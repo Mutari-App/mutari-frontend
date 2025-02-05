@@ -1,0 +1,20 @@
+import React from 'react'
+import {
+  AboutSection,
+  ContactSection,
+  FeatureSection,
+  Header,
+  PreRegisterSection,
+} from './sections'
+
+export const LandingPageModule: React.FC = () => {
+  return (
+    <>
+      <Header />
+      <AboutSection />
+      <FeatureSection />
+      <PreRegisterSection />
+      <ContactSection />
+    </>
+  )
+}
