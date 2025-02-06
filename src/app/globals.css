@@ -11,3 +11,7 @@ body {
     --radius: 0.5rem;
   }
 }
+
+header .call-to-action {
+    text-shadow: 0px 0px 6px #0073E6;
+}

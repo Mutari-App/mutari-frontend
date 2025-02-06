@@ -9,7 +9,7 @@ import Image from 'next/image'
 
 export const Navbar: React.FC = () => {
   return (
-    <NavigationMenu className="p-4 shadow-md bg-white max-w-full ">
+    <NavigationMenu className="p-4 shadow-md bg-transparent max-w-full ">
       <div className="mx-auto container flex justify-between max-w-screen-xl items-center">
         <div className="flex items-center gap-3">
           <Image
