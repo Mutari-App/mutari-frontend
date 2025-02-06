@@ -9,21 +9,18 @@ import Image from 'next/image'
 
 export const Navbar: React.FC = () => {
   return (
-    <NavigationMenu className="p-4 shadow-md bg-transparent max-w-full ">
-      <div className="mx-auto container flex justify-between max-w-screen-xl items-center">
+    <NavigationMenu className="p-4 fixed bg-transparent max-w-full z-50">
+      <div className="mx-auto w-full container flex justify-between max-w-screen-xl items-center">
         <div className="flex items-center gap-3">
           <Image
-            src="/logo-no-background.png"
+            src="/images/logo-white.png"
             alt="Mutari Logo"
             width={150}
             height={50}
-            className="h-12 w-auto"
+            className="h-12 w-auto z-30"
           />
-          <span className="text-2xl font-bold tracking-wide text-blue-600 uppercase">
-            Mutari
-          </span>
         </div>
-        <NavigationMenuList className="flex space-x-4">
+        {/* <NavigationMenuList className="flex space-x-4">
           <NavigationMenuItem>
             <NavigationMenuLink href="/" className="">
               Home
@@ -39,7 +36,7 @@ export const Navbar: React.FC = () => {
               Kontak
             </NavigationMenuLink>
           </NavigationMenuItem>
-        </NavigationMenuList>
+        </NavigationMenuList> */}
       </div>
     </NavigationMenu>
   )
