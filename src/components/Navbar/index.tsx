@@ -6,6 +6,7 @@ import {
   NavigationMenuList,
 } from '../ui/navigation-menu'
 import Image from 'next/image'
+import { getImage } from '@/utils/getImage'
 
 export const Navbar: React.FC = () => {
   return (
@@ -13,7 +14,7 @@ export const Navbar: React.FC = () => {
       <div className="mx-auto container flex justify-between max-w-screen-xl items-center">
         <div className="flex items-center gap-3">
           <Image
-            src="/logo-no-background.png"
+            src={getImage(`logo-no-background.png`)}
             alt="Mutari Logo"
             width={150}
             height={50}
