@@ -1,5 +1,11 @@
 import type { Metadata } from 'next'
-import { Epilogue, Hammersmith_One, Poppins, Raleway, Roboto } from 'next/font/google'
+import {
+  Epilogue,
+  Hammersmith_One,
+  Poppins,
+  Raleway,
+  Roboto,
+} from 'next/font/google'
 import './globals.css'
 import { Suspense } from 'react'
 

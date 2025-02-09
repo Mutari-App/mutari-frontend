@@ -6,6 +6,7 @@ import { HERO_IMAGES } from '../constant'
 import { Button } from '@/components/ui/button'
 import { ChevronLeft, ChevronRight, ChevronsDownIcon } from 'lucide-react'
 import Link from 'next/link'
+import { getImage } from '@/utils/getImage'
 
 export const Header: React.FC = () => {
   const carouselRef = useRef<HTMLDivElement>(null)
@@ -84,26 +85,26 @@ export const Header: React.FC = () => {
         {HERO_IMAGES.map((item, index) => (
           <div key={index} className={`item absolute inset-0 z-10`}>
             <Image
-              src={`/images/hero/${item.imgName}`}
+              src={getImage(item.imgName)}
               alt={item.name}
               width={720}
               height={720}
-              className="w-full h-full object-cover brightness-50"
+              className="w-full h-full object-cover brightness-50 pointer-events-none"
             />
             <div
-              className="content absolute top-[20%] w-[1140px] max-w-[80%] left-1/2 -translate-x-1/2 
-            md:pr-[30%] text-white [text-shadow:_0_2px_0_rgb(0_0_0_/40%)]"
+              className="content absolute top-[20%] w-[1140px] max-w-[80%] left-[10%] 
+            text-white [text-shadow:_0_2px_0_rgb(0_0_0_/40%)] font-poppins"
             >
-              <h1 className="hook font-bold w-full md:w-[150%]">
+              <h1 className="hook">
                 <p className="text-[2em] md:text-[3.2em]">
                   Rencanakan Perjalanan Sekali Klik.
                 </p>
-                <p className="text-[1em]">Mulai jelajahi</p>
+                <p className="text-[1em] font-normal">Mulai jelajahi</p>
               </h1>
-              <div className="name font-bold text-[2em] md:text-[2em] delay-300 text-blue-400">
+              <div className="name font-semibold text-[20px] md:text-[2em] delay-300 text-white font-raleway">
                 {item.name}
               </div>
-              <div className="city">{item.city}</div>
+              <div className="city font-raleway text-xs">{item.city}</div>
               <Link href={'/#about'}>
                 <Button className="flex md:hidden text-xs rounded-[150px] mt-5 bg-white text-[#0059B3] w-fit px-4 py-2 gap-3 hover:bg-[#FFFB]">
                   <ChevronsDownIcon />
@@ -115,22 +116,22 @@ export const Header: React.FC = () => {
         ))}
       </div>
       <div
-        className="thumbnail absolute bottom-[100px] left-1/2 w-max z-[100] flex gap-5"
+        className="thumbnail absolute bottom-[50px] md:bottom-[100px] left-1/2 w-max z-[100] flex gap-5"
         ref={thumbnailRef}
       >
         {HERO_IMAGES.map((item, index) => (
           <div
             key={index}
-            className="item relative w-[150px] h-[220px] flex-shrink-0"
+            className="item relative w-[200px] h-[150px] flex-shrink-0"
           >
             <Image
-              src={`/images/hero/${item.imgName}`}
+              src={getImage(item.imgName)}
               alt={item.name}
               width={720}
               height={720}
-              className="w-full h-full object-cover rounded-2xl"
+              className="w-full h-full object-cover rounded-2xl pointer-events-none"
             />
-            <div className="content absolute bottom-0 p-2 text-white bg-black/40 w-full">
+            <div className="content absolute bottom-0 p-2 text-white bg-black/40 w-full rounded-b-2xl">
               <div className="title font-bold text-sm">{item.name}</div>
               <div className="city text-[10px]">{item.city}</div>
             </div>
@@ -138,7 +139,7 @@ export const Header: React.FC = () => {
         ))}
       </div>
 
-      <div className="flex flex-col gap-5 absolute top-[75%] right-[68%] w-[300px] max-w-[30%] z-40">
+      <div className="flex flex-col gap-5 absolute top-[75%] left-[10%] w-[300px] max-w-[30%] z-40">
         <Link href={'/#about'}>
           <Button className="hidden md:flex rounded-[150px] bg-white text-[#0059B3] w-fit px-4 py-2 gap-3 hover:bg-[#FFFB]">
             <ChevronsDownIcon />

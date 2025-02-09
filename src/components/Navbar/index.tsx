@@ -24,7 +24,7 @@ export const Navbar: React.FC = () => {
             height={50}
             className="h-12 w-auto z-30"
           />
-          <h1 className='text-white font-hammersmithOne text-[30px]'>MUTARI</h1>
+          <h1 className="text-white font-hammersmithOne text-[30px]">MUTARI</h1>
         </Link>
         {/* <NavigationMenuList className="flex space-x-4">
           <NavigationMenuItem>
