@@ -8,77 +8,97 @@ import { ChevronLeft, ChevronRight, ChevronsDownIcon } from 'lucide-react'
 import Link from 'next/link'
 
 export const Header: React.FC = () => {
-  const carouselRef = useRef<HTMLDivElement>(null);
-  const sliderRef = useRef<HTMLDivElement>(null);
-  const thumbnailRef = useRef<HTMLDivElement>(null);
-  const [autoNextTimeout, setAutoNextTimeout] = useState<NodeJS.Timeout | null>(null);
-  const [resetClassTimeout, setResetClassTimeout] = useState<NodeJS.Timeout | null>(null);
-  const TIME_RUNNING = 1000;
-  const TIME_AUTO_NEXT = 5000;
+  const carouselRef = useRef<HTMLDivElement>(null)
+  const sliderRef = useRef<HTMLDivElement>(null)
+  const thumbnailRef = useRef<HTMLDivElement>(null)
+  const [autoNextTimeout, setAutoNextTimeout] = useState<NodeJS.Timeout | null>(
+    null
+  )
+  const [resetClassTimeout, setResetClassTimeout] =
+    useState<NodeJS.Timeout | null>(null)
+  const TIME_RUNNING = 1000
+  const TIME_AUTO_NEXT = 5000
 
   const showSlider = (type: 'prev' | 'next') => {
-    if (!carouselRef.current || !sliderRef.current || !thumbnailRef.current) return;
+    if (!carouselRef.current || !sliderRef.current || !thumbnailRef.current)
+      return
 
-    const sliderItems = sliderRef.current.querySelectorAll<HTMLDivElement>('.item');
-    const thumbnailItems = thumbnailRef.current.querySelectorAll<HTMLDivElement>('.item');
+    const sliderItems =
+      sliderRef.current.querySelectorAll<HTMLDivElement>('.item')
+    const thumbnailItems =
+      thumbnailRef.current.querySelectorAll<HTMLDivElement>('.item')
 
     if (type === 'next') {
-      sliderRef.current.appendChild(sliderItems[0]);
-      thumbnailRef.current.appendChild(thumbnailItems[0]);
-      carouselRef.current.classList.add('next');
+      sliderRef.current.appendChild(sliderItems[0])
+      thumbnailRef.current.appendChild(thumbnailItems[0])
+      carouselRef.current.classList.add('next')
     } else {
-      sliderRef.current.prepend(sliderItems[sliderItems.length - 1]);
-      thumbnailRef.current.prepend(thumbnailItems[thumbnailItems.length - 1]);
-      carouselRef.current.classList.add('prev');
+      sliderRef.current.prepend(sliderItems[sliderItems.length - 1])
+      thumbnailRef.current.prepend(thumbnailItems[thumbnailItems.length - 1])
+      carouselRef.current.classList.add('prev')
     }
 
-    if (resetClassTimeout) clearTimeout(resetClassTimeout);
+    if (resetClassTimeout) clearTimeout(resetClassTimeout)
     setResetClassTimeout(
       setTimeout(() => {
-        carouselRef.current?.classList.remove('next', 'prev');
+        carouselRef.current?.classList.remove('next', 'prev')
       }, TIME_RUNNING)
-    );
+    )
 
-    if (autoNextTimeout) clearTimeout(autoNextTimeout);
+    if (autoNextTimeout) clearTimeout(autoNextTimeout)
     setAutoNextTimeout(
       setTimeout(() => {
-        showSlider('next');
+        showSlider('next')
       }, TIME_AUTO_NEXT)
-    );
+    )
   }
 
   useEffect(() => {
     if (thumbnailRef.current) {
-      const thumbnailItems = thumbnailRef.current.querySelectorAll<HTMLDivElement>('.item');
+      const thumbnailItems =
+        thumbnailRef.current.querySelectorAll<HTMLDivElement>('.item')
       if (thumbnailItems.length > 0) {
-        thumbnailRef.current.appendChild(thumbnailItems[0]);
+        thumbnailRef.current.appendChild(thumbnailItems[0])
       }
     }
 
     setAutoNextTimeout(
       setTimeout(() => {
-        showSlider('next');
+        showSlider('next')
       }, TIME_AUTO_NEXT)
-    );
+    )
 
     return () => {
-      if (autoNextTimeout) clearTimeout(autoNextTimeout);
-      if (resetClassTimeout) clearTimeout(resetClassTimeout);
-    };
-  }, []);
+      if (autoNextTimeout) clearTimeout(autoNextTimeout)
+      if (resetClassTimeout) clearTimeout(resetClassTimeout)
+    }
+  }, [])
 
   return (
-    <header className="carousel h-screen w-screen overflow-hidden relative" ref={carouselRef}>
+    <header
+      id='hero'
+      className="carousel h-screen w-screen overflow-hidden relative"
+      ref={carouselRef}
+    >
       <div className="list" ref={sliderRef}>
         {HERO_IMAGES.map((item, index) => (
           <div key={index} className={`item absolute inset-0 z-10`}>
-            <Image src={`/images/hero/${item.imgName}`} alt={item.name} 
-            width={720} height={720} className='w-full h-full object-cover brightness-50'/>
-            <div className="content absolute top-[20%] w-[1140px] max-w-[80%] left-1/2 -translate-x-1/2 
-            md:pr-[30%] text-white [text-shadow:_0_2px_0_rgb(0_0_0_/40%)]">
-              <h1 className='hook font-bold w-full md:w-[150%]'>
-                <p className='text-[2em] md:text-[3.2em]'>Rencanakan Perjalanan Sekali Klik.</p>
-                <p className='text-[1em]'>Mulai jelajahi</p>
+            <Image
+              src={`/images/hero/${item.imgName}`}
+              alt={item.name}
+              width={720}
+              height={720}
+              className="w-full h-full object-cover brightness-50"
+            />
+            <div
+              className="content absolute top-[20%] w-[1140px] max-w-[80%] left-1/2 -translate-x-1/2 
+            md:pr-[30%] text-white [text-shadow:_0_2px_0_rgb(0_0_0_/40%)]"
+            >
+              <h1 className="hook font-bold w-full md:w-[150%]">
+                <p className="text-[2em] md:text-[3.2em]">
+                  Rencanakan Perjalanan Sekali Klik.
+                </p>
+                <p className="text-[1em]">Mulai jelajahi</p>
               </h1>
               <div className="name font-bold text-[2em] md:text-[2em] delay-300 text-blue-400">
                 {item.name}
@@ -94,15 +114,24 @@ export const Header: React.FC = () => {
           </div>
         ))}
       </div>
-      <div className="thumbnail absolute bottom-[100px] left-1/2 w-max z-[100] flex gap-5" ref={thumbnailRef}>
+      <div
+        className="thumbnail absolute bottom-[100px] left-1/2 w-max z-[100] flex gap-5"
+        ref={thumbnailRef}
+      >
         {HERO_IMAGES.map((item, index) => (
-          <div key={index} className="item relative w-[150px] h-[220px] flex-shrink-0">
-            <Image src={`/images/hero/${item.imgName}`} alt={item.name} 
-            width={720} height={720} className='w-full h-full object-cover rounded-2xl'/>
+          <div
+            key={index}
+            className="item relative w-[150px] h-[220px] flex-shrink-0"
+          >
+            <Image
+              src={`/images/hero/${item.imgName}`}
+              alt={item.name}
+              width={720}
+              height={720}
+              className="w-full h-full object-cover rounded-2xl"
+            />
             <div className="content absolute bottom-0 p-2 text-white bg-black/40 w-full">
-              <div className="title font-bold text-sm">
-                {item.name}
-              </div>
+              <div className="title font-bold text-sm">{item.name}</div>
               <div className="city text-[10px]">{item.city}</div>
             </div>
           </div>
@@ -116,18 +145,26 @@ export const Header: React.FC = () => {
             Pra-Registrasi Sekarang!
           </Button>
         </Link>
-        <div className='arrows flex gap-5 items-center'>
-          <Button onClick={() => showSlider('prev')} id="prev" className="w-10 h-10 rounded-full bg-[#EEE4] text-white hover:bg-[#EEE] hover:text-[#555] duration-500">
+        <div className="arrows flex gap-5 items-center">
+          <Button
+            onClick={() => showSlider('prev')}
+            id="prev"
+            className="w-10 h-10 rounded-full bg-[#EEE4] text-white hover:bg-[#EEE] hover:text-[#555] duration-500"
+          >
             <ChevronLeft />
           </Button>
-          <Button onClick={() => showSlider('next')} id='next' className="w-10 h-10 rounded-full bg-[#EEE4] text-white hover:bg-[#EEE] hover:text-[#555] duration-500">
+          <Button
+            onClick={() => showSlider('next')}
+            id="next"
+            className="w-10 h-10 rounded-full bg-[#EEE4] text-white hover:bg-[#EEE] hover:text-[#555] duration-500"
+          >
             <ChevronRight />
           </Button>
         </div>
       </div>
 
       <div className="time absolute top-0 left-0 w-[0%] h-1 bg-blue-500 z-[1000]"></div>
-      <div className='bg-gradient-to-t from-white via-white/30 to-white/0 absolute left-0 bottom-0 h-[10%] z-[1001] w-full'></div>
+      <div className="bg-gradient-to-t from-white via-white/30 to-white/0 absolute left-0 bottom-0 h-[10%] z-[1001] w-full"></div>
     </header>
   )
 }

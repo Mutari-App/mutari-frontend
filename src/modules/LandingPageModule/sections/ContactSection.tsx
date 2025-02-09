@@ -1,20 +1,21 @@
 import React from 'react'
 import Image from 'next/image'
 import { Instagram, Mail } from 'lucide-react'
+import { getImage } from '@/utils/getImage'
 
 export const ContactSection: React.FC = () => {
   return (
     <section
       className="relative bg-cover bg-center bg-no-repeat py-12 md:py-16 px-4 text-white"
       style={{
-        backgroundImage: 'url("/contact-background.png")',
+        backgroundImage: `url("${getImage('contact-background.webp')}")`,
       }}
     >
       <div className="absolute inset-0 bg-[#3C3744] opacity-50" />
       <div className="relative max-w-screen-xl mx-auto flex flex-col items-center">
         <div className="mb-6">
           <Image
-            src="/logo-white.png"
+            src={getImage('logo-white.png')}
             alt="Mutari Logo"
             width={1000}
             height={1000}

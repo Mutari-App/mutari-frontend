@@ -6,12 +6,14 @@ import {
   NavigationMenuList,
 } from '../ui/navigation-menu'
 import Image from 'next/image'
+import { getImage } from '@/utils/getImage'
+import Link from 'next/link'
 
 export const Navbar: React.FC = () => {
   return (
     <NavigationMenu className="p-4 fixed bg-transparent max-w-full z-50">
       <div className="mx-auto w-full container flex justify-between max-w-screen-xl items-center">
-        <div className="flex items-center gap-3">
+        <Link href={'/#hero'} className="flex items-center gap-3 hover:cursor-pointer">
           <Image
             src="/images/logo-white.png"
             alt="Mutari Logo"
@@ -19,7 +21,7 @@ export const Navbar: React.FC = () => {
             height={50}
             className="h-12 w-auto z-30"
           />
-        </div>
+        </Link>
         {/* <NavigationMenuList className="flex space-x-4">
           <NavigationMenuItem>
             <NavigationMenuLink href="/" className="">
