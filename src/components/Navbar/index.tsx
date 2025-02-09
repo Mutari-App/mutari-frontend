@@ -13,7 +13,10 @@ export const Navbar: React.FC = () => {
   return (
     <NavigationMenu className="p-4 fixed bg-transparent max-w-full z-50">
       <div className="mx-auto w-full container flex justify-between max-w-screen-xl items-center">
-        <Link href={'/#hero'} className="flex items-center gap-3 hover:cursor-pointer">
+        <Link
+          href={'/#hero'}
+          className="flex items-center gap-3 hover:cursor-pointer"
+        >
           <Image
             src="/images/logo-white.png"
             alt="Mutari Logo"

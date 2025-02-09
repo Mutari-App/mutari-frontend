@@ -76,7 +76,7 @@ export const Header: React.FC = () => {
 
   return (
     <header
-      id='hero'
+      id="hero"
       className="carousel h-screen w-screen overflow-hidden relative"
       ref={carouselRef}
     >
