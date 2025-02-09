@@ -15,15 +15,16 @@ export const Navbar: React.FC = () => {
       <div className="mx-auto w-full container flex justify-between max-w-screen-xl items-center">
         <Link
           href={'/#hero'}
-          className="flex items-center gap-3 hover:cursor-pointer"
+          className="flex items-end gap-3 hover:cursor-pointer"
         >
           <Image
-            src="/images/logo-white.png"
+            src={getImage('logo-white.png')}
             alt="Mutari Logo"
             width={150}
             height={50}
             className="h-12 w-auto z-30"
           />
+          <h1 className='text-white font-hammersmithOne text-[30px]'>MUTARI</h1>
         </Link>
         {/* <NavigationMenuList className="flex space-x-4">
           <NavigationMenuItem>
