@@ -6,42 +6,49 @@ import { getImage } from '@/utils/getImage'
 export const ContactSection: React.FC = () => {
   return (
     <section
-      className="relative bg-cover bg-center bg-no-repeat py-12 md:py-16 px-4 text-white"
+      className="flex justify-center items-center relative bg-cover bg-center bg-no-repeat py-6 md:py-16 text-white"
       style={{
         backgroundImage: `url("${getImage('contact-background.webp')}")`,
       }}
     >
       <div className="absolute inset-0 bg-[#3C3744] opacity-50" />
-      <div className="relative max-w-screen-xl mx-auto flex flex-col items-center">
-        <div className="mb-6">
-          <Image
-            src={getImage('logo-white.png')}
-            alt="Mutari Logo"
-            width={1000}
-            height={1000}
-            className="object-contain w-20 md:w-24"
-          />
-        </div>
-        <h2 className="text-xl md:text-3xl font-bold mb-4">CONTACT US</h2>
-        <div className="flex flex-col items-center space-y-3">
+      <div className="relative max-w-screen-xl mx-auto flex gap-4 justify-center">
+        <Image
+          src={getImage('logo-white-shadow.png')}
+          alt="Mutari Logo"
+          width={1000}
+          height={1000}
+          className="object-contain w-28 md:w-36"
+        />
+        <div className="flex flex-col gap-2 justify-start mt-2">
+          <p className="text-lg md:text-2xl font-semibold drop-shadow-lg">
+            Kontak kami
+          </p>
           <a
             href="https://instagram.com/mutari.id"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center space-x-2 hover:underline transition-colors"
           >
-            <Instagram className="w-5 h-5" />
-            <span>@mutari.id</span>
+            <Instagram className="w-4 h-4 md:w-6 md:h-6 drop-shadow-lg" />
+            <span className="text-sm md:text-xl drop-shadow-lg">
+              @mutari.id
+            </span>
           </a>
           <a
-            href="mailto:mutari.idn@gmail.com"
+            href="mailto:admin@mutari.id"
             className="flex items-center space-x-2 hover:underline transition-colors"
           >
-            <Mail className="w-5 h-5" />
-            <span>mutari.idn@gmail.com</span>
+            <Mail className="w-4 h-4 md:w-6 md:h-6 drop-shadow-lg" />
+            <span className="text-sm md:text-xl drop-shadow-lg">
+              admin@mutari.id
+            </span>
           </a>
         </div>
       </div>
+      <p className="absolute bottom-2.5 md:bottom-12 text-xs">
+        © 2025 Mutari. Semua hak dilindungi undang-undang
+      </p>
     </section>
   )
 }
