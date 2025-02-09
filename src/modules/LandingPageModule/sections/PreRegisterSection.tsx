@@ -4,65 +4,109 @@ import Form from 'next/form'
 export const PreRegisterSection: React.FC = () => {
   return (
     <section className='relative flex flex-col items-center md:py-4 mb-16 text-blue-500'>
-      <div className='flex flex-col items-center pb-10'>
-        <span className='text-[52px] font-semibold italic'>999,999,999</span>
-        <span className='text-lg'>Pengguna telah pra-daftar ke Mutari</span>
+      <div className='flex flex-col items-center pb-8'>
+        <h2 className="text-xl md:text-3xl font-bold text-center mb-2 uppercase">Petualangan Baru Menanti!</h2>
+        <span className='text-lg'>Pra-registrasi sekarang, dapatkan (...)</span>
+
+        <div className='my-8'>
+          <div className='bg-blue-100 text-blue-800 rounded-xl py-6 px-6 w-full grid grid-cols-5 text-center'>
+            <div className='flex flex-col'>
+              <span className='text-3xl font-bold'>99</span>
+              <span>hari</span>
+            </div>
+            <span>:</span>
+            <div className='flex flex-col'>
+              <span className='text-3xl font-bold'>10</span>
+              <span>jam</span>
+            </div>
+            <span>:</span>
+            <div className='flex flex-col'>
+              <span className='text-3xl font-bold'>45</span>
+              <span>menit</span>
+            </div>
+          </div>
+        </div>
+
+        <span className='text-lg'>999 pengguna telah pra-daftar</span>
       </div>
 
-      <div className='w-full flex flex-col gap-3 max-w-3xl px-4'>
-        <h2 className="text-xl md:text-3xl font-bold text-center mb-2">PRA-DAFTAR SEKARANG</h2>
-
-        <div className='bg-blue-500 text-white rounded-lg py-6 px-6 w-full'>
+      <div className='w-full flex flex-col gap-3 max-w-3xl px-4 mb-8'>
+        <div className='bg-blue-600 text-white rounded-3xl py-12 px-12 w-full'>
           <Form formMethod="POST" action="/" className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-3 w-full">
             <div className="text-sm">
               <label className="block" htmlFor="firstname">
-                Nama Depan
+                Nama Depan*
               </label>
-              <input className="shadow appearance-none bg-blue-100 border border-blue-500 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="firstname" type="text" placeholder=""/>
+              <input className="shadow appearance-none bg-blue-100 border border-blue-500 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="firstname" type="text" placeholder="Masukkan nama depan"/>
             </div>
 
             <div className="text-sm">
               <label className="block" htmlFor="lastname">
-                Nama Akhir
+                Nama Akhir*
               </label>
-              <input className="shadow appearance-none bg-blue-100 border border-blue-500 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="lastname" type="text" placeholder=""/>
+              <input className="shadow appearance-none bg-blue-100 border border-blue-500 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="lastname" type="text" placeholder="Masukkan nama akhir"/>
             </div>
 
             <div className="text-sm">
               <label className="block" htmlFor="email">
-                Email
+                Email*
               </label>
-              <input className="shadow appearance-none bg-blue-100 border border-blue-500 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="email" type="text" placeholder=""/>
+              <input className="shadow appearance-none bg-blue-100 border border-blue-500 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="email" type="text" placeholder="Masukkan alamat email"/>
             </div>
 
             <div className="text-sm">
               <label className="block" htmlFor="phone">
-                No. Telp
+                No. HP*
               </label>
-              <input className="shadow appearance-none bg-blue-100 border border-blue-500 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="phone" type="text" placeholder=""/>
+              <input className="shadow appearance-none bg-blue-100 border border-blue-500 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="phone" type="text" placeholder="Masukkan nomor telepon"/>
             </div>
+
+            {/* <div className="text-sm">
+              <label className="block" htmlFor="country">
+                Country*
+              </label>
+              <input className="shadow appearance-none bg-blue-100 border border-blue-500 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="country" type="text" placeholder="Select your country"/>
+            </div> */}
 
             <div className="text-sm">
               <label className="block" htmlFor="country">
-                Negara
+                Negara*
               </label>
-              <input className="shadow appearance-none bg-blue-100 border border-blue-500 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="country" type="text" placeholder=""/>
+              <select id="countries" className="shadow appearance-none bg-blue-100 border border-blue-500 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                <option defaultValue>Pilih negara</option>
+                {/* TODO ini masih blm pake API countries */}
+                <option value="ID">Indonesia</option>
+                <option value="SG">Singapore</option>
+              </select>
             </div>
 
             <div className="text-sm">
               <label className="block" htmlFor="city">
-                Kota
+                Kota*
               </label>
-              <input className="shadow appearance-none bg-blue-100 border border-blue-500 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="city" type="dropdown" placeholder=""/>
+              <select id="city" className="shadow appearance-none bg-blue-100 border border-blue-500 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                <option defaultValue>Pilih kota</option>
+                {/* TODO ini masih blm pake API countries */}
+                <option value="US">Jakarta</option>
+                <option value="CA">Depok</option>
+                <option value="FR">Bandung</option>
+                <option value="DE">Surabaya</option>
+              </select>
             </div>
 
-            <div className="col-span-2 py-3 flex items-center">
-              <button className="bg-blue-50 text-blue-500 font-bold py-2 px-4 rounded-lg focus:outline-none focus:shadow-outline w-full max-w-xs" type="submit">
+            <div className="text-sm col-span-2">
+              <label className="block" htmlFor="refcode">
+                Kode Referal
+              </label>
+              <input className="shadow appearance-none bg-blue-100 border border-blue-500 rounded-lg w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="refcode" type="dropdown" placeholder="Masukkan kode referal (optional)"/>
+            </div>
+
+            <div className="col-span-2 flex justify-center">
+              <button className="bg-blue-50 text-blue-500 font-bold py-2 px-4 rounded-lg focus:outline-none focus:shadow-outline" type="submit">
                 Pra-Daftar
               </button>
             </div>
           </Form>
-
         </div>
       </div>
     </section>
