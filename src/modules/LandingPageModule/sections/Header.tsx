@@ -116,7 +116,7 @@ export const Header: React.FC = () => {
         ))}
       </div>
       <div
-        className="thumbnail absolute bottom-[50px] md:bottom-[100px] left-1/2 w-max z-[100] flex gap-5"
+        className="thumbnail absolute bottom-[80px] md:bottom-[100px] left-1/2 w-max z-[100] flex gap-5"
         ref={thumbnailRef}
       >
         {HERO_IMAGES.map((item, index) => (
