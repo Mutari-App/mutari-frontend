@@ -19,6 +19,12 @@ export default {
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
       },
+      fontFamily: {
+        poppins: ['var(--font-poppins)'],
+        epilogue: ['var(--font-epilogue)'],
+        raleway: ['var(--font-raleway)'],
+        roboto: ['var(--font-roboto)'],
+      },
     },
   },
   // eslint-disable-next-line @typescript-eslint/no-require-imports
