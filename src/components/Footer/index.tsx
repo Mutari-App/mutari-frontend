@@ -30,12 +30,12 @@ export const Footer: React.FC = () => {
             </span>
           </a>
           <a
-            href="mailto:admin@mutari.id"
+            href="mailto:support@mutari.id"
             className="flex items-center space-x-2 hover:underline transition-colors"
           >
             <Mail className="w-4 h-4 md:w-6 md:h-6 drop-shadow-lg" />
             <span className="text-sm md:text-xl drop-shadow-lg">
-              admin@mutari.id
+              support@mutari.id
             </span>
           </a>
         </div>
