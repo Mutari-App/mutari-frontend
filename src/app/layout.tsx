@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Poppins } from 'next/font/google'
+import { Epilogue, Poppins, Raleway, Roboto } from 'next/font/google'
 import './globals.css'
 import { Suspense } from 'react'
 
@@ -11,6 +11,25 @@ const poppins = Poppins({
   display: 'swap',
   variable: '--font-poppins',
   weight: ['100', '200', '300', '400', '500', '600', '700', '800', '900'],
+})
+
+const epilogue = Epilogue({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-epilogue',
+})
+
+const raleway = Raleway({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-raleway',
+})
+
+const roboto = Roboto({
+  weight: ['100', '300', '400', '500', '700', '900'],
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-roboto',
 })
 
 export const metadata: Metadata = {
@@ -47,7 +66,9 @@ export default function RootLayout({
         <link rel="manifest" href="/site.webmanifest" />
         <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5" />
       </head>
-      <body className={`${poppins.className}  overflow-x-hidden min-h-screen`}>
+      <body
+        className={`${epilogue.variable} ${poppins.variable} ${raleway.variable} ${roboto.variable} font-poppins overflow-x-hidden min-h-screen`}
+      >
         <Suspense>
           <Navbar />
           <main className="w-full min-h-screen bg-white">{children}</main>
