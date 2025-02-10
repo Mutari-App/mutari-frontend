@@ -78,7 +78,7 @@ export const Header: React.FC = () => {
   return (
     <header
       id="hero"
-      className="carousel h-screen w-screen overflow-hidden relative"
+      className="carousel mb-10 sm:mb-12 md:mb-14 lg:mb-24 xl:mb-32 h-screen w-screen overflow-hidden relative"
       ref={carouselRef}
     >
       <div className="list" ref={sliderRef}>
