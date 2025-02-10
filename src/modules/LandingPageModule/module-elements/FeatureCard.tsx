@@ -11,7 +11,7 @@ const FeatureCard: React.FC<FeatureCardProps> = (feature) => {
 
       <Image
         src={getImage(feature.iconURL)}
-        alt="Itinerary-icon.png"
+        alt={feature.iconURL}
         width={40}
         height={40}
         layout={'constrained'}
