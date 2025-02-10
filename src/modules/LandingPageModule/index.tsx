@@ -1,7 +1,6 @@
 import React from 'react'
 import {
   AboutSection,
-  ContactSection,
   FeatureSection,
   Header,
   PreRegisterSection,
@@ -14,7 +13,6 @@ export const LandingPageModule: React.FC = () => {
       <AboutSection />
       <FeatureSection />
       <PreRegisterSection />
-      <ContactSection />
     </>
   )
 }

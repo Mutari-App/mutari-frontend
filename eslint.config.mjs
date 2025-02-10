@@ -1,4 +1,5 @@
 import typescriptEslint from '@typescript-eslint/eslint-plugin'
+import globals from 'globals'
 import tsParser from '@typescript-eslint/parser'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -13,25 +14,13 @@ const compat = new FlatCompat({
   allConfig: js.configs.all,
 })
 
-export default [
-  {
-    files: ['**/*.ts', '**/*.tsx', '**/*.js'],
-  },
-  {
-    ignores: [
-      '**/.*',
-      '**/node_modules',
-      '**/public',
-      '**/next-env.d.ts',
-      '**/package-lock.json',
-      'eslint.config.mjs',
-      'postcss.config.mjs',
-    ],
-  },
+const eslintConfig = [
   ...compat.extends(
     'next/core-web-vitals',
-    'plugin:@typescript-eslint/recommended-type-checked',
-    'plugin:@typescript-eslint/stylistic-type-checked'
+    'eslint:recommended',
+    'plugin:@typescript-eslint/recommended',
+    'plugin:prettier/recommended',
+    'prettier'
   ),
   {
     plugins: {
@@ -39,47 +28,53 @@ export default [
     },
 
     languageOptions: {
+      globals: {
+        ...globals.browser,
+      },
+
       parser: tsParser,
-      ecmaVersion: 5,
-      sourceType: 'script',
+      ecmaVersion: 'latest',
+      sourceType: 'module',
 
       parserOptions: {
-        project: true,
-        tsconfigRootDir: __dirname,
+        ecmaFeatures: {
+          jsx: true,
+        },
+      },
+    },
+
+    settings: {
+      react: {
+        version: 'detect',
       },
     },
 
     rules: {
-      '@typescript-eslint/array-type': 'off',
-      '@typescript-eslint/consistent-type-definitions': 'off',
-
-      '@typescript-eslint/consistent-type-imports': [
-        'warn',
-        {
-          prefer: 'type-imports',
-          fixStyle: 'inline-type-imports',
-        },
-      ],
+      '@typescript-eslint/no-empty-interface': 'off',
+      '@typescript-eslint/no-explicit-any': 'off',
 
       '@typescript-eslint/no-unused-vars': [
-        'warn',
-        {
-          argsIgnorePattern: '^_',
-        },
-      ],
-
-      '@typescript-eslint/require-await': 'off',
-
-      '@typescript-eslint/no-misused-promises': [
         'error',
         {
-          checksVoidReturn: {
-            attributes: false,
-          },
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
         },
       ],
 
-      'import/no-anonymous-default-export': 'off',
+      'react/prop-types': 'off',
+      'react-hooks/rules-of-hooks': 'warn',
+
+      'prettier/prettier': [
+        'error',
+        {
+          endOfLine: 'auto',
+        },
+      ],
+
+      'prefer-const': 'off',
     },
   },
 ]
+
+export default eslintConfig
