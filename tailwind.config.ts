@@ -24,6 +24,7 @@ export default {
         epilogue: ['var(--font-epilogue)'],
         raleway: ['var(--font-raleway)'],
         roboto: ['var(--font-roboto)'],
+        hammersmithOne: ['var(--font-hammersmith-one)'],
       },
     },
   },

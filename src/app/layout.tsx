@@ -1,5 +1,11 @@
 import type { Metadata } from 'next'
-import { Epilogue, Poppins, Raleway, Roboto } from 'next/font/google'
+import {
+  Epilogue,
+  Hammersmith_One,
+  Poppins,
+  Raleway,
+  Roboto,
+} from 'next/font/google'
 import './globals.css'
 import { Suspense } from 'react'
 
@@ -30,6 +36,13 @@ const roboto = Roboto({
   subsets: ['latin'],
   display: 'swap',
   variable: '--font-roboto',
+})
+
+const hammersmithOne = Hammersmith_One({
+  weight: ['400'],
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-hammersmith-one',
 })
 
 export const metadata: Metadata = {
@@ -67,7 +80,7 @@ export default function RootLayout({
         <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5" />
       </head>
       <body
-        className={`${epilogue.variable} ${poppins.variable} ${raleway.variable} ${roboto.variable} font-poppins overflow-x-hidden min-h-screen`}
+        className={`${epilogue.variable} ${poppins.variable} ${raleway.variable} ${roboto.variable} ${hammersmithOne.variable} font-poppins overflow-x-hidden min-h-screen`}
       >
         <Suspense>
           <Navbar />
