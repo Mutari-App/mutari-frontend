@@ -7,15 +7,17 @@ import React, {
   useRef,
   useState,
 } from 'react'
-import {
-  AuthContextInterface,
-  AuthContextProviderProps,
-  User,
-} from './interface'
 import { getCookie, setCookie } from 'cookies-next/client'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { toast } from 'sonner'
 import { useBaseUrlWithPath } from '@/hooks/useBaseUrlWithPath'
+import {
+  type AuthContextInterface,
+  type AuthContextProviderProps,
+  type User,
+  type ValidateResponse,
+} from './interface'
+import { customFetch, customFetchBody } from '@/utils/customFetch'
 
 const AuthContext = createContext({} as AuthContextInterface)
 
@@ -34,43 +36,34 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
   const pathname = usePathname()
 
   const validate = async ({ ticket }: { ticket: string }) => {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/pre-register/login/validate/${ticket}`,
-      {
-        method: 'POST',
-      }
+    const response = await customFetch<ValidateResponse>(
+      `/pre-register/login/validate/${ticket}`,
+      { method: 'POST' }
     )
 
-    const responseJson = await response.json()
-
-    if (responseJson.statusCode === 200) {
+    if (response.code === 200) {
       setIsAuthenticated(true)
-      setCookie('AT', responseJson.accessToken)
+      setCookie('AT', response.accessToken)
       router.replace(pathname)
       router.refresh()
-      return responseJson
+      return response
     } else {
       setUser(null)
       setIsAuthenticated(false)
-      throw new Error(responseJson.message)
+      throw new Error(response.message)
     }
   }
 
   const login = async ({ email }: { email: string }) => {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/pre-register/login`,
-      {
-        method: 'POST',
-        body: JSON.stringify({ email }),
-      }
-    )
+    const response = await customFetch('/pre-register/login', {
+      method: 'POST',
+      body: customFetchBody({ email }),
+    })
 
-    const responseJson = await response.json()
-
-    if (responseJson.statusCode === 200) {
-      return responseJson
+    if (response.code === 200) {
+      return response
     } else {
-      throw new Error(responseJson.message)
+      throw new Error(response.message)
     }
   }
 
@@ -80,13 +73,13 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
     if (!developmentLock.current || process.env.NODE_ENV === 'production') {
       if (searchParams.toString().includes('ticket')) {
         const ticket = searchParams.get('ticket')
-        toast.promise(validate({ ticket: ticket as string }), {
+        toast.promise(validate({ ticket: ticket! }), {
           loading: 'Logging in...',
           success: () => {
             router.refresh()
             return 'Login berhasil!'
           },
-          error: (err: any) => `Oops. Login gagal! ${err.message}`,
+          error: (err: Error) => `Oops. Login gagal! ${err.message}`,
         })
       }
     }

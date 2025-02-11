@@ -1,30 +1,28 @@
 import { cookies } from 'next/headers'
+import {
+  type User,
+  type UserResponseInterface,
+} from '../contexts/AuthContext/interface'
+import { customFetch } from '../utils/customFetch'
 import { getCookie } from 'cookies-next'
 
 export default async function useUserServer() {
-  let accessToken = getCookie('AT', { cookies })
-  if (!accessToken) {
+  const AT = getCookie('AT', { cookies })
+  if (!AT) {
     return null
   }
 
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/pre-register/referral-code`,
-    {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    }
+  const response = await customFetch<UserResponseInterface>(
+    '/auth/user',
+    { isAuthorized: true },
+    cookies
   )
 
-  const responseJson = await response.json()
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { code, success, message, ...user } = response
 
-  if (responseJson.statusCode === 200) {
-    return {
-      email: responseJson.email,
-      referralCode: responseJson.referralCode,
-      usedCount: responseJson.usedCount,
-    }
-  } else {
+  if (code !== 200) {
     return null
   }
+  return user as User
 }
