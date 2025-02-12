@@ -105,7 +105,7 @@ export const Header: React.FC = () => {
                 {item.name}
               </div>
               <div className="city font-raleway text-xs">{item.city}</div>
-              <Link href={'/#about'}>
+              <Link href={'#praregistrasi'}>
                 <Button className="flex md:hidden text-xs rounded-[150px] mt-5 bg-white text-[#0059B3] w-fit px-4 py-2 gap-3 hover:bg-[#FFFB]">
                   <ChevronsDownIcon />
                   Pra-Registrasi Sekarang!
@@ -140,7 +140,7 @@ export const Header: React.FC = () => {
       </div>
 
       <div className="flex flex-col gap-5 absolute top-[75%] left-[10%] w-[300px] max-w-[30%] z-40">
-        <Link href={'/#about'}>
+        <Link href={'#praregistrasi'}>
           <Button className="hidden md:flex rounded-[150px] bg-white text-[#0059B3] w-fit px-4 py-2 gap-3 hover:bg-[#FFFB]">
             <ChevronsDownIcon />
             Pra-Registrasi Sekarang!

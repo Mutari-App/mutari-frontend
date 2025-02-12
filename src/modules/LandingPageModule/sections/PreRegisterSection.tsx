@@ -28,7 +28,10 @@ export const PreRegisterSection: React.FC<PreRegisterSectionProps> = ({
   }
 
   return (
-    <section className="relative min-h-screen w-screen flex flex-col items-center px-2 sm:px-4 py-4 sm:py-10 md:py-20 text-white">
+    <section
+      id={'praregistrasi'}
+      className="relative min-h-screen w-screen flex flex-col items-center px-2 sm:px-4 py-4 sm:py-10 md:py-20 text-white"
+    >
       <Image
         src={getImage('pre-register-form-bg.webp')}
         fill
