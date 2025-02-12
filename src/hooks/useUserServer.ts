@@ -1,8 +1,5 @@
 import { cookies } from 'next/headers'
-import {
-  type User,
-  type UserResponseInterface,
-} from '../contexts/AuthContext/interface'
+import { type UserResponseInterface } from '../contexts/AuthContext/interface'
 import { customFetch } from '../utils/customFetch'
 import { getCookie } from 'cookies-next'
 
@@ -13,16 +10,13 @@ export default async function useUserServer() {
   }
 
   const response = await customFetch<UserResponseInterface>(
-    '/auth/user',
+    '/pre-register/referral-code',
     { isAuthorized: true },
     cookies
   )
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { code, success, message, ...user } = response
-
-  if (code !== 200) {
+  if (response.statusCode !== 200) {
     return null
   }
-  return user as User
+  return response.user
 }

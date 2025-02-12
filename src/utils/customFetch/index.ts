@@ -5,11 +5,11 @@ import {
 } from './interface'
 import { deleteCookie, getCookie } from 'cookies-next'
 
-export async function customFetch<T = CustomFetchBaseResponse>(
+export async function customFetch<T>(
   url: string,
   options: CustomFetchRequestInit = { uploadFile: false },
   cookies?: () => Promise<ReadonlyRequestCookies>
-): Promise<T> {
+): Promise<CustomFetchBaseResponse & T> {
   const headers: HeadersInit = {
     authorization: '',
     'Content-Type': 'application/json',
@@ -54,7 +54,7 @@ export async function customFetch<T = CustomFetchBaseResponse>(
     await deleteCookie('AT')
   }
 
-  return result as T
+  return result as T & CustomFetchBaseResponse
 }
 
 export function customFetchBody(body: object) {
