@@ -63,3 +63,8 @@ export interface PreRegisterResponse {
     referredById: string
   }
 }
+export interface FeatureCardProps {
+  title: string
+  description: string
+  iconURL: string
+}
