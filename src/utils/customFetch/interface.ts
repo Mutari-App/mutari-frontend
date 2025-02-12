@@ -4,7 +4,7 @@ export interface CustomFetchRequestInit extends RequestInit {
 }
 
 export interface CustomFetchBaseResponse {
-  code: number
+  statusCode: number
   success: boolean
   message: string
   detail?: unknown

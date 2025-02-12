@@ -41,7 +41,7 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
       { method: 'POST' }
     )
 
-    if (response.code === 200) {
+    if (response.statusCode === 200) {
       setIsAuthenticated(true)
       setCookie('AT', response.accessToken)
       router.replace(pathname)
@@ -60,7 +60,7 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
       body: customFetchBody({ email }),
     })
 
-    if (response.code === 200) {
+    if (response.statusCode === 200) {
       return response
     } else {
       throw new Error(response.message)
@@ -71,7 +71,7 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
     const accessToken = getCookie('AT')
     setIsAuthenticated(!!accessToken)
     if (!developmentLock.current || process.env.NODE_ENV === 'production') {
-      if (searchParams.toString().includes('ticket')) {
+      if (searchParams.toString().includes('ticket') && !!fullUrl) {
         const ticket = searchParams.get('ticket')
         toast.promise(validate({ ticket: ticket! }), {
           loading: 'Logging in...',

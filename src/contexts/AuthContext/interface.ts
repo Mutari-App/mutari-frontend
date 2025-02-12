@@ -20,10 +20,8 @@ export interface User {
   usedCount: number
 }
 
-export interface UserResponseInterface extends User {
-  code: number
-  success: boolean
-  message: string
+export interface UserResponseInterface {
+  user: User
 }
 
 export interface ValidateResponse extends CustomFetchBaseResponse {
