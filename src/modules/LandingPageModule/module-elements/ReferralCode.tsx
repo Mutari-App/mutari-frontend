@@ -12,7 +12,7 @@ export const ReferralCode: React.FC<ReferralCodeProps> = ({ user }) => {
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(
-        `Gunakan kode referral saya ${user.referralCode} untuk bergabung di Mutari! 🚀\nDaftar di sini: ${process.env.CLIENT_URL ?? 'https://mutari.id'}`
+        `Gunakan kode referral saya ${user?.referralCode} untuk bergabung di Mutari! 🚀\nDaftar di sini: ${process.env.CLIENT_URL ?? 'https://mutari.id'}`
       )
 
       toast.success('Berhasil menyalin kode!')
@@ -32,7 +32,7 @@ export const ReferralCode: React.FC<ReferralCodeProps> = ({ user }) => {
       </div>
       <span className="text-sm sm:text-base mb-4">
         Anda telah berhasil melakukan praregistrasi dengan email:{' '}
-        <strong className="font-semibold">{user.email}</strong>
+        <strong className="font-semibold">{user?.email}</strong>
       </span>
       <h1 className="font-bold text-xl md:text-2xl lg:text-3xl mb-3">
         Login Berhasil!
@@ -53,7 +53,7 @@ export const ReferralCode: React.FC<ReferralCodeProps> = ({ user }) => {
       <div className="flex items-center gap-1.5 text-xs mb-2">
         <Users size={20} />
         <span>
-          <strong>{user.usedCount} pengguna</strong> telah menggunakan kode
+          <strong>{user?.usedCount} pengguna</strong> telah menggunakan kode
           referral anda
         </span>
       </div>
