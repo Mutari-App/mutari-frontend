@@ -12,6 +12,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { toast } from 'sonner'
 import { useBaseUrlWithPath } from '@/hooks/useBaseUrlWithPath'
 import {
+  UserResponseInterface,
   type AuthContextInterface,
   type AuthContextProviderProps,
   type User,
@@ -36,21 +37,34 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
   const pathname = usePathname()
 
   const validate = async ({ ticket }: { ticket: string }) => {
-    const response = await customFetch<ValidateResponse>(
-      `/pre-register/login/validate/${ticket}`,
-      { method: 'POST' }
-    )
+    try {
+      const response = await customFetch<ValidateResponse>(
+        `/pre-register/login/validate/${ticket}`,
+        { method: 'POST' }
+      )
 
-    if (response.statusCode === 200) {
-      setIsAuthenticated(true)
+      if (response.statusCode !== 200) throw new Error(response.message)
+
       setCookie('AT', response.accessToken)
+      setIsAuthenticated(true)
+      const responseUser = await customFetch<UserResponseInterface>(
+        '/pre-register/referral-code',
+        { isAuthorized: true }
+      )
+
+      if (responseUser.statusCode !== 200) throw new Error(responseUser.message)
+
+      setUser(responseUser.user)
       router.replace(pathname)
       router.refresh()
       return response
-    } else {
+    } catch (e) {
       setUser(null)
       setIsAuthenticated(false)
-      throw new Error(response.message)
+      router.replace(pathname)
+      router.refresh()
+      if (e instanceof Error) throw new Error(e.message)
+      throw new Error('Unexpected error')
     }
   }
 
