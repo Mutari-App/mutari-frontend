@@ -43,7 +43,7 @@ export const ReferralCode: React.FC<ReferralCodeProps> = ({ user }) => {
         </span>
         <div className="flex gap-2">
           <span className="font-bold tracking-[0.2em] text-xl sm:text-2xl md:text-3xl">
-            {user.referralCode}
+            {user?.referralCode}
           </span>
           <button onClick={handleCopy}>
             <Copy size={18} className="w-4 h-4" />
