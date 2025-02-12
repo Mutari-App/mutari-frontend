@@ -52,7 +52,7 @@ export default [
     rules: {
       '@typescript-eslint/array-type': 'off',
       '@typescript-eslint/consistent-type-definitions': 'off',
-
+      '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/consistent-type-imports': [
         'warn',
         {
@@ -80,6 +80,7 @@ export default [
       ],
 
       'import/no-anonymous-default-export': 'off',
+      'react-hooks/rules-of-hooks': 'warn',
     },
   },
 ]

@@ -1,29 +1,56 @@
-import React from 'react'
-import {
-  NavigationMenu,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-} from '../ui/navigation-menu'
+'use client'
+
+import React, { useEffect, useState } from 'react'
+import { NavigationMenu } from '../ui/navigation-menu'
 import Image from 'next/image'
+import { getImage } from '@/utils/getImage'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 
 export const Navbar: React.FC = () => {
+  const pathname = usePathname() // Get current route path
+
+  const [isScrolledToScreen, setIsScrolledToScreen] = useState(false)
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY >= window.innerHeight) {
+        setIsScrolledToScreen(true)
+      } else {
+        setIsScrolledToScreen(false)
+      }
+    }
+
+    window.addEventListener('scroll', handleScroll)
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll)
+    }
+  }, [])
   return (
-    <NavigationMenu className="p-4 shadow-md bg-white max-w-full ">
-      <div className="mx-auto container flex justify-between max-w-screen-xl items-center">
-        <div className="flex items-center gap-3">
+    <NavigationMenu
+      className={`p-4 fixed bg-transparent max-w-full w-full z-50 transition-colors duration-300 ${
+        pathname == '/' && isScrolledToScreen
+          ? 'bg-[#0059B3] shadow-md'
+          : 'bg-transparent'
+      }`}
+    >
+      <div className="mx-auto w-full container flex justify-between   items-center">
+        <Link
+          href={'/#hero'}
+          className="flex items-end gap-3 hover:cursor-pointer"
+        >
           <Image
-            src="/logo-no-background.png"
+            src={getImage('logo-white.png')}
             alt="Mutari Logo"
             width={150}
             height={50}
-            className="h-12 w-auto"
+            className="h-12 w-auto z-30"
           />
-          <span className="text-2xl font-bold tracking-wide text-blue-600 uppercase">
-            Mutari
+          <span className="text-white font-hammersmithOne text-[30px]">
+            MUTARI
           </span>
-        </div>
-        <NavigationMenuList className="flex space-x-4">
+        </Link>
+        {/* <NavigationMenuList className="flex space-x-4">
           <NavigationMenuItem>
             <NavigationMenuLink href="/" className="">
               Home
@@ -39,7 +66,7 @@ export const Navbar: React.FC = () => {
               Kontak
             </NavigationMenuLink>
           </NavigationMenuItem>
-        </NavigationMenuList>
+        </NavigationMenuList> */}
       </div>
     </NavigationMenu>
   )
