@@ -23,7 +23,7 @@ export default [
       '**/node_modules',
       '**/public',
       '**/next-env.d.ts',
-      '**/package-lock.json',
+      '**/pnpm-lock.yaml',
       'eslint.config.mjs',
       'postcss.config.mjs',
     ],

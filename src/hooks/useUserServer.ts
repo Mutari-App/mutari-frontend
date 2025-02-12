@@ -1,10 +1,10 @@
 import { cookies } from 'next/headers'
 import { type UserResponseInterface } from '../contexts/AuthContext/interface'
 import { customFetch } from '../utils/customFetch'
-import { getCookie } from 'cookies-next'
+import { getCookie } from 'cookies-next/server'
 
 export default async function useUserServer() {
-  const AT = getCookie('AT', { cookies })
+  const AT = await getCookie('AT', { cookies })
   if (!AT) {
     return null
   }
