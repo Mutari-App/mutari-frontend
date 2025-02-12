@@ -11,7 +11,7 @@
     "check-format": "prettier --check .",
     "check-lint": "eslint",
     "format": "prettier --write .",
-    "test-all": "npm run format && npm run check-format && npm run check-lint && npm run check-types",
+    "test-all": "pnpm run format && pnpm run check-format && pnpm run check-lint && pnpm run check-types",
     "prepare": "husky"
   },
   "dependencies": {
@@ -40,10 +40,13 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@eslint/js": "^9.20.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "eslint": "^9.19.0",
+    "@typescript-eslint/eslint-plugin": "^8.24.0",
+    "@typescript-eslint/parser": "^8.24.0",
+    "eslint": "^9.20.1",
     "eslint-config-next": "15.1.6",
     "eslint-config-prettier": "^10.0.1",
     "eslint-plugin-prettier": "^5.2.3",
