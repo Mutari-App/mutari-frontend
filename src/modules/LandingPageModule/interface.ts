@@ -1,5 +1,5 @@
 import { type User } from '@/contexts/AuthContext/interface'
-import { type Dispatch, type SetStateAction } from 'react'
+import React, { type Dispatch, type SetStateAction } from 'react'
 
 export interface LoginFormProps {
   isSuccess: boolean
@@ -67,4 +67,10 @@ export interface FeatureCardProps {
   title: string
   description: string
   iconURL: string
+}
+
+export interface CapabilityItemProps {
+  icon: React.ReactNode
+  title: string
+  desc: string
 }
