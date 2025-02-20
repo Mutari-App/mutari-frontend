@@ -244,7 +244,7 @@ export const PreRegisterForm: React.FC<PreRegisterFormProps> = ({
               <FormControl>
                 <Input
                   prefix="+62"
-                  type="text"
+                  type="number"
                   placeholder="Masukkan nomor telepon"
                   {...field}
                 />
