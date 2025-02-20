@@ -85,12 +85,12 @@ export default async function RootLayout({
         <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5" />
       </head>
       <body
-        className={`${epilogue.variable} ${poppins.variable} ${raleway.variable} ${roboto.variable} ${hammersmithOne.variable} font-poppins overflow-x-hidden min-h-screen`}
+        className={`${epilogue.variable} ${poppins.variable} ${raleway.variable} ${roboto.variable} ${hammersmithOne.variable} font-poppins overflow-x-hidden w-screen`}
       >
         <Suspense>
           <AuthContextProvider user={user}>
             <Navbar />
-            <main className="w-full min-h-screen bg-white">{children}</main>
+            <main className="w-full bg-white">{children}</main>
             <Toaster />
 
             <Footer />

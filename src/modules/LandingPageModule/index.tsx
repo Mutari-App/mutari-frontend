@@ -23,7 +23,7 @@ export const LandingPageModule: React.FC = async () => {
       <Header />
       {/* <FeatureSection /> */}
       <div className="w-full h-fit overflow-hidden relative">
-        <div className="absolute w-full aspect-[1440/1950] top-1/4">
+        <div className="absolute w-full aspect-[1440/1950] top-[15%] md:top-1/4">
           <Image
             src={getImage('landing-page-demo-bg-blue.png')}
             alt="Section Background"
