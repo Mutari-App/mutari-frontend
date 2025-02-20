@@ -44,7 +44,7 @@ export const PreRegisterSection: React.FC<PreRegisterSectionProps> = ({
         <span className="text-xs sm:text-sm md:text-base pb-3">
           Tunggu apalagi?
         </span>
-        <h2 className="text-lg text-white  md:text-3xl font-semibold text-center shadow-lg pb-3">
+        <h2 className="text-lg text-white  md:text-3xl font-semibold text-center pb-3">
           Petualangan Baru Menanti!
         </h2>
         <span className="text-sm md:text-lg  text-center pb-3">
