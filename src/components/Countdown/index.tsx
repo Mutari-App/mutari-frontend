@@ -15,13 +15,13 @@ const BlockTime: React.FC<ComponentPropsWithoutRef<'div'> & CountdownProps> = ({
     <div className="flex flex-col items-center ">
       <div
         className={cn(
-          'flex justify-center items-center mb-2  w-[48px]  xs:w-[64px] sm:w-[93px]    rounded-xl',
+          'flex justify-center items-center sm:mb-2  w-[48px]  xs:w-[64px] sm:w-[93px]    rounded-xl',
           classNameBlock
         )}
       >
         <span
           className={cn(
-            'inline-block font-semibold text-2xl xs:text-[32px] lg:text-[48px] md:text-[32px] text-white',
+            'inline-block font-semibold text-2xl xs:text-[32px] lg:text-[48px] sm:text-[40px] text-white',
             classNameType
           )}
         >
@@ -132,7 +132,7 @@ const Countdown = ({
   }, [targetDate])
 
   return (
-    <div className="relative font-raleway flex shadow-[0_0_0_0.5px_rgba(255,255,255)] bg-gradient-to-br  from-[#ffffff47] to-[#ffffff00] overflow-hidden rounded-2xl px-4 py-4 flex-col items-center gap-2">
+    <div className="relative font-raleway flex shadow-[0_0_0_0.5px_rgba(255,255,255)] bg-gradient-to-br  from-[#ffffff47] to-[#ffffff00] overflow-hidden rounded-xl sm:rounded-2xl px-4 py-2 sm:py-4 flex-col items-center gap-2">
       <div className="absolute top-0 left-0 w-full h-full bg-black/15" />
       <div className="relative flex items-center gap-1 sm:gap-3">
         <BlockTime
