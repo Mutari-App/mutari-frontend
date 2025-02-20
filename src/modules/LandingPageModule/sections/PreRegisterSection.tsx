@@ -32,6 +32,7 @@ export const PreRegisterSection: React.FC<PreRegisterSectionProps> = ({
       id={'praregistrasi'}
       className="relative min-h-screen w-screen flex flex-col items-center px-2 sm:px-4 py-4 sm:py-10 md:py-20 text-white"
     >
+      <div className="w-screen h-10 bg-gradient-to-b from-white to-transparent absolute z-10 top-0 left-0 " />
       <Image
         src={getImage('pre-register-form-bg.webp')}
         fill
@@ -39,11 +40,14 @@ export const PreRegisterSection: React.FC<PreRegisterSectionProps> = ({
         alt="Form Background"
       />
       <div className="absolute top-0 left-0 w-full h-full bg-[#3C374450] " />
-      <div className="flex flex-col items-center relative">
-        <h2 className="text-lg text-white  md:text-3xl font-bold text-center uppercase">
+      <div className="flex pt-10 flex-col items-center relative">
+        <span className="text-xs sm:text-sm md:text-base pb-3">
+          Tunggu apalagi?
+        </span>
+        <h2 className="text-lg text-white  md:text-3xl font-semibold text-center shadow-lg pb-3">
           Petualangan Baru Menanti!
         </h2>
-        <span className="text-sm md:text-lg  text-center">
+        <span className="text-sm md:text-lg  text-center pb-3">
           Pra-registrasi sekarang, dapatkan hadiahnya
         </span>
 
@@ -55,7 +59,7 @@ export const PreRegisterSection: React.FC<PreRegisterSectionProps> = ({
       </div>
 
       <div className="w-full max-w-3xl mb-8 relative">
-        <div className="overflow-hidden relative bg-gradient-to-br from-[#ffffff47] to-[#ffffff00] shadow-[0_0_0_0.5px_rgba(255,255,255)] rounded-3xl py-6 px-2 sm:px-8 md:px-16">
+        <div className="overflow-hidden relative bg-gradient-to-br from-[#ffffff47] to-[#ffffff00] shadow-[0_0_0_0.5px_rgba(255,255,255)] rounded-xl sm:rounded-3xl py-6 px-4 sm:px-8 md:px-16">
           <div className="absolute top-0 left-0 w-full h-full bg-black/25" />
           {isAuthenticated ? (
             <ReferralCode user={user!} />
