@@ -51,7 +51,13 @@ export const PreRegisterSection: React.FC<PreRegisterSectionProps> = ({
           Pra-registrasi sekarang, dapatkan hadiahnya
         </span>
 
-        <Countdown targetDate={new Date('2025-06-15T12:00:00')} />
+        <Countdown
+          targetDate={
+            new Date(
+              process.env.NEXT_PUBLIC_LAUNCHING_DATE ?? '2025-05-10T00:00:00'
+            )
+          }
+        />
 
         <span className=" pt-2 pb-2 sm:pb-4 sm:pt-4 md:pb-6  md:pt-6 text-xs  sm:text-sm md:text-base text-center">
           <strong>{count} pengguna</strong> telah melakukan praregistrasi
