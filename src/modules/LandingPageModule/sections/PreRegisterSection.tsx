@@ -59,15 +59,17 @@ export const PreRegisterSection: React.FC<PreRegisterSectionProps> = ({
           }
         />
 
-        <span className=" pt-2 pb-2 sm:pb-4 sm:pt-4 md:pb-6  md:pt-6 text-xs  sm:text-sm md:text-base text-center">
-          <strong>{count} pengguna</strong> telah melakukan praregistrasi
-        </span>
+        {count >= Number(process.env.NEXT_PUBLIC_MINIMAL ?? 0) && (
+          <span className=" pt-2 pb-2 sm:pb-4 sm:pt-4 md:pb-6  md:pt-6 text-xs  sm:text-sm md:text-base text-center">
+            <strong>{count} pengguna</strong> telah melakukan praregistrasi
+          </span>
+        )}
       </div>
 
       <div className="w-full max-w-3xl mb-8 relative">
         <div className="overflow-hidden relative bg-gradient-to-br from-[#ffffff47] to-[#ffffff00] shadow-[0_0_0_0.5px_rgba(255,255,255)] rounded-xl sm:rounded-3xl py-6 px-4 sm:px-8 md:px-16">
           <div className="absolute top-0 left-0 w-full h-full bg-black/25" />
-          {isAuthenticated ? (
+          {isAuthenticated && !!user ? (
             <ReferralCode user={user!} />
           ) : isLoginForm ? (
             <LoginForm
