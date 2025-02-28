@@ -1,3 +1,3 @@
 export default function ItineraryModule() {
-  return <></>
+  return <div>ItineraryModule</div>
 }
