@@ -35,3 +35,6 @@
 //     }
 //   }
 // }
+Cypress.Commands.add("getBySel", (selector: string, options?: Partial<Cypress.Loggable & Cypress.Timeoutable & Cypress.Withinable & Cypress.Shadow>) => {
+    return cy.get(`[data-cy=${selector}]`, options);
+});
