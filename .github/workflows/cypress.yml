@@ -12,8 +12,22 @@ jobs:
       - name: Setup pnpm
         run: npm install -g pnpm
 
+      # we use the exact restore key to avoid Cypress binary snowballing
+      # https://glebbahmutov.com/blog/do-not-let-cypress-cache-snowball/
+      - name: Cache Cypress binary
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/Cypress
+          key: cypress-${{ runner.os }}-cypress-${{ github.ref }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            cypress-${{ runner.os }}-cypress-${{ github.ref }}-${{ hashFiles('**/package-lock.json') }}
+
       - name: Install dependencies
-        run: pnpm install 
+        run: pnpm install
+
+      - name: Install Cypress binary (if cache missed)
+        if: steps.cache-cypress.outputs.cache-hit != 'true'
+        run: npx cypress install
 
       - name: Cypress run
         uses: cypress-io/github-action@v6
