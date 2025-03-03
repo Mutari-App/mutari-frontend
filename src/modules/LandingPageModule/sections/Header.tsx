@@ -141,7 +141,10 @@ export const Header: React.FC = () => {
 
       <div className="flex flex-col gap-5 absolute top-[75%] left-[10%] w-[300px] max-w-[30%] z-40">
         <Link href={'#praregistrasi'}>
-          <Button className="hidden md:flex rounded-[150px] bg-white text-[#0059B3] w-fit px-4 py-2 gap-3 hover:bg-[#FFFB]">
+          <Button
+            data-cy="button-hero"
+            className="hidden md:flex rounded-[150px] bg-white text-[#0059B3] w-fit px-4 py-2 gap-3 hover:bg-[#FFFB]"
+          >
             <ChevronsDownIcon />
             Pra-Registrasi Sekarang!
           </Button>
