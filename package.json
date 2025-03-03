@@ -12,7 +12,10 @@
     "check-lint": "eslint",
     "format": "prettier --write .",
     "test-all": "pnpm run format && pnpm run check-format && pnpm run check-lint && pnpm run check-types",
-    "prepare": "husky"
+    "prepare": "husky",
+    "cy:open": "cypress open",
+    "cy:run": "cypress run",
+    "e2e": "cypress open --e2e"
   },
   "dependencies": {
     "@hookform/resolvers": "^4.0.0",

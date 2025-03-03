@@ -193,10 +193,10 @@ export const PreRegisterForm: React.FC<PreRegisterFormProps> = ({
             <FormItem className="col-span-2 sm:col-span-1">
               <FormLabel>Nama Depan*</FormLabel>
               <FormControl>
-                <Input 
-                  data-cy="preregister-input-first-name" 
-                  placeholder="Masukkan nama depan" 
-                  {...field} 
+                <Input
+                  data-cy="preregister-input-first-name"
+                  placeholder="Masukkan nama depan"
+                  {...field}
                 />
               </FormControl>
               <FormMessage />
@@ -212,7 +212,11 @@ export const PreRegisterForm: React.FC<PreRegisterFormProps> = ({
             <FormItem className="col-span-2 sm:col-span-1">
               <FormLabel>Nama Akhir</FormLabel>
               <FormControl>
-                <Input data-cy="preregister-input-last-name" placeholder="Masukkan nama akhir" {...field} />
+                <Input
+                  data-cy="preregister-input-last-name"
+                  placeholder="Masukkan nama akhir"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
