@@ -193,7 +193,11 @@ export const PreRegisterForm: React.FC<PreRegisterFormProps> = ({
             <FormItem className="col-span-2 sm:col-span-1">
               <FormLabel>Nama Depan*</FormLabel>
               <FormControl>
-                <Input placeholder="Masukkan nama depan" {...field} />
+                <Input 
+                  data-cy="preregister-input-first-name" 
+                  placeholder="Masukkan nama depan" 
+                  {...field} 
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -208,7 +212,7 @@ export const PreRegisterForm: React.FC<PreRegisterFormProps> = ({
             <FormItem className="col-span-2 sm:col-span-1">
               <FormLabel>Nama Akhir</FormLabel>
               <FormControl>
-                <Input placeholder="Masukkan nama akhir" {...field} />
+                <Input data-cy="preregister-input-last-name" placeholder="Masukkan nama akhir" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -224,6 +228,7 @@ export const PreRegisterForm: React.FC<PreRegisterFormProps> = ({
               <FormLabel>Email*</FormLabel>
               <FormControl>
                 <Input
+                  data-cy="preregister-input-email"
                   type="email"
                   placeholder="Masukkan alamat email"
                   {...field}
@@ -243,6 +248,7 @@ export const PreRegisterForm: React.FC<PreRegisterFormProps> = ({
               <FormLabel>No. HP*</FormLabel>
               <FormControl>
                 <Input
+                  data-cy="preregister-input-number"
                   prefix="+62"
                   type="number"
                   placeholder="Masukkan nomor telepon"
@@ -448,7 +454,12 @@ export const PreRegisterForm: React.FC<PreRegisterFormProps> = ({
 
         {/* Submit Button */}
         <div className="col-span-2 flex justify-center">
-          <Button disabled={submitLoading} variant={'secondary'} type="submit">
+          <Button
+            data-cy="preregister-submit-button"
+            disabled={submitLoading}
+            variant={'secondary'}
+            type="submit"
+          >
             {submitLoading ? (
               <Loader className="animate-spin" />
             ) : (
