@@ -13,9 +13,6 @@
     "format": "prettier --write .",
     "test-all": "pnpm run format && pnpm run check-format && pnpm run check-lint && pnpm run check-types",
     "prepare": "husky",
-    "cy:open": "cypress open",
-    "cy:run": "cypress run",
-    "e2e": "cypress open --e2e",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage"
@@ -56,7 +53,6 @@
     "@types/react-dom": "^19",
     "@typescript-eslint/eslint-plugin": "^8.24.0",
     "@typescript-eslint/parser": "^8.24.0",
-    "cypress": "^14.1.0",
     "eslint": "^9.20.1",
     "eslint-config-next": "15.1.6",
     "eslint-config-prettier": "^10.0.1",
