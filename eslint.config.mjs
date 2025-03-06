@@ -26,6 +26,7 @@ export default [
       '**/pnpm-lock.yaml',
       'eslint.config.mjs',
       'postcss.config.mjs',
+      '**/coverage',
     ],
   },
   ...compat.extends(
