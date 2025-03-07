@@ -15,14 +15,14 @@ const mockItem: ItineraryData = {
   userId: 'user1',
   isPublished: false,
   isCompleted: false,
-  locationCount: 5
+  locationCount: 5,
 }
 
 jest.mock('sonner', () => ({
   toast: {
     success: jest.fn(),
-    error: jest.fn()
-  }
+    error: jest.fn(),
+  },
 }))
 jest.mock('@/utils/customFetch')
 jest.mock('lucide-react', () => ({
@@ -63,14 +63,21 @@ describe('ItineraryCard Component', () => {
     fireEvent.click(screen.getByText('Mark as Completed'))
 
     await waitFor(() => {
-      expect(customFetch).toHaveBeenCalledWith('/itinerary/1/mark-as-complete', { method: 'PATCH' })
-      expect(toast.success).toHaveBeenCalledWith('Itinerary marked as complete!')
+      expect(customFetch).toHaveBeenCalledWith(
+        '/itinerary/1/mark-as-complete',
+        { method: 'PATCH' }
+      )
+      expect(toast.success).toHaveBeenCalledWith(
+        'Itinerary marked as complete!'
+      )
       expect(mockRefresh).toHaveBeenCalled()
     })
   })
 
   it('shows error toast when API fails', async () => {
-    ;(customFetch as jest.Mock).mockRejectedValue(new Error('Failed to mark as complete'))
+    ;(customFetch as jest.Mock).mockRejectedValue(
+      new Error('Failed to mark as complete')
+    )
     const mockRefresh = jest.fn()
 
     render(<ItineraryCard item={mockItem} refresh={mockRefresh} />)

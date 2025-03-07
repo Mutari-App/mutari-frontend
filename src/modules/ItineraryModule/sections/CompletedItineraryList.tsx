@@ -1,16 +1,13 @@
 'use client'
 import React from 'react'
 import ItineraryCard from '../module-elements/ItineraryCard'
-import type { ItineraryData, metadataType } from '../module-elements/types'
-import { Pagination } from '../module-elements/Pagination'
+import type { ItineraryData } from '../module-elements/types'
 
-function MyItineraryList({
+function CompletedItineraryList({
   data,
-  metadata,
   refresh,
 }: {
   data: ItineraryData[]
-  metadata: metadataType
   refresh: () => void
 }) {
   return (
@@ -23,12 +20,11 @@ function MyItineraryList({
         </div>
       ) : (
         <div className="w-full flex items-center justify-center py-8">
-          Belum ada rencana perjalanan.
+          Belum ada perjalanan yang selesai.
         </div>
       )}
-      <Pagination {...metadata} />
     </div>
   )
 }
 
-export default MyItineraryList
+export default CompletedItineraryList

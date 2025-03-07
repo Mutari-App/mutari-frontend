@@ -4,8 +4,16 @@ import Image from 'next/image'
 import React, { useRef, useState } from 'react'
 import type { ItineraryData } from './types'
 import useOutsideClick from '@/hooks/useOutsideClick'
+import { customFetch } from '@/utils/customFetch'
+import { toast } from 'sonner'
 
-function ItineraryCard({ item }: { item: ItineraryData }) {
+function ItineraryCard({
+  item,
+  refresh,
+}: {
+  item: ItineraryData
+  refresh: () => void
+}) {
   const [openOptions, setOpenOptions] = useState(false)
   const optionRef = useRef<HTMLDivElement>(null)
   const daysTotal =
@@ -16,6 +24,23 @@ function ItineraryCard({ item }: { item: ItineraryData }) {
     ref: optionRef,
     handler: () => setOpenOptions(false),
   })
+
+  const markAsComplete = async () => {
+    try {
+      const response = await customFetch(
+        `/itinerary/${item.id}/mark-as-complete`,
+        {
+          method: 'PATCH',
+        }
+      )
+
+      if (response.statusCode !== 200) throw new Error(response.message)
+      toast.success('Itinerary marked as complete!')
+      refresh()
+    } catch (err) {
+      if (err instanceof Error) toast.error(`${err.message}`)
+    }
+  }
 
   return (
     <div className="group flex items-center gap-5 shadow-lg w-full rounded-xl overflow-hidden hover:cursor-pointer relative">
@@ -35,7 +60,9 @@ function ItineraryCard({ item }: { item: ItineraryData }) {
             <MapPinIcon size={16} />
             <p className="text-base">Bali</p>
           </div>
-          <p className="text-sm">{daysTotal} Hari • 5 Destinasi</p>
+          <p className="text-sm">
+            {daysTotal} Hari • {item.locationCount} Destinasi
+          </p>
         </div>
       </div>
       <div
@@ -51,7 +78,11 @@ function ItineraryCard({ item }: { item: ItineraryData }) {
           ref={optionRef}
           className="absolute top-2 right-2 z-20 bg-white shadow-lg text-sm font-medium rounded-lg overflow-hidden w-max flex flex-col"
         >
-          <p className="hover:bg-black/10 px-4 py-2">Mark as Completed</p>
+          {!item.isCompleted && (
+            <p onClick={markAsComplete} className="hover:bg-black/10 px-4 py-2">
+              Mark as Completed
+            </p>
+          )}
           <p className="hover:bg-black/10 px-4 py-2 text-red-500">Delete</p>
         </div>
       )}

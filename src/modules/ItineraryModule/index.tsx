@@ -1,17 +1,74 @@
 'use client'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import MyItineraryList from './sections/MyItineraryList'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { PlusIcon } from 'lucide-react'
 import Image from 'next/image'
 import { getImage } from '@/utils/getImage'
+import CompletedItineraryList from './sections/CompletedItineraryList'
+import { customFetch } from '@/utils/customFetch'
+import type {
+  CompletedItineraryResponse,
+  ItineraryData,
+  ItineraryResponse,
+  metadataType,
+} from './module-elements/types'
 
 export default function ItineraryModule() {
   const searchParams = useSearchParams()
+  const page = searchParams.get('page')
   const router = useRouter()
-  const page = searchParams.get('page') ?? '1'
+
+  const defaultMetadata = {
+    page: 1,
+    totalPages: 1,
+    total: 0,
+  }
+  const [data, setData] = useState<ItineraryData[]>([])
+  const [completedData, setCompletedData] = useState<ItineraryData[]>([])
+  const [metadata, setMetadata] = useState<metadataType>(defaultMetadata)
+
+  const refreshAll = async () => {
+    await fetchMyItinerary()
+    await fetchMyCompletedItinerary()
+  }
+
+  const fetchMyItinerary = async () => {
+    try {
+      const res = await customFetch<ItineraryResponse>(
+        `/itinerary/me?page=${page}`
+      )
+      if (res.statusCode !== 200) throw new Error(res.message)
+      setData(res.itinerary.data)
+      setMetadata(res.itinerary.metadata)
+      console.log(res)
+    } catch (err: any) {
+      console.log(err)
+    }
+  }
+
+  const fetchMyCompletedItinerary = async () => {
+    try {
+      const res = await customFetch<CompletedItineraryResponse>(
+        `/itinerary/me/completed`
+      )
+      if (res.statusCode !== 200) throw new Error(res.message)
+      setCompletedData(res.itinerary)
+      console.log(res.itinerary)
+    } catch (err: any) {
+      console.log(err)
+    }
+  }
+
+  useEffect(() => {
+    fetchMyCompletedItinerary().catch((err) => console.log(err))
+  }, [])
+
+  useEffect(() => {
+    fetchMyItinerary().catch((err) => console.log(err))
+  }, [page])
 
   useEffect(() => {
     if (!searchParams.get('page')) {
@@ -31,7 +88,14 @@ export default function ItineraryModule() {
             Buat Itinerary Baru
           </Button>
         </Link>
-        <MyItineraryList page={page} />
+        <MyItineraryList data={data} metadata={metadata} refresh={refreshAll} />
+
+        <div className="flex flex-col justify-start gap-7 w-full">
+          <h1 className="font-semibold text-2xl md:text-left md:text-[36px] sel">
+            Perjalanan Selesai
+          </h1>
+          <CompletedItineraryList data={completedData} refresh={refreshAll} />
+        </div>
       </div>
       <div className="text-center text-sm">
         <p>

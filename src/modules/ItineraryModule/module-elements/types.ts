@@ -12,6 +12,9 @@ export interface ItineraryResponse extends CustomFetchBaseResponse {
     metadata: metadataType
   }
 }
+export interface CompletedItineraryResponse extends CustomFetchBaseResponse {
+  itinerary: ItineraryData[]
+}
 
 export interface ItineraryData {
   id: string
@@ -23,4 +26,5 @@ export interface ItineraryData {
   endDate: string
   isPublished: boolean
   isCompleted: boolean
+  locationCount: number
 }
