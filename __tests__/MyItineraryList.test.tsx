@@ -2,6 +2,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import { customFetch } from '@/utils/customFetch'
 import '@testing-library/jest-dom'
 import MyItineraryList from '@/modules/ItineraryModule/sections/MyItineraryList'
+import type { ItineraryData } from '@/modules/ItineraryModule/module-elements/types'
 
 // Mock API response
 jest.mock('@/utils/customFetch')
@@ -12,33 +13,41 @@ jest.mock('lucide-react', () => ({
   EllipsisIcon: () => 'EllipsisIcon',
 }))
 
-const mockResponse = {
-  statusCode: 200,
-  itinerary: {
-    data: [
-      {
-        title: 'Trip to Bali',
-        startDate: '2025-03-01',
-        endDate: '2025-03-05',
-        coverImage: 'bali.jpg',
-      },
-    ],
-    metadata: {
-      page: 1,
-      totalPages: 2,
-      total: 2,
-    },
+const mockData: ItineraryData[] = [
+  {
+    id: "itinerary1",
+    userId: "user1",
+    title: "Trip to Bali",
+    startDate: "2025-03-01",
+    endDate: "2025-03-05",
+    coverImage: "bali.jpg",
+    isPublished: false,
+    isCompleted: false,
+    locationCount: 0,
   },
+  {
+    id: "itinerary2",
+    userId: "user2",
+    title: "Trip to Japan",
+    startDate: "2025-04-10",
+    endDate: "2025-04-20",
+    coverImage: "japan.jpg",
+    isPublished: true,
+    isCompleted: false,
+    locationCount: 5,
+  },
+];
+
+
+const mockMetadata = {
+  page: 1,
+  totalPages: 2,
+  total: 2,
 }
 
 describe('MyItineraryList Component', () => {
   it('renders empty state when there is no data', async () => {
-    ;(customFetch as jest.Mock).mockResolvedValueOnce({
-      statusCode: 200,
-      itinerary: { data: [], metadata: { page: 1, totalPages: 1, total: 0 } },
-    })
-
-    render(<MyItineraryList page="1" />)
+    render(<MyItineraryList data={[]} metadata={mockMetadata} refresh={jest.fn} />)
 
     await waitFor(() =>
       expect(
@@ -48,21 +57,20 @@ describe('MyItineraryList Component', () => {
   })
 
   it('renders itinerary list when data is available', async () => {
-    ;(customFetch as jest.Mock).mockResolvedValue(mockResponse)
-
-    render(<MyItineraryList page="1" />)
+    render(<MyItineraryList metadata={mockMetadata} data={mockData} refresh={jest.fn} />)
 
     await waitFor(() => {
       expect(
-        screen.getByText('Belum ada rencana perjalanan.')
+        screen.getByText('Trip to Bali')
+      ).toBeInTheDocument()
+      expect(
+        screen.getByText('Trip to Japan')
       ).toBeInTheDocument()
     })
   })
 
   it('renders pagination correctly', async () => {
-    ;(customFetch as jest.Mock).mockResolvedValueOnce(mockResponse)
-
-    render(<MyItineraryList page="1" />)
+    render(<MyItineraryList data={mockData} metadata={mockMetadata} refresh={jest.fn} />)
 
     await waitFor(() => expect(screen.getByText('1')).toBeInTheDocument())
   })

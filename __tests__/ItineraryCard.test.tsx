@@ -1,7 +1,9 @@
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import '@testing-library/jest-dom'
+import { customFetch } from '@/utils/customFetch'
 import { type ItineraryData } from '@/modules/ItineraryModule/module-elements/types'
 import ItineraryCard from '@/modules/ItineraryModule/module-elements/ItineraryCard'
+import { toast } from 'sonner'
 
 // Mock data untuk props item
 const mockItem: ItineraryData = {
@@ -9,12 +11,20 @@ const mockItem: ItineraryData = {
   startDate: '2025-03-01',
   endDate: '2025-03-05',
   coverImage: 'bali.jpg',
-  id: 'itinerary1',
+  id: '1',
   userId: 'user1',
   isPublished: false,
   isCompleted: false,
+  locationCount: 5
 }
 
+jest.mock('sonner', () => ({
+  toast: {
+    success: jest.fn(),
+    error: jest.fn()
+  }
+}))
+jest.mock('@/utils/customFetch')
 jest.mock('lucide-react', () => ({
   EllipsisIcon: () => 'EllipsisIcon',
   MapPinIcon: () => 'MapPinIcon',
@@ -22,7 +32,7 @@ jest.mock('lucide-react', () => ({
 
 describe('ItineraryCard Component', () => {
   it('renders the component correctly', () => {
-    render(<ItineraryCard item={mockItem} />)
+    render(<ItineraryCard item={mockItem} refresh={jest.fn} />)
 
     expect(screen.getByText('Trip to Bali')).toBeInTheDocument()
     expect(screen.getByText('Bali')).toBeInTheDocument()
@@ -30,7 +40,7 @@ describe('ItineraryCard Component', () => {
   })
 
   it('toggles the options menu when clicked', () => {
-    render(<ItineraryCard item={mockItem} />)
+    render(<ItineraryCard item={mockItem} refresh={jest.fn} />)
 
     const menuButton = screen.getByTestId('option-btn') // Menangkap tombol menu
     fireEvent.click(menuButton) // Klik pertama untuk membuka opsi
@@ -38,5 +48,39 @@ describe('ItineraryCard Component', () => {
 
     fireEvent.click(menuButton) // Klik kedua untuk menutup opsi
     expect(screen.queryByText('Mark as Completed')).not.toBeInTheDocument()
+  })
+
+  it('calls markAsComplete and refresh when clicked', async () => {
+    const mockRefresh = jest.fn()
+    ;(customFetch as jest.Mock).mockResolvedValueOnce({
+      statusCode: 200,
+      itinerary: mockItem,
+    })
+
+    render(<ItineraryCard item={mockItem} refresh={mockRefresh} />)
+
+    fireEvent.click(screen.getByTestId('option-btn'))
+    fireEvent.click(screen.getByText('Mark as Completed'))
+
+    await waitFor(() => {
+      expect(customFetch).toHaveBeenCalledWith('/itinerary/1/mark-as-complete', { method: 'PATCH' })
+      expect(toast.success).toHaveBeenCalledWith('Itinerary marked as complete!')
+      expect(mockRefresh).toHaveBeenCalled()
+    })
+  })
+
+  it('shows error toast when API fails', async () => {
+    ;(customFetch as jest.Mock).mockRejectedValue(new Error('Failed to mark as complete'))
+    const mockRefresh = jest.fn()
+
+    render(<ItineraryCard item={mockItem} refresh={mockRefresh} />)
+
+    fireEvent.click(screen.getByTestId('option-btn'))
+    fireEvent.click(screen.getByText('Mark as Completed'))
+
+    await waitFor(() => {
+      expect(toast.error).toHaveBeenCalled()
+      expect(mockRefresh).not.toHaveBeenCalled()
+    })
   })
 })
