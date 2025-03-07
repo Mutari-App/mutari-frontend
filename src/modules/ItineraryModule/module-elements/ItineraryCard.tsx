@@ -1,0 +1,62 @@
+import { getImage } from '@/utils/getImage'
+import { EllipsisIcon, MapPinIcon } from 'lucide-react'
+import Image from 'next/image'
+import React, { useRef, useState } from 'react'
+import type { ItineraryData } from './types'
+import useOutsideClick from '@/hooks/useOutsideClick'
+
+function ItineraryCard({ item }: { item: ItineraryData }) {
+  const [openOptions, setOpenOptions] = useState(false)
+  const optionRef = useRef<HTMLDivElement>(null)
+  const daysTotal =
+    (new Date(item.endDate).getTime() - new Date(item.startDate).getTime()) /
+    (1000 * 60 * 60 * 24)
+
+  useOutsideClick({
+    ref: optionRef,
+    handler: () => setOpenOptions(false),
+  })
+
+  return (
+    <div className="group flex items-center gap-5 shadow-lg w-full rounded-xl overflow-hidden hover:cursor-pointer relative">
+      <div className="w-1/4 h-full overflow-hidden">
+        <Image
+          src={getImage(item.coverImage ?? 'logo-no-background.png')}
+          alt={item.title}
+          width={720}
+          height={720}
+          className="w-full h-full object-cover pointer-events-none group-hover:scale-125 duration-300"
+        />
+      </div>
+      <div className="w-3/4 h-full flex flex-col gap-2 py-4">
+        <p className="font-raleway font-medium text-xl">{item.title}</p>
+        <div className="font-raleway text-[#94A3B8] flex flex-col gap-1">
+          <div className="flex gap-2 items-center">
+            <MapPinIcon size={16} />
+            <p className="text-base">Bali</p>
+          </div>
+          <p className="text-sm">{daysTotal} Hari • 5 Destinasi</p>
+        </div>
+      </div>
+      <div
+        data-testid="option-btn"
+        className="absolute top-2 right-2 p-2 rounded-full hover:bg-black/10"
+        onClick={() => setOpenOptions(!openOptions)}
+      >
+        <EllipsisIcon />
+      </div>
+
+      {openOptions && (
+        <div
+          ref={optionRef}
+          className="absolute top-2 right-2 z-20 bg-white shadow-lg text-sm font-medium rounded-lg overflow-hidden w-max flex flex-col"
+        >
+          <p className="hover:bg-black/10 px-4 py-2">Mark as Completed</p>
+          <p className="hover:bg-black/10 px-4 py-2 text-red-500">Delete</p>
+        </div>
+      )}
+    </div>
+  )
+}
+
+export default ItineraryCard
