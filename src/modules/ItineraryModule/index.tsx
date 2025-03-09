@@ -38,7 +38,7 @@ export default function ItineraryModule() {
   const fetchMyItinerary = async () => {
     try {
       const res = await customFetch<ItineraryResponse>(
-        `/itinerary/me?page=${page}`
+        `/itineraries/me?page=${page}`
       )
       if (res.statusCode !== 200) throw new Error(res.message)
       setData(res.itinerary.data)
@@ -52,7 +52,7 @@ export default function ItineraryModule() {
   const fetchMyCompletedItinerary = async () => {
     try {
       const res = await customFetch<CompletedItineraryResponse>(
-        `/itinerary/me/completed`
+        `/itineraries/me/completed`
       )
       if (res.statusCode !== 200) throw new Error(res.message)
       setCompletedData(res.itinerary)

@@ -64,7 +64,7 @@ describe('ItineraryCard Component', () => {
 
     await waitFor(() => {
       expect(customFetch).toHaveBeenCalledWith(
-        '/itinerary/1/mark-as-complete',
+        '/itineraries/1/mark-as-complete',
         { method: 'PATCH' }
       )
       expect(toast.success).toHaveBeenCalledWith(

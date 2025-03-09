@@ -28,7 +28,7 @@ function ItineraryCard({
   const markAsComplete = async () => {
     try {
       const response = await customFetch(
-        `/itinerary/${item.id}/mark-as-complete`,
+        `/itineraries/${item.id}/mark-as-complete`,
         {
           method: 'PATCH',
         }
@@ -65,14 +65,13 @@ function ItineraryCard({
           </p>
         </div>
       </div>
-      <div
+      <button
         data-testid="option-btn"
         className="absolute top-2 right-2 p-2 rounded-full hover:bg-black/10"
         onClick={() => setOpenOptions(!openOptions)}
-        role='button'
       >
         <EllipsisIcon />
-      </div>
+      </button>
 
       {openOptions && (
         <div
@@ -80,11 +79,18 @@ function ItineraryCard({
           className="absolute top-2 right-2 z-20 bg-white shadow-lg text-sm font-medium rounded-lg overflow-hidden w-max flex flex-col"
         >
           {!item.isCompleted && (
-            <div role='button' onClick={markAsComplete} className="hover:bg-black/10 px-4 py-2">
+            <button
+              onClick={markAsComplete}
+              className="hover:bg-black/10 px-4 py-2"
+            >
               Mark as Completed
-            </div>
+            </button>
           )}
-          <div role='button' className="hover:bg-black/10 px-4 py-2 text-red-500">Delete</div>
+          <button
+            className="hover:bg-black/10 px-4 py-2 text-red-500"
+          >
+            Delete
+          </button>
         </div>
       )}
     </div>
