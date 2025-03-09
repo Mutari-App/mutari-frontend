@@ -16,7 +16,7 @@ export const ItineraryHeader: React.FC<ItineraryHeaderProps> = ({
   onSubmit,
 }) => {
   return (
-    <div className="relative w-full h-48 bg-gradient-to-b from-blue-900 to-blue-800 rounded-md mb-4 flex items-center justify-center">
+    <div className="relative w-full h-64 bg-gradient-to-b from-blue-900 to-blue-800 rounded-md mb-4 flex items-center justify-center">
       <div className="absolute bottom-0 left-0 flex">
         <Input
           className="md:text-5xl font-bold text-white bg-transparent border-none h-fit focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"

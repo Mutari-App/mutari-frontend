@@ -10,13 +10,15 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 import { format } from 'date-fns'
-import { CalendarIcon, Plus } from 'lucide-react'
+import { CalendarIcon, Plus, X } from 'lucide-react'
 import { toast } from 'sonner'
+import { Badge } from '@/components/ui/badge'
 import {
   type CreateItineraryDto,
   type Section,
   type Block,
   type CreateItineraryResponse,
+  type Tag,
 } from './interface'
 import { customFetch, customFetchBody } from '@/utils/customFetch'
 import { type DropResult } from '@hello-pangea/dnd'
@@ -25,6 +27,7 @@ import { v4 } from 'uuid'
 import { ItineraryHeader } from './sections/Header'
 import { ItinerarySections } from './sections/ItinerarySections'
 import { DateRangeAlertDialog } from './module-elements/DateRangeAlertDialog'
+import { TagSelector } from './module-elements/TagSelector'
 
 export default function ItineraryMakerModule() {
   const router = useRouter()
@@ -36,6 +39,8 @@ export default function ItineraryMakerModule() {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
   const pendingDateRange = useRef<DateRange | undefined>(undefined)
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
+  const [availableTags, setAvailableTags] = useState<Tag[]>([])
+
   const initialItineraryData = useRef<CreateItineraryDto>({
     title: 'Itinerary Tanpa Judul',
     description: '',
@@ -68,20 +73,42 @@ export default function ItineraryMakerModule() {
   )
 
   useEffect(() => {
+    const fetchTags = async () => {
+      try {
+        const response = await customFetch<{ tags: Tag[] }>(
+          '/itineraries/tags',
+          {
+            method: 'GET',
+          }
+        )
+
+        if (response.success && response.tags) {
+          setAvailableTags(response.tags)
+        } else {
+          toast.error('Gagal mengambil tag')
+        }
+      } catch (error) {
+        console.error('Error fetching tags:', error)
+        toast.error('Gagal mengambil tag')
+      }
+    }
+
+    void fetchTags()
+  }, [])
+
+  useEffect(() => {
     // Check for unsaved changes by comparing current data with initial data
     const checkUnsavedChanges = () => {
-      // Only mark as unsaved if the user has made meaningful changes
       const hasBlocks = itineraryData.sections.some(
         (section) => section.blocks && section.blocks.length > 0
       )
-
       const hasCustomTitle =
         itineraryData.title !== initialItineraryData.current.title
-
       const hasDates =
         itineraryData.startDate !== '' || itineraryData.endDate !== ''
+      const hasTags = (itineraryData.tags?.length ?? 0) > 0
 
-      setHasUnsavedChanges(hasBlocks || hasCustomTitle || hasDates)
+      setHasUnsavedChanges(hasBlocks || hasCustomTitle || hasDates || hasTags)
     }
 
     checkUnsavedChanges()
@@ -105,6 +132,29 @@ export default function ItineraryMakerModule() {
       window.removeEventListener('beforeunload', handleBeforeUnload)
     }
   }, [hasUnsavedChanges])
+
+  const handleTagsChange = (tags: string[]) => {
+    setItineraryData((prev) => ({
+      ...prev,
+      tags,
+    }))
+  }
+
+  const removeTag = (tagId: string) => {
+    setItineraryData((prev) => ({
+      ...prev,
+      tags: prev.tags?.filter((id) => id !== tagId) ?? [],
+    }))
+  }
+
+  const getSelectedTagNames = () => {
+    return (itineraryData.tags ?? [])
+      .map((tagId) => {
+        const tag = availableTags.find((t) => t.id === tagId)
+        return tag ? tag.name : ''
+      })
+      .filter(Boolean)
+  }
 
   const toggleInput = (
     blockId: string,
@@ -662,7 +712,6 @@ export default function ItineraryMakerModule() {
         throw new Error('Failed to create itinerary')
       }
 
-      // Clear unsaved changes flag after successful save
       setHasUnsavedChanges(false)
       toast('Itinerary created successfully')
 
@@ -683,10 +732,12 @@ export default function ItineraryMakerModule() {
         isSubmitting={isSubmitting}
         onSubmit={handleSubmit}
       />
-      <div className="flex gap-2 mb-4">
-        <Button variant="outline" size="sm">
-          Tambahkan tag
-        </Button>
+      <div className="flex flex-wrap items-center gap-2 mb-4">
+        <TagSelector
+          selectedTags={itineraryData.tags ?? []}
+          onChangeAction={handleTagsChange}
+          availableTags={availableTags}
+        />
         <Button variant="outline" size="sm">
           Ganti foto cover
         </Button>
@@ -715,6 +766,25 @@ export default function ItineraryMakerModule() {
           </Popover>
         </div>
       </div>
+      {itineraryData.tags && itineraryData.tags.length > 0 && (
+        <div className="flex flex-wrap gap-2 mb-4">
+          {getSelectedTagNames().map((tagName, index) => (
+            <Badge
+              key={index}
+              variant="secondary"
+              className="flex items-center gap-1"
+            >
+              {tagName}
+              <button
+                onClick={() => removeTag(itineraryData.tags![index])}
+                className="ml-1 rounded-full hover:bg-gray-200 p-0.5"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </Badge>
+          ))}
+        </div>
+      )}
       <DateRangeAlertDialog
         open={showConfirmDialog}
         onOpenChange={setShowConfirmDialog}
@@ -747,11 +817,7 @@ export default function ItineraryMakerModule() {
         timeWarning={timeWarning}
       />
       <div className="flex justify-center my-8">
-        <Button
-          variant="outline"
-          className="w-full max-w-md"
-          onClick={() => addSection()}
-        >
+        <Button className="w-full max-w-md" onClick={() => addSection()}>
           <Plus className="mr-2 h-4 w-4" /> Bagian
         </Button>
       </div>
