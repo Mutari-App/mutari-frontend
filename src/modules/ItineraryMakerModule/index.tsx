@@ -54,7 +54,13 @@ export default function ItineraryMakerModule() {
       {
         sectionNumber: 1,
         title: 'Hari ke-1',
-        blocks: [],
+        blocks: [
+          {
+            id: v4(),
+            blockType: 'LOCATION',
+            title: 'Masukkan Judul',
+          },
+        ],
       },
     ],
   })
