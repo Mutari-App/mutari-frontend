@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { Button } from '@/components/ui/button'
+import { Button, buttonVariants } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
 import {
   Popover,
@@ -28,6 +28,8 @@ import { ItineraryHeader } from './sections/Header'
 import { ItinerarySections } from './sections/ItinerarySections'
 import { DateRangeAlertDialog } from './module-elements/DateRangeAlertDialog'
 import { TagSelector } from './module-elements/TagSelector'
+import { CldUploadButton } from 'next-cloudinary'
+import { cn } from '@/lib/utils'
 
 export default function ItineraryMakerModule() {
   const router = useRouter()
@@ -107,8 +109,11 @@ export default function ItineraryMakerModule() {
       const hasDates =
         itineraryData.startDate !== '' || itineraryData.endDate !== ''
       const hasTags = (itineraryData.tags?.length ?? 0) > 0
+      const hasCoverImage = itineraryData.coverImage !== ''
 
-      setHasUnsavedChanges(hasBlocks || hasCustomTitle || hasDates || hasTags)
+      setHasUnsavedChanges(
+        hasBlocks || hasCustomTitle || hasDates || hasTags || hasCoverImage
+      )
     }
 
     checkUnsavedChanges()
@@ -132,6 +137,26 @@ export default function ItineraryMakerModule() {
       window.removeEventListener('beforeunload', handleBeforeUnload)
     }
   }, [hasUnsavedChanges])
+
+  const handleImageUpload = (result: any) => {
+    // Check if upload was successful and get the secure_url
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    if (result?.info?.secure_url) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+      const imageUrl = result.info.secure_url
+
+      // Update the itinerary data with the new cover image URL
+      setItineraryData((prev) => ({
+        ...prev,
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        coverImage: imageUrl,
+      }))
+
+      toast.success('Cover image uploaded successfully')
+    } else {
+      toast.error('Failed to upload image')
+    }
+  }
 
   const handleTagsChange = (tags: string[]) => {
     setItineraryData((prev) => ({
@@ -728,7 +753,11 @@ export default function ItineraryMakerModule() {
     <div className="container max-w-4xl mx-auto p-4">
       <ItineraryHeader
         title={itineraryData.title}
+        coverImage={itineraryData.coverImage}
         onTitleChange={handleTitleChange}
+        onCoverImageChange={(url) =>
+          setItineraryData((prev) => ({ ...prev, coverImage: url }))
+        }
         isSubmitting={isSubmitting}
         onSubmit={handleSubmit}
       />
@@ -738,9 +767,18 @@ export default function ItineraryMakerModule() {
           onChangeAction={handleTagsChange}
           availableTags={availableTags}
         />
-        <Button variant="outline" size="sm">
+        <CldUploadButton
+          uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
+          onSuccess={handleImageUpload}
+          className={cn(buttonVariants({ variant: 'outline', size: 'sm' }))}
+          options={{
+            clientAllowedFormats: ['image'],
+            maxFiles: 1,
+            maxFileSize: 1024 * 256, // 256 KB
+          }}
+        >
           Ganti foto cover
-        </Button>
+        </CldUploadButton>
         <div className="ml-auto">
           <Popover>
             <PopoverTrigger asChild>
