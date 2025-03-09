@@ -78,7 +78,11 @@ export const TagSelector: React.FC<TagSelectorProps> = ({
           </div>
 
           <div className="pt-2 flex justify-end">
-            <Button size="sm" onClick={() => setIsOpen(false)}>
+            <Button
+              size="sm"
+              onClick={() => setIsOpen(false)}
+              className="bg-gradient-to-r from-[#0073E6] to-[#004080] text-white hover:from-[#0066cc] hover:to-[#003366]"
+            >
               Selesai
             </Button>
           </div>

@@ -137,22 +137,20 @@ export const ItinerarySections: React.FC<ItinerarySectionsProps> = ({
               </div>
             )}
           </Droppable>
-          <div className="flex justify-center gap-2 mt-4">
+          <div className="flex justify-center gap-4 mt-4">
             <Button
-              variant="outline"
               size="sm"
               onClick={() => addBlock(section.sectionNumber, 'LOCATION')}
-              className="flex items-center"
+              className="flex w-28 items-center bg-gradient-to-r from-[#0073E6] to-[#004080] text-white hover:from-[#0066cc] hover:to-[#003366] rounded-lg"
             >
-              <Plus className="mr-1 h-4 w-4" /> Lokasi
+              <Plus className="h-4 w-4" /> Lokasi
             </Button>
             <Button
-              variant="outline"
               size="sm"
               onClick={() => addBlock(section.sectionNumber, 'NOTE')}
-              className="flex items-center"
+              className="flex w-28 items-center bg-gradient-to-r from-[#0073E6] to-[#004080] text-white hover:from-[#0066cc] hover:to-[#003366] rounded-lg"
             >
-              <Plus className="mr-1 h-4 w-4" /> Catatan
+              <Plus className="h-4 w-4" /> Catatan
             </Button>
           </div>
         </div>

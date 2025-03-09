@@ -855,8 +855,12 @@ export default function ItineraryMakerModule() {
         timeWarning={timeWarning}
       />
       <div className="flex justify-center my-8">
-        <Button className="w-full max-w-md" onClick={() => addSection()}>
-          <Plus className="mr-2 h-4 w-4" /> Bagian
+        <Button
+          size="sm"
+          className="-mt-4 w-[240px] bg-gradient-to-r from-[#0073E6] to-[#004080] text-white hover:from-[#0066cc] hover:to-[#003366] rounded-lg"
+          onClick={() => addSection()}
+        >
+          <Plus className="h-4 w-4" /> Bagian
         </Button>
       </div>
     </div>

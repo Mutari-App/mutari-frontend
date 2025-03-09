@@ -24,7 +24,7 @@ export const ItineraryHeader: React.FC<ItineraryHeaderProps> = ({
       style={{
         backgroundImage: coverImage
           ? `url(${coverImage})`
-          : 'linear-gradient(to bottom, #1e3a8a, #1e40af)',
+          : 'linear-gradient(360deg, #004080, #0073E6, #60A5FA)',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
       }}
@@ -39,7 +39,7 @@ export const ItineraryHeader: React.FC<ItineraryHeaderProps> = ({
         />
       </div>
       <Button
-        className="absolute top-4 right-4 bg-blue-600 hover:bg-blue-700 z-10"
+        className="absolute top-4 right-4 z-10 bg-gradient-to-r from-[#0073E6] to-[#004080] text-white hover:from-[#0066cc] hover:to-[#003366]"
         onClick={onSubmit}
         disabled={isSubmitting}
       >

@@ -1,6 +1,6 @@
 'use client'
 
-import * as React from 'react'
+import type * as React from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { DayPicker } from 'react-day-picker'
 
@@ -43,14 +43,14 @@ function Calendar({
         ),
         day_range_end: 'day-range-end',
         day_selected:
-          'bg-neutral-900 text-neutral-50 hover:bg-neutral-900 hover:text-neutral-50 focus:bg-neutral-900 focus:text-neutral-50 dark:bg-neutral-50 dark:text-neutral-900 dark:hover:bg-neutral-50 dark:hover:text-neutral-900 dark:focus:bg-neutral-50 dark:focus:text-neutral-900',
+          'bg-[#024C98] text-white hover:bg-[#024C98] hover:text-white focus:bg-[#024C98] focus:text-white',
         day_today:
-          'bg-neutral-100 text-neutral-900 dark:bg-neutral-800 dark:text-neutral-50',
+          'bg-blue-100 text-blue-900 font-semibold dark:bg-blue-800 dark:text-blue-50',
         day_outside:
           'day-outside text-neutral-500 aria-selected:bg-neutral-100/50 aria-selected:text-neutral-500 dark:text-neutral-400 dark:aria-selected:bg-neutral-800/50 dark:aria-selected:text-neutral-400',
         day_disabled: 'text-neutral-500 opacity-50 dark:text-neutral-400',
         day_range_middle:
-          'aria-selected:bg-neutral-100 aria-selected:text-neutral-900 dark:aria-selected:bg-neutral-800 dark:aria-selected:text-neutral-50',
+          'aria-selected:bg-blue-50 aria-selected:text-blue-900 dark:aria-selected:bg-blue-900/50 dark:aria-selected:text-blue-50',
         day_hidden: 'invisible',
         ...classNames,
       }}
