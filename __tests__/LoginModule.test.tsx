@@ -83,7 +83,7 @@ describe('LoginModule', () => {
 
     // Fill form with valid data
     await userEvent.type(emailInput, 'test@example.com')
-    await userEvent.type(passwordInput, 'password123')
+    await userEvent.type(passwordInput, 'dummyPassword')
 
     // Submit form
     fireEvent.click(submitButton)
@@ -92,7 +92,7 @@ describe('LoginModule', () => {
     await waitFor(() => {
       expect(consoleSpy).toHaveBeenCalledWith('Login values:', {
         email: 'test@example.com',
-        password: 'password123',
+        password: 'dummyPassword',
       })
     })
 

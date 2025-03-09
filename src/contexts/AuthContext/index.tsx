@@ -68,7 +68,22 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
     }
   }
 
-  const login = async ({ email }: { email: string }) => {
+  const login = async (body: { email: string; password: string }) => {
+    const response = await customFetch('/auth/login', {
+      method: 'POST',
+      credentials: 'include',
+      body: customFetchBody(body),
+    })
+
+    if (response.statusCode === 200) {
+      setIsAuthenticated(true)
+      return response
+    } else {
+      throw new Error(response.message)
+    }
+  }
+
+  const preRegistLogin = async ({ email }: { email: string }) => {
     const response = await customFetch('/pre-register/login', {
       method: 'POST',
       body: customFetchBody({ email }),
@@ -110,6 +125,7 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
     isAuthenticated,
     setIsAuthenticated,
     validate,
+    preRegistLogin,
     login,
   }
 

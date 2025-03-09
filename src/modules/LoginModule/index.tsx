@@ -14,6 +14,10 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
+import { useAuthContext } from '@/contexts/AuthContext'
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 
 const loginSchema = z.object({
   email: z.string().email({ message: 'Email tidak valid' }),
@@ -21,13 +25,29 @@ const loginSchema = z.object({
 })
 
 export default function LoginModule() {
+  const { login } = useAuthContext()
+  const router = useRouter()
+
+  const [loading, setLoading] = useState<boolean>(false)
+
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
     defaultValues: { email: '', password: '' },
   })
 
-  const onSubmit = (values: z.infer<typeof loginSchema>) => {
+  const onSubmit = async (values: z.infer<typeof loginSchema>) => {
     console.log('Login values:', values)
+    try {
+      setLoading(true)
+      const response = await login(values)
+      console.log(response)
+      router.push('/')
+      toast.success('Berhasil login!')
+    } catch (err: any) {
+      toast.error((err as Error).message)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -76,7 +96,7 @@ export default function LoginModule() {
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full">
+            <Button type="submit" disabled={loading} className="w-full">
               Masuk
             </Button>
           </form>

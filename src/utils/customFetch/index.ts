@@ -51,7 +51,7 @@ export async function customFetch<T>(
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
   if (result.message === 'Token expired') {
-    await deleteCookie('AT')
+    await deleteCookie('accessToken')
   }
 
   return result as T & CustomFetchBaseResponse
