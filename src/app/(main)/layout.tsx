@@ -6,7 +6,7 @@ import {
   Raleway,
   Roboto,
 } from 'next/font/google'
-import './globals.css'
+import './../globals.css'
 import { Suspense } from 'react'
 
 import { Footer } from '@/components/Footer'
