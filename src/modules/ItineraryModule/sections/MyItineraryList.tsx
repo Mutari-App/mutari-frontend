@@ -9,16 +9,16 @@ function MyItineraryList({
   metadata,
   refresh,
 }: {
-  data: ItineraryData[]
-  metadata: metadataType
-  refresh: () => void
+  readonly data: readonly Readonly<ItineraryData>[]
+  readonly metadata: metadataType
+  readonly refresh: () => void
 }) {
   return (
     <div className="flex flex-col gap-8 w-full">
       {data.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 w-full">
-          {data.map((item, index) => (
-            <ItineraryCard item={item} key={index} refresh={refresh} />
+          {data.map((item) => (
+            <ItineraryCard item={item} key={item.id} refresh={refresh} />
           ))}
         </div>
       ) : (

@@ -11,8 +11,8 @@ function ItineraryCard({
   item,
   refresh,
 }: {
-  item: ItineraryData
-  refresh: () => void
+  readonly item: Readonly<ItineraryData>
+  readonly refresh: () => void
 }) {
   const [openOptions, setOpenOptions] = useState(false)
   const optionRef = useRef<HTMLDivElement>(null)
@@ -69,6 +69,7 @@ function ItineraryCard({
         data-testid="option-btn"
         className="absolute top-2 right-2 p-2 rounded-full hover:bg-black/10"
         onClick={() => setOpenOptions(!openOptions)}
+        role='button'
       >
         <EllipsisIcon />
       </div>
@@ -79,11 +80,11 @@ function ItineraryCard({
           className="absolute top-2 right-2 z-20 bg-white shadow-lg text-sm font-medium rounded-lg overflow-hidden w-max flex flex-col"
         >
           {!item.isCompleted && (
-            <p onClick={markAsComplete} className="hover:bg-black/10 px-4 py-2">
+            <div role='button' onClick={markAsComplete} className="hover:bg-black/10 px-4 py-2">
               Mark as Completed
-            </p>
+            </div>
           )}
-          <p className="hover:bg-black/10 px-4 py-2 text-red-500">Delete</p>
+          <div role='button' className="hover:bg-black/10 px-4 py-2 text-red-500">Delete</div>
         </div>
       )}
     </div>

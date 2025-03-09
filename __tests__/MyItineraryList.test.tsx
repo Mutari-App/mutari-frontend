@@ -1,5 +1,4 @@
 import { render, screen, waitFor } from '@testing-library/react'
-import { customFetch } from '@/utils/customFetch'
 import '@testing-library/jest-dom'
 import MyItineraryList from '@/modules/ItineraryModule/sections/MyItineraryList'
 import type { ItineraryData } from '@/modules/ItineraryModule/module-elements/types'

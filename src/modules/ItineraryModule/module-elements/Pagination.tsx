@@ -24,14 +24,14 @@ export const Pagination = (props: metadataType) => {
       }
     }
 
-    return pages.map((p, index) =>
+    return pages.map((p) =>
       p === '...' ? (
-        <span key={index} className="px-2">
+        <span key={p} className="px-2">
           ...
         </span>
       ) : (
         <Link
-          key={index}
+          key={p}
           href={`?page=${p}`}
           className={`text-black p-2 w-8 text-xs text-center hover:bg-black/5 font-medium border rounded-md ${page === p && 'bg-[#0059B3] text-white hover:bg-[#0059B3]/80'}`}
         >
