@@ -26,6 +26,11 @@ export const Navbar: React.FC = () => {
       window.removeEventListener('scroll', handleScroll)
     }
   }, [])
+
+  if (pathname === '/itinerary/create') {
+    return null
+  }
+
   return (
     <NavigationMenu
       className={`p-4 fixed bg-transparent max-w-full w-full z-50 transition-colors duration-300 ${
