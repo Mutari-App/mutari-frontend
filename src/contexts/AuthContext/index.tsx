@@ -48,8 +48,7 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
       setCookie('AT', response.accessToken)
       setIsAuthenticated(true)
       const responseUser = await customFetch<UserResponseInterface>(
-        '/pre-register/referral-code',
-        { isAuthorized: true }
+        '/pre-register/referral-code'
       )
 
       if (responseUser.statusCode !== 200) throw new Error(responseUser.message)
