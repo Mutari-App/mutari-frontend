@@ -8,14 +8,14 @@ export default async function Home() {
 
   // Contoh pemanggilan endpoint protected pada Server Side
   try {
-    const response = await customFetch('/auth/me', {
-      credentials: 'include',
-      headers: {
-        Cookie: cookieStore.toString(),
-      },
-    })
+    // const response = await customFetch('/auth/me', {
+    //   credentials: 'include',
+    //   headers: {
+    //     Cookie: cookieStore.toString(),
+    //   },
+    // })
 
-    if (response.statusCode !== 200) throw new Error()
+    // if (response.statusCode !== 200) throw new Error()
 
     return <ProfileModule />
   } catch (err) {
