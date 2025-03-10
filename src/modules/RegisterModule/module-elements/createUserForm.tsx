@@ -43,7 +43,6 @@ export const CreateUserForm: React.FC = () => {
     const {
       formState: { errors },
     } = form
-    console.log(errors)
 
     if (!Object.keys(errors).length) {
       setRegisterData((prevValue) => {
