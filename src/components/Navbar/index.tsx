@@ -1,7 +1,12 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { NavigationMenu } from '../ui/navigation-menu'
+import {
+  NavigationMenu,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+} from '../ui/navigation-menu'
 import Image from 'next/image'
 import { getImage } from '@/utils/getImage'
 import Link from 'next/link'
@@ -37,41 +42,37 @@ export const Navbar: React.FC = () => {
         pathname == '/' && isScrolledToScreen
           ? 'bg-[#0059B3] shadow-md'
           : 'bg-transparent'
-      }`}
+      } ${pathname != '/' && 'bg-white shadow-md'}`}
     >
-      <div className="mx-auto w-full container flex justify-between   items-center">
+      <div className="mx-auto w-full container flex justify-start gap-5 items-center">
         <Link
           href={'/#hero'}
           className="flex items-end gap-3 hover:cursor-pointer"
         >
           <Image
-            src={getImage('logo-white.png')}
+            src={getImage(
+              `${pathname == '/' ? 'logo-white.png' : 'logo-no-background.png'}`
+            )}
             alt="Mutari Logo"
             width={150}
             height={50}
             className="h-12 w-auto z-30"
           />
-          <span className="text-white font-hammersmithOne text-[30px]">
+          <span
+            className={`${pathname == '/' ? 'text-white' : 'text-[#0059B3]'} font-hammersmithOne text-[30px]`}
+          >
             MUTARI
           </span>
         </Link>
-        {/* <NavigationMenuList className="flex space-x-4">
+        <NavigationMenuList
+          className={`flex space-x-4 ${pathname == '/' ? 'text-white' : 'text-black'}`}
+        >
           <NavigationMenuItem>
-            <NavigationMenuLink href="/" className="">
-              Home
+            <NavigationMenuLink href="/itinerary" className="hover:underline">
+              Itinerary
             </NavigationMenuLink>
           </NavigationMenuItem>
-          <NavigationMenuItem>
-            <NavigationMenuLink href="/about" className="">
-              Tentang
-            </NavigationMenuLink>
-          </NavigationMenuItem>
-          <NavigationMenuItem>
-            <NavigationMenuLink href="/contact" className="">
-              Kontak
-            </NavigationMenuLink>
-          </NavigationMenuItem>
-        </NavigationMenuList> */}
+        </NavigationMenuList>
       </div>
     </NavigationMenu>
   )
