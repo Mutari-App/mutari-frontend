@@ -783,9 +783,6 @@ export default function ItineraryMakerModule() {
         title={itineraryData.title}
         coverImage={itineraryData.coverImage}
         onTitleChange={handleTitleChange}
-        onCoverImageChange={(url) =>
-          setItineraryData((prev) => ({ ...prev, coverImage: url }))
-        }
         isSubmitting={isSubmitting}
         onSubmit={handleSubmit}
       />

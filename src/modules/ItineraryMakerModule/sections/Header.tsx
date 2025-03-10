@@ -6,7 +6,6 @@ interface ItineraryHeaderProps {
   title: string
   coverImage?: string
   onTitleChange: (e: React.ChangeEvent<HTMLInputElement>) => void
-  onCoverImageChange: (url: string) => void
   isSubmitting: boolean
   onSubmit: () => void
 }
