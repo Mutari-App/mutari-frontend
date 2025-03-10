@@ -12,12 +12,12 @@ import {
 import { type DateRange } from 'react-day-picker'
 
 interface DateRangeAlertDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  pendingDateRange: DateRange | undefined
-  currentSectionCount: number
-  onCancel: () => void
-  onConfirm: () => void
+  readonly open: boolean
+  readonly onOpenChange: (open: boolean) => void
+  readonly pendingDateRange: DateRange | undefined
+  readonly currentSectionCount: number
+  readonly onCancel: () => void
+  readonly onConfirm: () => void
 }
 
 export function DateRangeAlertDialog({
