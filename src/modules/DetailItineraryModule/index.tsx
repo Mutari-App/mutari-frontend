@@ -4,13 +4,11 @@ import { ItineraryHeader } from './module-elements/ItineraryHeader'
 import { ItineraryList } from './module-elements/ItineraryList'
 import { ItinerarySummary } from './module-elements/ItinerarySummary'
 import { useEffect, useState } from 'react'
-import { cookies } from 'next/headers'
 import { useParams } from 'next/navigation'
 
-export default async function DetailItineraryModule() {
+export default function DetailItineraryModule() {
   const [data, setData] = useState<Itinerary>({} as Itinerary)
   const { id } = useParams<{ id: string }>()
-  const cookieStore = await cookies()
 
   useEffect(() => {
     void (async () => {
@@ -19,9 +17,6 @@ export default async function DetailItineraryModule() {
           `/itineraries/${id}`,
           {
             credentials: 'include',
-            headers: {
-              Cookie: cookieStore.toString(),
-            },
           }
         )
         console.log('Itinerary Response:', res)
