@@ -1,11 +1,14 @@
+import { ReadonlyRequestCookies } from 'next/dist/server/web/spec-extension/adapters/request-cookies'
 import {
   type CustomFetchBaseResponse,
   type CustomFetchRequestInit,
 } from './interface'
+import { deleteCookie, getCookie } from 'cookies-next'
 
 export async function customFetch<T>(
   url: string,
-  options: CustomFetchRequestInit = { uploadFile: false }
+  options: CustomFetchRequestInit = { uploadFile: false },
+  cookies?: () => Promise<ReadonlyRequestCookies>
 ): Promise<CustomFetchBaseResponse & T> {
   const isServer = typeof window === 'undefined'
 
@@ -14,6 +17,26 @@ export async function customFetch<T>(
   }
   const baseUrl = process.env.NEXT_PUBLIC_API_URL!
   const fullUrl = new URL(url, baseUrl)
+
+  if (options.isAuthorized) {
+    let token: string | undefined | null = null
+
+    if (cookies) {
+      // Server-side: use ReadonlyRequestCookies
+      const serverCookies = await cookies()
+      token = serverCookies.get('accessToken')?.value
+    } else {
+      // Client-side: use cookies-next with proper type handling
+      const clientToken = getCookie('accessToken')
+      token = typeof clientToken === 'string' ? clientToken : undefined
+    }
+
+    if (token) {
+      headers.authorization = `Bearer ${token}`
+    } else {
+      await deleteCookie('AT')
+    }
+  }
 
   if (options.uploadFile) {
     delete headers['Content-Type']
@@ -28,6 +51,7 @@ export async function customFetch<T>(
   let rawResult = await fetch(fullUrl.toString(), {
     headers,
     ...options,
+    credentials: 'include',
   })
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment

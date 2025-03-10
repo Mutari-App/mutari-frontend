@@ -1,4 +1,5 @@
 export interface CustomFetchRequestInit extends RequestInit {
+  isAuthorized?: boolean
   uploadFile?: boolean
 }
 
