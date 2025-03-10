@@ -192,47 +192,21 @@ export default function ItineraryMakerModule() {
     inputType: 'time' | 'price' | 'location'
   ) => {
     const isCurrentlyVisible = visibleInputs[blockId]?.[inputType] ?? false
-
     if (isCurrentlyVisible) {
-      setItineraryData((prev) => {
-        const updatedSections = prev.sections.map((section) => {
-          if (section.blocks) {
-            const blockIndex = section.blocks.findIndex(
-              (block) => block.id === blockId
-            )
-            if (blockIndex !== -1) {
-              const updatedBlocks = [...section.blocks]
-              const blockToUpdate = { ...updatedBlocks[blockIndex] }
-
-              if (inputType === 'time') {
-                blockToUpdate.startTime = undefined
-                blockToUpdate.endTime = undefined
-              } else if (inputType === 'price') {
-                blockToUpdate.price = undefined
-              } else if (inputType === 'location') {
-                blockToUpdate.location = undefined
-              }
-
-              updatedBlocks[blockIndex] = blockToUpdate
-              return {
-                ...section,
-                blocks: updatedBlocks,
-              }
-            }
-          }
-          return section
-        })
-
-        return {
-          ...prev,
-          sections: updatedSections,
-        }
-      })
+      updateBlockInputData(blockId, inputType)
     }
+    updateInputVisibility(blockId, inputType)
+    if (inputType === 'time') {
+      setTimeWarning(null)
+    }
+  }
 
+  const updateInputVisibility = (
+    blockId: string,
+    inputType: 'time' | 'price' | 'location'
+  ) => {
     setVisibleInputs((prev) => {
       const currentValues = prev[blockId] || {}
-
       return {
         ...prev,
         [blockId]: {
@@ -241,10 +215,56 @@ export default function ItineraryMakerModule() {
         },
       }
     })
+  }
 
-    if (inputType === 'time') {
-      setTimeWarning(null)
-    }
+  const updateBlockInputData = (
+    blockId: string,
+    inputType: 'time' | 'price' | 'location'
+  ) => {
+    setItineraryData((prev) => {
+      const updatedSections = clearBlockInputInSections(
+        prev.sections,
+        blockId,
+        inputType
+      )
+      return {
+        ...prev,
+        sections: updatedSections,
+      }
+    })
+  }
+
+  const clearBlockInputInSections = (
+    sections: Section[],
+    blockId: string,
+    inputType: 'time' | 'price' | 'location'
+  ) => {
+    return sections.map((section) => {
+      if (!section.blocks) return section
+
+      const blockIndex = section.blocks.findIndex(
+        (block) => block.id === blockId
+      )
+      if (blockIndex === -1) return section
+
+      const updatedBlocks = [...section.blocks]
+      const blockToUpdate = { ...updatedBlocks[blockIndex] }
+
+      if (inputType === 'time') {
+        blockToUpdate.startTime = undefined
+        blockToUpdate.endTime = undefined
+      } else if (inputType === 'price') {
+        blockToUpdate.price = undefined
+      } else if (inputType === 'location') {
+        blockToUpdate.location = undefined
+      }
+
+      updatedBlocks[blockIndex] = blockToUpdate
+      return {
+        ...section,
+        blocks: updatedBlocks,
+      }
+    })
   }
 
   const isInputVisible = (
@@ -511,50 +531,9 @@ export default function ItineraryMakerModule() {
     value: Block[T]
   ) => {
     setItineraryData((prev) => {
-      const updatedSections = prev.sections.map((section) => {
-        if (section.blocks) {
-          const blockIndex = section.blocks.findIndex(
-            (block) => block.id === blockId
-          )
-
-          if (blockIndex !== -1) {
-            const updatedBlocks = [...section.blocks]
-            const currentBlock = { ...updatedBlocks[blockIndex] }
-
-            if (field === 'startTime' || field === 'endTime') {
-              const updatedBlock = {
-                ...currentBlock,
-                [field]: value,
-              }
-
-              const startTime =
-                field === 'startTime'
-                  ? (value as string | null)
-                  : updatedBlock.startTime
-              const endTime =
-                field === 'endTime'
-                  ? (value as string | null)
-                  : updatedBlock.endTime
-
-              if (startTime && endTime) {
-                validateTimeSelection(blockId, startTime, endTime)
-              }
-            }
-
-            updatedBlocks[blockIndex] = {
-              ...currentBlock,
-              [field]: value,
-            }
-
-            return {
-              ...section,
-              blocks: updatedBlocks,
-            }
-          }
-        }
-        return section
-      })
-
+      const updatedSections = prev.sections.map((section) =>
+        getUpdatedSectionWithBlock(section, blockId, field, value)
+      )
       return {
         ...prev,
         sections: updatedSections,
@@ -562,35 +541,75 @@ export default function ItineraryMakerModule() {
     })
   }
 
+  const getUpdatedSectionWithBlock = <T extends keyof Block>(
+    section: Section,
+    blockId: string,
+    field: keyof Block,
+    value: Block[T]
+  ): Section => {
+    if (!section.blocks) return section
+
+    const blockIndex = section.blocks.findIndex((block) => block.id === blockId)
+    if (blockIndex === -1) return section
+
+    const updatedBlocks = [...section.blocks]
+    const currentBlock = { ...updatedBlocks[blockIndex] }
+
+    const updatedBlock = {
+      ...currentBlock,
+      [field]: value,
+    }
+
+    if (
+      (field === 'startTime' || field === 'endTime') &&
+      updatedBlock.startTime &&
+      updatedBlock.endTime
+    ) {
+      validateTimeSelection(
+        blockId,
+        updatedBlock.startTime,
+        updatedBlock.endTime
+      )
+    }
+
+    updatedBlocks[blockIndex] = updatedBlock
+    return {
+      ...section,
+      blocks: updatedBlocks,
+    }
+  }
+
   const removeBlock = (blockId: string) => {
-    setItineraryData((prev) => {
-      const updatedSections = prev.sections.map((section) => {
-        if (section.blocks) {
-          const blockIndex = section.blocks.findIndex(
-            (block) => block.id === blockId
-          )
-
-          if (blockIndex !== -1) {
-            const updatedBlocks = [...section.blocks]
-            updatedBlocks.splice(blockIndex, 1)
-            return {
-              ...section,
-              blocks: updatedBlocks,
-            }
-          }
-        }
-        return section
-      })
-
-      return {
-        ...prev,
-        sections: updatedSections,
-      }
-    })
-
+    setItineraryData((prev) => ({
+      ...prev,
+      sections: filterBlockFromSections(prev.sections, blockId),
+    }))
     if (timeWarning && timeWarning.blockId === blockId) {
       setTimeWarning(null)
     }
+  }
+
+  const filterBlockFromSections = (
+    sections: Section[],
+    blockId: string
+  ): Section[] => {
+    return sections.map((section) => {
+      if (!section.blocks) return section
+
+      const blockIndex = section.blocks.findIndex(
+        (block) => block.id === blockId
+      )
+
+      if (blockIndex === -1) return section
+
+      const updatedBlocks = [...section.blocks]
+      updatedBlocks.splice(blockIndex, 1)
+
+      return {
+        ...section,
+        blocks: updatedBlocks,
+      }
+    })
   }
 
   const updateSectionTitle = (sectionNumber: number, title: string) => {
