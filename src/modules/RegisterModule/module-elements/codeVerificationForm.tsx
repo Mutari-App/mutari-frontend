@@ -15,11 +15,14 @@ import {
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { codeVerificationFormSchema } from '../schemas/codeVerificationFormSchema'
+import { customFetch, customFetchBody } from '@/utils/customFetch'
+import { toast } from 'sonner'
+import { Loader } from 'lucide-react'
 
 export const CodeVerificationForm: React.FC = () => {
   const {
     goToNextPage,
-    registerData: { email, uniqueCode },
+    registerData: { firstName, lastName, email, birthDate, uniqueCode },
     setRegisterData,
   } = useRegisterContext()
 
@@ -30,10 +33,11 @@ export const CodeVerificationForm: React.FC = () => {
     },
   })
 
-  const submitCodeVerificationForm = (
+  const submitCodeVerificationForm = async (
     values: z.infer<typeof codeVerificationFormSchema>
   ) => {
     setSubmitLoading(true)
+
     const {
       formState: { errors },
     } = form
@@ -45,8 +49,33 @@ export const CodeVerificationForm: React.FC = () => {
           uniqueCode: values.uniqueCode,
         }
       })
+    }
+
+    try {
+      const response = await customFetch('/auth/createUser', {
+        method: 'POST',
+        body: customFetchBody({
+          firstName,
+          lastName,
+          email,
+          birthDate,
+          uniqueCode: values.uniqueCode,
+        }),
+      })
+
+      if (response.statusCode === 201) {
+        toast.success('Verifikasi kode berhasil!')
+        setSubmitLoading(false)
+        goToNextPage()
+        return
+      } else {
+        console.log('masuk sini')
+        toast.error('Terjadi kesalahan. Silakan coba lagi.')
+        setSubmitLoading(false)
+      }
+    } catch (error) {
+      toast.error('Terjadi kesalahan. Silakan coba lagi.')
       setSubmitLoading(false)
-      goToNextPage()
     }
   }
 
@@ -94,7 +123,11 @@ export const CodeVerificationForm: React.FC = () => {
                 type="submit"
                 className="bg-[#0059B3] hover:bg-[#0059B3]/90 text-white w-full"
               >
-                Verifikasi
+                {submitLoading ? (
+                  <Loader className="animate-spin" />
+                ) : (
+                  'Verifikasi'
+                )}
               </Button>
             </div>
           </div>
