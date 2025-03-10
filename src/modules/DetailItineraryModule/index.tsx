@@ -11,7 +11,7 @@ export default function DetailItineraryModule() {
   const { id } = useParams<{ id: string }>()
 
   useEffect(() => {
-    void (async () => {
+    const fetchData = async () => {
       try {
         const res = await customFetch<ItineraryDetailResponse>(
           `/itineraries/${id}`,
@@ -26,7 +26,9 @@ export default function DetailItineraryModule() {
       } catch (err: any) {
         console.error('Fetch Error:', err)
       }
-    })()
+    }
+
+    void fetchData()
   }, [id])
 
   return (
