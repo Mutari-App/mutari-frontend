@@ -833,7 +833,7 @@ export default function ItineraryMakerModule() {
         <div className="flex flex-wrap gap-2 mb-4">
           {getSelectedTagNames().map((tagName, index) => (
             <Badge
-              key={index}
+              key={`tag-${tagName}-${itineraryData.tags![index]}`}
               variant="secondary"
               className="flex items-center gap-1"
             >
