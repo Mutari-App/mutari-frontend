@@ -11,6 +11,7 @@ import Image from 'next/image'
 import { getImage } from '@/utils/getImage'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { customFetch } from '@/utils/customFetch'
 
 export const Navbar: React.FC = () => {
   const pathname = usePathname() // Get current route path
@@ -32,9 +33,26 @@ export const Navbar: React.FC = () => {
     }
   }, [])
 
-  if (pathname === '/itinerary/create') {
-    return null
-  }
+  const [isValidItinerary, setIsValidItinerary] = useState<boolean | null>(null)
+  useEffect(() => {
+    void (async () => {
+      const pathnameParts = pathname.split('/')
+      const itineraryId = pathnameParts[2]
+
+      if (!itineraryId) return
+
+      try {
+        const res = await customFetch<{ id: string }>(
+          `/itineraries/${itineraryId}`
+        )
+        setIsValidItinerary(res.statusCode === 200)
+      } catch {
+        setIsValidItinerary(false)
+      }
+    })()
+  }, [pathname])
+
+  if (pathname === '/itinerary/create' || isValidItinerary) {
 
   return (
     <NavigationMenu
