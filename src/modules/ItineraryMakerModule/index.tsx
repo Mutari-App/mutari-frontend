@@ -762,7 +762,7 @@ export default function ItineraryMakerModule() {
   }
 
   return (
-    <div className="container max-w-4xl mx-auto p-4">
+    <div className="container max-w-4xl mx-auto p-4 min-h-screen">
       <ItineraryHeader
         title={itineraryData.title}
         coverImage={itineraryData.coverImage}
@@ -770,7 +770,7 @@ export default function ItineraryMakerModule() {
         isSubmitting={isSubmitting}
         onSubmit={handleSubmit}
       />
-      <div className="flex flex-wrap items-center gap-2 mb-4">
+      <div className="flex flex-wrap max-sm:justify-center items-center gap-2 mb-4">
         <TagSelector
           selectedTags={itineraryData.tags ?? []}
           onChangeAction={handleTagsChange}
@@ -788,7 +788,7 @@ export default function ItineraryMakerModule() {
         >
           Ganti foto cover
         </CldUploadButton>
-        <div className="ml-auto">
+        <div className="sm:ml-auto">
           <Popover>
             <PopoverTrigger asChild>
               <Button

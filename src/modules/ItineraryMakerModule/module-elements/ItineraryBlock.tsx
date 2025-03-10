@@ -63,20 +63,20 @@ export const ItineraryBlock: React.FC<ItineraryBlockProps> = ({
               : ''
           }`}
         >
-          <CardContent className="p-4">
+          <CardContent className="p-1 pb-2 md:pb-4 sm:p-2 md:p-4">
             <div className="flex justify-between items-start">
               <div
                 {...provided.dragHandleProps}
-                className="mr-2 cursor-grab active:cursor-grabbing flex items-center mt-2.5"
+                className="mr-1 md:mr-2 cursor-grab active:cursor-grabbing flex items-center mt-3 md:mt-2.5"
               >
-                <GripVertical className="h-5 w-5 text-gray-400" />
+                <GripVertical className="h-4 md:h-5 w-4 md:w-5 text-gray-400" />
               </div>
               <div className="flex-1">
                 {block.blockType === 'LOCATION' ? (
                   <>
                     <div className="flex items-center mb-2">
                       <Input
-                        className="text-lg font-medium border-none p-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                        className="text-sm sm:text-base md:text-lg font-medium border-none p-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
                         value={block.title}
                         onChange={(e) =>
                           updateBlock(block.id, 'title', e.target.value)
@@ -109,8 +109,8 @@ export const ItineraryBlock: React.FC<ItineraryBlockProps> = ({
                       />
                     </div>
                     <Input
-                      placeholder="Tambahkan catatan singkat untuk lokasi ini..."
-                      className="mt-2"
+                      placeholder="Tambahkan catatan singkat..."
+                      className="mt-2 text-sm md:text-base"
                       value={block.description ?? ''}
                       onChange={(e) =>
                         updateBlock(block.id, 'description', e.target.value)
@@ -120,7 +120,7 @@ export const ItineraryBlock: React.FC<ItineraryBlockProps> = ({
                 ) : (
                   <Textarea
                     placeholder="Masukkan Catatan"
-                    className="mt-2"
+                    className="mt-2 text-sm md:text-base"
                     value={block.description ?? ''}
                     onChange={(e) =>
                       updateBlock(block.id, 'description', e.target.value)

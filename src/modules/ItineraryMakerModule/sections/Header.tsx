@@ -19,7 +19,7 @@ export const ItineraryHeader: React.FC<ItineraryHeaderProps> = ({
 }) => {
   return (
     <div
-      className="relative w-full h-64 rounded-md mb-4 flex items-center justify-center overflow-hidden"
+      className="relative w-full h-40 md:h-64 rounded-md mb-4 flex items-center justify-center overflow-hidden"
       style={{
         backgroundImage: coverImage
           ? `url(${coverImage})`
@@ -29,15 +29,16 @@ export const ItineraryHeader: React.FC<ItineraryHeaderProps> = ({
       }}
     >
       <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
-      <div className="absolute bottom-0 left-0 flex p-4 z-10">
+      <div className="absolute bottom-0 left-0 flex p-2 md:p-4 z-10">
         <Input
-          className="md:text-4xl font-bold text-white bg-transparent border-none h-fit focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
+          className="text-lg md:text-4xl font-bold text-white bg-transparent border-none h-fit focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
           value={title}
           onChange={onTitleChange}
           placeholder="Enter trip title"
         />
       </div>
       <Button
+        size="sm"
         className="absolute top-4 right-4 z-10 bg-gradient-to-r from-[#0073E6] to-[#004080] text-white hover:from-[#0066cc] hover:to-[#003366]"
         onClick={onSubmit}
         disabled={isSubmitting}
