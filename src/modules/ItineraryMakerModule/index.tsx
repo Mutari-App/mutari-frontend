@@ -129,11 +129,7 @@ export default function ItineraryMakerModule() {
     // Attach beforeunload event handler to detect tab closing or navigation away
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (hasUnsavedChanges) {
-        // Show confirmation dialog when closing tab
         e.preventDefault()
-        // For older browsers
-        e.returnValue = ''
-        return ''
       }
     }
 
@@ -145,13 +141,11 @@ export default function ItineraryMakerModule() {
   }, [hasUnsavedChanges])
 
   const handleImageUpload = (result: any) => {
-    // Check if upload was successful and get the secure_url
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     if (result?.info?.secure_url) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
       const imageUrl = result.info.secure_url
 
-      // Update the itinerary data with the new cover image URL
       setItineraryData((prev) => ({
         ...prev,
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
