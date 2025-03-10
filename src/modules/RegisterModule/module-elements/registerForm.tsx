@@ -16,11 +16,23 @@ import {
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { registerFormSchema } from '../schemas/registerFormSchema'
-import { redirect } from 'next/navigation'
+import { useRouter } from 'next/navigation'
+import { Loader } from 'lucide-react'
+import { customFetch, customFetchBody } from '@/utils/customFetch'
+import { toast } from 'sonner'
 
 export const RegisterForm: React.FC = () => {
+  const router = useRouter()
   const {
-    registerData: { password, confirmPassword },
+    registerData: {
+      firstName,
+      lastName,
+      email,
+      birthDate,
+      uniqueCode,
+      password,
+      confirmPassword,
+    },
     setRegisterData,
   } = useRegisterContext()
 
@@ -32,7 +44,9 @@ export const RegisterForm: React.FC = () => {
     },
   })
 
-  const submitRegisterForm = (values: z.infer<typeof registerFormSchema>) => {
+  const submitRegisterForm = async (
+    values: z.infer<typeof registerFormSchema>
+  ) => {
     setSubmitLoading(true)
     const {
       formState: { errors },
@@ -46,8 +60,34 @@ export const RegisterForm: React.FC = () => {
           confirmPassword: values.confirmPassword,
         }
       })
+    }
+
+    try {
+      console.log('uniqueCode', uniqueCode)
+      const response = await customFetch('/auth/register', {
+        method: 'POST',
+        body: customFetchBody({
+          firstName,
+          lastName,
+          email,
+          birthDate,
+          verificationCode: uniqueCode,
+          password: values.password,
+          confirmPassword: values.confirmPassword,
+        }),
+      })
+
+      if (response.statusCode == 200) {
+        toast.success('Password berhasil disimpan!')
+        setSubmitLoading(false)
+        router.push('/login')
+      } else {
+        toast.error('Terjadi kesalahan. Silakan coba lagi.')
+        setSubmitLoading(false)
+      }
+    } catch (error) {
+      toast.error('Terjadi kesalahan. Silakan coba lagi.')
       setSubmitLoading(false)
-      redirect('/')
     }
   }
 
@@ -121,7 +161,11 @@ export const RegisterForm: React.FC = () => {
                 type="submit"
                 className="bg-[#0059B3] hover:bg-[#0059B3]/90 text-white w-full"
               >
-                Simpan Password
+                {submitLoading ? (
+                  <Loader className="animate-spin" />
+                ) : (
+                  'Simpan password'
+                )}
               </Button>
             </div>
           </div>
