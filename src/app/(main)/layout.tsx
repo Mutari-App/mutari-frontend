@@ -6,7 +6,7 @@ import {
   Raleway,
   Roboto,
 } from 'next/font/google'
-import './globals.css'
+import './../globals.css'
 import { Suspense } from 'react'
 
 import { Footer } from '@/components/Footer'
@@ -90,7 +90,7 @@ export default async function RootLayout({
         <Suspense>
           <AuthContextProvider user={user}>
             <Navbar />
-            <main className="w-full bg-white">{children}</main>
+            <main className="w-full bg-white min-h-[80dvh]">{children}</main>
             <Toaster />
 
             <Footer />

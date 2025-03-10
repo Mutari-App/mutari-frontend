@@ -14,9 +14,9 @@ import { getImage } from '@/utils/getImage'
 import Image from 'next/image'
 
 export const LandingPageModule: React.FC = async () => {
-  const response = await customFetch<PreRegisterCountResponse>(
-    '/pre-register/count'
-  )
+  //   const response = await customFetch<PreRegisterCountResponse>(
+  //     '/pre-register/count'
+  //   )
 
   return (
     <>
@@ -39,7 +39,7 @@ export const LandingPageModule: React.FC = async () => {
       </div>
 
       <AboutSection />
-      <PreRegisterSection count={response.count} />
+      <PreRegisterSection count={1} />
     </>
   )
 }
