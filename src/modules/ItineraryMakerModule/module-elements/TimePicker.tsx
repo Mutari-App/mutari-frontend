@@ -10,9 +10,9 @@ import { Button } from '@/components/ui/button'
 import { format } from 'date-fns'
 
 interface TimePickerProps {
-  value?: Date
-  onChange?: (date?: Date) => void
-  label?: string
+  readonly value?: Date
+  readonly onChange?: (date?: Date) => void
+  readonly label?: string
 }
 
 export function TimePicker({ value, onChange, label }: TimePickerProps) {
