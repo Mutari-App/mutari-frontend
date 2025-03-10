@@ -1,4 +1,4 @@
-import { type ReadonlyRequestCookies } from 'next/dist/server/web/spec-extension/adapters/request-cookies'
+import { ReadonlyRequestCookies } from 'next/dist/server/web/spec-extension/adapters/request-cookies'
 import {
   type CustomFetchBaseResponse,
   type CustomFetchRequestInit,
@@ -10,8 +10,9 @@ export async function customFetch<T>(
   options: CustomFetchRequestInit = { uploadFile: false },
   cookies?: () => Promise<ReadonlyRequestCookies>
 ): Promise<CustomFetchBaseResponse & T> {
+  const isServer = typeof window === 'undefined'
+
   const headers: HeadersInit = {
-    authorization: '',
     'Content-Type': 'application/json',
   }
   const baseUrl = process.env.NEXT_PUBLIC_API_URL!
@@ -23,10 +24,10 @@ export async function customFetch<T>(
     if (cookies) {
       // Server-side: use ReadonlyRequestCookies
       const serverCookies = await cookies()
-      token = serverCookies.get('AT')?.value
+      token = serverCookies.get('accessToken')?.value
     } else {
       // Client-side: use cookies-next with proper type handling
-      const clientToken = getCookie('AT')
+      const clientToken = getCookie('accessToken')
       token = typeof clientToken === 'string' ? clientToken : undefined
     }
 
@@ -41,17 +42,42 @@ export async function customFetch<T>(
     delete headers['Content-Type']
   }
 
-  const rawResult = await fetch(fullUrl.toString(), {
+  if (isServer) {
+    const { cookies } = await import('next/headers')
+    const serverCookies = await cookies()
+    headers.Cookies = serverCookies.toString()
+  }
+
+  let rawResult = await fetch(fullUrl.toString(), {
     headers,
     ...options,
+    credentials: 'include',
   })
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  const result = await rawResult.json()
+  let result = (await rawResult.json()) as CustomFetchBaseResponse
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-  if (result.message === 'Token expired') {
-    await deleteCookie('AT')
+  if (
+    result.message === 'token has expired' ||
+    result.message === 'token not provided'
+  ) {
+    const isRefreshSuccess = await handleRefreshToken()
+    if (isRefreshSuccess) {
+      rawResult = await fetch(fullUrl.toString(), {
+        headers,
+        ...options,
+        credentials: 'include',
+      })
+
+      result = (await rawResult.json()) as CustomFetchBaseResponse
+    } else {
+      void fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/logout`, {
+        method: 'POST',
+        credentials: 'include',
+      })
+      throw new Error('Session expired, please login again.')
+    }
   }
 
   return result as T & CustomFetchBaseResponse
@@ -59,4 +85,38 @@ export async function customFetch<T>(
 
 export function customFetchBody(body: object) {
   return JSON.stringify(body)
+}
+
+async function handleRefreshToken(): Promise<boolean> {
+  const isServer = typeof window === 'undefined'
+
+  let serverCookies
+
+  if (isServer) {
+    const { cookies } = await import('next/headers') // Lazy import agar tidak error di client
+    serverCookies = await cookies()
+  }
+
+  try {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh-token`,
+      {
+        method: 'POST',
+        credentials: 'include',
+        headers: isServer
+          ? { Cookie: serverCookies!.toString() } // Kirim refreshToken dari server
+          : {},
+      }
+    )
+
+    const responseJson = (await response.json()) as CustomFetchBaseResponse
+
+    if (responseJson.statusCode !== 200) {
+      throw new Error('Failed to refresh token')
+    }
+
+    return true
+  } catch (error) {
+    return false
+  }
 }
