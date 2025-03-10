@@ -15,6 +15,7 @@ import type {
   ItineraryResponse,
   metadataType,
 } from './module-elements/types'
+import { toast } from 'sonner'
 
 export default function ItineraryModule() {
   const searchParams = useSearchParams()
@@ -46,6 +47,9 @@ export default function ItineraryModule() {
       console.log(res)
     } catch (err: any) {
       console.log(err)
+      toast.error('Something went wrong.', {
+        richColors: true
+      })
     }
   }
 
@@ -59,6 +63,9 @@ export default function ItineraryModule() {
       console.log(res.itinerary)
     } catch (err: any) {
       console.log(err)
+      toast.error('Something went wrong.', {
+        richColors: true
+      })
     }
   }
 

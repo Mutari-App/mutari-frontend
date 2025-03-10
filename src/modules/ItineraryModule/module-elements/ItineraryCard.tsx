@@ -16,9 +16,10 @@ function ItineraryCard({
 }) {
   const [openOptions, setOpenOptions] = useState(false)
   const optionRef = useRef<HTMLDivElement>(null)
-  const daysTotal =
+  const daysTotal = Math.floor(
     (new Date(item.endDate).getTime() - new Date(item.startDate).getTime()) /
     (1000 * 60 * 60 * 24)
+  )
 
   useOutsideClick({
     ref: optionRef,
@@ -56,10 +57,10 @@ function ItineraryCard({
       <div className="w-3/4 h-full flex flex-col gap-2 py-4">
         <p className="font-raleway font-medium text-xl">{item.title}</p>
         <div className="font-raleway text-[#94A3B8] flex flex-col gap-1">
-          <div className="flex gap-2 items-center">
+          {/* <div className="flex gap-2 items-center">
             <MapPinIcon size={16} />
             <p className="text-base">Bali</p>
-          </div>
+          </div> */}
           <p className="text-sm">
             {daysTotal} Hari • {item.locationCount} Destinasi
           </p>
@@ -86,9 +87,7 @@ function ItineraryCard({
               Mark as Completed
             </button>
           )}
-          <button
-            className="hover:bg-black/10 px-4 py-2 text-red-500"
-          >
+          <button className="hover:bg-black/10 px-4 py-2 text-red-500">
             Delete
           </button>
         </div>
