@@ -741,7 +741,7 @@ export default function ItineraryMakerModule() {
         {
           method: 'POST',
           body: customFetchBody({ itineraryData: submissionData }),
-          isAuthorized: true,
+          credentials: 'include',
         }
       )
 
