@@ -45,7 +45,6 @@ export const CreateUserForm: React.FC = () => {
     values: z.infer<typeof createUserFormSchema>
   ) => {
     setSubmitLoading(true)
-
     const {
       formState: { errors },
     } = form
