@@ -1,5 +1,5 @@
 import { getImage } from '@/utils/getImage'
-import { EllipsisIcon, MapPinIcon } from 'lucide-react'
+import { EllipsisIcon } from 'lucide-react'
 import Image from 'next/image'
 import React, { useRef, useState } from 'react'
 import type { ItineraryData } from './types'
