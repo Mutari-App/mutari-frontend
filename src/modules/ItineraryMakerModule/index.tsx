@@ -740,14 +740,17 @@ export default function ItineraryMakerModule() {
     setIsSubmitting(true)
     try {
       // Remove block IDs before submitting
-      const submissionData = structuredClone(itineraryData)
-      submissionData.sections.forEach((section) => {
-        if (section.blocks) {
-          section.blocks.forEach((block) => {
-            delete block.id
-          })
-        }
-      })
+      const submissionData = {
+        ...itineraryData,
+        sections: itineraryData.sections.map((section) => ({
+          ...section,
+          blocks:
+            section.blocks?.map(
+              // eslint-disable-next-line @typescript-eslint/no-unused-vars
+              ({ id, ...blockWithoutId }) => blockWithoutId
+            ) ?? [],
+        })),
+      }
 
       const response = await customFetch<CreateItineraryResponse>(
         '/itineraries',

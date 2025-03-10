@@ -1,7 +1,7 @@
 import { type CustomFetchBaseResponse } from '@/utils/customFetch/interface'
 
 export interface Block {
-  id?: string
+  id: string
   blockType: string
   title: string
   description?: string

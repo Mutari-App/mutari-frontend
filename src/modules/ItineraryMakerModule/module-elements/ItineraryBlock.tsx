@@ -79,31 +79,31 @@ export const ItineraryBlock: React.FC<ItineraryBlockProps> = ({
                         className="text-lg font-medium border-none p-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
                         value={block.title}
                         onChange={(e) =>
-                          updateBlock(block.id!, 'title', e.target.value)
+                          updateBlock(block.id, 'title', e.target.value)
                         }
                       />
                     </div>
                     <div className="flex flex-wrap gap-2 text-sm text-gray-500 mb-2">
                       <TimeInput
-                        blockId={block.id!}
+                        blockId={block.id}
                         startTime={block.startTime}
                         endTime={block.endTime}
-                        isVisible={isInputVisible(block.id!, 'time')}
+                        isVisible={isInputVisible(block.id, 'time')}
                         toggleInput={toggleInput}
                         updateBlock={updateBlock}
                         timeWarning={timeWarning}
                       />
                       <PriceInput
-                        blockId={block.id!}
+                        blockId={block.id}
                         price={block.price}
-                        isVisible={isInputVisible(block.id!, 'price')}
+                        isVisible={isInputVisible(block.id, 'price')}
                         toggleInput={toggleInput}
                         updateBlock={updateBlock}
                       />
                       <CoordinateInput
-                        blockId={block.id!}
+                        blockId={block.id}
                         location={block.location}
-                        isVisible={isInputVisible(block.id!, 'location')}
+                        isVisible={isInputVisible(block.id, 'location')}
                         toggleInput={toggleInput}
                         updateBlock={updateBlock}
                       />
@@ -113,7 +113,7 @@ export const ItineraryBlock: React.FC<ItineraryBlockProps> = ({
                       className="mt-2"
                       value={block.description ?? ''}
                       onChange={(e) =>
-                        updateBlock(block.id!, 'description', e.target.value)
+                        updateBlock(block.id, 'description', e.target.value)
                       }
                     />
                   </>
@@ -124,7 +124,7 @@ export const ItineraryBlock: React.FC<ItineraryBlockProps> = ({
                       className="mt-2"
                       value={block.description ?? ''}
                       onChange={(e) =>
-                        updateBlock(block.id!, 'description', e.target.value)
+                        updateBlock(block.id, 'description', e.target.value)
                       }
                     />
                   </>
@@ -133,7 +133,7 @@ export const ItineraryBlock: React.FC<ItineraryBlockProps> = ({
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => removeBlock(block.id!)}
+                onClick={() => removeBlock(block.id)}
               >
                 <X className="h-4 w-4" />
               </Button>
