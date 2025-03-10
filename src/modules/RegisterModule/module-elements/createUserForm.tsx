@@ -14,8 +14,13 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { customFetch, customFetchBody } from '@/utils/customFetch'
+import { toast } from 'sonner'
+import { useRouter } from 'next/navigation'
+import { Loader } from 'lucide-react'
 
 export const CreateUserForm: React.FC = () => {
+  const router = useRouter()
   const {
     goToNextPage,
     registerData: { firstName, lastName, email, birthDate },
@@ -40,33 +45,66 @@ export const CreateUserForm: React.FC = () => {
     values: z.infer<typeof createUserFormSchema>
   ) => {
     setSubmitLoading(true)
+
     const {
       formState: { errors },
     } = form
 
+    let parseBirthdate: Date | undefined = undefined
+
     if (!Object.keys(errors).length) {
       setRegisterData((prevValue) => {
+        parseBirthdate =
+          values.birthDate?.year !== undefined &&
+          values.birthDate?.month !== undefined &&
+          values.birthDate?.day !== undefined
+            ? new Date(
+                values.birthDate.year,
+                values.birthDate.month - 1,
+                values.birthDate.day
+              )
+            : undefined
+
         return {
           ...prevValue,
           firstName: values.firstName,
           lastName: values.lastName,
           email: values.email,
-          birthDate:
-            values.birthDate?.year !== undefined &&
-            values.birthDate?.month !== undefined &&
-            values.birthDate?.day !== undefined
-              ? new Date(
-                  values.birthDate.year,
-                  values.birthDate.month - 1,
-                  values.birthDate.day
-                )
-              : undefined,
+          birthDate: parseBirthdate,
         }
       })
 
-      setSubmitLoading(false)
+      try {
+        const response = await customFetch('/auth/createUser', {
+          method: 'POST',
+          body: customFetchBody({
+            firstName: values.firstName,
+            lastName: values.lastName,
+            email: values.email,
+            birthDate: parseBirthdate
+              ? (parseBirthdate as Date).toISOString()
+              : undefined,
+          }),
+        })
 
-      goToNextPage()
+        if (response.statusCode === 201) {
+          toast.success('Kode verifikasi dikirim! Silakan cek email Anda.')
+          setSubmitLoading(false)
+          goToNextPage()
+          return
+        } else if (response.statusCode === 409) {
+          toast.error('Email ini sudah terdaftar!')
+          setSubmitLoading(false)
+          return router.push('/login')
+        } else {
+          toast.error('Terjadi kesalahan. Silakan coba lagi.')
+          setSubmitLoading(false)
+        }
+      } catch (error) {
+        console.log('ini eror sekali bos')
+        toast.error('Terjadi kesalahan. Silakan coba lagi.')
+        setSubmitLoading(false)
+      }
     }
   }
 
@@ -220,7 +258,11 @@ export const CreateUserForm: React.FC = () => {
                 name="submit-button"
                 className="bg-[#0059B3] hover:bg-[#0059B3]/90 text-white w-full"
               >
-                Daftar Akun
+                {submitLoading ? (
+                  <Loader className="animate-spin" />
+                ) : (
+                  'Daftar Akun'
+                )}
               </Button>
             </div>
           </div>
