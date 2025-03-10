@@ -187,10 +187,9 @@ export default function ItineraryMakerModule() {
       .filter(Boolean)
   }
 
-  const toggleInput = (
-    blockId: string,
-    inputType: 'time' | 'price' | 'location'
-  ) => {
+  type InputType = 'time' | 'price' | 'location'
+
+  const toggleInput = (blockId: string, inputType: InputType) => {
     const isCurrentlyVisible = visibleInputs[blockId]?.[inputType] ?? false
     if (isCurrentlyVisible) {
       updateBlockInputData(blockId, inputType)
@@ -201,10 +200,7 @@ export default function ItineraryMakerModule() {
     }
   }
 
-  const updateInputVisibility = (
-    blockId: string,
-    inputType: 'time' | 'price' | 'location'
-  ) => {
+  const updateInputVisibility = (blockId: string, inputType: InputType) => {
     setVisibleInputs((prev) => {
       const currentValues = prev[blockId] || {}
       return {
@@ -217,10 +213,7 @@ export default function ItineraryMakerModule() {
     })
   }
 
-  const updateBlockInputData = (
-    blockId: string,
-    inputType: 'time' | 'price' | 'location'
-  ) => {
+  const updateBlockInputData = (blockId: string, inputType: InputType) => {
     setItineraryData((prev) => {
       const updatedSections = clearBlockInputInSections(
         prev.sections,
@@ -237,7 +230,7 @@ export default function ItineraryMakerModule() {
   const clearBlockInputInSections = (
     sections: Section[],
     blockId: string,
-    inputType: 'time' | 'price' | 'location'
+    inputType: InputType
   ) => {
     return sections.map((section) => {
       if (!section.blocks) return section
@@ -267,10 +260,7 @@ export default function ItineraryMakerModule() {
     })
   }
 
-  const isInputVisible = (
-    blockId: string,
-    inputType: 'time' | 'price' | 'location'
-  ) => {
+  const isInputVisible = (blockId: string, inputType: InputType) => {
     return visibleInputs[blockId]?.[inputType] ?? false
   }
 
