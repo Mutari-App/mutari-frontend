@@ -6,6 +6,13 @@ export type metadataType = {
   totalPages: number
 }
 
+export type clientMetadataType = {
+  total: number
+  page: number
+  totalPages: number
+  setPage: React.Dispatch<React.SetStateAction<number>>
+}
+
 export interface ItineraryResponse extends CustomFetchBaseResponse {
   itinerary: {
     data: ItineraryData[]

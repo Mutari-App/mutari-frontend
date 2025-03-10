@@ -18,7 +18,7 @@ function ItineraryCard({
   const optionRef = useRef<HTMLDivElement>(null)
   const daysTotal = Math.floor(
     (new Date(item.endDate).getTime() - new Date(item.startDate).getTime()) /
-    (1000 * 60 * 60 * 24)
+      (1000 * 60 * 60 * 24)
   )
 
   useOutsideClick({
@@ -55,7 +55,9 @@ function ItineraryCard({
         />
       </div>
       <div className="w-3/4 h-full flex flex-col gap-2 py-4">
-        <p className="font-raleway font-medium text-sm md:text-xl w-4/5">{item.title}</p>
+        <p className="font-raleway font-medium text-sm md:text-xl w-4/5">
+          {item.title}
+        </p>
         <div className="font-raleway text-[#94A3B8] flex flex-col gap-1">
           {/* <div className="flex gap-2 items-center">
             <MapPinIcon size={16} />
