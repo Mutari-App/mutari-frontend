@@ -47,8 +47,8 @@ export default function ItineraryModule() {
       console.log(res)
     } catch (err: any) {
       console.log(err)
-      toast.error('Something went wrong.', {
-        richColors: true
+      if (err instanceof Error) toast.error(`${err.message}`, {
+        richColors: true,
       })
     }
   }
@@ -63,8 +63,8 @@ export default function ItineraryModule() {
       console.log(res.itinerary)
     } catch (err: any) {
       console.log(err)
-      toast.error('Something went wrong.', {
-        richColors: true
+      if (err instanceof Error) toast.error(`${err.message}`, {
+        richColors: true,
       })
     }
   }

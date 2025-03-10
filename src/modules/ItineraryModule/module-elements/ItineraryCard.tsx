@@ -55,13 +55,13 @@ function ItineraryCard({
         />
       </div>
       <div className="w-3/4 h-full flex flex-col gap-2 py-4">
-        <p className="font-raleway font-medium text-xl">{item.title}</p>
+        <p className="font-raleway font-medium text-sm md:text-xl w-4/5">{item.title}</p>
         <div className="font-raleway text-[#94A3B8] flex flex-col gap-1">
           {/* <div className="flex gap-2 items-center">
             <MapPinIcon size={16} />
             <p className="text-base">Bali</p>
           </div> */}
-          <p className="text-sm">
+          <p className="text-xs md:text-sm">
             {daysTotal} Hari • {item.locationCount} Destinasi
           </p>
         </div>
