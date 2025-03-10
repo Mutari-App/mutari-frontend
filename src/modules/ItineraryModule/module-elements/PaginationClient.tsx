@@ -21,7 +21,6 @@ export const PaginationClient = (props: clientMetadataType) => {
     }
   }
 
-
   return (
     <div className="flex gap-3 items-center self-center">
       <button
