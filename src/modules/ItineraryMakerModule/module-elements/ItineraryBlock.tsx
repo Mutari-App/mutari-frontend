@@ -118,16 +118,14 @@ export const ItineraryBlock: React.FC<ItineraryBlockProps> = ({
                     />
                   </>
                 ) : (
-                  <>
-                    <Textarea
-                      placeholder="Masukkan Catatan"
-                      className="mt-2"
-                      value={block.description ?? ''}
-                      onChange={(e) =>
-                        updateBlock(block.id, 'description', e.target.value)
-                      }
-                    />
-                  </>
+                  <Textarea
+                    placeholder="Masukkan Catatan"
+                    className="mt-2"
+                    value={block.description ?? ''}
+                    onChange={(e) =>
+                      updateBlock(block.id, 'description', e.target.value)
+                    }
+                  />
                 )}
               </div>
               <Button
