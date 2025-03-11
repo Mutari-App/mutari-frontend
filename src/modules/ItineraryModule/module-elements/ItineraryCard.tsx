@@ -17,6 +17,7 @@ function ItineraryCard({
 }) {
   const [openOptions, setOpenOptions] = useState(false)
   const [showModal, setShowModal] = useState(false)
+  const router = useRouter()
   const optionRef = useRef<HTMLDivElement>(null)
   const daysTotal = Math.floor(
     (new Date(item.endDate).getTime() - new Date(item.startDate).getTime()) /
@@ -68,7 +69,9 @@ function ItineraryCard({
   }
 
   return (
-    <div className="group flex items-center gap-5 shadow-lg w-full rounded-xl overflow-hidden hover:cursor-pointer relative">
+    <div 
+    onClick={() => router.push(`/itinerary/${item.id}`)}
+    className="group flex items-center gap-5 shadow-lg w-full rounded-xl overflow-hidden hover:cursor-pointer relative">
       <div className="w-1/4 h-full overflow-hidden">
         <Image
           src={getImage(item.coverImage ?? 'logo-no-background.png')}
@@ -95,7 +98,10 @@ function ItineraryCard({
       <button
         data-testid="option-btn"
         className="absolute top-2 right-2 p-2 rounded-full hover:bg-black/10"
-        onClick={() => setOpenOptions(!openOptions)}
+        onClick={(e) => {
+          e.stopPropagation()
+          setOpenOptions(!openOptions)
+        }}
       >
         <EllipsisIcon />
       </button>
