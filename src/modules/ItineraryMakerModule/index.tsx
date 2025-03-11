@@ -30,7 +30,7 @@ import { TagSelector } from './module-elements/TagSelector'
 import { CldUploadButton } from 'next-cloudinary'
 import { cn } from '@/lib/utils'
 import { useAuthContext } from '@/contexts/AuthContext'
-import { redirect } from 'next/navigation'
+import { redirect, useRouter } from 'next/navigation'
 
 const SAVED_ITINERARY_KEY = 'saved_itinerary_data'
 
@@ -45,6 +45,7 @@ export default function ItineraryMakerModule() {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   const [availableTags, setAvailableTags] = useState<Tag[]>([])
   const { isAuthenticated } = useAuthContext()
+  const router = useRouter()
 
   const initialItineraryData = useRef<CreateItineraryDto>({
     title: 'Itinerary Tanpa Judul',
@@ -812,7 +813,7 @@ export default function ItineraryMakerModule() {
       setHasUnsavedChanges(false)
       toast('Itinerary created successfully')
 
-      redirect(`/itinerary/${response.id}`)
+      router.push(`/itinerary/${response.id}`)
     } catch (error) {
       console.error('Error creating itinerary:', error)
       toast.error('Failed to create itinerary. Please try again.')
