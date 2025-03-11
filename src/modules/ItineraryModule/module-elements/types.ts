@@ -28,7 +28,7 @@ export interface ItineraryData {
   userId: string
   title: string
   description?: string
-  coverImage?: string
+  coverImage: string
   startDate: string // ISO string format (e.g., "2025-03-02T12:00:00Z")
   endDate: string
   isPublished: boolean
