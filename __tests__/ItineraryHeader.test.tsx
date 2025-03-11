@@ -4,7 +4,7 @@ import React from 'react'
 
 jest.mock('next/image', () => ({
   __esModule: true,
-  default: (props: any) => <img {...props} />,
+  default: (props: any) => <img alt={props.alt || ''} {...props} />,
 }))
 
 jest.mock('@/utils/getImage', () => ({
