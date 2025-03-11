@@ -103,12 +103,16 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
   }
 
   const getMe = async () => {
-    // TODO: change this endpoint to a more proper protected endpoint
-    const response = await customFetch('/itineraries/me/completed')
+    try {
+      // TODO: change this endpoint to a more proper protected endpoint
+      const response = await customFetch('/itineraries/me/completed')
 
-    if (response.statusCode === 200) {
-      setIsAuthenticated(true)
-    } else {
+      if (response.statusCode === 200) {
+        setIsAuthenticated(true)
+      } else {
+        setIsAuthenticated(false)
+      }
+    } catch (err) {
       setIsAuthenticated(false)
     }
   }
