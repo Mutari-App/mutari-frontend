@@ -15,8 +15,8 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { useAuthContext } from '@/contexts/AuthContext'
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { toast } from 'sonner'
 
 const loginSchema = z.object({
@@ -27,8 +27,16 @@ const loginSchema = z.object({
 export default function LoginModule() {
   const { login } = useAuthContext()
   const router = useRouter()
-
+  const searchParams = useSearchParams()
   const [loading, setLoading] = useState<boolean>(false)
+  const [redirectPath, setRedirectPath] = useState<string>('/')
+
+  useEffect(() => {
+    const redirect = searchParams.get('redirect')
+    if (redirect) {
+      setRedirectPath(redirect)
+    }
+  }, [searchParams])
 
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -41,7 +49,7 @@ export default function LoginModule() {
       setLoading(true)
       const response = await login(values)
       console.log(response)
-      router.push('/')
+      router.push(redirectPath)
       toast.success('Berhasil login!')
     } catch (err: any) {
       toast.error((err as Error).message)

@@ -1,7 +1,6 @@
 'use client'
 
 import React, { useState, useRef, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
 import {
@@ -30,9 +29,12 @@ import { DateRangeAlertDialog } from './module-elements/DateRangeAlertDialog'
 import { TagSelector } from './module-elements/TagSelector'
 import { CldUploadButton } from 'next-cloudinary'
 import { cn } from '@/lib/utils'
+import { useAuthContext } from '@/contexts/AuthContext'
+import { redirect } from 'next/navigation'
+
+const SAVED_ITINERARY_KEY = 'saved_itinerary_data'
 
 export default function ItineraryMakerModule() {
-  const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [timeWarning, setTimeWarning] = useState<{
     blockId: string
@@ -42,6 +44,7 @@ export default function ItineraryMakerModule() {
   const pendingDateRange = useRef<DateRange | undefined>(undefined)
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   const [availableTags, setAvailableTags] = useState<Tag[]>([])
+  const { isAuthenticated } = useAuthContext()
 
   const initialItineraryData = useRef<CreateItineraryDto>({
     title: 'Itinerary Tanpa Judul',
@@ -80,6 +83,36 @@ export default function ItineraryMakerModule() {
     initialItineraryData.current
   )
 
+  // Load saved itinerary data from local storage
+  useEffect(() => {
+    try {
+      const savedItineraryJSON = localStorage.getItem(SAVED_ITINERARY_KEY)
+
+      if (savedItineraryJSON) {
+        const savedItinerary = JSON.parse(
+          savedItineraryJSON
+        ) as CreateItineraryDto
+
+        setItineraryData(savedItinerary)
+
+        if (savedItinerary.startDate && savedItinerary.endDate) {
+          setDateRange({
+            from: new Date(savedItinerary.startDate),
+            to: new Date(savedItinerary.endDate),
+          })
+        }
+
+        toast.success('Itinerary yang tersimpan berhasil dimuat')
+        setHasUnsavedChanges(false)
+        localStorage.removeItem(SAVED_ITINERARY_KEY)
+      }
+    } catch (error) {
+      console.error('Error loading saved itinerary:', error)
+      toast.error('Gagal memuat itinerary yang tersimpan')
+      localStorage.removeItem(SAVED_ITINERARY_KEY)
+    }
+  }, [])
+
   useEffect(() => {
     const fetchTags = async () => {
       try {
@@ -107,8 +140,21 @@ export default function ItineraryMakerModule() {
   useEffect(() => {
     // Check for unsaved changes by comparing current data with initial data
     const checkUnsavedChanges = () => {
+      // Check if there are any blocks with modified data
+      const hasModifiedBlocks = itineraryData.sections.some((section) => {
+        return section.blocks?.some((block) => {
+          return (
+            block.title !== 'Masukkan Judul' ||
+            (block.description ??
+              block.startTime ??
+              block.endTime ??
+              block.location ??
+              block.price !== undefined)
+          )
+        })
+      })
       const hasBlocks = itineraryData.sections.some(
-        (section) => section.blocks && section.blocks.length > 0
+        (section) => section.blocks && section.blocks.length > 1
       )
       const hasCustomTitle =
         itineraryData.title !== initialItineraryData.current.title
@@ -118,7 +164,12 @@ export default function ItineraryMakerModule() {
       const hasCoverImage = itineraryData.coverImage !== ''
 
       setHasUnsavedChanges(
-        hasBlocks || hasCustomTitle || hasDates || hasTags || hasCoverImage
+        hasBlocks ||
+          hasCustomTitle ||
+          hasDates ||
+          hasTags ||
+          hasCoverImage ||
+          hasModifiedBlocks
       )
     }
 
@@ -721,6 +772,15 @@ export default function ItineraryMakerModule() {
       return
     }
 
+    // If user is not authenticated, save to local storage and redirect to login
+    if (!isAuthenticated) {
+      localStorage.setItem(SAVED_ITINERARY_KEY, JSON.stringify(itineraryData))
+      setHasUnsavedChanges(false)
+      toast.info('Silakan login untuk menyimpan itinerary Anda')
+      redirect('/login?redirect=/itinerary/create')
+    }
+
+    // If user is authenticated, proceed with normal submission
     setIsSubmitting(true)
     try {
       // Remove block IDs before submitting
@@ -752,7 +812,7 @@ export default function ItineraryMakerModule() {
       setHasUnsavedChanges(false)
       toast('Itinerary created successfully')
 
-      router.push(`/itinerary/${response.id}`)
+      redirect(`/itinerary/${response.id}`)
     } catch (error) {
       console.error('Error creating itinerary:', error)
       toast.error('Failed to create itinerary. Please try again.')
