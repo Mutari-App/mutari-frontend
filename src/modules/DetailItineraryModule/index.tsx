@@ -45,7 +45,7 @@ export default function DetailItineraryModule() {
           </button>
         </div>
       )}
-      <div>
+      <div className="w-full max-w-3xl">
         <ItineraryHeader data={data} />
         <ItinerarySummary startDate={data.startDate} endDate={data.endDate} />
         <ItineraryList section={data.sections || []} />
