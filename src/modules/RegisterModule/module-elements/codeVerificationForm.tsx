@@ -52,18 +52,18 @@ export const CodeVerificationForm: React.FC = () => {
     }
 
     try {
-      const response = await customFetch('/auth/createUser', {
+      const response = await customFetch('/auth/verify', {
         method: 'POST',
         body: customFetchBody({
           firstName,
           lastName,
           email,
           birthDate,
-          uniqueCode: values.uniqueCode,
+          verificationCode: values.uniqueCode,
         }),
       })
 
-      if (response.statusCode === 201) {
+      if (response.statusCode === 200) {
         toast.success('Verifikasi kode berhasil!')
         setSubmitLoading(false)
         goToNextPage()
