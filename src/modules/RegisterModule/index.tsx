@@ -14,12 +14,12 @@ export default function RegisterModule() {
         src={getImage('auth_bg.png')}
         alt="Section Background"
         fill
-        className="absolute inset-0 object-cover z-0"
+        className="hidden lg:flex absolute inset-0 object-cover z-0"
       />
 
-      <section className="flex flex-row relative">
+      <section className="flex flex-row relative items-center justify-center">
         <JoinUsSection />
-        <div className="bg-white min-w-[50%] max-w-[50%] flex flex-col items-center justify-center gap-10 p-[2%]">
+        <div className="bg-white min-w-[50%] min-h-screen flex flex-col items-center justify-center gap-10  p-[10%] md:p-[2%]">
           <RegisterFormHeader />
           <RegisterContextProvider>
             <RegisterFormSection />
