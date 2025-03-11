@@ -740,19 +740,19 @@ export default function ItineraryMakerModule() {
         '/itineraries',
         {
           method: 'POST',
-          body: customFetchBody({ itineraryData: submissionData }),
-          isAuthorized: true,
+          body: customFetchBody(submissionData),
+          credentials: 'include',
         }
       )
 
-      if (!response.success) {
+      if (response.statusCode !== 201) {
         throw new Error('Failed to create itinerary')
       }
 
       setHasUnsavedChanges(false)
       toast('Itinerary created successfully')
 
-      router.push(`/itinerary/${response.itinerary.id}`)
+      router.push(`/itinerary/${response.id}`)
     } catch (error) {
       console.error('Error creating itinerary:', error)
       toast.error('Failed to create itinerary. Please try again.')
