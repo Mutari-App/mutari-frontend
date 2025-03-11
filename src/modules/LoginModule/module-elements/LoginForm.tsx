@@ -5,7 +5,6 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   Form,
   FormControl,
@@ -15,8 +14,8 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { useAuthContext } from '@/contexts/AuthContext'
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { toast } from 'sonner'
 import Link from 'next/link'
 
@@ -28,6 +27,15 @@ const loginSchema = z.object({
 export const LoginForm = () => {
   const { login } = useAuthContext()
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const [redirectPath, setRedirectPath] = useState<string>('/')
+
+  useEffect(() => {
+    const redirect = searchParams.get('redirect')
+    if (redirect) {
+      setRedirectPath(redirect)
+    }
+  }, [searchParams])
 
   const [loading, setLoading] = useState<boolean>(false)
 
@@ -40,7 +48,7 @@ export const LoginForm = () => {
     try {
       setLoading(true)
       await login(values)
-      router.push('/')
+      router.push(redirectPath)
       toast.success('Berhasil login!')
     } catch (err: any) {
       toast.error((err as Error).message)
