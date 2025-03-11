@@ -29,12 +29,14 @@ function ItineraryCard({
     handler: () => setOpenOptions(false),
   })
 
-  const openDeleteConfirmation = () => {
+  const openDeleteConfirmation = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation()
     setOpenOptions(false)
     setShowModal(true)
   }
 
-  const markAsComplete = async () => {
+  const markAsComplete = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation()
     try {
       const response = await customFetch(
         `/itineraries/${item.id}/mark-as-complete/`,
@@ -110,6 +112,7 @@ function ItineraryCard({
 
       {openOptions && (
         <div
+          onClick={e => e.stopPropagation()}
           ref={optionRef}
           className="absolute top-2 right-2 z-20 bg-white shadow-lg text-sm font-medium rounded-lg overflow-hidden w-max flex flex-col"
         >
@@ -132,7 +135,9 @@ function ItineraryCard({
 
       {/* Confirmation Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center font-roboto z-40">
+        <div 
+        onClick={e => e.stopPropagation()}
+        className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center font-roboto z-40">
           <div className="bg-white p-8 rounded-lg shadow-lg">
             <h2 className="text-xl font-semibold mb-4 text-center">
               Apakah anda yakin?
