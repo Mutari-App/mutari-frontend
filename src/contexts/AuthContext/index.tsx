@@ -7,7 +7,7 @@ import React, {
   useRef,
   useState,
 } from 'react'
-import { getCookie, setCookie } from 'cookies-next/client'
+import { getCookie, setCookie, getCookies } from 'cookies-next/client'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { toast } from 'sonner'
 import { useBaseUrlWithPath } from '@/hooks/useBaseUrlWithPath'
@@ -95,9 +95,27 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
     }
   }
 
+  const logout = async () => {
+    const response = await customFetch('/auth/logout', {
+      method: 'POST',
+    })
+    return response
+  }
+
+  const getMe = async () => {
+    // TODO: change this endpoint to a more proper protected endpoint
+    const response = await customFetch('/itineraries/me/completed')
+
+    if (response.statusCode === 200) {
+      setIsAuthenticated(true)
+    } else {
+      setIsAuthenticated(false)
+    }
+  }
+
   useEffect(() => {
-    const accessToken = getCookie('AT')
-    setIsAuthenticated(!!accessToken)
+    void getMe()
+
     if (!developmentLock.current || process.env.NODE_ENV === 'production') {
       if (searchParams.toString().includes('ticket') && !!fullUrl) {
         const ticket = searchParams.get('ticket')
@@ -126,6 +144,7 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
     validate,
     preRegistLogin,
     login,
+    logout,
   }
 
   return (

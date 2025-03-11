@@ -18,6 +18,7 @@ export interface AuthContextInterface {
   preRegistLogin: (params: {
     email: string
   }) => Promise<CustomFetchBaseResponse>
+  logout: () => Promise<CustomFetchBaseResponse>
 }
 
 export interface User {
