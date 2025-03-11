@@ -19,7 +19,7 @@ import { toast } from 'sonner'
 
 export default function ItineraryModule() {
   const searchParams = useSearchParams()
-  const page = searchParams.get('page')
+  const page = searchParams.get('page') ?? 1
   const router = useRouter()
 
   const defaultMetadata = {

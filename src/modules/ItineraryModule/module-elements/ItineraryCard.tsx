@@ -53,12 +53,9 @@ function ItineraryCard({
 
   const removeItinerary = async () => {
     try {
-      const response = await customFetch(
-        `/itineraries/${item.id}/`,
-        {
-          method: 'DELETE',
-        }
-      )
+      const response = await customFetch(`/itineraries/${item.id}/`, {
+        method: 'DELETE',
+      })
 
       if (response.statusCode !== 200) throw new Error(response.message)
       toast.success('Itinerary deleted successfully!')
@@ -69,9 +66,10 @@ function ItineraryCard({
   }
 
   return (
-    <div 
-    onClick={() => router.push(`/itinerary/${item.id}`)}
-    className="group flex items-center gap-5 shadow-lg w-full rounded-xl overflow-hidden hover:cursor-pointer relative">
+    <div
+      onClick={() => router.push(`/itinerary/${item.id}`)}
+      className="group flex items-center gap-5 shadow-lg w-full rounded-xl overflow-hidden hover:cursor-pointer relative"
+    >
       <div className="w-1/4 h-full overflow-hidden">
         <Image
           src={getImage(item.coverImage ?? 'logo-no-background.png')}
@@ -119,7 +117,10 @@ function ItineraryCard({
               Mark as Completed
             </button>
           )}
-          <button onClick={openDeleteConfirmation} className="hover:bg-black/10 px-4 py-2 text-red-500">
+          <button
+            onClick={openDeleteConfirmation}
+            className="hover:bg-black/10 px-4 py-2 text-red-500"
+          >
             Delete
           </button>
         </div>
