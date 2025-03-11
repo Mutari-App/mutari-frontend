@@ -100,7 +100,6 @@ export const CreateUserForm: React.FC = () => {
           setSubmitLoading(false)
         }
       } catch (error) {
-        console.log('ini eror sekali bos')
         toast.error('Terjadi kesalahan. Silakan coba lagi.')
         setSubmitLoading(false)
       }

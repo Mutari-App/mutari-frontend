@@ -63,7 +63,6 @@ export const RegisterForm: React.FC = () => {
     }
 
     try {
-      console.log('uniqueCode', uniqueCode)
       const response = await customFetch('/auth/register', {
         method: 'POST',
         body: customFetchBody({

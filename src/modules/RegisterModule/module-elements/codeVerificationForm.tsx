@@ -69,7 +69,6 @@ export const CodeVerificationForm: React.FC = () => {
         goToNextPage()
         return
       } else {
-        console.log('masuk sini')
         toast.error('Terjadi kesalahan. Silakan coba lagi.')
         setSubmitLoading(false)
       }
