@@ -17,8 +17,9 @@ export const Footer: React.FC = () => {
     void (async () => {
       const pathnameParts = pathname.split('/')
       const itineraryId = pathnameParts[2]
+      const isEdit = pathnameParts[3] === 'edit'
 
-      if (!itineraryId) return
+      if (!itineraryId || itineraryId === 'create' || isEdit) return
 
       try {
         const res = await customFetch<{ id: string }>(
