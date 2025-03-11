@@ -773,6 +773,11 @@ export default function ItineraryMakerModule() {
       return
     }
 
+    if (!itineraryData.startDate || !itineraryData.endDate) {
+      toast.error('Silakan masukkan tanggal perjalanan')
+      return
+    }
+
     // If user is not authenticated, save to local storage and redirect to login
     if (!isAuthenticated) {
       localStorage.setItem(SAVED_ITINERARY_KEY, JSON.stringify(itineraryData))
