@@ -34,33 +34,31 @@ export interface Tag {
 }
 
 export interface CreateItineraryResponse extends CustomFetchBaseResponse {
-  itinerary: {
+  id: string
+  userId: string
+  title: string
+  description?: string
+  coverImage?: string
+  startDate: string
+  endDate: string
+  tags: {
+    tag: Tag
+  }[]
+  sections: {
     id: string
-    userId: string
+    sectionNumber: number
     title: string
-    description?: string
-    coverImage?: string
-    startDate: string
-    endDate: string
-    tags: {
-      tag: Tag
-    }[]
-    sections: {
+    blocks: {
       id: string
-      sectionNumber: number
+      position: number
+      blockType: string
       title: string
-      blocks: {
-        id: string
-        position: number
-        blockType: string
-        title: string
-        description?: string
-        startTime?: string
-        endTime?: string
-        location?: string
-        price: number
-        photoUrl?: string
-      }[]
+      description?: string
+      startTime?: string
+      endTime?: string
+      location?: string
+      price: number
+      photoUrl?: string
     }[]
-  }
+  }[]
 }
