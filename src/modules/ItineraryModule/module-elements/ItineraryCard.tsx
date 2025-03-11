@@ -72,7 +72,11 @@ function ItineraryCard({
     >
       <div className="w-1/4 h-full overflow-hidden">
         <Image
-          src={item.coverImage !== '' && item.coverImage != null ? item.coverImage : getImage('logo-no-background.png')}
+          src={
+            item.coverImage !== '' && item.coverImage != null
+              ? item.coverImage
+              : getImage('logo-no-background.png')
+          }
           alt={item.title}
           width={720}
           height={720}
