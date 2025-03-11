@@ -18,6 +18,7 @@ import { useAuthContext } from '@/contexts/AuthContext'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
+import Link from 'next/link'
 
 const loginSchema = z.object({
   email: z.string().email({ message: 'Email tidak valid' }),
@@ -108,6 +109,12 @@ export const LoginForm = () => {
               Masuk
             </Button>
           </div>
+          <span className="text-sm text-center text-[#024C98] font-medium">
+            Belum punya akun?{' '}
+            <Link href="/register" className="underline">
+              Daftar di sini
+            </Link>
+          </span>
         </div>
       </form>
     </Form>
