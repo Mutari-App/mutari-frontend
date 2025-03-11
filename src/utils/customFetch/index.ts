@@ -5,6 +5,9 @@ import {
 } from './interface'
 import { deleteCookie, getCookie } from 'cookies-next'
 
+let isRefreshing = false
+let refreshSubscribers: (() => void)[] = []
+
 export async function customFetch<T>(
   url: string,
   options: CustomFetchRequestInit = { uploadFile: false },
@@ -62,7 +65,20 @@ export async function customFetch<T>(
     result.message === 'token has expired' ||
     result.message === 'token not provided'
   ) {
+    if (isRefreshing) {
+      return new Promise((resolve) => {
+        refreshSubscribers.push(() => {
+          resolve(customFetch(url, options))
+        })
+      })
+    }
+    isRefreshing = true
+
     const isRefreshSuccess = await handleRefreshToken()
+    isRefreshing = false
+    refreshSubscribers.forEach((callback) => callback())
+    refreshSubscribers = []
+
     if (isRefreshSuccess) {
       rawResult = await fetch(fullUrl.toString(), {
         headers,
@@ -93,7 +109,7 @@ async function handleRefreshToken(): Promise<boolean> {
   let serverCookies
 
   if (isServer) {
-    const { cookies } = await import('next/headers') // Lazy import agar tidak error di client
+    const { cookies } = await import('next/headers')
     serverCookies = await cookies()
   }
 
@@ -103,9 +119,7 @@ async function handleRefreshToken(): Promise<boolean> {
       {
         method: 'POST',
         credentials: 'include',
-        headers: isServer
-          ? { Cookie: serverCookies!.toString() } // Kirim refreshToken dari server
-          : {},
+        headers: isServer ? { Cookie: serverCookies!.toString() } : {},
       }
     )
 
