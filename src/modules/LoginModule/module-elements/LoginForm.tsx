@@ -36,11 +36,9 @@ export const LoginForm = () => {
   })
 
   const onSubmit = async (values: z.infer<typeof loginSchema>) => {
-    console.log('Login values:', values)
     try {
       setLoading(true)
-      const response = await login(values)
-      console.log(response)
+      await login(values)
       router.push('/')
       toast.success('Berhasil login!')
     } catch (err: any) {
@@ -57,7 +55,7 @@ export const LoginForm = () => {
         className="w-full"
         onSubmit={form.handleSubmit(onSubmit)}
       >
-        <div className="flex w-full max-w-sm mx-auto  flex-col md:gap-8 text-[#024C98]">
+        <div className="flex w-full max-w-sm mx-auto  flex-col gap-4 md:gap-8 text-[#024C98]">
           <div className="flex flex-col gap-5 text-center font-semibold">
             <h1 className="text-4xl">Masuk</h1>
           </div>

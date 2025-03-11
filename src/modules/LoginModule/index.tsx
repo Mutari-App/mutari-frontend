@@ -8,7 +8,7 @@ import { LoginForm } from './module-elements/LoginForm'
 
 export default function LoginModule() {
   return (
-    <div className="relative">
+    <div className="relative min-h-screen">
       <Image
         src={getImage('auth_bg.png')}
         alt="Section Background"
@@ -16,9 +16,9 @@ export default function LoginModule() {
         className="absolute inset-0 object-cover z-0"
       />
 
-      <section className="flex flex-row relative">
+      <section className="flex min-h-screen flex-row relative">
         <JoinUsSection />
-        <div className="bg-white min-w-[50%] max-w-[50%] flex flex-col items-center justify-center gap-10 p-[2%]">
+        <div className="bg-white w-full md:w-1/2 flex flex-col items-center  justify-center gap-10 p-[2%]">
           <RegisterFormHeader />
           <LoginForm />
         </div>
