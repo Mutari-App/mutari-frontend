@@ -6,6 +6,7 @@ import type { ItineraryData } from './types'
 import useOutsideClick from '@/hooks/useOutsideClick'
 import { customFetch } from '@/utils/customFetch'
 import { toast } from 'sonner'
+import { useRouter } from 'next/navigation'
 
 function ItineraryCard({
   item,
@@ -15,6 +16,7 @@ function ItineraryCard({
   readonly refresh: () => void
 }) {
   const [openOptions, setOpenOptions] = useState(false)
+  const [showModal, setShowModal] = useState(false)
   const optionRef = useRef<HTMLDivElement>(null)
   const daysTotal = Math.floor(
     (new Date(item.endDate).getTime() - new Date(item.startDate).getTime()) /
@@ -26,10 +28,15 @@ function ItineraryCard({
     handler: () => setOpenOptions(false),
   })
 
+  const openDeleteConfirmation = () => {
+    setOpenOptions(false)
+    setShowModal(true)
+  }
+
   const markAsComplete = async () => {
     try {
       const response = await customFetch(
-        `/itineraries/${item.id}/mark-as-complete`,
+        `/itineraries/${item.id}/mark-as-complete/`,
         {
           method: 'PATCH',
         }
@@ -37,6 +44,23 @@ function ItineraryCard({
 
       if (response.statusCode !== 200) throw new Error(response.message)
       toast.success('Itinerary marked as complete!')
+      refresh()
+    } catch (err) {
+      if (err instanceof Error) toast.error(`${err.message}`)
+    }
+  }
+
+  const removeItinerary = async () => {
+    try {
+      const response = await customFetch(
+        `/itineraries/${item.id}/`,
+        {
+          method: 'DELETE',
+        }
+      )
+
+      if (response.statusCode !== 200) throw new Error(response.message)
+      toast.success('Itinerary deleted successfully!')
       refresh()
     } catch (err) {
       if (err instanceof Error) toast.error(`${err.message}`)
@@ -89,9 +113,35 @@ function ItineraryCard({
               Mark as Completed
             </button>
           )}
-          <button className="hover:bg-black/10 px-4 py-2 text-red-500">
+          <button onClick={openDeleteConfirmation} className="hover:bg-black/10 px-4 py-2 text-red-500">
             Delete
           </button>
+        </div>
+      )}
+
+      {/* Confirmation Modal */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center font-roboto z-40">
+          <div className="bg-white p-8 rounded-lg shadow-lg">
+            <h2 className="text-xl font-semibold mb-4 text-center">
+              Apakah anda yakin?
+            </h2>
+            <p className="text-md mb-4">Anda ingin menghapus itinerary ini?</p>
+            <div className="flex justify-center space-x-2">
+              <button
+                className="px-8 py-2 border-2 border-[#016CD7] bg-white rounded text-[#014285]"
+                onClick={() => setShowModal(false)}
+              >
+                Batal
+              </button>
+              <button
+                className="px-8 py-2 bg-gradient-to-r from-[#016CD7] to-[#014285] text-white items-center rounded"
+                onClick={removeItinerary}
+              >
+                Hapus
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
