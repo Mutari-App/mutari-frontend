@@ -13,12 +13,12 @@ export default function LoginModule() {
         src={getImage('auth_bg.png')}
         alt="Section Background"
         fill
-        className="absolute inset-0 object-cover z-0"
+        className="hidden lg:flex absolute inset-0 object-cover z-0"
       />
 
       <section className="flex min-h-screen flex-row relative">
         <JoinUsSection />
-        <div className="bg-white w-full md:w-1/2 flex flex-col items-center  justify-center gap-10 p-[2%]">
+        <div className="bg-white w-full flex flex-col items-center  justify-center gap-10 p-[10%] md:p-[2%]">
           <RegisterFormHeader />
           <LoginForm />
         </div>

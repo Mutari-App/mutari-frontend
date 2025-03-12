@@ -5,7 +5,7 @@ import { Mail } from 'lucide-react'
 
 export const JoinUsSection = () => {
   return (
-    <section className="hidden lg:flex flex-col text-white min-h-screen items-center justify-end px-[5%] py-[3%] gap-12 w-[50%]">
+    <section className="hidden lg:flex flex-col min-w-[50%] text-white min-h-screen items-center justify-end px-[5%] py-[3%] gap-12 w-[50%]">
       <div className="text-center space-y-5">
         <h1 className="text-3xl font-semibold">Bergabung Bersama Kami!</h1>
         <p>
