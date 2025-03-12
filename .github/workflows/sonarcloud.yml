@@ -1,4 +1,4 @@
-name: SonarCloud Analysis
+name: SonarQube Scan
 
 on:
   push:
@@ -13,12 +13,14 @@ on:
     types: [opened, synchronize, reopened]
 
 jobs:
-  sonarcloud:
-    name: SonarCloud Scan
+  build:
+    name: Build and analyze
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
@@ -31,9 +33,7 @@ jobs:
       - name: Run tests & generate coverage
         run: pnpm jest "__tests__/PreRegisterForm.test.tsx" --coverage
 
-      - name: SonarCloud Scan
+      - uses: SonarSource/sonarqube-scan-action@v4
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-        run: |
-          pnpm sonar-scanner
