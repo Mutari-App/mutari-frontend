@@ -149,17 +149,16 @@ export default function ItineraryMakerModule() {
           to: new Date(data.endDate),
         })
       }
-      setItineraryData(
-        (initialItineraryData.current = {
-          title: data.title,
-          description: data.description,
-          coverImage: data.coverImage,
-          startDate: data.startDate,
-          endDate: data.endDate,
-          tags: mappedTags,
-          sections: mappedSections,
-        } as CreateItineraryDto)
-      )
+      initialItineraryData.current = {
+        title: data.title,
+        description: data.description,
+        coverImage: data.coverImage,
+        startDate: data.startDate,
+        endDate: data.endDate,
+        tags: mappedTags,
+        sections: mappedSections,
+      } as CreateItineraryDto
+      setItineraryData(initialItineraryData.current)
     }
   }, [data])
 
@@ -173,7 +172,8 @@ export default function ItineraryMakerModule() {
           savedItineraryJSON
         ) as CreateItineraryDto
 
-        setItineraryData((initialItineraryData.current = savedItinerary))
+        initialItineraryData.current = savedItinerary
+        setItineraryData(savedItinerary)
 
         if (savedItinerary.startDate && savedItinerary.endDate) {
           setDateRange({
