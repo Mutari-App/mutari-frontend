@@ -219,26 +219,28 @@ export default function ItineraryMakerModule() {
 
   useEffect(() => {
     // Check for unsaved changes by comparing current data with initial data
+    const checkIsBlockModified = (section: Section, section_index: number) => {
+      return section.blocks?.some((block, index) => {
+        const initialBlock =
+          initialItineraryData.current.sections[section_index]?.blocks?.[index]
+        return (
+          block.title !== initialBlock?.title ||
+          block.description !== initialBlock?.description ||
+          block.startTime !== initialBlock?.startTime ||
+          block.endTime !== initialBlock?.endTime ||
+          block.location !== initialBlock?.location
+        )
+      })
+    }
+
     const checkUnsavedChanges = () => {
       // Check if there are any blocks with modified data
       const isBlocksModified =
         itineraryData.sections.length !==
           initialItineraryData.current.sections.length ||
-        itineraryData.sections.some((section, section_index) => {
-          return section.blocks?.some((block, index) => {
-            const initialBlock =
-              initialItineraryData.current.sections[section_index]?.blocks?.[
-                index
-              ]
-            return (
-              block.title !== initialBlock?.title ||
-              block.description !== initialBlock?.description ||
-              block.startTime !== initialBlock?.startTime ||
-              block.endTime !== initialBlock?.endTime ||
-              block.location !== initialBlock?.location
-            )
-          })
-        })
+        itineraryData.sections.some((section, section_index) =>
+          checkIsBlockModified(section, section_index)
+        )
       const isTitleModified =
         itineraryData.title !== initialItineraryData.current.title
       const isDatesModified =
