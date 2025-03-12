@@ -48,7 +48,8 @@ export default function ItineraryMakerModule() {
   const { isAuthenticated } = useAuthContext()
   const router = useRouter()
   const { id: itineraryId } = useParams<{ id: string }>()
-  const [data, setData] = useState<Itinerary>({} as Itinerary)
+  const [data, setData] = useState<Itinerary | null>(null)
+  const wasAlreadyRequested = useRef(false)
 
   const initialItineraryData = useRef<CreateItineraryDto>({
     title: 'Itinerary Tanpa Judul',
@@ -91,6 +92,7 @@ export default function ItineraryMakerModule() {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        wasAlreadyRequested.current = true
         const res = await customFetch<ItineraryDetailResponse>(
           `/itineraries/${itineraryId}`,
           {
@@ -105,12 +107,14 @@ export default function ItineraryMakerModule() {
         return <NotFound statusCode={404} />
       }
     }
-    void fetchData()
-  }, [])
+    if (!wasAlreadyRequested.current) {
+      void fetchData()
+    }
+  }, [wasAlreadyRequested])
 
   // Map existing data if fetched
   useEffect(() => {
-    if (itineraryId) {
+    if (data) {
       // Section and Block mapping
       const mappedSections: Section[] = data.sections
         ? data.sections.map((section) => ({
