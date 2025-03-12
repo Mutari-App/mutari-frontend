@@ -25,6 +25,7 @@ export default function DetailItineraryModule() {
 
         setData(res.data)
         setError(null)
+        document.title = `${res.data.title} - Mutari`
       } catch (err: any) {
         setError('Gagal menampilkan detail itinerary')
       }
