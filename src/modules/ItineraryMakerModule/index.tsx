@@ -862,26 +862,34 @@ export default function ItineraryMakerModule() {
         })),
       }
 
-      const response = await customFetch<CreateItineraryResponse>(
-        '/itineraries',
-        {
-          method: 'POST',
-          body: customFetchBody(submissionData),
-          credentials: 'include',
-        }
-      )
+      const response = itineraryId
+        ? await customFetch<CreateItineraryResponse>(
+            `/itineraries/${itineraryId}`,
+            {
+              method: 'PATCH',
+              body: customFetchBody(submissionData),
+              credentials: 'include',
+            }
+          )
+        : await customFetch<CreateItineraryResponse>('/itineraries', {
+            method: 'POST',
+            body: customFetchBody(submissionData),
+            credentials: 'include',
+          })
 
-      if (response.statusCode !== 201) {
-        throw new Error('Failed to create itinerary')
+      if (!response.success) {
+        throw new Error('Failed to create or edit itinerary')
       }
 
       setHasUnsavedChanges(false)
-      toast('Itinerary created successfully')
+      toast(`Itinerary ${itineraryId ? 'updated' : 'created'} successfully`)
 
       router.push(`/itinerary/${response.id}`)
     } catch (error) {
-      console.error('Error creating itinerary:', error)
-      toast.error('Failed to create itinerary. Please try again.')
+      console.error('Error creating or updating itinerary:', error)
+      toast.error(
+        `Failed to ${itineraryId ? 'updated' : 'created'} itinerary. Please try again.`
+      )
     } finally {
       setIsSubmitting(false)
     }
