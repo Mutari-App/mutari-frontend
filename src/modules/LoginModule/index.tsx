@@ -18,7 +18,7 @@ export default function LoginModule() {
 
       <section className="flex min-h-screen flex-row relative">
         <JoinUsSection />
-        <div className="bg-white w-full flex flex-col items-center  justify-center gap-10 p-[10%] md:p-[2%]">
+        <div className="bg-white w-full lg:w-1/2 flex flex-col items-center  justify-center gap-10 p-[10%] md:p-[2%]">
           <RegisterFormHeader />
           <LoginForm />
         </div>
