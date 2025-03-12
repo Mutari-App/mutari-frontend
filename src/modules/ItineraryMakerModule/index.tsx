@@ -116,16 +116,22 @@ export default function ItineraryMakerModule() {
         ? data.sections.map((section) => ({
             sectionNumber: section.sectionNumber,
             title: section.title,
-            blocks: section.blocks.map((block) => ({
-              id: block.id,
-              blockType: block.blockType,
-              title: block.title,
-              description: block.description,
-              startTime: block.startTime,
-              endTime: block.endTime,
-              location: block.location,
-              price: block.price,
-            })),
+            blocks: section.blocks.map((block) => {
+              if (block.startTime || block.endTime)
+                toggleInput(block.id, 'time')
+              if (block.price > 0) toggleInput(block.id, 'price')
+              if (block.location) toggleInput(block.id, 'location')
+              return {
+                id: block.id,
+                blockType: block.blockType,
+                title: block.title,
+                description: block.description,
+                startTime: block.startTime,
+                endTime: block.endTime,
+                location: block.location,
+                price: block.price,
+              }
+            }),
           }))
         : []
       // Tags mapping
