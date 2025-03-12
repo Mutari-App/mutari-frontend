@@ -30,7 +30,7 @@ import { TagSelector } from './module-elements/TagSelector'
 import { CldUploadButton } from 'next-cloudinary'
 import { cn } from '@/lib/utils'
 import { useAuthContext } from '@/contexts/AuthContext'
-import { redirect, useRouter } from 'next/navigation'
+import { redirect, useParams, useRouter } from 'next/navigation'
 
 const SAVED_ITINERARY_KEY = 'saved_itinerary_data'
 
@@ -46,6 +46,8 @@ export default function ItineraryMakerModule() {
   const [availableTags, setAvailableTags] = useState<Tag[]>([])
   const { isAuthenticated } = useAuthContext()
   const router = useRouter()
+  const { id: itineraryId } = useParams<{ id: string }>()
+  const [data, setData] = useState<Itinerary>({} as Itinerary)
 
   const initialItineraryData = useRef<CreateItineraryDto>({
     title: 'Itinerary Tanpa Judul',
@@ -83,6 +85,64 @@ export default function ItineraryMakerModule() {
   const [itineraryData, setItineraryData] = useState<CreateItineraryDto>(
     initialItineraryData.current
   )
+
+  // Fetch detail if id is provided
+  useEffect(() => {
+    if (itineraryId) {
+      const fetchData = async () => {
+        try {
+          const res = await customFetch<ItineraryDetailResponse>(
+            `/itineraries/${itineraryId}`,
+            {
+              method: 'GET',
+              credentials: 'include',
+            }
+          )
+
+          if (res.statusCode !== 200) throw new Error(res.message)
+          setData(res.data)
+        } catch (err: any) {}
+      }
+      void fetchData()
+    }
+  }, [itineraryId])
+
+  // Map existing data if fetched
+  useEffect(() => {
+    if (itineraryId) {
+      // Section and Block mapping
+      const mappedSections: Section[] = data.sections
+        ? data.sections.map((section) => ({
+            sectionNumber: section.sectionNumber,
+            title: section.title,
+            blocks: section.blocks.map((block) => ({
+              id: block.id,
+              blockType: block.blockType,
+              title: block.title,
+              description: block.description,
+              startTime: block.startTime,
+              endTime: block.endTime,
+              location: block.location,
+              price: block.price,
+            })),
+          }))
+        : []
+      // Tags mapping
+      const mappedTags: string[] = data.tags
+        ? data.tags.map((tag) => tag.tag.id)
+        : []
+      setItineraryData((prev) => ({
+        ...prev,
+        title: data.title,
+        description: data.description,
+        coverImage: data.coverImage,
+        startDate: data.startDate,
+        endDate: data.endDate,
+        tags: mappedTags,
+        sections: mappedSections,
+      }))
+    }
+  }, [data])
 
   // Load saved itinerary data from local storage
   useEffect(() => {
