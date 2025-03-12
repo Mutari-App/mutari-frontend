@@ -31,6 +31,7 @@ import { CldUploadButton } from 'next-cloudinary'
 import { cn } from '@/lib/utils'
 import { useAuthContext } from '@/contexts/AuthContext'
 import { redirect, useParams, useRouter } from 'next/navigation'
+import NotFound from 'next/error'
 
 const SAVED_ITINERARY_KEY = 'saved_itinerary_data'
 
@@ -88,24 +89,24 @@ export default function ItineraryMakerModule() {
 
   // Fetch detail if id is provided
   useEffect(() => {
-    if (itineraryId) {
-      const fetchData = async () => {
-        try {
-          const res = await customFetch<ItineraryDetailResponse>(
-            `/itineraries/${itineraryId}`,
-            {
-              method: 'GET',
-              credentials: 'include',
-            }
-          )
+    const fetchData = async () => {
+      try {
+        const res = await customFetch<ItineraryDetailResponse>(
+          `/itineraries/${itineraryId}`,
+          {
+            method: 'GET',
+            credentials: 'include',
+          }
+        )
 
-          if (res.statusCode !== 200) throw new Error(res.message)
-          setData(res.data)
-        } catch (err: any) {}
+        if (res.statusCode !== 200) throw new Error(res.message)
+        setData(res.data)
+      } catch (err: any) {
+        return <NotFound statusCode={404} />
       }
-      void fetchData()
     }
-  }, [itineraryId])
+    void fetchData()
+  }, [])
 
   // Map existing data if fetched
   useEffect(() => {
