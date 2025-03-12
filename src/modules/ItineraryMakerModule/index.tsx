@@ -132,8 +132,14 @@ export default function ItineraryMakerModule() {
       const mappedTags: string[] = data.tags
         ? data.tags.map((tag) => tag.tag.id)
         : []
-      setItineraryData((prev) => ({
-        ...prev,
+      // Apply date
+      if (data.startDate && data.endDate) {
+        setDateRange({
+          from: new Date(data.startDate),
+          to: new Date(data.endDate),
+        })
+      }
+      setItineraryData({
         title: data.title,
         description: data.description,
         coverImage: data.coverImage,
@@ -141,7 +147,7 @@ export default function ItineraryMakerModule() {
         endDate: data.endDate,
         tags: mappedTags,
         sections: mappedSections,
-      }))
+      } as CreateItineraryDto)
     }
   }, [data])
 
