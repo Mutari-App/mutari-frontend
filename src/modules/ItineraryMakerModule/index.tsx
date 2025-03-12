@@ -221,35 +221,44 @@ export default function ItineraryMakerModule() {
     // Check for unsaved changes by comparing current data with initial data
     const checkUnsavedChanges = () => {
       // Check if there are any blocks with modified data
-      const hasModifiedBlocks = itineraryData.sections.some((section) => {
-        return section.blocks?.some((block) => {
-          return (
-            block.title !== 'Masukkan Judul' ||
-            (block.description ??
-              block.startTime ??
-              block.endTime ??
-              block.location ??
-              block.price !== undefined)
-          )
+      const isBlocksModified =
+        itineraryData.sections.length !==
+          initialItineraryData.current.sections.length ||
+        itineraryData.sections.some((section, section_index) => {
+          return section.blocks?.some((block, index) => {
+            const initialBlock =
+              initialItineraryData.current.sections[section_index]?.blocks?.[
+                index
+              ]
+            return (
+              block.title !== initialBlock?.title ||
+              block.description !== initialBlock?.description ||
+              block.startTime !== initialBlock?.startTime ||
+              block.endTime !== initialBlock?.endTime ||
+              block.location !== initialBlock?.location
+            )
+          })
         })
-      })
-      const hasBlocks = itineraryData.sections.some(
-        (section) => section.blocks && section.blocks.length > 1
-      )
-      const hasCustomTitle =
+      const isTitleModified =
         itineraryData.title !== initialItineraryData.current.title
-      const hasDates =
-        itineraryData.startDate !== '' || itineraryData.endDate !== ''
-      const hasTags = (itineraryData.tags?.length ?? 0) > 0
-      const hasCoverImage = itineraryData.coverImage !== ''
-
+      const isDatesModified =
+        itineraryData.startDate !== initialItineraryData.current.startDate ||
+        itineraryData.endDate !== initialItineraryData.current.endDate
+      const isTagsModified =
+        (itineraryData.tags?.length ?? 0) !==
+          (initialItineraryData.current.tags?.length ?? 0) ||
+        (itineraryData.tags?.some((tag, tag_index) => {
+          return tag !== initialItineraryData.current.tags?.[tag_index]
+        }) ??
+          false)
+      const isCoverModified =
+        itineraryData.coverImage !== initialItineraryData.current.coverImage
       setHasUnsavedChanges(
-        hasBlocks ||
-          hasCustomTitle ||
-          hasDates ||
-          hasTags ||
-          hasCoverImage ||
-          hasModifiedBlocks
+        isBlocksModified ||
+          isTitleModified ||
+          isDatesModified ||
+          isTagsModified ||
+          isCoverModified
       )
     }
 
