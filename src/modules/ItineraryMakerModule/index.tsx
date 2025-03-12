@@ -140,7 +140,7 @@ export default function ItineraryMakerModule() {
         })
       }
       setItineraryData({
-        title: data.title,
+        title: data.title ?? initialItineraryData.current.title,
         description: data.description,
         coverImage: data.coverImage,
         startDate: data.startDate,
