@@ -26,6 +26,7 @@ export default function DetailItineraryModule() {
         }
 
         setData(res.data)
+        document.title = `${res.data.title} - Mutari`
       } catch (err: any) {
         setIsNotFound(true)
       }
