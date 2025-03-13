@@ -11,7 +11,14 @@ export interface AuthContextInterface {
   isAuthenticated: boolean
   setIsAuthenticated: React.Dispatch<React.SetStateAction<boolean>>
   validate: (params: { ticket: string }) => Promise<ValidateResponse>
-  login: (params: { email: string }) => Promise<CustomFetchBaseResponse>
+  login: (params: {
+    email: string
+    password: string
+  }) => Promise<CustomFetchBaseResponse>
+  preRegistLogin: (params: {
+    email: string
+  }) => Promise<CustomFetchBaseResponse>
+  logout: () => Promise<CustomFetchBaseResponse>
 }
 
 export interface User {

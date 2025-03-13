@@ -7,7 +7,7 @@ import React, {
   useRef,
   useState,
 } from 'react'
-import { getCookie, setCookie } from 'cookies-next/client'
+import { getCookie, setCookie, getCookies } from 'cookies-next/client'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { toast } from 'sonner'
 import { useBaseUrlWithPath } from '@/hooks/useBaseUrlWithPath'
@@ -28,6 +28,12 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
   user: userFromServer,
   children,
 }) => {
+  const launchingDate = new Date(
+    process.env.NEXT_PUBLIC_LAUNCHING_DATE || '2025-01-22T00:00:00'
+  )
+  const nowDate = new Date()
+  const isLaunching = nowDate > launchingDate
+
   const [user, setUser] = useState<null | User>(userFromServer)
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false)
   const searchParams = useSearchParams()
@@ -68,7 +74,22 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
     }
   }
 
-  const login = async ({ email }: { email: string }) => {
+  const login = async (body: { email: string; password: string }) => {
+    const response = await customFetch('/auth/login', {
+      method: 'POST',
+      credentials: 'include',
+      body: customFetchBody(body),
+    })
+
+    if (response.statusCode === 200) {
+      setIsAuthenticated(true)
+      return response
+    } else {
+      throw new Error(response.message)
+    }
+  }
+
+  const preRegistLogin = async ({ email }: { email: string }) => {
     const response = await customFetch('/pre-register/login', {
       method: 'POST',
       body: customFetchBody({ email }),
@@ -81,10 +102,40 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
     }
   }
 
+  const logout = async () => {
+    const response = await customFetch('/auth/logout', {
+      method: 'POST',
+    })
+    return response
+  }
+
+  const getMe = async () => {
+    try {
+      // TODO: change this endpoint to a more proper protected endpoint
+      const response = await customFetch('/itineraries/me/completed')
+
+      if (response.statusCode === 200) {
+        setIsAuthenticated(true)
+      } else {
+        setIsAuthenticated(false)
+      }
+    } catch (err) {
+      setIsAuthenticated(false)
+    }
+  }
+
   useEffect(() => {
-    const accessToken = getCookie('AT')
-    setIsAuthenticated(!!accessToken)
-    if (!developmentLock.current || process.env.NODE_ENV === 'production') {
+    if (isLaunching) {
+      void getMe()
+    } else {
+      const accessToken = getCookie('AT')
+      setIsAuthenticated(!!accessToken)
+    }
+
+    if (
+      !isLaunching &&
+      (!developmentLock.current || process.env.NODE_ENV === 'production')
+    ) {
       if (searchParams.toString().includes('ticket') && !!fullUrl) {
         const ticket = searchParams.get('ticket')
         toast.promise(validate({ ticket: ticket! }), {
@@ -110,7 +161,9 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
     isAuthenticated,
     setIsAuthenticated,
     validate,
+    preRegistLogin,
     login,
+    logout,
   }
 
   return (

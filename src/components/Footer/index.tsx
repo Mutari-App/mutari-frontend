@@ -1,11 +1,40 @@
-import React from 'react'
+'use client'
+
+import React, { useEffect, useState } from 'react'
 import Image from 'next/image'
 import { Mail } from 'lucide-react'
 import { getImage } from '@/utils/getImage'
 import { Instagram } from '@/icons/Instagram'
 import { Twitter } from '@/icons/Twitter'
+import { usePathname } from 'next/navigation'
+import { customFetch } from '@/utils/customFetch'
 
 export const Footer: React.FC = () => {
+  const pathname = usePathname()
+  const [isValidItinerary, setIsValidItinerary] = useState<boolean | null>(null)
+
+  useEffect(() => {
+    void (async () => {
+      const pathnameParts = pathname.split('/')
+      const itineraryId = pathnameParts[2]
+
+      if (!itineraryId || itineraryId === 'create') return
+
+      try {
+        const res = await customFetch<{ id: string }>(
+          `/itineraries/${itineraryId}`
+        )
+        setIsValidItinerary(res.statusCode === 200)
+      } catch {
+        setIsValidItinerary(false)
+      }
+    })()
+  }, [pathname])
+
+  if (pathname === '/itinerary/create' || isValidItinerary) {
+    return null
+  }
+
   return (
     <section className="flex justify-center items-center relative bg-[#0059B3] py-8 md:py-12 text-white">
       <div className="relative max-w-screen-xl mx-auto flex gap-4 justify-center">

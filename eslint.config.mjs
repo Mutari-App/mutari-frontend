@@ -26,6 +26,7 @@ export default [
       '**/pnpm-lock.yaml',
       'eslint.config.mjs',
       'postcss.config.mjs',
+      '**/coverage',
     ],
   },
   ...compat.extends(
@@ -50,6 +51,7 @@ export default [
     },
 
     rules: {
+      '@typescript-eslint/prefer-nullish-coalescing': 'warn',
       '@typescript-eslint/array-type': 'off',
       '@typescript-eslint/no-unnecessary-type-assertion': 'warn',
       '@typescript-eslint/consistent-type-definitions': 'off',
