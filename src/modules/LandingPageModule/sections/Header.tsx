@@ -7,8 +7,16 @@ import { Button } from '@/components/ui/button'
 import { ChevronLeft, ChevronRight, ChevronsDownIcon } from 'lucide-react'
 import Link from 'next/link'
 import { getImage } from '@/utils/getImage'
+import { useAuthContext } from '@/contexts/AuthContext'
 
 export const Header: React.FC = () => {
+  const { isAuthenticated } = useAuthContext()
+  const launchingDate = new Date(
+    process.env.NEXT_PUBLIC_LAUNCHING_DATE || '2025-01-22T00:00:00'
+  )
+  const nowDate = new Date()
+  const isLaunching = nowDate > launchingDate
+
   const carouselRef = useRef<HTMLDivElement>(null)
   const sliderRef = useRef<HTMLDivElement>(null)
   const thumbnailRef = useRef<HTMLDivElement>(null)
@@ -105,10 +113,12 @@ export const Header: React.FC = () => {
                 {item.name}
               </div>
               <div className="city font-raleway text-xs">{item.city}</div>
-              <Link href={'#praregistrasi'}>
+              <Link href={isLaunching ? '/register' : '#praregistrasi'}>
                 <Button className="flex md:hidden text-xs rounded-[150px] mt-5 bg-white text-[#0059B3] w-fit px-4 py-2 gap-3 hover:bg-[#FFFB]">
                   <ChevronsDownIcon />
-                  Pra-Registrasi Sekarang!
+                  {isLaunching
+                    ? 'Registrasi Sekarang!'
+                    : 'Pra-Registrasi Sekarang!'}
                 </Button>
               </Link>
             </div>
@@ -140,12 +150,18 @@ export const Header: React.FC = () => {
       </div>
 
       <div className="flex flex-col gap-5 absolute top-[75%] left-[10%] w-[300px] max-w-[30%] z-40">
-        <Link href={'#praregistrasi'}>
-          <Button className="hidden md:flex rounded-[150px] bg-white text-[#0059B3] w-fit px-4 py-2 gap-3 hover:bg-[#FFFB]">
-            <ChevronsDownIcon />
-            Pra-Registrasi Sekarang!
-          </Button>
-        </Link>
+        {isAuthenticated && isLaunching ? (
+          <></>
+        ) : (
+          <Link href={isLaunching ? '/register' : '#praregistrasi'}>
+            <Button className="hidden md:flex rounded-[150px] bg-white text-[#0059B3] w-fit px-4 py-2 gap-3 hover:bg-[#FFFB]">
+              <ChevronsDownIcon />
+              {isLaunching
+                ? 'Registrasi Sekarang!'
+                : 'Pra-Registrasi Sekarang!'}
+            </Button>
+          </Link>
+        )}
         <div className="arrows flex gap-5 items-center">
           <Button
             onClick={() => showSlider('prev')}

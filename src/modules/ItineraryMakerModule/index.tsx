@@ -36,6 +36,12 @@ import NotFound from 'next/error'
 const SAVED_ITINERARY_KEY = 'saved_itinerary_data'
 
 export default function ItineraryMakerModule() {
+  const launchingDate = new Date(
+    process.env.NEXT_PUBLIC_LAUNCHING_DATE || '2025-01-22T00:00:00'
+  )
+  const nowDate = new Date()
+  const isLaunching = nowDate > launchingDate
+
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [timeWarning, setTimeWarning] = useState<{
     blockId: string
@@ -98,6 +104,7 @@ export default function ItineraryMakerModule() {
           {
             method: 'GET',
             credentials: 'include',
+            isAuthorized: true,
           }
         )
 
@@ -873,7 +880,9 @@ export default function ItineraryMakerModule() {
       localStorage.setItem(SAVED_ITINERARY_KEY, JSON.stringify(itineraryData))
       setHasUnsavedChanges(false)
       toast.info('Silakan login untuk menyimpan itinerary Anda')
-      redirect('/login?redirect=/itinerary/create')
+      redirect(
+        isLaunching ? '/login?redirect=/itinerary/create' : '/#praregistrasi'
+      )
     }
 
     // If user is authenticated, proceed with normal submission
@@ -899,12 +908,14 @@ export default function ItineraryMakerModule() {
               method: 'PATCH',
               body: customFetchBody(submissionData),
               credentials: 'include',
+              isAuthorized: true,
             }
           )
         : await customFetch<CreateItineraryResponse>('/itineraries', {
             method: 'POST',
             body: customFetchBody(submissionData),
             credentials: 'include',
+            isAuthorized: true,
           })
 
       if (!response.success) {

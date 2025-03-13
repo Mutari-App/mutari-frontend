@@ -18,6 +18,7 @@ export default function DetailItineraryModule() {
           `/itineraries/${id}`,
           {
             credentials: 'include',
+            isAuthorized: true,
           }
         )
 
@@ -35,7 +36,7 @@ export default function DetailItineraryModule() {
   }, [id])
 
   if (isNotFound) {
-    notFound() 
+    notFound()
   }
 
   return (

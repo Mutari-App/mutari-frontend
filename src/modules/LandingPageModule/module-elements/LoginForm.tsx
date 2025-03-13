@@ -40,7 +40,6 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   })
 
   const onSubmit = async (values: z.infer<typeof loginSchema>) => {
-    console.log('Form Data:', values)
     setLoading(true)
     try {
       const response = await customFetch('/pre-register/login', {
