@@ -27,10 +27,10 @@ export async function customFetch<T>(
     if (cookies) {
       // Server-side: use ReadonlyRequestCookies
       const serverCookies = await cookies()
-      token = serverCookies.get('accessToken')?.value
+      token = serverCookies.get('AT')?.value
     } else {
       // Client-side: use cookies-next with proper type handling
-      const clientToken = getCookie('accessToken')
+      const clientToken = getCookie('AT')
       token = typeof clientToken === 'string' ? clientToken : undefined
     }
 
@@ -50,6 +50,8 @@ export async function customFetch<T>(
     const serverCookies = await cookies()
     headers.Cookies = serverCookies.toString()
   }
+
+  console.log(headers.authorization)
 
   let rawResult = await fetch(fullUrl.toString(), {
     headers,
@@ -92,7 +94,7 @@ export async function customFetch<T>(
         method: 'POST',
         credentials: 'include',
       })
-      throw new Error('Session expired, please login again.')
+      // throw new Error('Session expired, please login again.')
     }
   }
 

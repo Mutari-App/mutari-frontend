@@ -1,5 +1,6 @@
 import RegisterModule from '@/modules/RegisterModule'
 import type { Metadata } from 'next'
+import { notFound } from 'next/navigation'
 
 export function generateMetadata(): Metadata {
   return {
@@ -8,5 +9,10 @@ export function generateMetadata(): Metadata {
 }
 
 export default function Home() {
-  return <RegisterModule />
+  const launchingDate = new Date(
+    process.env.NEXT_PUBLIC_LAUNCHING_DATE || '2025-01-22T00:00:00'
+  )
+  const nowDate = new Date()
+  const isLaunching = nowDate > launchingDate
+  return isLaunching ? <RegisterModule /> : notFound()
 }

@@ -101,67 +101,6 @@ export const PreRegisterForm: React.FC<PreRegisterFormProps> = ({
     }
   }
 
-  //   const fetchCities = async (query: string) => {
-  //     try {
-  //       const response = await customFetch<GetCitiesResponse>(
-  //         `/static/cities/${form.getValues('country')}?query=${query}`
-  //       )
-
-  //       if (response.statusCode !== 200) throw new Error('Failed to fetch cities')
-
-  //       setCities(response.cities)
-  //     } catch (error) {
-  //       console.error('Error fetching cities:', error)
-  //     } finally {
-  //       setCityLoading(false)
-  //     }
-  //   }
-
-  //   const fetchCountries = async (query: string) => {
-  //     try {
-  //       const response = await customFetch<GetCountriesResponse>(
-  //         `/static/countries?query=${query}`
-  //       )
-
-  //       if (response.statusCode !== 200)
-  //         throw new Error('Failed to fetch countries')
-
-  //       console.log(response.countries)
-  //       setCountries(response.countries || [])
-  //     } catch (error) {
-  //       console.error('Error fetching cities:', error)
-  //     } finally {
-  //       setCountryLoading(false)
-  //     }
-  //   }
-  //   useEffect(() => {
-  //     if (!countryInput) return
-  //     setCountryLoading(true)
-
-  //     const getData = setTimeout(() => {
-  //       void fetchCountries(countryInput)
-  //     }, 500)
-
-  //     return () => clearTimeout(getData)
-  //   }, [countryInput])
-
-  //   useEffect(() => {
-  //     if (!cityInput || !form.getValues('country')) return
-  //     setCityLoading(true)
-
-  //     const getData = setTimeout(() => {
-  //       void fetchCities(cityInput)
-  //     }, 500)
-
-  //     return () => clearTimeout(getData)
-  //   }, [cityInput, form.getValues('country')])
-
-  //   useEffect(() => {
-  //     setSelectedCity('')
-  //     setCityInput('')
-  //     form.setValue('city', '')
-  //   }, [form.getValues('country')])
-
   return isSuccess ? (
     <div className="relative  rounded-2xl p-8 text-center text-white shadow-xl  ">
       <CheckCircle className="mx-auto h-16 w-16 text-green-400 mb-6" />

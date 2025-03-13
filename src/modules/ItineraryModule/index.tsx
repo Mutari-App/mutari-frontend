@@ -39,35 +39,32 @@ export default function ItineraryModule() {
   const fetchMyItinerary = async () => {
     try {
       const res = await customFetch<ItineraryResponse>(
-        `/itineraries/me?page=${page}`
+        `/itineraries/me?page=${page}`,
+        { isAuthorized: true }
       )
+      if (res.statusCode === 401) return
+
       if (res.statusCode !== 200) throw new Error(res.message)
       setData(res.itinerary.data)
       setMetadata(res.itinerary.metadata)
-      console.log(res)
     } catch (err: any) {
-      console.log(err)
-      if (err instanceof Error)
-        toast.error(`${err.message}`, {
-          richColors: true,
-        })
+      if (err instanceof Error) toast.error(`${err.message}`)
     }
   }
 
   const fetchMyCompletedItinerary = async () => {
     try {
       const res = await customFetch<CompletedItineraryResponse>(
-        `/itineraries/me/completed`
+        `/itineraries/me/completed`,
+        {
+          isAuthorized: true,
+        }
       )
+      if (res.statusCode === 401) return
       if (res.statusCode !== 200) throw new Error(res.message)
       setCompletedData(res.itinerary)
-      console.log(res.itinerary)
     } catch (err: any) {
-      console.log(err)
-      if (err instanceof Error)
-        toast.error(`${err.message}`, {
-          richColors: true,
-        })
+      if (err instanceof Error) toast.error(`${err.message}`)
     }
   }
 

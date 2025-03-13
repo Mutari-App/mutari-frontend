@@ -90,7 +90,16 @@ export default async function RootLayout({
         <Suspense>
           <AuthContextProvider user={user}>
             <main className="w-full bg-white">{children}</main>
-            <Toaster />
+            <Toaster
+              toastOptions={{
+                classNames: {
+                  error: 'bg-red-400',
+                  success: 'text-green-400',
+                  warning: 'text-yellow-400',
+                  info: 'bg-blue-400',
+                },
+              }}
+            />
           </AuthContextProvider>
         </Suspense>
       </body>

@@ -4,8 +4,8 @@ import { customFetch } from '../utils/customFetch'
 import { getCookie } from 'cookies-next/server'
 
 export default async function useUserServer() {
-  const AT = await getCookie('AT', { cookies })
-  if (!AT) {
+  const accessToken = await getCookie('AT', { cookies })
+  if (!accessToken) {
     return null
   }
 
