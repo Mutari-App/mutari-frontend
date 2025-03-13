@@ -17,7 +17,7 @@ export const ItinerarySummary = ({
     })
 
   return (
-    <div className="flex items-center gap-2 text-[#024C98] font-roboto font-medium text-lg mt-2">
+    <div className="flex items-center gap-2 text-[#024C98] font-roboto font-medium md:text-sm mt-2">
       <Calendar size={20} />
       <span className="font-bold">
         {formatDate(startDate)} - {formatDate(endDate)}
