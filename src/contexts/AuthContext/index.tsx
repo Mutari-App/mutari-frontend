@@ -19,6 +19,7 @@ import {
   type ValidateResponse,
 } from './interface'
 import { customFetch, customFetchBody } from '@/utils/customFetch'
+import { deleteCookie } from 'cookies-next'
 
 const AuthContext = createContext({} as AuthContextInterface)
 
@@ -107,6 +108,8 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
       method: 'POST',
       credentials: 'include',
     })
+    await deleteCookie('accessToken')
+    await deleteCookie('refreshToken')
     return response
   }
 
