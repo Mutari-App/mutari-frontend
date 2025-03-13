@@ -10,9 +10,7 @@ export const ItineraryDay = ({ section }: { section: Section }) => {
         {section.sectionNumber}
       </div>
 
-      <h2 className="text-3xl mt-3 font-raleway font-bold ml-2">
-        {section.title}
-      </h2>
+      <h2 className="md:text-2xl mt-3 font-semibold ml-2">{section.title}</h2>
 
       {section.blocks.map((block, index) => {
         const isLastBlock = index === section.blocks.length - 1
@@ -27,16 +25,16 @@ export const ItineraryDay = ({ section }: { section: Section }) => {
           <div
             key={block.id}
             className={cn(
-              'p-3',
+              'p-3 w-full',
               block.blockType === 'NOTE' ? 'bg-[#E5F1FF]' : 'bg-white'
             )}
           >
             {block.blockType === 'LOCATION' && (
               <>
-                <h3 className="text-3xl font-bold font-raleway">
+                <h3 className="md:text-2xl font-bold font-raleway">
                   {block.title}
                 </h3>
-                <div className="flex items-center gap-4 text-lg text-[#024C98] font-roboto font-medium">
+                <div className="flex items-center gap-4 md:text-lg text-[#024C98] font-roboto font-medium">
                   <div className="flex items-center gap-1">
                     <Clock size={16} /> {formatTime(block.startTime)} -{' '}
                     {formatTime(block.endTime)}
@@ -48,12 +46,12 @@ export const ItineraryDay = ({ section }: { section: Section }) => {
                     <MapPin size={16} /> {block.location}
                   </div>
                 </div>
-                <p className="text-lg font-roboto">{block.description}</p>
+                <p className="md:text-lg font-roboto">{block.description}</p>
               </>
             )}
 
             {block.blockType === 'NOTE' && (
-              <p className="text-lg font-roboto">{block.description}</p>
+              <p className="md:text-lg font-roboto">{block.description}</p>
             )}
 
             {isLastBlock && (
