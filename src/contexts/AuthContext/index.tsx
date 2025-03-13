@@ -105,6 +105,7 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
   const logout = async () => {
     const response = await customFetch('/auth/logout', {
       method: 'POST',
+      credentials: 'include',
     })
     return response
   }
