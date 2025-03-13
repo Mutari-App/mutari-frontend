@@ -52,9 +52,8 @@ export const Navbar: React.FC = () => {
     void (async () => {
       const pathnameParts = pathname.split('/')
       const itineraryId = pathnameParts[2]
-      const isEdit = pathnameParts[3] === 'edit'
 
-      if (!itineraryId || itineraryId === 'create' || isEdit) return
+      if (!itineraryId || itineraryId === 'create') return
 
       try {
         const res = await customFetch<{ id: string }>(

@@ -4,11 +4,11 @@ import { ItineraryHeader } from './module-elements/ItineraryHeader'
 import { ItineraryList } from './module-elements/ItineraryList'
 import { ItinerarySummary } from './module-elements/ItinerarySummary'
 import { useEffect, useState } from 'react'
-import { useParams } from 'next/navigation'
+import { notFound, useParams } from 'next/navigation'
 
 export default function DetailItineraryModule() {
   const [data, setData] = useState<Itinerary>({} as Itinerary)
-  const [error, setError] = useState<string | null>(null)
+  const [isNotFound, setIsNotFound] = useState(false)
   const { id } = useParams<{ id: string }>()
 
   useEffect(() => {
@@ -21,35 +21,28 @@ export default function DetailItineraryModule() {
           }
         )
 
-        if (res.statusCode !== 200) throw new Error(res.message)
+        if (res.statusCode === 404) {
+          setIsNotFound(true)
+        }
 
         setData(res.data)
-        setError(null)
+        document.title = `${res.data.title} - Mutari`
       } catch (err: any) {
-        setError('Gagal menampilkan detail itinerary')
+        setIsNotFound(true)
       }
     }
     void fetchData()
   }, [id])
 
+  if (isNotFound) {
+    notFound() 
+  }
+
   return (
-    <div className="flex justify-center m-4 p-6">
-      {error && (
-        <div className="absolute top-4 right-4 bg-red-500 text-white px-4 py-2 rounded-lg shadow-md">
-          <p>{error}</p>
-          <button
-            onClick={() => setError(null)}
-            className="ml-2 text-sm opacity-80 hover:opacity-100"
-          >
-            ✖
-          </button>
-        </div>
-      )}
-      <div>
-        <ItineraryHeader data={data} />
-        <ItinerarySummary startDate={data.startDate} endDate={data.endDate} />
-        <ItineraryList section={data.sections || []} />
-      </div>
+    <div className="container max-w-4xl mx-auto p-4 min-h-screen">
+      <ItineraryHeader data={data} />
+      <ItinerarySummary startDate={data.startDate} endDate={data.endDate} />
+      <ItineraryList section={data.sections || []} />
     </div>
   )
 }

@@ -46,7 +46,10 @@ const hammersmithOne = Hammersmith_One({
 })
 
 export const metadata: Metadata = {
-  title: 'Mutari - Satu Aplikasi, Sejuta Destinasi, Bersama Mutari!',
+  title: {
+    default: 'Mutari - Satu Aplikasi, Sejuta Destinasi, Bersama Mutari!',
+    template: '%s - Mutari',
+  },
   description:
     'Mutari adalah platform digital yang membantu wisatawan merencanakan perjalanan di Indonesia dengan itinerary otomatis, rekomendasi destinasi, dan kemudahan booking akomodasi serta transportasi.',
 }
