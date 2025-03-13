@@ -108,6 +108,7 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
       method: 'POST',
       credentials: 'include',
     })
+    setIsAuthenticated(false)
     await deleteCookie('accessToken')
     await deleteCookie('refreshToken')
     return response
@@ -122,6 +123,7 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
         setIsAuthenticated(true)
       } else {
         setIsAuthenticated(false)
+        setUser(null)
       }
     } catch (err) {
       setIsAuthenticated(false)
