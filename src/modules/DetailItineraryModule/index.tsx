@@ -6,6 +6,15 @@ import { ItinerarySummary } from './module-elements/ItinerarySummary'
 import { useEffect, useState } from 'react'
 import { notFound, useParams } from 'next/navigation'
 
+/**
+ * Retrieves and displays itinerary details based on the itinerary ID from the URL.
+ *
+ * This component fetches itinerary details using a custom fetch call and updates the state accordingly.
+ * If the fetch returns a 404 response or encounters an error, it triggers the not found page; otherwise,
+ * it renders the itinerary information and updates the document title to include the itinerary's title followed by " - Mutari".
+ *
+ * @returns A React component containing the itinerary header, summary, and list, or it triggers a not found state.
+ */
 export default function DetailItineraryModule() {
   const [data, setData] = useState<Itinerary>({} as Itinerary)
   const [isNotFound, setIsNotFound] = useState(false)

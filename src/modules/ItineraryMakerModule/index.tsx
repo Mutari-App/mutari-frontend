@@ -35,6 +35,21 @@ import NotFound from 'next/error'
 
 const SAVED_ITINERARY_KEY = 'saved_itinerary_data'
 
+/**
+ * Renders the itinerary maker module for creating and editing itineraries.
+ *
+ * This component manages itinerary details such as title, description, cover image, tags, date ranges,
+ * and sections with blocks. It conditionally fetches itinerary data when an itinerary ID is provided,
+ * mapping the fetched information into its state. The component also handles unsaved changes through local storage,
+ * supports image uploads and tag selection, and offers dynamic management of sections and blocks—including
+ * drag-and-drop reordering, addition, and removal. Additionally, it validates time selections and prompts for
+ * confirmation when reducing the itinerary's date range may remove non-empty sections.
+ *
+ * For unauthenticated users, the itinerary is saved locally and the user is redirected to log in; authenticated
+ * users have their itineraries submitted directly to the server.
+ *
+ * @returns The JSX element representing the itinerary maker module.
+ */
 export default function ItineraryMakerModule() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [timeWarning, setTimeWarning] = useState<{
