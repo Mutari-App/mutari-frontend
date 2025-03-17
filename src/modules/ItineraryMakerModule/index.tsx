@@ -37,7 +37,7 @@ const SAVED_ITINERARY_KEY = 'saved_itinerary_data'
 
 export default function ItineraryMakerModule() {
   const launchingDate = new Date(
-    process.env.NEXT_PUBLIC_LAUNCHING_DATE || '2025-01-22T00:00:00'
+    process.env.NEXT_PUBLIC_LAUNCHING_DATE ?? '2025-01-22T00:00:00'
   )
   const nowDate = new Date()
   const isLaunching = nowDate > launchingDate
@@ -117,7 +117,7 @@ export default function ItineraryMakerModule() {
     if (!wasAlreadyRequested.current) {
       void fetchData()
     }
-  }, [wasAlreadyRequested])
+  }, [itineraryId, wasAlreadyRequested])
 
   // Map existing data if fetched
   useEffect(() => {
@@ -194,7 +194,6 @@ export default function ItineraryMakerModule() {
         localStorage.removeItem(SAVED_ITINERARY_KEY)
       }
     } catch (error) {
-      console.error('Error loading saved itinerary:', error)
       toast.error('Gagal memuat itinerary yang tersimpan')
       localStorage.removeItem(SAVED_ITINERARY_KEY)
     }
@@ -216,7 +215,6 @@ export default function ItineraryMakerModule() {
           toast.error('Gagal mengambil tag')
         }
       } catch (error) {
-        console.error('Error fetching tags:', error)
         toast.error('Gagal mengambil tag')
       }
     }
@@ -927,7 +925,6 @@ export default function ItineraryMakerModule() {
 
       router.push(`/itinerary/${response.id}`)
     } catch (error) {
-      console.error('Error creating or updating itinerary:', error)
       toast.error(
         `Failed to ${itineraryId ? 'updated' : 'created'} itinerary. Please try again.`
       )

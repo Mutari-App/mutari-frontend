@@ -1,6 +1,5 @@
 import { getImage } from '@/utils/getImage'
 import Image from 'next/image'
-import Link from 'next/link'
 
 export const ItineraryHeader = ({ data }: { data: Itinerary }) => {
   return (
