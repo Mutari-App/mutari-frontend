@@ -25,7 +25,6 @@ interface ApiErrorResponse extends BaseApiResponse {
 
 type ApiResponse = ApiSuccessResponse | ApiErrorResponse
 
-// Mock dependencies
 jest.mock('lucide-react', () => ({
   Loader: () => 'Loader',
 }))
@@ -51,13 +50,11 @@ interface CustomFetchRequest {
   body: CreateUserRequest
 }
 
-// Mock customFetch with type
 jest.mock('@/utils/customFetch', () => ({
   customFetch: jest.fn() as jest.Mock<Promise<ApiResponse>>,
   customFetchBody: (data: CreateUserRequest): CreateUserRequest => data,
 }))
 
-// Mock toast
 jest.mock('sonner', () => ({
   toast: {
     success: jest.fn(),
