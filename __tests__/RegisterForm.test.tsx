@@ -41,6 +41,8 @@ describe('RegisterForm', () => {
     email: 'john.doe@example.com',
     birthDate: new Date('2000-01-01'),
     uniqueCode: '12345678',
+    password: '',
+    confirmPassword: '',
   }
 
   const mockSetRegisterData = jest.fn()
@@ -70,7 +72,9 @@ describe('RegisterForm', () => {
     fireEvent.click(screen.getByRole('button', { name: /Simpan Password/i }))
 
     await waitFor(() => {
-      const errorMessages = screen.getAllByText(/Required/i)
+      const errorMessages = screen.getAllByText(
+        /Password must be at least 8 characters/i
+      )
       expect(errorMessages).toHaveLength(2)
       errorMessages.forEach((message) => {
         expect(message).toBeInTheDocument()
