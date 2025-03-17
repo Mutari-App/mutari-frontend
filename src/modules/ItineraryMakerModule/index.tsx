@@ -937,7 +937,7 @@ export default function ItineraryMakerModule() {
   }
 
   return (
-    <div className="container max-w-4xl mx-auto p-4 min-h-screen">
+    <div className="container max-w-4xl mx-auto p-4 pt-24 min-h-screen">
       <ItineraryHeader
         title={itineraryData.title}
         coverImage={itineraryData.coverImage}
