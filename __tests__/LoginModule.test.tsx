@@ -35,6 +35,14 @@ jest.mock('@/contexts/AuthContext', () => ({
   }),
 }))
 
+jest.mock('@/utils/getImage', () => ({
+  getImage: jest
+    .fn()
+    .mockReturnValue(
+      'https://res.cloudinary.com/mutari/image/upload/auth_bg.png'
+    ),
+}))
+
 describe('LoginModule', () => {
   beforeEach(() => {
     jest.clearAllMocks()
