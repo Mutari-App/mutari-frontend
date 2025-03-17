@@ -25,6 +25,11 @@ import { useAuthContext } from '@/contexts/AuthContext'
 import { toast } from 'sonner'
 
 export const Navbar: React.FC = () => {
+  const launchingDate = new Date(
+    process.env.NEXT_PUBLIC_LAUNCHING_DATE || '2025-01-22T00:00:00'
+  )
+  const nowDate = new Date()
+  const isLaunching = nowDate > launchingDate
   const { isAuthenticated, logout } = useAuthContext()
   const pathname = usePathname() // Get current route path
   const router = useRouter()
@@ -46,27 +51,6 @@ export const Navbar: React.FC = () => {
     }
   }, [])
 
-  const [isValidItinerary, setIsValidItinerary] = useState<boolean | null>(null)
-
-  useEffect(() => {
-    void (async () => {
-      const pathnameParts = pathname.split('/')
-      const itineraryId = pathnameParts[2]
-      const isEdit = pathnameParts[3] === 'edit'
-
-      if (!itineraryId || itineraryId === 'create' || isEdit) return
-
-      try {
-        const res = await customFetch<{ id: string }>(
-          `/itineraries/${itineraryId}`
-        )
-        setIsValidItinerary(res.statusCode === 200)
-      } catch {
-        setIsValidItinerary(false)
-      }
-    })()
-  }, [pathname])
-
   const handleLogout = async () => {
     try {
       const response = await logout()
@@ -78,10 +62,6 @@ export const Navbar: React.FC = () => {
     } catch (err: any) {
       toast.error((err as Error).message)
     }
-  }
-
-  if (pathname === '/itinerary/create' || isValidItinerary) {
-    return null
   }
 
   return (
@@ -124,46 +104,46 @@ export const Navbar: React.FC = () => {
           </NavigationMenuList>
         </div>
 
-        {/* Profile Dropdown */}
-        {isAuthenticated ? (
-          <DropdownMenu>
-            <DropdownMenuTrigger className="focus:outline-none ">
-              <div className="rounded-full overflow-hidden hover:opacity-80 transition-opacity">
-                <Image
-                  src="/images/profile-placeholder.png"
-                  alt="Profile"
-                  width={40}
-                  height={40}
-                  className="h-10 w-10 object-cover"
-                />
-              </div>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              align="end"
-              className="w-48 p-2 relative z-[102]"
-            >
-              <DropdownMenuItem
-                onClick={handleLogout}
-                className="cursor-pointer flex items-center gap-2 text-red-500 hover:text-red-700 focus:text-red-700"
+        {isLaunching &&
+          (isAuthenticated ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger className="focus:outline-none ">
+                <div className="rounded-full overflow-hidden hover:opacity-80 transition-opacity">
+                  <Image
+                    src="/images/profile-placeholder.png"
+                    alt="Profile"
+                    width={40}
+                    height={40}
+                    className="h-10 w-10 object-cover"
+                  />
+                </div>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align="end"
+                className="w-48 p-2 relative z-[102]"
               >
-                <LogOut className="h-4 w-4" />
-                <span>Logout</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        ) : (
-          <Link href="/login">
-            <Button
-              className={`transition-colors px-6 ${
-                pathname === '/'
-                  ? 'bg-white text-[#0059B3] hover:bg-gray-100'
-                  : 'bg-[#0059B3] text-white hover:bg-[#004C99]'
-              }`}
-            >
-              Masuk
-            </Button>
-          </Link>
-        )}
+                <DropdownMenuItem
+                  onClick={handleLogout}
+                  className="cursor-pointer flex items-center gap-2 text-red-500 hover:text-red-700 focus:text-red-700"
+                >
+                  <LogOut className="h-4 w-4" />
+                  <span>Logout</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Link href="/login">
+              <Button
+                className={`transition-colors px-6 ${
+                  pathname === '/'
+                    ? 'bg-white text-[#0059B3] hover:bg-gray-100'
+                    : 'bg-[#0059B3] text-white hover:bg-[#004C99]'
+                }`}
+              >
+                Masuk
+              </Button>
+            </Link>
+          ))}
       </div>
     </NavigationMenu>
   )
