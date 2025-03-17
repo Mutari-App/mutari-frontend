@@ -11,7 +11,7 @@ interface Block {
   endTime: string
   location: string
   price: number
-  photoUrl: string | null
+  photoUrl: string | undefined
 }
 
 interface Section {
@@ -24,6 +24,11 @@ interface Section {
   blocks: Block[]
 }
 
+interface Tag {
+  id: string
+  name: string
+}
+
 interface Itinerary {
   updatedAt: string
   createdAt: string
@@ -34,6 +39,9 @@ interface Itinerary {
   coverImage: string
   startDate: string
   endDate: string
+  tags: {
+    tag: Tag
+  }[]
   isPublished: boolean
   isCompleted: boolean
   sections: Section[]

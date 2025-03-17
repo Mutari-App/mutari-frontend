@@ -19,6 +19,7 @@ import {
   type ValidateResponse,
 } from './interface'
 import { customFetch, customFetchBody } from '@/utils/customFetch'
+import { deleteCookie } from 'cookies-next'
 
 const AuthContext = createContext({} as AuthContextInterface)
 
@@ -28,6 +29,12 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
   user: userFromServer,
   children,
 }) => {
+  const launchingDate = new Date(
+    process.env.NEXT_PUBLIC_LAUNCHING_DATE || '2025-01-22T00:00:00'
+  )
+  const nowDate = new Date()
+  const isLaunching = nowDate > launchingDate
+
   const [user, setUser] = useState<null | User>(userFromServer)
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false)
   const searchParams = useSearchParams()
@@ -48,7 +55,8 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
       setCookie('AT', response.accessToken)
       setIsAuthenticated(true)
       const responseUser = await customFetch<UserResponseInterface>(
-        '/pre-register/referral-code'
+        '/pre-register/referral-code',
+        { isAuthorized: true }
       )
 
       if (responseUser.statusCode !== 200) throw new Error(responseUser.message)
@@ -98,7 +106,11 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
   const logout = async () => {
     const response = await customFetch('/auth/logout', {
       method: 'POST',
+      credentials: 'include',
     })
+    setIsAuthenticated(false)
+    await deleteCookie('accessToken')
+    await deleteCookie('refreshToken')
     return response
   }
 
@@ -111,6 +123,7 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
         setIsAuthenticated(true)
       } else {
         setIsAuthenticated(false)
+        setUser(null)
       }
     } catch (err) {
       setIsAuthenticated(false)
@@ -118,9 +131,17 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
   }
 
   useEffect(() => {
-    void getMe()
+    if (isLaunching) {
+      void getMe()
+    } else {
+      const accessToken = getCookie('AT')
+      setIsAuthenticated(!!accessToken)
+    }
 
-    if (!developmentLock.current || process.env.NODE_ENV === 'production') {
+    if (
+      !isLaunching &&
+      (!developmentLock.current || process.env.NODE_ENV === 'production')
+    ) {
       if (searchParams.toString().includes('ticket') && !!fullUrl) {
         const ticket = searchParams.get('ticket')
         toast.promise(validate({ ticket: ticket! }), {

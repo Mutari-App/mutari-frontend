@@ -18,6 +18,7 @@ import { customFetch, customFetchBody } from '@/utils/customFetch'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { Loader } from 'lucide-react'
+import Link from 'next/link'
 
 export const CreateUserForm: React.FC = () => {
   const router = useRouter()
@@ -123,7 +124,7 @@ export const CreateUserForm: React.FC = () => {
         name="createUserForm"
         onSubmit={form.handleSubmit(submitCreateUserForm)}
       >
-        <div className="flex flex-col md:gap-8 text-[#024C98]">
+        <div className="flex flex-col gap-5 md:gap-8 text-[#024C98]">
           <div className="flex flex-col gap-5 text-center font-semibold">
             <h1 className="text-4xl">Buat Akun Baru</h1>
             <span className="text-xl font-raleway">
@@ -186,7 +187,7 @@ export const CreateUserForm: React.FC = () => {
               )}
             />
 
-            <div className="space-y-4">
+            <div className="space-y-2">
               <FormLabel>Tanggal Lahir</FormLabel>
               <div className="flex flex-row gap-4 justify-center">
                 <FormField
@@ -248,22 +249,29 @@ export const CreateUserForm: React.FC = () => {
                 />
               </div>
             </div>
-
-            <div className="flex justify-center">
-              <Button
-                disabled={submitLoading}
-                type="submit"
-                name="submit-button"
-                className="bg-[#0059B3] hover:bg-[#0059B3]/90 text-white w-full"
-              >
-                {submitLoading ? (
-                  <Loader className="animate-spin" />
-                ) : (
-                  'Daftar Akun'
-                )}
-              </Button>
-            </div>
           </div>
+
+          <div className="flex justify-center">
+            <Button
+              disabled={submitLoading}
+              type="submit"
+              name="submit-button"
+              className="bg-[#0059B3] hover:bg-[#0059B3]/90 text-white w-full"
+            >
+              {submitLoading ? (
+                <Loader className="animate-spin" />
+              ) : (
+                'Daftar Akun'
+              )}
+            </Button>
+          </div>
+
+          <span className="text-sm text-center text-[#024C98] font-medium">
+            Sudah punya akun?{' '}
+            <Link href="/login" className="underline">
+              Login di sini
+            </Link>
+          </span>
         </div>
       </form>
     </Form>
