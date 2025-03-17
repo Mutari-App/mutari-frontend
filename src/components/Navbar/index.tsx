@@ -59,8 +59,12 @@ export const Navbar: React.FC = () => {
       }
       router.push('/login')
       toast.success('Logout berhasil!')
-    } catch (err: any) {
-      toast.error((err as Error).message)
+    } catch (error) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("Terjadi kesalahan tidak terduga.")
+      }
     }
   }
 
