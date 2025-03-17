@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client'
 
 import React, { useState, useRef, useEffect } from 'react'
@@ -893,7 +894,6 @@ export default function ItineraryMakerModule() {
           ...section,
           blocks:
             section.blocks?.map(
-              // eslint-disable-next-line @typescript-eslint/no-unused-vars
               ({ id, ...blockWithoutId }) => blockWithoutId
             ) ?? [],
         })),
