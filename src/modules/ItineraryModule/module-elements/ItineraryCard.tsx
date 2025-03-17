@@ -42,6 +42,7 @@ function ItineraryCard({
         `/itineraries/${item.id}/mark-as-complete/`,
         {
           method: 'PATCH',
+          isAuthorized: true,
         }
       )
 
@@ -57,6 +58,7 @@ function ItineraryCard({
     try {
       const response = await customFetch(`/itineraries/${item.id}/`, {
         method: 'DELETE',
+        isAuthorized: true,
       })
 
       if (response.statusCode !== 200) throw new Error(response.message)

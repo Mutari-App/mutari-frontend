@@ -30,11 +30,18 @@ import { TagSelector } from './module-elements/TagSelector'
 import { CldUploadButton } from 'next-cloudinary'
 import { cn } from '@/lib/utils'
 import { useAuthContext } from '@/contexts/AuthContext'
-import { redirect, useRouter } from 'next/navigation'
+import { redirect, useParams, useRouter } from 'next/navigation'
+import NotFound from 'next/error'
 
 const SAVED_ITINERARY_KEY = 'saved_itinerary_data'
 
 export default function ItineraryMakerModule() {
+  const launchingDate = new Date(
+    process.env.NEXT_PUBLIC_LAUNCHING_DATE || '2025-01-22T00:00:00'
+  )
+  const nowDate = new Date()
+  const isLaunching = nowDate > launchingDate
+
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [timeWarning, setTimeWarning] = useState<{
     blockId: string
@@ -46,6 +53,9 @@ export default function ItineraryMakerModule() {
   const [availableTags, setAvailableTags] = useState<Tag[]>([])
   const { isAuthenticated } = useAuthContext()
   const router = useRouter()
+  const { id: itineraryId } = useParams<{ id: string }>()
+  const [data, setData] = useState<Itinerary | null>(null)
+  const wasAlreadyRequested = useRef(false)
 
   const initialItineraryData = useRef<CreateItineraryDto>({
     title: 'Itinerary Tanpa Judul',
@@ -84,6 +94,81 @@ export default function ItineraryMakerModule() {
     initialItineraryData.current
   )
 
+  // Fetch detail if id is provided
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        wasAlreadyRequested.current = true
+        const res = await customFetch<ItineraryDetailResponse>(
+          `/itineraries/${itineraryId}`,
+          {
+            method: 'GET',
+            credentials: 'include',
+            isAuthorized: true,
+          }
+        )
+
+        if (res.statusCode !== 200) throw new Error(res.message)
+        setData(res.data)
+      } catch (err: any) {
+        return <NotFound statusCode={404} />
+      }
+    }
+    if (!wasAlreadyRequested.current) {
+      void fetchData()
+    }
+  }, [wasAlreadyRequested])
+
+  // Map existing data if fetched
+  useEffect(() => {
+    if (data) {
+      // Section and Block mapping
+      const mappedSections: Section[] = data.sections
+        ? data.sections.map((section) => ({
+            sectionNumber: section.sectionNumber,
+            title: section.title,
+            blocks: section.blocks.map((block) => {
+              if (block.startTime || block.endTime)
+                toggleInput(block.id, 'time')
+              if (block.price > 0) toggleInput(block.id, 'price')
+              if (block.location) toggleInput(block.id, 'location')
+              return {
+                id: block.id,
+                blockType: block.blockType,
+                title: block.title,
+                description: block.description,
+                startTime: block.startTime,
+                endTime: block.endTime,
+                location: block.location,
+                price: block.price,
+              }
+            }),
+          }))
+        : []
+      // Tags mapping
+      const mappedTags: string[] = data.tags
+        ? data.tags.map((tag) => tag.tag.id)
+        : []
+      // Apply date
+      if (data.startDate && data.endDate) {
+        setDateRange({
+          from: new Date(data.startDate),
+          to: new Date(data.endDate),
+        })
+      }
+      initialItineraryData.current = {
+        title: data.title,
+        description: data.description,
+        coverImage: data.coverImage,
+        startDate: data.startDate,
+        endDate: data.endDate,
+        tags: mappedTags,
+        sections: mappedSections,
+      } as CreateItineraryDto
+      setItineraryData(initialItineraryData.current)
+    }
+  }, [data])
+
   // Load saved itinerary data from local storage
   useEffect(() => {
     try {
@@ -94,6 +179,7 @@ export default function ItineraryMakerModule() {
           savedItineraryJSON
         ) as CreateItineraryDto
 
+        initialItineraryData.current = savedItinerary
         setItineraryData(savedItinerary)
 
         if (savedItinerary.startDate && savedItinerary.endDate) {
@@ -140,37 +226,48 @@ export default function ItineraryMakerModule() {
 
   useEffect(() => {
     // Check for unsaved changes by comparing current data with initial data
+    const checkIsBlockModified = (section: Section, section_index: number) => {
+      return section.blocks?.some((block, index) => {
+        const initialBlock =
+          initialItineraryData.current.sections[section_index]?.blocks?.[index]
+        return (
+          block.title !== initialBlock?.title ||
+          block.description !== initialBlock?.description ||
+          block.startTime !== initialBlock?.startTime ||
+          block.endTime !== initialBlock?.endTime ||
+          block.location !== initialBlock?.location
+        )
+      })
+    }
+
     const checkUnsavedChanges = () => {
       // Check if there are any blocks with modified data
-      const hasModifiedBlocks = itineraryData.sections.some((section) => {
-        return section.blocks?.some((block) => {
-          return (
-            block.title !== 'Masukkan Judul' ||
-            (block.description ??
-              block.startTime ??
-              block.endTime ??
-              block.location ??
-              block.price !== undefined)
-          )
-        })
-      })
-      const hasBlocks = itineraryData.sections.some(
-        (section) => section.blocks && section.blocks.length > 1
-      )
-      const hasCustomTitle =
+      const isBlocksModified =
+        itineraryData.sections.length !==
+          initialItineraryData.current.sections.length ||
+        itineraryData.sections.some((section, section_index) =>
+          checkIsBlockModified(section, section_index)
+        )
+      const isTitleModified =
         itineraryData.title !== initialItineraryData.current.title
-      const hasDates =
-        itineraryData.startDate !== '' || itineraryData.endDate !== ''
-      const hasTags = (itineraryData.tags?.length ?? 0) > 0
-      const hasCoverImage = itineraryData.coverImage !== ''
-
+      const isDatesModified =
+        itineraryData.startDate !== initialItineraryData.current.startDate ||
+        itineraryData.endDate !== initialItineraryData.current.endDate
+      const isTagsModified =
+        (itineraryData.tags?.length ?? 0) !==
+          (initialItineraryData.current.tags?.length ?? 0) ||
+        (itineraryData.tags?.some((tag, tag_index) => {
+          return tag !== initialItineraryData.current.tags?.[tag_index]
+        }) ??
+          false)
+      const isCoverModified =
+        itineraryData.coverImage !== initialItineraryData.current.coverImage
       setHasUnsavedChanges(
-        hasBlocks ||
-          hasCustomTitle ||
-          hasDates ||
-          hasTags ||
-          hasCoverImage ||
-          hasModifiedBlocks
+        isBlocksModified ||
+          isTitleModified ||
+          isDatesModified ||
+          isTagsModified ||
+          isCoverModified
       )
     }
 
@@ -783,7 +880,9 @@ export default function ItineraryMakerModule() {
       localStorage.setItem(SAVED_ITINERARY_KEY, JSON.stringify(itineraryData))
       setHasUnsavedChanges(false)
       toast.info('Silakan login untuk menyimpan itinerary Anda')
-      redirect('/login?redirect=/itinerary/create')
+      redirect(
+        isLaunching ? '/login?redirect=/itinerary/create' : '/#praregistrasi'
+      )
     }
 
     // If user is authenticated, proceed with normal submission
@@ -802,26 +901,36 @@ export default function ItineraryMakerModule() {
         })),
       }
 
-      const response = await customFetch<CreateItineraryResponse>(
-        '/itineraries',
-        {
-          method: 'POST',
-          body: customFetchBody(submissionData),
-          credentials: 'include',
-        }
-      )
+      const response = itineraryId
+        ? await customFetch<CreateItineraryResponse>(
+            `/itineraries/${itineraryId}`,
+            {
+              method: 'PATCH',
+              body: customFetchBody(submissionData),
+              credentials: 'include',
+              isAuthorized: true,
+            }
+          )
+        : await customFetch<CreateItineraryResponse>('/itineraries', {
+            method: 'POST',
+            body: customFetchBody(submissionData),
+            credentials: 'include',
+            isAuthorized: true,
+          })
 
-      if (response.statusCode !== 201) {
-        throw new Error('Failed to create itinerary')
+      if (!response.success) {
+        throw new Error('Failed to create or edit itinerary')
       }
 
       setHasUnsavedChanges(false)
-      toast('Itinerary created successfully')
+      toast(`Itinerary ${itineraryId ? 'updated' : 'created'} successfully`)
 
       router.push(`/itinerary/${response.id}`)
     } catch (error) {
-      console.error('Error creating itinerary:', error)
-      toast.error('Failed to create itinerary. Please try again.')
+      console.error('Error creating or updating itinerary:', error)
+      toast.error(
+        `Failed to ${itineraryId ? 'updated' : 'created'} itinerary. Please try again.`
+      )
     } finally {
       setIsSubmitting(false)
     }

@@ -25,6 +25,7 @@ const mockData = {
   isCompleted: false,
   updatedAt: '2025-06-10',
   createdAt: '2025-06-15',
+  tags: [],
   sections: [
     {
       id: 'section1',

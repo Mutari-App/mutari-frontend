@@ -49,7 +49,10 @@ const hammersmithOne = Hammersmith_One({
 })
 
 export const metadata: Metadata = {
-  title: 'Mutari - Satu Aplikasi, Sejuta Destinasi, Bersama Mutari!',
+  title: {
+    default: 'Mutari - Satu Aplikasi, Sejuta Destinasi, Bersama Mutari!',
+    template: '%s - Mutari',
+  },
   description:
     'Mutari adalah platform digital yang membantu wisatawan merencanakan perjalanan di Indonesia dengan itinerary otomatis, rekomendasi destinasi, dan kemudahan booking akomodasi serta transportasi.',
 }
@@ -91,7 +94,16 @@ export default async function RootLayout({
           <AuthContextProvider user={user}>
             <Navbar />
             <main className="w-full bg-white min-h-[80dvh]">{children}</main>
-            <Toaster />
+            <Toaster
+              toastOptions={{
+                classNames: {
+                  error: 'bg-red-400',
+                  success: 'text-green-400',
+                  warning: 'text-yellow-400',
+                  info: 'bg-blue-400',
+                },
+              }}
+            />
 
             <Footer />
           </AuthContextProvider>
