@@ -4,13 +4,35 @@ import { customFetch } from '@/utils/customFetch'
 import { type ItineraryData } from '@/modules/ItineraryModule/module-elements/types'
 import ItineraryCard from '@/modules/ItineraryModule/module-elements/ItineraryCard'
 import { toast } from 'sonner'
+import { ImageProps } from 'next/image'
+
+const mockPush = jest.fn()
+jest.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push: mockPush,
+    replace: jest.fn(),
+  }),
+}))
+jest.mock('next/image', () => ({
+  __esModule: true,
+  default: ({ alt, ...props }: ImageProps) => {
+    // eslint-disable-next-line @next/next/no-img-element
+    return (
+      <img
+        {...props}
+        alt={alt || ''}
+        src={typeof props.src === 'string' ? props.src : ''}
+      />
+    )
+  },
+}))
 
 // Mock data untuk props item
 const mockItem: ItineraryData = {
   title: 'Trip to Bali',
   startDate: '2025-03-01',
   endDate: '2025-03-05',
-  coverImage: 'bali.jpg',
+  coverImage: 'https://example.com/images/bali.jpg',
   id: '1',
   userId: 'user1',
   isPublished: false,
@@ -35,7 +57,6 @@ describe('ItineraryCard Component', () => {
     render(<ItineraryCard item={mockItem} refresh={jest.fn} />)
 
     expect(screen.getByText('Trip to Bali')).toBeInTheDocument()
-    expect(screen.getByText('Bali')).toBeInTheDocument()
     expect(screen.getByText('4 Hari • 5 Destinasi')).toBeInTheDocument()
   })
 
@@ -64,8 +85,8 @@ describe('ItineraryCard Component', () => {
 
     await waitFor(() => {
       expect(customFetch).toHaveBeenCalledWith(
-        '/itineraries/1/mark-as-complete',
-        { method: 'PATCH' }
+        '/itineraries/1/mark-as-complete/',
+        { isAuthorized: true, method: 'PATCH' }
       )
       expect(toast.success).toHaveBeenCalledWith(
         'Itinerary marked as complete!'

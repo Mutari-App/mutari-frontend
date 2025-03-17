@@ -2,6 +2,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import '@testing-library/jest-dom'
 import MyItineraryList from '@/modules/ItineraryModule/sections/MyItineraryList'
 import type { ItineraryData } from '@/modules/ItineraryModule/module-elements/types'
+import { ImageProps } from 'next/image'
 
 // Mock API response
 jest.mock('@/utils/customFetch')
@@ -11,6 +12,26 @@ jest.mock('lucide-react', () => ({
   MapPinIcon: () => 'MapPinIcon',
   EllipsisIcon: () => 'EllipsisIcon',
 }))
+const mockPush = jest.fn()
+jest.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push: mockPush,
+    replace: jest.fn(),
+  }),
+}))
+jest.mock('next/image', () => ({
+  __esModule: true,
+  default: ({ alt, ...props }: ImageProps) => {
+    // eslint-disable-next-line @next/next/no-img-element
+    return (
+      <img
+        {...props}
+        alt={alt || ''}
+        src={typeof props.src === 'string' ? props.src : ''}
+      />
+    )
+  },
+}))
 
 const mockData: ItineraryData[] = [
   {
@@ -19,7 +40,7 @@ const mockData: ItineraryData[] = [
     title: 'Trip to Bali',
     startDate: '2025-03-01',
     endDate: '2025-03-05',
-    coverImage: 'bali.jpg',
+    coverImage: 'https://example.com/images/bali.jpg',
     isPublished: false,
     isCompleted: false,
     locationCount: 0,
@@ -30,7 +51,7 @@ const mockData: ItineraryData[] = [
     title: 'Trip to Japan',
     startDate: '2025-04-10',
     endDate: '2025-04-20',
-    coverImage: 'japan.jpg',
+    coverImage: 'https://example.com/images/japan.jpg',
     isPublished: true,
     isCompleted: false,
     locationCount: 5,
