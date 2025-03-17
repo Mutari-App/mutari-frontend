@@ -67,7 +67,6 @@ describe('RegisterForm', () => {
   })
 
   it('should validate password requirements', async () => {
-    // Submit empty form
     fireEvent.click(screen.getByRole('button', { name: /Simpan Password/i }))
 
     await waitFor(() => {
@@ -78,7 +77,6 @@ describe('RegisterForm', () => {
       })
     })
 
-    // Test password without uppercase
     fireEvent.change(screen.getByPlaceholderText(/^Password$/i), {
       target: { value: 'password123' },
     })
@@ -98,7 +96,6 @@ describe('RegisterForm', () => {
       })
     })
 
-    // Test password without number
     fireEvent.change(screen.getByPlaceholderText(/^Password$/i), {
       target: { value: 'PasswordABC' },
     })
@@ -120,7 +117,6 @@ describe('RegisterForm', () => {
   })
 
   it('should validate password match', async () => {
-    // Test non-matching passwords
     fireEvent.change(screen.getByPlaceholderText(/^Password$/i), {
       target: { value: 'Password123' },
     })

@@ -5,7 +5,6 @@ import { CodeVerificationForm } from '@/modules/RegisterModule/module-elements/c
 import { customFetch } from '@/utils/customFetch'
 import { toast } from 'sonner'
 
-// Mock dependencies
 jest.mock('lucide-react', () => ({
   Loader: () => 'Loader',
 }))
@@ -104,16 +103,12 @@ describe('CodeVerificationForm', () => {
   })
 
   it('should not go to next page on invalid submission', async () => {
-    // Fill in form with invalid data
     fireEvent.change(screen.getByPlaceholderText(/Kode Verifikasi/i), {
       target: { value: '123' }, // Invalid code (less than 8 characters)
     })
-
-    // Submit form
     fireEvent.click(screen.getByRole('button', { name: /Verifikasi/i }))
 
     await waitFor(() => {
-      // Verify that the form does not go to the next page
       expect(screen.queryByText(/Buat Password/i)).not.toBeInTheDocument()
       expect(
         screen.getByText(/Unique Code must be 8 characters./i)
@@ -191,8 +186,6 @@ describe('CodeVerificationForm', () => {
 
     await waitFor(() => {
       expect(mockSetRegisterData).toHaveBeenCalled()
-
-      // const updateFn = mockSetRegisterData.mock.calls.map((call) => call[0])
 
       const mockCall = mockSetRegisterData.mock.calls[0] as unknown[]
       const updateFn = mockCall[0] as jest.Mock
