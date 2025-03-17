@@ -56,7 +56,7 @@ describe('CodeVerificationForm', () => {
     render(<CodeVerificationForm />)
   })
 
-  it('should render code verification form', async () => {
+  it('should render code verification form', () => {
     expect(screen.getByPlaceholderText(/Kode Verifikasi/i)).toBeInTheDocument()
     expect(
       screen.getByRole('button', { name: /Verifikasi/i })
