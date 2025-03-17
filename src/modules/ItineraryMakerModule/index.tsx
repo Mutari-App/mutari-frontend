@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 'use client'
 
 import React, { useState, useRef, useEffect } from 'react'
@@ -111,7 +110,8 @@ export default function ItineraryMakerModule() {
 
         if (res.statusCode !== 200) throw new Error(res.message)
         setData(res.data)
-      } catch (err: any) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (error) {
         return <NotFound statusCode={404} />
       }
     }
@@ -194,6 +194,7 @@ export default function ItineraryMakerModule() {
         setHasUnsavedChanges(false)
         localStorage.removeItem(SAVED_ITINERARY_KEY)
       }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       toast.error('Gagal memuat itinerary yang tersimpan')
       localStorage.removeItem(SAVED_ITINERARY_KEY)
@@ -215,6 +216,7 @@ export default function ItineraryMakerModule() {
         } else {
           toast.error('Gagal mengambil tag')
         }
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
         toast.error('Gagal mengambil tag')
       }
@@ -894,6 +896,7 @@ export default function ItineraryMakerModule() {
           ...section,
           blocks:
             section.blocks?.map(
+              // eslint-disable-next-line @typescript-eslint/no-unused-vars
               ({ id, ...blockWithoutId }) => blockWithoutId
             ) ?? [],
         })),
@@ -924,6 +927,7 @@ export default function ItineraryMakerModule() {
       toast(`Itinerary ${itineraryId ? 'updated' : 'created'} successfully`)
 
       router.push(`/itinerary/${response.id}`)
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       toast.error(
         `Failed to ${itineraryId ? 'updated' : 'created'} itinerary. Please try again.`
