@@ -1,10 +1,6 @@
 import React from 'react'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
-import { RegisterFormSection } from '@/modules/RegisterModule/sections/RegisterFormSection'
-import {
-  RegisterContextProvider,
-  useRegisterContext,
-} from '@/modules/RegisterModule/contexts/RegisterContext'
+import { useRegisterContext } from '@/modules/RegisterModule/contexts/RegisterContext'
 import { RegisterForm } from '@/modules/RegisterModule/module-elements/registerForm'
 import { toast } from 'sonner'
 import { customFetch } from '@/utils/customFetch'
