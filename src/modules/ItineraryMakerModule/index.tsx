@@ -919,15 +919,25 @@ export default function ItineraryMakerModule() {
           })
 
       if (!response.success) {
+        if (!itineraryId && typeof window !== 'undefined' && window.umami) {
+          window.umami.track('create_itinerary_fail')
+        }
         throw new Error('Failed to create or edit itinerary')
       }
 
       setHasUnsavedChanges(false)
       toast(`Itinerary ${itineraryId ? 'updated' : 'created'} successfully`)
 
+      if (!itineraryId && typeof window !== 'undefined' && window.umami) {
+        window.umami.track('create_itinerary_success')
+      }
+
       router.push(`/itinerary/${response.id}`)
     } catch (error) {
       console.error('Error creating or updating itinerary:', error)
+      if (!itineraryId && typeof window !== 'undefined' && window.umami) {
+        window.umami.track('create_itinerary_fail')
+      }
       toast.error(
         `Failed to ${itineraryId ? 'updated' : 'created'} itinerary. Please try again.`
       )

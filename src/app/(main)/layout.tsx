@@ -14,6 +14,7 @@ import { Navbar } from '@/components/Navbar'
 import { Toaster } from '@/components/ui/sonner'
 import { AuthContextProvider } from '@/contexts/AuthContext'
 import useUserServer from '@/hooks/useUserServer'
+import Script from 'next/script'
 
 const poppins = Poppins({
   subsets: ['latin'],
@@ -86,6 +87,14 @@ export default async function RootLayout({
         />
         <link rel="manifest" href="/site.webmanifest" />
         <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5" />
+        {process.env.NODE_ENV === 'production' && (
+          <Script
+            defer
+            src="https://cloud.umami.is/script.js"
+            data-website-id="04ee9858-3b97-481d-93d5-dc62afdf04fb"
+            data-domains="mutari.id"
+          />
+        )}
       </head>
       <body
         className={`${epilogue.variable} ${poppins.variable} ${raleway.variable} ${roboto.variable} ${hammersmithOne.variable} font-poppins overflow-x-hidden max-w-screen`}

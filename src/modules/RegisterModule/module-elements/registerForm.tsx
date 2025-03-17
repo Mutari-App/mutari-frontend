@@ -80,12 +80,24 @@ export const RegisterForm: React.FC = () => {
         toast.success('Password berhasil disimpan!')
         setSubmitLoading(false)
         router.push('/login')
+
+        if (typeof window !== 'undefined' && window.umami) {
+          window.umami.track('register_success', {
+            email: email,
+          })
+        }
       } else {
         toast.error('Terjadi kesalahan. Silakan coba lagi.')
+        if (typeof window !== 'undefined' && window.umami) {
+          window.umami.track('register_fail')
+        }
         setSubmitLoading(false)
       }
     } catch (error) {
       toast.error('Terjadi kesalahan. Silakan coba lagi.')
+      if (typeof window !== 'undefined' && window.umami) {
+        window.umami.track('register_fail')
+      }
       setSubmitLoading(false)
     }
   }
