@@ -40,7 +40,7 @@ export default function DetailItineraryModule() {
   }
 
   return (
-    <div className="container max-w-4xl mx-auto p-4 min-h-screen">
+    <div className="container max-w-4xl mx-auto p-4 pt-24 min-h-screen">
       <ItineraryHeader data={data} />
       <ItinerarySummary startDate={data.startDate} endDate={data.endDate} />
       <ItineraryList section={data.sections || []} />
