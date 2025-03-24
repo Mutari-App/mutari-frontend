@@ -88,6 +88,10 @@ jest.mock(
   })
 )
 
+jest.mock('@/modules/ItineraryMakerModule/module-elements/RouteInfo', () => ({
+  RouteInfo: jest.fn(() => <div data-testid="route-info" />),
+}))
+
 // Mock the UI components
 jest.mock('@/components/ui/card', () => ({
   Card: ({
@@ -224,6 +228,7 @@ describe('ItineraryBlock Component', () => {
         toggleInput={mockToggleInput}
         updateBlock={mockUpdateBlock}
         removeBlock={mockRemoveBlock}
+        showRoute={false}
       />
     )
 
@@ -256,6 +261,7 @@ describe('ItineraryBlock Component', () => {
         toggleInput={mockToggleInput}
         updateBlock={mockUpdateBlock}
         removeBlock={mockRemoveBlock}
+        showRoute={false}
       />
     )
 
@@ -275,6 +281,50 @@ describe('ItineraryBlock Component', () => {
     ).not.toBeInTheDocument()
   })
 
+  test('renders RouteInfo when showRoute is true and routeInfo exists', () => {
+    const locationBlock = createLocationBlock()
+    const routeInfo = { distance: 10, duration: 30, polyline: 'test' }
+
+    render(
+      <ItineraryBlock
+        block={locationBlock}
+        blockIndex={blockIndex}
+        sectionNumber={sectionNumber}
+        timeWarning={null}
+        isInputVisible={mockIsInputVisible}
+        toggleInput={mockToggleInput}
+        updateBlock={mockUpdateBlock}
+        removeBlock={mockRemoveBlock}
+        showRoute={true}
+        routeInfo={routeInfo}
+      />
+    )
+
+    expect(screen.getByTestId('route-info')).toBeInTheDocument()
+  })
+
+  test('does not render RouteInfo when showRoute is false', () => {
+    const locationBlock = createLocationBlock()
+    const routeInfo = { distance: 10, duration: 30, polyline: 'test' }
+
+    render(
+      <ItineraryBlock
+        block={locationBlock}
+        blockIndex={blockIndex}
+        sectionNumber={sectionNumber}
+        timeWarning={null}
+        isInputVisible={mockIsInputVisible}
+        toggleInput={mockToggleInput}
+        updateBlock={mockUpdateBlock}
+        removeBlock={mockRemoveBlock}
+        showRoute={false}
+        routeInfo={routeInfo}
+      />
+    )
+
+    expect(screen.queryByTestId('route-info')).not.toBeInTheDocument()
+  })
+
   test('updates block title when title input changes', () => {
     const locationBlock = createLocationBlock()
 
@@ -288,6 +338,7 @@ describe('ItineraryBlock Component', () => {
         toggleInput={mockToggleInput}
         updateBlock={mockUpdateBlock}
         removeBlock={mockRemoveBlock}
+        showRoute={false}
       />
     )
 
@@ -316,6 +367,7 @@ describe('ItineraryBlock Component', () => {
         toggleInput={mockToggleInput}
         updateBlock={mockUpdateBlock}
         removeBlock={mockRemoveBlock}
+        showRoute={false}
       />
     )
 
@@ -344,6 +396,7 @@ describe('ItineraryBlock Component', () => {
         toggleInput={mockToggleInput}
         updateBlock={mockUpdateBlock}
         removeBlock={mockRemoveBlock}
+        showRoute={false}
       />
     )
 
@@ -370,6 +423,7 @@ describe('ItineraryBlock Component', () => {
         toggleInput={mockToggleInput}
         updateBlock={mockUpdateBlock}
         removeBlock={mockRemoveBlock}
+        showRoute={false}
       />
     )
 
@@ -397,10 +451,55 @@ describe('ItineraryBlock Component', () => {
         toggleInput={mockToggleInput}
         updateBlock={mockUpdateBlock}
         removeBlock={mockRemoveBlock}
+        showRoute={false}
       />
     )
 
     const descriptionInput = screen.getByTestId('input-Tambahkan')
     expect(descriptionInput).toHaveValue('')
+  })
+
+  test('applies border-red-500 when there is a timeWarning for the block', () => {
+    const locationBlock = createLocationBlock()
+    const timeWarning = { blockId: blockId, message: 'Time conflict' }
+
+    render(
+      <ItineraryBlock
+        block={locationBlock}
+        blockIndex={blockIndex}
+        sectionNumber={sectionNumber}
+        timeWarning={timeWarning}
+        isInputVisible={mockIsInputVisible}
+        toggleInput={mockToggleInput}
+        updateBlock={mockUpdateBlock}
+        removeBlock={mockRemoveBlock}
+        showRoute={false}
+      />
+    )
+
+    expect(screen.getByTestId('draggable-props')).toHaveClass('border-red-500')
+  })
+
+  test('does not apply border-red-500 when timeWarning is for different block', () => {
+    const locationBlock = createLocationBlock()
+    const timeWarning = { blockId: 'other-block', message: 'Time conflict' }
+
+    render(
+      <ItineraryBlock
+        block={locationBlock}
+        blockIndex={blockIndex}
+        sectionNumber={sectionNumber}
+        timeWarning={timeWarning}
+        isInputVisible={mockIsInputVisible}
+        toggleInput={mockToggleInput}
+        updateBlock={mockUpdateBlock}
+        removeBlock={mockRemoveBlock}
+        showRoute={false}
+      />
+    )
+
+    expect(screen.getByTestId('draggable-props')).not.toHaveClass(
+      'border-red-500'
+    )
   })
 })
