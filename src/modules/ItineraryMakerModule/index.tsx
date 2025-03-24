@@ -316,16 +316,16 @@ export default function ItineraryMakerModule() {
       updatedSections[sectionIdx].blocks[blockIdx] = newBlock
     }
 
-    const canCalculateRoute = (source: Block, dest: Block): boolean => {
-      return (
-        source.blockType === 'LOCATION' &&
-        dest.blockType === 'LOCATION' &&
-        !!source.location &&
-        !!dest.location
-      )
-    }
+    const canCalculateRoute = (source: Block, dest: Block): boolean =>
+      source.blockType === 'LOCATION' &&
+      dest.blockType === 'LOCATION' &&
+      !!source.location &&
+      !!dest.location
 
-    const updateRouteBetween = async (sourceBlock: Block, destBlock: Block) => {
+    const calculateAndUpdateRoute = async (
+      sourceBlock: Block,
+      destBlock: Block
+    ) => {
       if (!canCalculateRoute(sourceBlock, destBlock)) {
         return {
           updatedSource: { ...sourceBlock, routeToNext: undefined },
@@ -358,7 +358,7 @@ export default function ItineraryMakerModule() {
         }
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
-        toast.error('Gagal menghitung rute antar lokasi')
+        toast.error('Failed to calculate route between locations')
         return {
           updatedSource: { ...sourceBlock, routeToNext: undefined },
           updatedDest: { ...destBlock, routeFromPrevious: undefined },
@@ -366,41 +366,47 @@ export default function ItineraryMakerModule() {
       }
     }
 
-    const getPairsForBlock = (blockId: string) => {
+    const collectPairs = (blockId?: string) => {
+      if (blockId) return collectPairsForBlock(blockId, updatedSections)
+      return collectAllPairs(updatedSections)
+    }
+
+    const collectPairsForBlock = (
+      blockId: string,
+      sections: typeof updatedSections
+    ) => {
       const pairs: Array<{ sectionIdx: number; currentBlockIdx: number }> = []
-      updatedSections.forEach((section, sIdx) => {
+      sections.forEach((section, sIdx) => {
         if (!section.blocks) return
         const blockIdx = section.blocks.findIndex((b) => b.id === blockId)
-        if (blockIdx === -1) return
         if (blockIdx > 0)
           pairs.push({ sectionIdx: sIdx, currentBlockIdx: blockIdx - 1 })
-        if (blockIdx < section.blocks.length - 1)
+        if (blockIdx >= 0 && blockIdx < section.blocks.length - 1)
           pairs.push({ sectionIdx: sIdx, currentBlockIdx: blockIdx })
       })
       return pairs
     }
 
-    const getAllPairs = () => {
+    const collectAllPairs = (sections: typeof updatedSections) => {
       const pairs: Array<{ sectionIdx: number; currentBlockIdx: number }> = []
-      updatedSections.forEach((section, sIdx) => {
+      sections.forEach((section, sIdx) => {
         if (!section.blocks || section.blocks.length < 2) return
-        section.blocks.slice(0, -1).forEach((_, bIdx) => {
+        for (let bIdx = 0; bIdx < section.blocks.length - 1; bIdx++) {
           pairs.push({ sectionIdx: sIdx, currentBlockIdx: bIdx })
-        })
+        }
       })
       return pairs
     }
 
-    const pairs = blockId ? getPairsForBlock(blockId) : getAllPairs()
+    const pairs = collectPairs(blockId)
 
-    for (const pair of pairs) {
-      const { sectionIdx, currentBlockIdx } = pair
+    for (const { sectionIdx, currentBlockIdx } of pairs) {
       const section = updatedSections[sectionIdx]
       if (!section.blocks || currentBlockIdx >= section.blocks.length - 1)
         continue
       const currentBlock = section.blocks[currentBlockIdx]
       const nextBlock = section.blocks[currentBlockIdx + 1]
-      const { updatedSource, updatedDest } = await updateRouteBetween(
+      const { updatedSource, updatedDest } = await calculateAndUpdateRoute(
         currentBlock,
         nextBlock
       )
@@ -778,6 +784,17 @@ export default function ItineraryMakerModule() {
     return true
   }
 
+  const updateRoutes = async (blockId?: string) => {
+    const updatedSections = await updateRoutesBetweenBlocks(
+      itineraryDataRef.current.sections,
+      blockId
+    )
+    setItineraryData((prev) => ({
+      ...prev,
+      sections: updatedSections,
+    }))
+  }
+
   const updateBlock = <T extends keyof Block>(
     blockId: string,
     field: T,
@@ -793,18 +810,7 @@ export default function ItineraryMakerModule() {
       }
     })
     if (field === 'location') {
-      void setTimeout(() => {
-        void (async () => {
-          const updatedSections = await updateRoutesBetweenBlocks(
-            itineraryDataRef.current.sections,
-            blockId
-          )
-          setItineraryData((prev) => ({
-            ...prev,
-            sections: updatedSections,
-          }))
-        })()
-      }, 0)
+      setTimeout(() => void updateRoutes(blockId), 0)
     }
   }
 
@@ -854,22 +860,10 @@ export default function ItineraryMakerModule() {
         sections: updatedSections,
       }
     })
-
     if (timeWarning && timeWarning.blockId === blockId) {
       setTimeWarning(null)
     }
-
-    void setTimeout(() => {
-      void (async () => {
-        const updatedSections = await updateRoutesBetweenBlocks(
-          itineraryDataRef.current.sections
-        )
-        setItineraryData((prev) => ({
-          ...prev,
-          sections: updatedSections,
-        }))
-      })()
-    }, 0)
+    setTimeout(() => void updateRoutes(), 0)
   }
 
   const filterBlockFromSections = (
@@ -962,17 +956,7 @@ export default function ItineraryMakerModule() {
         }
       })
 
-      void setTimeout(() => {
-        void (async () => {
-          const updatedSections = await updateRoutesBetweenBlocks(
-            itineraryDataRef.current.sections
-          )
-          setItineraryData((prev) => ({
-            ...prev,
-            sections: updatedSections,
-          }))
-        })()
-      }, 0)
+      setTimeout(() => void updateRoutes(), 0)
     }
     // Handle moving blocks between sections
     else if (sourceSection !== destinationSection) {
@@ -1022,17 +1006,7 @@ export default function ItineraryMakerModule() {
         }
       })
 
-      void setTimeout(() => {
-        void (async () => {
-          const updatedSections = await updateRoutesBetweenBlocks(
-            itineraryDataRef.current.sections
-          )
-          setItineraryData((prev) => ({
-            ...prev,
-            sections: updatedSections,
-          }))
-        })()
-      }, 0)
+      setTimeout(() => void updateRoutes(), 0)
     }
   }
 
