@@ -18,6 +18,7 @@ import {
   type Block,
   type CreateItineraryResponse,
   type Tag,
+  type Route,
 } from './interface'
 import { customFetch, customFetchBody } from '@/utils/customFetch'
 import { type DropResult } from '@hello-pangea/dnd'
@@ -32,6 +33,7 @@ import { cn } from '@/lib/utils'
 import { useAuthContext } from '@/contexts/AuthContext'
 import { redirect, useParams, useRouter } from 'next/navigation'
 import NotFound from 'next/error'
+import { calculateRoute } from '@/utils/maps'
 
 const SAVED_ITINERARY_KEY = 'saved_itinerary_data'
 
@@ -93,6 +95,12 @@ export default function ItineraryMakerModule() {
   const [itineraryData, setItineraryData] = useState<CreateItineraryDto>(
     initialItineraryData.current
   )
+
+  const itineraryDataRef = useRef(itineraryData)
+
+  useEffect(() => {
+    itineraryDataRef.current = itineraryData
+  }, [itineraryData])
 
   // Fetch detail if id is provided
   useEffect(() => {
@@ -168,6 +176,7 @@ export default function ItineraryMakerModule() {
       } as CreateItineraryDto
       setItineraryData(initialItineraryData.current)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data])
 
   // Load saved itinerary data from local storage
@@ -221,7 +230,6 @@ export default function ItineraryMakerModule() {
         toast.error('Gagal mengambil tag')
       }
     }
-
     void fetchTags()
   }, [])
 
@@ -290,18 +298,127 @@ export default function ItineraryMakerModule() {
     }
   }, [hasUnsavedChanges])
 
+  const updateRoutesBetweenBlocks = async (
+    sections: Section[],
+    blockId?: string
+  ) => {
+    const updatedSections = sections.map((section) => ({
+      ...section,
+      blocks: section.blocks ? [...section.blocks] : undefined,
+    }))
+
+    const updateBlockInSection = (
+      sectionIdx: number,
+      blockIdx: number,
+      newBlock: Block
+    ) => {
+      if (!updatedSections[sectionIdx].blocks) return
+      updatedSections[sectionIdx].blocks[blockIdx] = newBlock
+    }
+
+    const updateRouteBetween = async (sourceBlock: Block, destBlock: Block) => {
+      let updatedSource = { ...sourceBlock }
+      let updatedDest = { ...destBlock }
+
+      if (
+        sourceBlock.blockType === 'LOCATION' &&
+        destBlock.blockType === 'LOCATION' &&
+        sourceBlock.location &&
+        destBlock.location
+      ) {
+        try {
+          const routeData = await calculateRoute(
+            sourceBlock.location,
+            destBlock.location
+          )
+          if (routeData) {
+            const routeObject: Route = {
+              sourceBlockId: sourceBlock.id,
+              destinationBlockId: destBlock.id,
+              distance: routeData.distance,
+              duration: routeData.duration,
+              polyline: routeData.polyline,
+            }
+
+            updatedSource = { ...sourceBlock, routeToNext: routeObject }
+            updatedDest = { ...destBlock, routeFromPrevious: routeObject }
+          }
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        } catch (error) {
+          updatedSource = { ...sourceBlock, routeToNext: undefined }
+          updatedDest = { ...destBlock, routeFromPrevious: undefined }
+          toast.error('Gagal menghitung rute antar lokasi')
+        }
+      } else {
+        updatedSource = { ...sourceBlock, routeToNext: undefined }
+        updatedDest = { ...destBlock, routeFromPrevious: undefined }
+      }
+
+      return { updatedSource, updatedDest }
+    }
+
+    if (blockId) {
+      for (let sIdx = 0; sIdx < updatedSections.length; sIdx++) {
+        const section = updatedSections[sIdx]
+        if (!section.blocks) continue
+        const blockIdx = section.blocks.findIndex((b) => b.id === blockId)
+        if (blockIdx === -1) continue
+
+        const currentBlock = section.blocks[blockIdx]
+
+        // Update route between previous and current block
+        if (blockIdx > 0) {
+          const prevBlock = section.blocks[blockIdx - 1]
+          const { updatedSource, updatedDest } = await updateRouteBetween(
+            prevBlock,
+            currentBlock
+          )
+          updateBlockInSection(sIdx, blockIdx - 1, updatedSource)
+          updateBlockInSection(sIdx, blockIdx, updatedDest)
+        }
+
+        // Update route between current and next block
+        if (blockIdx < section.blocks.length - 1) {
+          const nextBlock = section.blocks[blockIdx + 1]
+          const { updatedSource, updatedDest } = await updateRouteBetween(
+            currentBlock,
+            nextBlock
+          )
+          updateBlockInSection(sIdx, blockIdx, updatedSource)
+          updateBlockInSection(sIdx, blockIdx + 1, updatedDest)
+        }
+      }
+    } else {
+      // full route recalculation
+      for (let sIdx = 0; sIdx < updatedSections.length; sIdx++) {
+        const section = updatedSections[sIdx]
+        if (!section.blocks || section.blocks.length < 2) continue
+        for (let bIdx = 0; bIdx < section.blocks.length - 1; bIdx++) {
+          const currentBlock = section.blocks[bIdx]
+          const nextBlock = section.blocks[bIdx + 1]
+          const { updatedSource, updatedDest } = await updateRouteBetween(
+            currentBlock,
+            nextBlock
+          )
+          updateBlockInSection(sIdx, bIdx, updatedSource)
+          updateBlockInSection(sIdx, bIdx + 1, updatedDest)
+        }
+      }
+    }
+
+    return updatedSections
+  }
+
   const handleImageUpload = (result: any) => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     if (result?.info?.secure_url) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
       const imageUrl = result.info.secure_url
-
       setItineraryData((prev) => ({
         ...prev,
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         coverImage: imageUrl,
       }))
-
       toast.success('Cover image uploaded successfully')
     } else {
       toast.error('Failed to upload image')
@@ -673,6 +790,20 @@ export default function ItineraryMakerModule() {
         sections: updatedSections,
       }
     })
+    if (field === 'location') {
+      void setTimeout(() => {
+        void (async () => {
+          const updatedSections = await updateRoutesBetweenBlocks(
+            itineraryDataRef.current.sections,
+            blockId
+          )
+          setItineraryData((prev) => ({
+            ...prev,
+            sections: updatedSections,
+          }))
+        })()
+      }, 0)
+    }
   }
 
   const getUpdatedSectionWithBlock = <T extends keyof Block>(
@@ -714,13 +845,29 @@ export default function ItineraryMakerModule() {
   }
 
   const removeBlock = (blockId: string) => {
-    setItineraryData((prev) => ({
-      ...prev,
-      sections: filterBlockFromSections(prev.sections, blockId),
-    }))
+    setItineraryData((prev) => {
+      const updatedSections = filterBlockFromSections(prev.sections, blockId)
+      return {
+        ...prev,
+        sections: updatedSections,
+      }
+    })
+
     if (timeWarning && timeWarning.blockId === blockId) {
       setTimeWarning(null)
     }
+
+    void setTimeout(() => {
+      void (async () => {
+        const updatedSections = await updateRoutesBetweenBlocks(
+          itineraryDataRef.current.sections
+        )
+        setItineraryData((prev) => ({
+          ...prev,
+          sections: updatedSections,
+        }))
+      })()
+    }, 0)
   }
 
   const filterBlockFromSections = (
@@ -812,6 +959,18 @@ export default function ItineraryMakerModule() {
           sections: updatedSections,
         }
       })
+
+      void setTimeout(() => {
+        void (async () => {
+          const updatedSections = await updateRoutesBetweenBlocks(
+            itineraryDataRef.current.sections
+          )
+          setItineraryData((prev) => ({
+            ...prev,
+            sections: updatedSections,
+          }))
+        })()
+      }, 0)
     }
     // Handle moving blocks between sections
     else if (sourceSection !== destinationSection) {
@@ -860,6 +1019,18 @@ export default function ItineraryMakerModule() {
           sections: updatedSections,
         }
       })
+
+      void setTimeout(() => {
+        void (async () => {
+          const updatedSections = await updateRoutesBetweenBlocks(
+            itineraryDataRef.current.sections
+          )
+          setItineraryData((prev) => ({
+            ...prev,
+            sections: updatedSections,
+          }))
+        })()
+      }, 0)
     }
   }
 
