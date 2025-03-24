@@ -46,7 +46,7 @@ export const PriceInput: React.FC<PriceInputProps> = ({
       <Input
         type="number"
         placeholder="50000"
-        className="w-24 h-6 text-sm focus-visible:ring-1 focus-visible:ring-offset-0"
+        className="w-[74px] h-6 text-sm focus-visible:ring-1 focus-visible:ring-offset-0"
         value={price ?? ''}
         onChange={(e) =>
           updateBlock(
