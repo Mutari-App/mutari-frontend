@@ -316,94 +316,96 @@ export default function ItineraryMakerModule() {
       updatedSections[sectionIdx].blocks[blockIdx] = newBlock
     }
 
-    const updateRouteBetween = async (sourceBlock: Block, destBlock: Block) => {
-      let updatedSource = { ...sourceBlock }
-      let updatedDest = { ...destBlock }
-
-      if (
-        sourceBlock.blockType === 'LOCATION' &&
-        destBlock.blockType === 'LOCATION' &&
-        sourceBlock.location &&
-        destBlock.location
-      ) {
-        try {
-          const routeData = await calculateRoute(
-            sourceBlock.location,
-            destBlock.location
-          )
-          if (routeData) {
-            const routeObject: Route = {
-              sourceBlockId: sourceBlock.id,
-              destinationBlockId: destBlock.id,
-              distance: routeData.distance,
-              duration: routeData.duration,
-              polyline: routeData.polyline,
-            }
-
-            updatedSource = { ...sourceBlock, routeToNext: routeObject }
-            updatedDest = { ...destBlock, routeFromPrevious: routeObject }
-          }
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        } catch (error) {
-          updatedSource = { ...sourceBlock, routeToNext: undefined }
-          updatedDest = { ...destBlock, routeFromPrevious: undefined }
-          toast.error('Gagal menghitung rute antar lokasi')
-        }
-      } else {
-        updatedSource = { ...sourceBlock, routeToNext: undefined }
-        updatedDest = { ...destBlock, routeFromPrevious: undefined }
-      }
-
-      return { updatedSource, updatedDest }
+    const canCalculateRoute = (source: Block, dest: Block): boolean => {
+      return (
+        source.blockType === 'LOCATION' &&
+        dest.blockType === 'LOCATION' &&
+        !!source.location &&
+        !!dest.location
+      )
     }
 
-    if (blockId) {
-      for (let sIdx = 0; sIdx < updatedSections.length; sIdx++) {
-        const section = updatedSections[sIdx]
-        if (!section.blocks) continue
+    const updateRouteBetween = async (sourceBlock: Block, destBlock: Block) => {
+      if (!canCalculateRoute(sourceBlock, destBlock)) {
+        return {
+          updatedSource: { ...sourceBlock, routeToNext: undefined },
+          updatedDest: { ...destBlock, routeFromPrevious: undefined },
+        }
+      }
+
+      try {
+        const routeData = await calculateRoute(
+          sourceBlock.location!,
+          destBlock.location!
+        )
+        if (routeData) {
+          const routeObject: Route = {
+            sourceBlockId: sourceBlock.id,
+            destinationBlockId: destBlock.id,
+            distance: routeData.distance,
+            duration: routeData.duration,
+            polyline: routeData.polyline,
+          }
+          return {
+            updatedSource: { ...sourceBlock, routeToNext: routeObject },
+            updatedDest: { ...destBlock, routeFromPrevious: routeObject },
+          }
+        } else {
+          return {
+            updatedSource: { ...sourceBlock, routeToNext: undefined },
+            updatedDest: { ...destBlock, routeFromPrevious: undefined },
+          }
+        }
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (error) {
+        toast.error('Gagal menghitung rute antar lokasi')
+        return {
+          updatedSource: { ...sourceBlock, routeToNext: undefined },
+          updatedDest: { ...destBlock, routeFromPrevious: undefined },
+        }
+      }
+    }
+
+    const getPairsForBlock = (blockId: string) => {
+      const pairs: Array<{ sectionIdx: number; currentBlockIdx: number }> = []
+      updatedSections.forEach((section, sIdx) => {
+        if (!section.blocks) return
         const blockIdx = section.blocks.findIndex((b) => b.id === blockId)
-        if (blockIdx === -1) continue
+        if (blockIdx === -1) return
+        if (blockIdx > 0)
+          pairs.push({ sectionIdx: sIdx, currentBlockIdx: blockIdx - 1 })
+        if (blockIdx < section.blocks.length - 1)
+          pairs.push({ sectionIdx: sIdx, currentBlockIdx: blockIdx })
+      })
+      return pairs
+    }
 
-        const currentBlock = section.blocks[blockIdx]
+    const getAllPairs = () => {
+      const pairs: Array<{ sectionIdx: number; currentBlockIdx: number }> = []
+      updatedSections.forEach((section, sIdx) => {
+        if (!section.blocks || section.blocks.length < 2) return
+        section.blocks.slice(0, -1).forEach((_, bIdx) => {
+          pairs.push({ sectionIdx: sIdx, currentBlockIdx: bIdx })
+        })
+      })
+      return pairs
+    }
 
-        // Update route between previous and current block
-        if (blockIdx > 0) {
-          const prevBlock = section.blocks[blockIdx - 1]
-          const { updatedSource, updatedDest } = await updateRouteBetween(
-            prevBlock,
-            currentBlock
-          )
-          updateBlockInSection(sIdx, blockIdx - 1, updatedSource)
-          updateBlockInSection(sIdx, blockIdx, updatedDest)
-        }
+    const pairs = blockId ? getPairsForBlock(blockId) : getAllPairs()
 
-        // Update route between current and next block
-        if (blockIdx < section.blocks.length - 1) {
-          const nextBlock = section.blocks[blockIdx + 1]
-          const { updatedSource, updatedDest } = await updateRouteBetween(
-            currentBlock,
-            nextBlock
-          )
-          updateBlockInSection(sIdx, blockIdx, updatedSource)
-          updateBlockInSection(sIdx, blockIdx + 1, updatedDest)
-        }
-      }
-    } else {
-      // full route recalculation
-      for (let sIdx = 0; sIdx < updatedSections.length; sIdx++) {
-        const section = updatedSections[sIdx]
-        if (!section.blocks || section.blocks.length < 2) continue
-        for (let bIdx = 0; bIdx < section.blocks.length - 1; bIdx++) {
-          const currentBlock = section.blocks[bIdx]
-          const nextBlock = section.blocks[bIdx + 1]
-          const { updatedSource, updatedDest } = await updateRouteBetween(
-            currentBlock,
-            nextBlock
-          )
-          updateBlockInSection(sIdx, bIdx, updatedSource)
-          updateBlockInSection(sIdx, bIdx + 1, updatedDest)
-        }
-      }
+    for (const pair of pairs) {
+      const { sectionIdx, currentBlockIdx } = pair
+      const section = updatedSections[sectionIdx]
+      if (!section.blocks || currentBlockIdx >= section.blocks.length - 1)
+        continue
+      const currentBlock = section.blocks[currentBlockIdx]
+      const nextBlock = section.blocks[currentBlockIdx + 1]
+      const { updatedSource, updatedDest } = await updateRouteBetween(
+        currentBlock,
+        nextBlock
+      )
+      updateBlockInSection(sectionIdx, currentBlockIdx, updatedSource)
+      updateBlockInSection(sectionIdx, currentBlockIdx + 1, updatedDest)
     }
 
     return updatedSections
