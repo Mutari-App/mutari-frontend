@@ -7,7 +7,6 @@ type MapsProps = {
 }
 
 function Maps({ itineraryData }: MapsProps) {
-  const [map, setMap] = React.useState<google.maps.Map | null>(null)
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? ''
   const defaultCenter = React.useMemo(
     () => ({ lat: -6.3604, lng: 106.82719 }),
@@ -38,13 +37,12 @@ function Maps({ itineraryData }: MapsProps) {
           mapContainerClassName="w-full h-full"
           center={defaultCenter}
           zoom={10}
-          onLoad={(map) => setMap(map)}
           options={{
             streetViewControl: false,
           }}
         >
-          {locations.map((loc, idx) => (
-            <Marker key={idx} position={loc} data-testid="map-marker" />
+          {locations.map((loc) => (
+            <Marker key={`${loc.lat}-${loc.lng}`} position={loc} data-testid="map-marker" />
           ))}
         </GoogleMap>
       )}
