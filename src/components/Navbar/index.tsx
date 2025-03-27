@@ -61,9 +61,9 @@ export const Navbar: React.FC = () => {
       toast.success('Logout berhasil!')
     } catch (error) {
       if (error instanceof Error) {
-        toast.error(error.message);
+        toast.error(error.message)
       } else {
-        toast.error("Terjadi kesalahan tidak terduga.")
+        toast.error('Terjadi kesalahan tidak terduga.')
       }
     }
   }

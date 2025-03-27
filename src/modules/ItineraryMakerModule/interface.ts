@@ -9,7 +9,16 @@ export interface Block {
   endTime?: string
   location?: string
   price?: number
-  photoUrl?: string
+  routeToNext?: Route
+  routeFromPrevious?: Route
+}
+
+export interface Route {
+  sourceBlockId: string
+  destinationBlockId: string
+  distance: number // Distance in meters
+  duration: number // Duration in seconds
+  polyline?: string
 }
 
 export interface Section {

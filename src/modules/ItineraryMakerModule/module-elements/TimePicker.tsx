@@ -59,7 +59,7 @@ export function TimePicker({ value, onChange, label }: TimePickerProps) {
           variant="outline"
           size="sm"
           className={cn(
-            'h-6 w-20 text-xs justify-start text-left font-normal',
+            'h-6 w-14 text-xs justify-start text-left font-normal',
             !value && 'text-muted-foreground'
           )}
         >

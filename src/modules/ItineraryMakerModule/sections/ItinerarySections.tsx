@@ -65,6 +65,24 @@ export const ItinerarySections: React.FC<ItinerarySectionsProps> = ({
   removeBlock,
   handleDragEnd,
 }) => {
+  // Helper function to check if a block should show route information
+  const shouldShowRoute = (section: Section, blockIndex: number): boolean => {
+    if (!section.blocks) return false
+
+    // Current block must be a location block
+    const currentBlock = section.blocks[blockIndex]
+    if (currentBlock.blockType !== 'LOCATION' || !currentBlock.location)
+      return false
+
+    // Must have a next block that is also a location block
+    const nextBlock = section.blocks[blockIndex + 1]
+    if (!nextBlock || nextBlock.blockType !== 'LOCATION' || !nextBlock.location)
+      return false
+
+    // Must have route information
+    return !!currentBlock.routeToNext
+  }
+
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
       {sections.map((section) => (
@@ -131,6 +149,8 @@ export const ItinerarySections: React.FC<ItinerarySectionsProps> = ({
                     toggleInput={toggleInput}
                     updateBlock={updateBlock}
                     removeBlock={removeBlock}
+                    showRoute={shouldShowRoute(section, blockIndex)}
+                    routeInfo={block.routeToNext}
                   />
                 ))}
                 {provided.placeholder}
