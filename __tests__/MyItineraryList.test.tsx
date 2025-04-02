@@ -44,6 +44,8 @@ const mockData: ItineraryData[] = [
     isPublished: false,
     isCompleted: false,
     locationCount: 0,
+    pendingInvites: [],
+    invitedUsers: [],
   },
   {
     id: 'itinerary2',
@@ -55,6 +57,8 @@ const mockData: ItineraryData[] = [
     isPublished: true,
     isCompleted: false,
     locationCount: 5,
+    pendingInvites: [],
+    invitedUsers: [],
   },
 ]
 

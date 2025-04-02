@@ -38,6 +38,8 @@ const mockItem: ItineraryData = {
   isPublished: false,
   isCompleted: false,
   locationCount: 5,
+  pendingInvites: [],
+  invitedUsers: [],
 }
 
 jest.mock('sonner', () => ({
