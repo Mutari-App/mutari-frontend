@@ -62,7 +62,6 @@ export default function ItineraryModule() {
       )
       if (res.statusCode === 401) return
       if (res.statusCode !== 200) throw new Error(res.message)
-      console.log(res.itinerary)
       setCompletedData(res.itinerary)
     } catch (err: any) {
       if (err instanceof Error) toast.error(`${err.message}`)

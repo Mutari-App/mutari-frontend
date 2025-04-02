@@ -34,4 +34,18 @@ export interface ItineraryData {
   isPublished: boolean
   isCompleted: boolean
   locationCount: number
+  pendingInvites: {
+    createdAt: string // ISO string format (e.g., "2025-03-31T09:07:34.592Z")
+    email: string
+    id: string
+    itineraryId: string
+    updatedAt: string
+  }[]
+  invitedUsers: {
+    id: string
+    firstName: string
+    lastName: string
+    photoProfile: string
+    email: string
+  }[]
 }

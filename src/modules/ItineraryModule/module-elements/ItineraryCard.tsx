@@ -26,7 +26,6 @@ import {
 } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
-const pendingUsers = [{ id: 'tests', email: 'test@gmail.com' }]
 const acceptedUsers = [
   {
     firstName: 'First',
@@ -145,6 +144,7 @@ function ItineraryCard({
       toast.success('Undangan berhasil dikirim!')
       setEmails([])
       setEmailInput('')
+      refresh()
     } catch (err) {
       if (err instanceof Error) toast.error(`${err.message}`)
     }
@@ -185,8 +185,24 @@ function ItineraryCard({
     }
   }
 
-  const removeUser = async () => {
-    console.log('removeUser')
+  const removeUser = async (userId: string) => {
+    try {
+      setIsLoading(true)
+      const response = await customFetch(
+        `/itineraries/${item.id}/${userId}/remove`,
+        {
+          method: 'DELETE',
+        }
+      )
+
+      if (response.statusCode !== 200) throw new Error(response.message)
+      toast.success('User berhasil dihapus!')
+      refresh()
+    } catch (err) {
+      if (err instanceof Error) toast.error(`${err.message}`)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -305,29 +321,29 @@ function ItineraryCard({
           <Tabs defaultValue="accepted" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="accepted">
-                Akun Terdaftar ({acceptedUsers.length})
+                Akun Terdaftar ({item.invitedUsers?.length})
               </TabsTrigger>
               <TabsTrigger value="pending">
-                Pending ({pendingUsers.length})
+                Pending ({item.pendingInvites?.length})
               </TabsTrigger>
             </TabsList>
 
             <TabsContent value="accepted" className="mt-4">
               {isLoading ? (
                 <div className="text-center py-4">Memuat...</div>
-              ) : acceptedUsers.length > 0 ? (
+              ) : item.invitedUsers?.length > 0 ? (
                 <div className="space-y-2 max-h-48 overflow-y-auto">
-                  {acceptedUsers.map((user) => (
+                  {item.invitedUsers?.map((user) => (
                     <div
                       key={user.id}
                       className="flex items-center justify-between p-2 bg-gray-50 rounded-md"
                     >
                       <div className="flex items-center gap-2">
-                        <div className="relative rounded-full overflow-hidden aspect-square w-10  bg-gray-400 ">
+                        <div className="relative rounded-full overflow-hidden aspect-square w-10  ">
                           <Image
                             src={
                               user.photoProfile ||
-                              '/placeholder.svg?height=40&width=40'
+                              '/images/profile-placeholder.png'
                             }
                             alt={`${user.firstName} ${user.lastName}`}
                             width={40}
@@ -344,7 +360,7 @@ function ItineraryCard({
                           </span>
                         </div>
                       </div>
-                      <button onClick={removeUser}>
+                      <button onClick={() => removeUser(user.id)}>
                         <X />
                       </button>
                     </div>
@@ -360,9 +376,9 @@ function ItineraryCard({
             <TabsContent value="pending" className="mt-4">
               {isLoading ? (
                 <div className="text-center py-4">Memuat...</div>
-              ) : pendingUsers.length > 0 ? (
+              ) : item.pendingInvites?.length > 0 ? (
                 <div className="space-y-2 max-h-48 overflow-y-auto">
-                  {pendingUsers.map((user) => (
+                  {item.pendingInvites.map((user) => (
                     <div
                       key={user.id}
                       className="flex items-center justify-between p-2 bg-gray-50 rounded-md"
