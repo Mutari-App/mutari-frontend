@@ -1,18 +1,25 @@
 import { toast } from 'sonner'
 
+export enum TransportMode {
+  DRIVE = 'DRIVE',
+  WALK = 'WALK',
+  BICYCLE = 'BICYCLE',
+  TRANSIT = 'TRANSIT',
+  TWO_WHEELER = 'TWO_WHEELER',
+}
+
+export const transportModeNames = {
+  [TransportMode.DRIVE]: 'Mobil',
+  [TransportMode.WALK]: 'Jalan Kaki',
+  [TransportMode.BICYCLE]: 'Sepeda',
+  [TransportMode.TRANSIT]: 'Transportasi Umum',
+  [TransportMode.TWO_WHEELER]: 'Motor',
+}
+
 interface RouteResponse {
   distance: number
   duration: number
   polyline: string
-}
-
-interface Waypoint {
-  location: {
-    latLng: {
-      latitude: number
-      longitude: number
-    }
-  }
 }
 
 interface Route {
@@ -27,45 +34,71 @@ interface ComputeRoutesResponse {
   routes: Route[]
 }
 
+interface LatLng {
+  latitude: number
+  longitude: number
+}
+
+interface Location {
+  latLng: LatLng
+}
+
+interface Waypoint {
+  location: Location
+}
+
+interface ComputeRoutesRequest {
+  origin: Waypoint
+  destination: Waypoint
+  travelMode: TransportMode
+  computeAlternativeRoutes: boolean
+  polylineQuality: 'HIGH_QUALITY'
+  polylineEncoding: 'ENCODED_POLYLINE'
+  routingPreference?: 'TRAFFIC_AWARE'
+}
+
 export async function calculateRoute(
   origin: string,
-  destination: string
+  destination: string,
+  transportMode: TransportMode = TransportMode.DRIVE
 ): Promise<RouteResponse | null> {
   try {
     const originCoords = origin.split(',').map(Number)
     const destinationCoords = destination.split(',').map(Number)
-
     if (originCoords.length !== 2 || destinationCoords.length !== 2) {
-      toast.error('Invalid origin or destination coordinates')
+      toast.error('Koordinat asal atau tujuan tidak valid')
       return null
     }
 
-    const originWaypoint: Waypoint = {
-      location: {
-        latLng: {
-          latitude: originCoords[0],
-          longitude: originCoords[1],
+    const requestBody: ComputeRoutesRequest = {
+      origin: {
+        location: {
+          latLng: {
+            latitude: originCoords[0],
+            longitude: originCoords[1],
+          },
         },
       },
-    }
-
-    const destinationWaypoint: Waypoint = {
-      location: {
-        latLng: {
-          latitude: destinationCoords[0],
-          longitude: destinationCoords[1],
+      destination: {
+        location: {
+          latLng: {
+            latitude: destinationCoords[0],
+            longitude: destinationCoords[1],
+          },
         },
       },
-    }
-
-    const requestBody = {
-      origin: originWaypoint,
-      destination: destinationWaypoint,
-      travelMode: 'DRIVE',
-      routingPreference: 'TRAFFIC_AWARE',
+      travelMode: transportMode,
       computeAlternativeRoutes: false,
       polylineQuality: 'HIGH_QUALITY',
       polylineEncoding: 'ENCODED_POLYLINE',
+    }
+
+    // Add routingPreference for DRIVE and TWO_WHEELER modes
+    if (
+      transportMode === TransportMode.DRIVE ||
+      transportMode === TransportMode.TWO_WHEELER
+    ) {
+      requestBody.routingPreference = 'TRAFFIC_AWARE'
     }
 
     const response = await fetch(
@@ -83,25 +116,34 @@ export async function calculateRoute(
     )
 
     if (!response.ok) {
-      console.error(`HTTP error! status: ${response.status}`)
+      toast.error(`Gagal menghitung rute: error ${response.status}`, {
+        id: 'route-calc',
+      })
       return null
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const data: ComputeRoutesResponse = await response.json()
 
-    if (data.routes && data.routes.length > 0) {
-      const route = data.routes[0]
-      return {
-        distance: route.distanceMeters,
-        duration: parseInt(route.duration.replace('s', '')),
-        polyline: route.polyline.encodedPolyline,
-      }
-    } else {
+    if (!data.routes?.length) {
+      toast.error(
+        `Rute tidak ditemukan untuk mode ${transportModeNames[transportMode]}`,
+        {
+          id: 'route-calc',
+        }
+      )
       return null
+    }
+
+    const route = data.routes[0]
+    return {
+      distance: route.distanceMeters ?? 0,
+      duration: parseInt(route.duration.replace('s', '')),
+      polyline: route.polyline.encodedPolyline,
     }
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
+    toast.error('Gagal menghitung rute', { id: 'route-calc' })
     return null
   }
 }
