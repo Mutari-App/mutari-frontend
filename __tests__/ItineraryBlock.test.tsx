@@ -1,8 +1,19 @@
 import React from 'react'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { ItineraryBlock } from '@/modules/ItineraryMakerModule/module-elements/ItineraryBlock'
 import '@testing-library/jest-dom'
 import { type Block } from '@/modules/ItineraryMakerModule/interface'
+import { toast } from 'sonner'
+import { TransportMode } from '@/utils/maps'
+
+// Mock the sonner toast
+jest.mock('sonner', () => ({
+  toast: {
+    loading: jest.fn(),
+    success: jest.fn(),
+    error: jest.fn(),
+  },
+}))
 
 // Mock the drag and drop library
 jest.mock('@hello-pangea/dnd', () => ({
@@ -89,7 +100,33 @@ jest.mock(
 )
 
 jest.mock('@/modules/ItineraryMakerModule/module-elements/RouteInfo', () => ({
-  RouteInfo: jest.fn(() => <div data-testid="route-info" />),
+  RouteInfo: jest.fn(
+    ({
+      distance,
+      duration,
+      transportMode,
+      onTransportModeChange,
+    }: {
+      distance: number
+      duration: number
+      transportMode?: TransportMode
+      onTransportModeChange?: (mode: TransportMode) => Promise<boolean>
+    }) => (
+      <div data-testid="route-info">
+        <span data-testid="route-distance">{distance}</span>
+        <span data-testid="route-duration">{duration}</span>
+        <span data-testid="route-mode">{transportMode}</span>
+        {onTransportModeChange && (
+          <button
+            data-testid="mode-walk"
+            onClick={() => onTransportModeChange(TransportMode.WALK)}
+          >
+            Change Mode
+          </button>
+        )}
+      </div>
+    )
+  ),
 }))
 
 // Mock the UI components
@@ -180,6 +217,10 @@ jest.mock('@/components/ui/button', () => ({
 jest.mock('lucide-react', () => ({
   X: () => 'X',
   GripVertical: () => 'GripVertical',
+  Car: () => 'Car',
+  Navigation: () => 'Navigation',
+  Bike: () => 'Bike',
+  Bus: () => 'Bus',
 }))
 
 describe('ItineraryBlock Component', () => {
@@ -283,7 +324,14 @@ describe('ItineraryBlock Component', () => {
 
   test('renders RouteInfo when showRoute is true and routeInfo exists', () => {
     const locationBlock = createLocationBlock()
-    const routeInfo = { distance: 10, duration: 30, polyline: 'test' }
+    const routeInfo = {
+      sourceBlockId: 'source-123',
+      destinationBlockId: 'dest-123',
+      distance: 10,
+      duration: 30,
+      polyline: 'test',
+      transportMode: TransportMode.DRIVE,
+    }
 
     render(
       <ItineraryBlock
@@ -300,12 +348,25 @@ describe('ItineraryBlock Component', () => {
       />
     )
 
+    // Route info should be rendered with the correct data
     expect(screen.getByTestId('route-info')).toBeInTheDocument()
+    expect(screen.getByTestId('route-distance').textContent).toBe('10')
+    expect(screen.getByTestId('route-duration').textContent).toBe('30')
+    expect(screen.getByTestId('route-mode').textContent).toBe(
+      TransportMode.DRIVE
+    )
   })
 
   test('does not render RouteInfo when showRoute is false', () => {
     const locationBlock = createLocationBlock()
-    const routeInfo = { distance: 10, duration: 30, polyline: 'test' }
+    const routeInfo = {
+      sourceBlockId: 'source-123',
+      destinationBlockId: 'dest-123',
+      distance: 10,
+      duration: 30,
+      polyline: 'test',
+      transportMode: TransportMode.DRIVE,
+    }
 
     render(
       <ItineraryBlock
@@ -323,6 +384,178 @@ describe('ItineraryBlock Component', () => {
     )
 
     expect(screen.queryByTestId('route-info')).not.toBeInTheDocument()
+  })
+
+  test('handles successful transport mode change', async () => {
+    const locationBlock = createLocationBlock()
+    const routeInfo = {
+      sourceBlockId: 'source-123',
+      destinationBlockId: 'dest-123',
+      distance: 10,
+      duration: 30,
+      polyline: 'test',
+      transportMode: TransportMode.DRIVE,
+    }
+
+    // Mock to return success (true)
+    const mockOnTransportModeChange = jest.fn().mockResolvedValue(true)
+
+    render(
+      <ItineraryBlock
+        block={locationBlock}
+        blockIndex={blockIndex}
+        sectionNumber={sectionNumber}
+        timeWarning={null}
+        isInputVisible={mockIsInputVisible}
+        toggleInput={mockToggleInput}
+        updateBlock={mockUpdateBlock}
+        removeBlock={mockRemoveBlock}
+        showRoute={true}
+        routeInfo={routeInfo}
+        onTransportModeChange={mockOnTransportModeChange}
+      />
+    )
+
+    // Click the button to change transport mode to WALK
+    fireEvent.click(screen.getByTestId('mode-walk'))
+
+    // Check that the loading toast was shown
+    expect(toast.loading).toHaveBeenCalled()
+
+    // Wait for the async function to complete
+    await waitFor(() => {
+      // Success callback should have been called
+      expect(mockOnTransportModeChange).toHaveBeenCalledWith(
+        locationBlock.id,
+        TransportMode.WALK
+      )
+      // Success toast should be shown
+      expect(toast.success).toHaveBeenCalledWith(
+        'Rute berhasil diperbarui',
+        expect.objectContaining({ id: 'route-calc' })
+      )
+    })
+  })
+
+  test('handles failed transport mode change', async () => {
+    const locationBlock = createLocationBlock()
+    const routeInfo = {
+      sourceBlockId: 'source-123',
+      destinationBlockId: 'dest-123',
+      distance: 10,
+      duration: 30,
+      polyline: 'test',
+      transportMode: TransportMode.DRIVE,
+    }
+
+    const mockOnTransportModeChange = jest.fn().mockResolvedValue(false)
+
+    render(
+      <ItineraryBlock
+        block={locationBlock}
+        blockIndex={blockIndex}
+        sectionNumber={sectionNumber}
+        timeWarning={null}
+        isInputVisible={mockIsInputVisible}
+        toggleInput={mockToggleInput}
+        updateBlock={mockUpdateBlock}
+        removeBlock={mockRemoveBlock}
+        showRoute={true}
+        routeInfo={routeInfo}
+        onTransportModeChange={mockOnTransportModeChange}
+      />
+    )
+
+    fireEvent.click(screen.getByTestId('mode-walk'))
+    expect(toast.loading).toHaveBeenCalled()
+
+    await waitFor(() => {
+      expect(mockOnTransportModeChange).toHaveBeenCalledWith(
+        locationBlock.id,
+        TransportMode.WALK
+      )
+      expect(toast.success).not.toHaveBeenCalled()
+    })
+  })
+
+  test('handles errors during transport mode change', async () => {
+    const locationBlock = createLocationBlock()
+    const routeInfo = {
+      sourceBlockId: 'source-123',
+      destinationBlockId: 'dest-123',
+      distance: 10,
+      duration: 30,
+      polyline: 'test',
+      transportMode: TransportMode.DRIVE,
+    }
+
+    const mockOnTransportModeChange = jest
+      .fn()
+      .mockRejectedValue(new Error('Test error'))
+
+    render(
+      <ItineraryBlock
+        block={locationBlock}
+        blockIndex={blockIndex}
+        sectionNumber={sectionNumber}
+        timeWarning={null}
+        isInputVisible={mockIsInputVisible}
+        toggleInput={mockToggleInput}
+        updateBlock={mockUpdateBlock}
+        removeBlock={mockRemoveBlock}
+        showRoute={true}
+        routeInfo={routeInfo}
+        onTransportModeChange={mockOnTransportModeChange}
+      />
+    )
+
+    fireEvent.click(screen.getByTestId('mode-walk'))
+
+    await waitFor(() => {
+      expect(mockOnTransportModeChange).toHaveBeenCalledWith(
+        locationBlock.id,
+        TransportMode.WALK
+      )
+      expect(toast.error).toHaveBeenCalledWith(
+        'Terjadi kesalahan saat memperbarui rute',
+        expect.objectContaining({ id: 'route-calc' })
+      )
+    })
+  })
+
+  test('handles case when onTransportModeChange is undefined', async () => {
+    const locationBlock = createLocationBlock()
+    const routeInfo = {
+      sourceBlockId: 'source-123',
+      destinationBlockId: 'dest-123',
+      distance: 10,
+      duration: 30,
+      polyline: 'test',
+      transportMode: TransportMode.DRIVE,
+    }
+
+    render(
+      <ItineraryBlock
+        block={locationBlock}
+        blockIndex={blockIndex}
+        sectionNumber={sectionNumber}
+        timeWarning={null}
+        isInputVisible={mockIsInputVisible}
+        toggleInput={mockToggleInput}
+        updateBlock={mockUpdateBlock}
+        removeBlock={mockRemoveBlock}
+        showRoute={true}
+        routeInfo={routeInfo}
+        // Intentionally not providing onTransportModeChange
+      />
+    )
+
+    fireEvent.click(screen.getByTestId('mode-walk'))
+
+    await waitFor(() => {
+      expect(toast.loading).toHaveBeenCalled()
+      expect(toast.success).not.toHaveBeenCalled()
+    })
   })
 
   test('updates block title when title input changes', () => {
