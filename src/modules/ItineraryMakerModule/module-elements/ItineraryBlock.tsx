@@ -3,6 +3,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
+import { toast } from 'sonner'
 import {
   Draggable,
   type DraggableProvided,
@@ -14,6 +15,22 @@ import { TimeInput } from './TimeInput'
 import { PriceInput } from './PriceInput'
 import { CoordinateInput } from './CoordinateInput'
 import { RouteInfo } from './RouteInfo'
+
+enum TransportMode {
+  DRIVE = 'DRIVE',
+  WALK = 'WALK',
+  BICYCLE = 'BICYCLE',
+  TRANSIT = 'TRANSIT',
+  TWO_WHEELER = 'TWO_WHEELER',
+}
+
+const transportModeNames = {
+  [TransportMode.DRIVE]: 'Mobil',
+  [TransportMode.WALK]: 'Jalan Kaki',
+  [TransportMode.BICYCLE]: 'Sepeda',
+  [TransportMode.TRANSIT]: 'Transportasi Umum',
+  [TransportMode.TWO_WHEELER]: 'Motor',
+}
 
 interface ItineraryBlockProps {
   block: Block
@@ -39,10 +56,17 @@ interface ItineraryBlockProps {
   removeBlock: (blockId: string) => void
   showRoute: boolean
   routeInfo?: {
+    sourceBlockId: string
+    destinationBlockId: string
     distance: number
     duration: number
     polyline?: string
+    transportMode?: TransportMode
   }
+  onTransportModeChange?: (
+    blockId: string,
+    mode: TransportMode
+  ) => Promise<boolean>
 }
 
 export const ItineraryBlock: React.FC<ItineraryBlockProps> = ({
@@ -56,6 +80,7 @@ export const ItineraryBlock: React.FC<ItineraryBlockProps> = ({
   removeBlock,
   showRoute,
   routeInfo,
+  onTransportModeChange,
 }) => {
   return (
     <>
@@ -155,6 +180,36 @@ export const ItineraryBlock: React.FC<ItineraryBlockProps> = ({
           distance={routeInfo.distance}
           duration={routeInfo.duration}
           polyline={routeInfo.polyline}
+          transportMode={routeInfo.transportMode}
+          onTransportModeChange={async (mode) => {
+            toast.loading(
+              `Menghitung ulang rute dengan ${transportModeNames[mode]}...`,
+              { id: 'route-calc' }
+            )
+
+            try {
+              if (onTransportModeChange) {
+                const success = await onTransportModeChange(block.id, mode)
+
+                if (success) {
+                  toast.success('Rute berhasil diperbarui', {
+                    id: 'route-calc',
+                    duration: 3000,
+                  })
+                  return true
+                }
+                return false
+              }
+              return false
+              // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            } catch (err) {
+              toast.error('Terjadi kesalahan saat memperbarui rute', {
+                id: 'route-calc',
+                duration: 3000,
+              })
+              return false
+            }
+          }}
         />
       )}
     </>
