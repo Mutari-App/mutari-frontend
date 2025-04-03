@@ -33,7 +33,7 @@ import { cn } from '@/lib/utils'
 import { useAuthContext } from '@/contexts/AuthContext'
 import { redirect, useParams, useRouter } from 'next/navigation'
 import NotFound from 'next/error'
-import { calculateRoute } from '@/utils/maps'
+import { calculateRoute, TransportMode } from '@/utils/maps'
 
 const SAVED_ITINERARY_KEY = 'saved_itinerary_data'
 
@@ -298,6 +298,115 @@ export default function ItineraryMakerModule() {
     }
   }, [hasUnsavedChanges])
 
+  const updateTransportMode = async (
+    blockId: string,
+    transportMode: TransportMode
+  ): Promise<boolean> => {
+    // First find the block and its next block to get origin and destination coordinates
+    let originLocation: string | undefined
+    let destinationLocation: string | undefined
+    let sourceBlockId: string | undefined
+    let destinationBlockId: string | undefined
+
+    for (const section of itineraryData.sections) {
+      if (!section.blocks) continue
+
+      const blockIndex = section.blocks.findIndex(
+        (block) => block.id === blockId
+      )
+      if (blockIndex !== -1 && blockIndex < section.blocks.length - 1) {
+        const currentBlock = section.blocks[blockIndex]
+        const nextBlock = section.blocks[blockIndex + 1]
+
+        if (currentBlock.location && nextBlock.location) {
+          originLocation = currentBlock.location
+          destinationLocation = nextBlock.location
+          sourceBlockId = currentBlock.id
+          destinationBlockId = nextBlock.id
+          break
+        }
+      }
+    }
+
+    // If we have origin and destination, recalculate the route
+    if (
+      originLocation &&
+      destinationLocation &&
+      sourceBlockId &&
+      destinationBlockId
+    ) {
+      try {
+        // Calculate new route with updated transport mode
+        const routeData = await calculateRoute(
+          originLocation,
+          destinationLocation,
+          transportMode
+        )
+
+        if (routeData) {
+          const routeObject: Route = {
+            sourceBlockId,
+            destinationBlockId,
+            distance: routeData.distance,
+            duration: routeData.duration,
+            polyline: routeData.polyline,
+            transportMode,
+          }
+
+          // Update itinerary data with new route information
+          setItineraryData((prev) => {
+            const updatedSections = prev.sections.map((section) => {
+              if (!section.blocks) return section
+
+              // Find the source block
+              const sourceBlockIndex = section.blocks.findIndex(
+                (block) => block.id === sourceBlockId
+              )
+              if (
+                sourceBlockIndex !== -1 &&
+                sourceBlockIndex < section.blocks.length - 1
+              ) {
+                const updatedBlocks = [...section.blocks]
+
+                // Update source block
+                const sourceBlock = { ...updatedBlocks[sourceBlockIndex] }
+                sourceBlock.routeToNext = routeObject
+                updatedBlocks[sourceBlockIndex] = sourceBlock
+
+                // Update destination block
+                const destBlock = { ...updatedBlocks[sourceBlockIndex + 1] }
+                destBlock.routeFromPrevious = routeObject
+                updatedBlocks[sourceBlockIndex + 1] = destBlock
+
+                return {
+                  ...section,
+                  blocks: updatedBlocks,
+                }
+              }
+
+              return section
+            })
+
+            return {
+              ...prev,
+              sections: updatedSections,
+            }
+          })
+          return true
+        } else {
+          return false
+        }
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (error) {
+        toast.error('Gagal memperbarui rute dengan mode transportasi baru')
+        return false
+      }
+    } else {
+      toast.error('Data lokasi tidak ditemukan untuk perhitungan rute')
+      return false
+    }
+  }
+
   const updateRoutesBetweenBlocks = async (
     sections: Section[],
     blockId?: string
@@ -334,9 +443,12 @@ export default function ItineraryMakerModule() {
       }
 
       try {
+        const transportMode =
+          sourceBlock.routeToNext?.transportMode ?? TransportMode.DRIVE
         const routeData = await calculateRoute(
           sourceBlock.location!,
-          destBlock.location!
+          destBlock.location!,
+          transportMode
         )
         if (routeData) {
           const routeObject: Route = {
@@ -345,6 +457,7 @@ export default function ItineraryMakerModule() {
             distance: routeData.distance,
             duration: routeData.duration,
             polyline: routeData.polyline,
+            transportMode,
           }
           return {
             updatedSource: { ...sourceBlock, routeToNext: routeObject },
@@ -1185,6 +1298,7 @@ export default function ItineraryMakerModule() {
         toggleInput={toggleInput}
         isInputVisible={isInputVisible}
         timeWarning={timeWarning}
+        onTransportModeChange={updateTransportMode}
       />
       <div className="flex justify-center my-8">
         <Button

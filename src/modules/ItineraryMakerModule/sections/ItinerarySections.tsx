@@ -21,6 +21,7 @@ import {
   Trash,
 } from 'lucide-react'
 import { type Block, type Section } from '../interface'
+import { type TransportMode } from '@/utils/maps'
 import { ItineraryBlock } from '../module-elements/ItineraryBlock'
 
 interface ItinerarySectionsProps {
@@ -49,6 +50,10 @@ interface ItinerarySectionsProps {
   ) => void
   removeBlock: (blockId: string) => void
   handleDragEnd: (result: DropResult) => void
+  onTransportModeChange?: (
+    blockId: string,
+    mode: TransportMode
+  ) => Promise<boolean>
 }
 
 export const ItinerarySections: React.FC<ItinerarySectionsProps> = ({
@@ -64,6 +69,7 @@ export const ItinerarySections: React.FC<ItinerarySectionsProps> = ({
   updateBlock,
   removeBlock,
   handleDragEnd,
+  onTransportModeChange,
 }) => {
   // Helper function to check if a block should show route information
   const shouldShowRoute = (section: Section, blockIndex: number): boolean => {
@@ -151,6 +157,7 @@ export const ItinerarySections: React.FC<ItinerarySectionsProps> = ({
                     removeBlock={removeBlock}
                     showRoute={shouldShowRoute(section, blockIndex)}
                     routeInfo={block.routeToNext}
+                    onTransportModeChange={onTransportModeChange}
                   />
                 ))}
                 {provided.placeholder}
