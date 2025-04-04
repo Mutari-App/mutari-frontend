@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import Maps from '@/modules/ItineraryMakerModule/sections/Maps'
 import { GoogleMap, Marker, useLoadScript } from '@react-google-maps/api'
 import type { CreateItineraryDto } from '@/modules/ItineraryMakerModule/interface'
@@ -6,6 +6,11 @@ import type { CreateItineraryDto } from '@/modules/ItineraryMakerModule/interfac
 const googleMapMock = jest.fn(({ children, ...props }) => (
   <div data-testid="google-map">{children}</div>
 ))
+
+jest.mock('lucide-react', () => ({
+  Globe: () => <span data-testid="globe-icon">Globe Icon Mock</span>,
+  Phone: () => <span data-testid="phone-icon">Phone Icon Mock</span>,
+}))
 
 jest.mock('@react-google-maps/api', () => ({
   GoogleMap: jest.fn(({ children, ...props }) => (
@@ -132,4 +137,32 @@ describe('Maps Component', () => {
     render(<Maps itineraryData={noBlocksItineraryData.sections} />)
     expect(screen.queryByTestId('map-marker')).not.toBeInTheDocument()
   })
+
+  test("calls addLocationToSection when adding a place to itinerary", async () => {
+    const addLocationToSectionMock = jest.fn();
+    render(
+      <Maps
+        itineraryData={mockItineraryData.sections}
+        isEditing
+        addLocationToSection={addLocationToSectionMock}
+        _testSelectedPlace={{ placeId: "abc123", latLng: { lat: -6.2, lng: 106.8 } }}
+        _testSelectedPlaceDetails={{
+          name: "Test Place",
+          vicinity: "Jakarta",
+          rating: 4.5,
+          user_ratings_total: 100,
+          international_phone_number: "+62 812 3456 7890",
+          website: "https://example.com",
+          photos: []
+        }}
+      />
+    );
+
+    // Simulate selecting a place
+    fireEvent.click(screen.getByText("Add to Itinerary"));
+    
+    await waitFor(() => {
+      expect(addLocationToSectionMock).toHaveBeenCalled();
+    });
+  });
 })
