@@ -5,10 +5,10 @@ import {
   Marker,
   useLoadScript,
 } from '@react-google-maps/api'
-import type { CreateItineraryDto } from '../interface'
+import type { Section } from '../interface'
 
 type MapsProps = {
-  readonly itineraryData: Readonly<CreateItineraryDto>
+  readonly itineraryData: Readonly<Section[]>
 }
 
 function Maps({ itineraryData }: MapsProps) {
@@ -17,7 +17,7 @@ function Maps({ itineraryData }: MapsProps) {
     () => ({ lat: -6.3604, lng: 106.82719 }),
     []
   )
-  const locations = itineraryData.sections.flatMap(
+  const locations = itineraryData?.flatMap(
     (section) =>
       section.blocks?.flatMap((block) => {
         if (!block.location) return []
