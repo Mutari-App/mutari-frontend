@@ -8,16 +8,19 @@ import {
   type DraggableProvided,
   type DraggableStateSnapshot,
 } from '@hello-pangea/dnd'
-import { X, GripVertical } from 'lucide-react'
-import { type Block } from '../interface'
+import { X, GripVertical, OctagonAlert } from 'lucide-react'
+import { FeedbackItem, type Block } from '../interface'
 import { TimeInput } from './TimeInput'
 import { PriceInput } from './PriceInput'
 import { CoordinateInput } from './CoordinateInput'
+import { feedbackForField } from '../utils'
+import { TooltipField } from './TooltipField'
 
 interface ItineraryBlockProps {
   block: Block
   blockIndex: number
   sectionNumber: number
+  feedbackItems: FeedbackItem[]
   timeWarning: {
     blockId: string
     message: string
@@ -39,6 +42,7 @@ interface ItineraryBlockProps {
 }
 
 export const ItineraryBlock: React.FC<ItineraryBlockProps> = ({
+  feedbackItems,
   block,
   blockIndex,
   sectionNumber,
@@ -76,7 +80,7 @@ export const ItineraryBlock: React.FC<ItineraryBlockProps> = ({
                   <>
                     <div className="flex items-center mb-2">
                       <Input
-                        className="text-sm sm:text-base md:text-lg font-medium border-none p-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                        className="text-sm ..."
                         value={block.title}
                         onChange={(e) =>
                           updateBlock(block.id, 'title', e.target.value)
@@ -84,6 +88,7 @@ export const ItineraryBlock: React.FC<ItineraryBlockProps> = ({
                       />
                     </div>
                     <div className="flex flex-wrap gap-2 text-sm text-gray-500 mb-2">
+                      {/* time */}
                       <TimeInput
                         blockId={block.id}
                         startTime={block.startTime}
@@ -93,6 +98,28 @@ export const ItineraryBlock: React.FC<ItineraryBlockProps> = ({
                         updateBlock={updateBlock}
                         timeWarning={timeWarning}
                       />
+                      {feedbackForField?.(
+                        feedbackItems,
+                        sectionNumber,
+                        blockIndex,
+                        'LOCATION',
+                        'startTime'
+                      ) && (
+                        <TooltipField
+                          feedback={
+                            feedbackForField(
+                              feedbackItems,
+                              sectionNumber,
+                              blockIndex,
+                              'LOCATION',
+                              'startTime'
+                            ) ?? undefined
+                          }
+                        >
+                          <OctagonAlert className="text-[#B62116]" />
+                        </TooltipField>
+                      )}
+                      {/* price */}
                       <PriceInput
                         blockId={block.id}
                         price={block.price}
@@ -100,6 +127,28 @@ export const ItineraryBlock: React.FC<ItineraryBlockProps> = ({
                         toggleInput={toggleInput}
                         updateBlock={updateBlock}
                       />
+                      {feedbackForField?.(
+                        feedbackItems,
+                        sectionNumber,
+                        blockIndex,
+                        'LOCATION',
+                        'price'
+                      ) && (
+                        <TooltipField
+                          feedback={
+                            feedbackForField(
+                              feedbackItems,
+                              sectionNumber,
+                              blockIndex,
+                              'LOCATION',
+                              'price'
+                            ) ?? undefined
+                          }
+                        >
+                          <OctagonAlert className="text-[#B62116]" />
+                        </TooltipField>
+                      )}
+                      {/* location */}
                       <CoordinateInput
                         blockId={block.id}
                         location={block.location}
@@ -107,6 +156,27 @@ export const ItineraryBlock: React.FC<ItineraryBlockProps> = ({
                         toggleInput={toggleInput}
                         updateBlock={updateBlock}
                       />
+                      {feedbackForField?.(
+                        feedbackItems,
+                        sectionNumber,
+                        blockIndex,
+                        'LOCATION',
+                        'location'
+                      ) && (
+                        <TooltipField
+                          feedback={
+                            feedbackForField(
+                              feedbackItems,
+                              sectionNumber,
+                              blockIndex,
+                              'LOCATION',
+                              'location'
+                            ) ?? undefined
+                          }
+                        >
+                          <OctagonAlert className="text-[#B62116]" />
+                        </TooltipField>
+                      )}
                     </div>
                     <Input
                       placeholder="Tambahkan catatan singkat..."
@@ -116,16 +186,60 @@ export const ItineraryBlock: React.FC<ItineraryBlockProps> = ({
                         updateBlock(block.id, 'description', e.target.value)
                       }
                     />
+                    {feedbackForField?.(
+                      feedbackItems,
+                      sectionNumber,
+                      blockIndex,
+                      'NOTE',
+                      'description'
+                    ) && (
+                      <TooltipField
+                        feedback={
+                          feedbackForField(
+                            feedbackItems,
+                            sectionNumber,
+                            blockIndex,
+                            'NOTE',
+                            'description'
+                          ) ?? undefined
+                        }
+                      >
+                        <OctagonAlert className="bg-[#B62116]" />
+                      </TooltipField>
+                    )}
                   </>
                 ) : (
-                  <Textarea
-                    placeholder="Masukkan Catatan"
-                    className="mt-2 text-sm md:text-base"
-                    value={block.description ?? ''}
-                    onChange={(e) =>
-                      updateBlock(block.id, 'description', e.target.value)
-                    }
-                  />
+                  <div>
+                    <Textarea
+                      placeholder="Masukkan Catatan"
+                      className="mt-2 text-sm md:text-base"
+                      value={block.description ?? ''}
+                      onChange={(e) =>
+                        updateBlock(block.id, 'description', e.target.value)
+                      }
+                    />
+                    {feedbackForField?.(
+                      feedbackItems,
+                      sectionNumber,
+                      blockIndex,
+                      'NOTE',
+                      'description'
+                    ) && (
+                      <TooltipField
+                        feedback={
+                          feedbackForField(
+                            feedbackItems,
+                            sectionNumber,
+                            blockIndex,
+                            'NOTE',
+                            'description'
+                          ) ?? undefined
+                        }
+                      >
+                        <OctagonAlert className="bg-[#B62116]" />
+                      </TooltipField>
+                    )}
+                  </div>
                 )}
               </div>
               <Button
