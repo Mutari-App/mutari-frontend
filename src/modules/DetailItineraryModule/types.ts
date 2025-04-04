@@ -1,3 +1,15 @@
+interface Route {
+  id: string
+  createdAt: string
+  updatedAt: string
+  sourceBlockId: string
+  destinationBlockId: string
+  distance: number
+  duration: number
+  polyline?: string
+  transportMode: string
+}
+
 interface Block {
   updatedAt: string
   createdAt: string
@@ -12,6 +24,8 @@ interface Block {
   location: string
   price: number
   photoUrl: string | undefined
+  routeToNext?: Route | null
+  routeFromPrevious?: Route | null
 }
 
 interface Section {
