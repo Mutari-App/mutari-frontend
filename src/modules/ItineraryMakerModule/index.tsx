@@ -37,6 +37,7 @@ import Maps from './sections/Maps'
 const SAVED_ITINERARY_KEY = 'saved_itinerary_data'
 
 export default function ItineraryMakerModule() {
+  const { user } = useAuthContext()
   const launchingDate = new Date(
     process.env.NEXT_PUBLIC_LAUNCHING_DATE ?? '2025-01-22T00:00:00'
   )
@@ -110,7 +111,12 @@ export default function ItineraryMakerModule() {
         )
 
         if (res.statusCode !== 200) throw new Error(res.message)
-        console.log(res.data)
+        if (res.data.userId !== user?.id) {
+          toast.error('Anda tidak memiliki akses untuk mengedit itinerary ini')
+          router.push(`/itinerary/${itineraryId}`)
+          return
+        }
+
         setData(res.data)
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
