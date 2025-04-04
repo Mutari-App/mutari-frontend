@@ -138,31 +138,34 @@ describe('Maps Component', () => {
     expect(screen.queryByTestId('map-marker')).not.toBeInTheDocument()
   })
 
-  test("calls addLocationToSection when adding a place to itinerary", async () => {
-    const addLocationToSectionMock = jest.fn();
+  test('calls addLocationToSection when adding a place to itinerary', async () => {
+    const addLocationToSectionMock = jest.fn()
     render(
       <Maps
         itineraryData={mockItineraryData.sections}
         isEditing
         addLocationToSection={addLocationToSectionMock}
-        _testSelectedPlace={{ placeId: "abc123", latLng: { lat: -6.2, lng: 106.8 } }}
+        _testSelectedPlace={{
+          placeId: 'abc123',
+          latLng: { lat: -6.2, lng: 106.8 },
+        }}
         _testSelectedPlaceDetails={{
-          name: "Test Place",
-          vicinity: "Jakarta",
+          name: 'Test Place',
+          vicinity: 'Jakarta',
           rating: 4.5,
           user_ratings_total: 100,
-          international_phone_number: "+62 812 3456 7890",
-          website: "https://example.com",
-          photos: []
+          international_phone_number: '+62 812 3456 7890',
+          website: 'https://example.com',
+          photos: [],
         }}
       />
-    );
+    )
 
     // Simulate selecting a place
-    fireEvent.click(screen.getByText("Add to Itinerary"));
-    
+    fireEvent.click(screen.getByText('Add to Itinerary'))
+
     await waitFor(() => {
-      expect(addLocationToSectionMock).toHaveBeenCalled();
-    });
-  });
+      expect(addLocationToSectionMock).toHaveBeenCalled()
+    })
+  })
 })

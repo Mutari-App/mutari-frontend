@@ -16,6 +16,8 @@ const buttonVariants = cva(
         secondary: 'bg-neutral-100 text-neutral-900 hover:bg-neutral-100/80',
         ghost: 'hover:bg-neutral-100 hover:text-neutral-900',
         link: 'text-neutral-900 underline-offset-4 hover:underline',
+        gradient:
+          'bg-gradient-to-r from-[#0073E6] to-[#004080] text-white hover:from-[#0066cc] hover:to-[#003366]',
       },
       size: {
         default: 'h-10 px-4 py-2',

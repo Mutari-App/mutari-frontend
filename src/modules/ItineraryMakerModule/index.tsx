@@ -533,6 +533,35 @@ export default function ItineraryMakerModule() {
     })
   }
 
+  const addLocationToSection = (
+    sectionNumber: number,
+    title: string,
+    location: string
+  ) => {
+    setItineraryData((prev) => {
+      const updatedSections = prev.sections.map((section) => {
+        if (section.sectionNumber === sectionNumber) {
+          const newBlock = {
+            id: v4(),
+            blockType: 'LOCATION',
+            title,
+            description: '',
+            location,
+          }
+          return {
+            ...section,
+            blocks: [...(section.blocks ?? []), newBlock],
+          }
+        }
+        return section
+      })
+      return {
+        ...prev,
+        sections: updatedSections,
+      }
+    })
+  }
+
   const addSection = (position?: 'after' | 'before', relativeTo?: number) => {
     const newSectionNumber = itineraryData.sections.length + 1
 
@@ -1053,7 +1082,11 @@ export default function ItineraryMakerModule() {
         </div>
       </div>
       <div className="w-full min-h-screen hidden md:block">
-        <Maps itineraryData={itineraryData.sections} />
+        <Maps
+          itineraryData={itineraryData.sections}
+          addLocationToSection={addLocationToSection}
+          isEditing
+        />
       </div>
     </div>
   )
