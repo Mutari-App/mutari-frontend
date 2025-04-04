@@ -1,5 +1,10 @@
 import React from 'react'
-import { GoogleMap, Marker, useLoadScript } from '@react-google-maps/api'
+import {
+  GoogleMap,
+  type Libraries,
+  Marker,
+  useLoadScript,
+} from '@react-google-maps/api'
 import type { CreateItineraryDto } from '../interface'
 
 type MapsProps = {
@@ -23,9 +28,11 @@ function Maps({ itineraryData }: MapsProps) {
       }) ?? []
   )
 
+  const libraries: Libraries = ['places']
+
   const { isLoaded } = useLoadScript({
     googleMapsApiKey: apiKey,
-    libraries: ['places'],
+    libraries,
   })
 
   return (
@@ -42,7 +49,11 @@ function Maps({ itineraryData }: MapsProps) {
           }}
         >
           {locations.map((loc) => (
-            <Marker key={`${loc.lat}-${loc.lng}`} position={loc} data-testid="map-marker" />
+            <Marker
+              key={`${loc.lat}-${loc.lng}`}
+              position={loc}
+              data-testid="map-marker"
+            />
           ))}
         </GoogleMap>
       )}
