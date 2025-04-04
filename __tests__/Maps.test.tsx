@@ -98,17 +98,17 @@ describe('Maps Component', () => {
 
   test('renders loading state when map is not loaded', () => {
     ;(useLoadScript as jest.Mock).mockReturnValueOnce({ isLoaded: false })
-    render(<Maps itineraryData={mockItineraryData} />)
+    render(<Maps itineraryData={mockItineraryData.sections} />)
     expect(screen.getByText(/loading.../i)).toBeInTheDocument()
   })
 
   test('renders Google Map when loaded', () => {
-    render(<Maps itineraryData={mockItineraryData} />)
+    render(<Maps itineraryData={mockItineraryData.sections} />)
     expect(screen.getByTestId('google-map')).toBeInTheDocument()
   })
 
   test('renders correct number of markers', () => {
-    render(<Maps itineraryData={mockItineraryData} />)
+    render(<Maps itineraryData={mockItineraryData.sections} />)
     const markers = screen.getAllByTestId('map-marker')
     expect(markers.length).toBe(3)
   })
@@ -116,20 +116,20 @@ describe('Maps Component', () => {
   test('uses default API key when environment variable is missing', () => {
     delete process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
     ;(useLoadScript as jest.Mock).mockReturnValueOnce({ isLoaded: false })
-    render(<Maps itineraryData={mockItineraryData} />)
+    render(<Maps itineraryData={mockItineraryData.sections} />)
 
     expect(process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY).toBeUndefined()
     expect(screen.getByText('Loading...')).toBeInTheDocument()
   })
 
   test('handles blocks without locations', () => {
-    render(<Maps itineraryData={incompleteItineraryData} />)
+    render(<Maps itineraryData={incompleteItineraryData.sections} />)
 
     expect(screen.queryByTestId('map-marker')).not.toBeInTheDocument()
   })
 
   test('handles sections with no blocks', () => {
-    render(<Maps itineraryData={noBlocksItineraryData} />)
+    render(<Maps itineraryData={noBlocksItineraryData.sections} />)
     expect(screen.queryByTestId('map-marker')).not.toBeInTheDocument()
   })
 })
