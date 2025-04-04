@@ -62,3 +62,13 @@ export interface CreateItineraryResponse extends CustomFetchBaseResponse {
     }[]
   }[]
 }
+
+export interface FeedbackItem {
+  target: {
+    sectionIndex: number;
+    blockIndex: number;
+    blockType: 'LOCATION' | 'NOTE';
+    field?: 'startTime' | 'endTime' | 'price' | 'description' | 'title';
+  };
+  suggestion: string;
+}
