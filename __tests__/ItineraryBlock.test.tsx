@@ -224,6 +224,7 @@ describe('ItineraryBlock Component', () => {
         toggleInput={mockToggleInput}
         updateBlock={mockUpdateBlock}
         removeBlock={mockRemoveBlock}
+        feedbackItems={[]}
       />
     )
 
@@ -256,6 +257,7 @@ describe('ItineraryBlock Component', () => {
         toggleInput={mockToggleInput}
         updateBlock={mockUpdateBlock}
         removeBlock={mockRemoveBlock}
+        feedbackItems={[]}
       />
     )
 
@@ -288,6 +290,7 @@ describe('ItineraryBlock Component', () => {
         toggleInput={mockToggleInput}
         updateBlock={mockUpdateBlock}
         removeBlock={mockRemoveBlock}
+        feedbackItems={[]}
       />
     )
 
@@ -316,6 +319,7 @@ describe('ItineraryBlock Component', () => {
         toggleInput={mockToggleInput}
         updateBlock={mockUpdateBlock}
         removeBlock={mockRemoveBlock}
+        feedbackItems={[]}
       />
     )
 
@@ -344,6 +348,7 @@ describe('ItineraryBlock Component', () => {
         toggleInput={mockToggleInput}
         updateBlock={mockUpdateBlock}
         removeBlock={mockRemoveBlock}
+        feedbackItems={[]}
       />
     )
 
@@ -370,6 +375,7 @@ describe('ItineraryBlock Component', () => {
         toggleInput={mockToggleInput}
         updateBlock={mockUpdateBlock}
         removeBlock={mockRemoveBlock}
+        feedbackItems={[]}
       />
     )
 
@@ -397,6 +403,7 @@ describe('ItineraryBlock Component', () => {
         toggleInput={mockToggleInput}
         updateBlock={mockUpdateBlock}
         removeBlock={mockRemoveBlock}
+        feedbackItems={[]}
       />
     )
 
