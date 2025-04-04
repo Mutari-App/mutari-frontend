@@ -18,6 +18,7 @@ import {
   type Block,
   type CreateItineraryResponse,
   type Tag,
+  FeedbackItem,
 } from './interface'
 import { customFetch, customFetchBody } from '@/utils/customFetch'
 import { type DropResult } from '@hello-pangea/dnd'
@@ -32,6 +33,7 @@ import { cn } from '@/lib/utils'
 import { useAuthContext } from '@/contexts/AuthContext'
 import { redirect, useParams, useRouter } from 'next/navigation'
 import NotFound from 'next/error'
+import { Lightbulb } from 'lucide-react'
 
 const SAVED_ITINERARY_KEY = 'saved_itinerary_data'
 
@@ -43,6 +45,10 @@ export default function ItineraryMakerModule() {
   const isLaunching = nowDate > launchingDate
 
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isGenerating, setIsGenerating] = useState(false)
+  const [dismissedFeedbacks, setDismissedFeedbacks] = useState<string[]>([])
+  const [feedbackItems, setFeedbackItems] = useState<FeedbackItem[]>([])
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false)
   const [timeWarning, setTimeWarning] = useState<{
     blockId: string
     message: string
@@ -886,6 +892,17 @@ export default function ItineraryMakerModule() {
       )
     }
 
+    const remainingFeedbacks = feedbackItems.filter((item) => {
+      const { sectionIndex, blockIndex, field } = item.target
+      const key = `${sectionIndex}-${blockIndex}-${field ?? ''}`
+      return !dismissedFeedbacks.includes(key)
+    })
+
+    if (remainingFeedbacks.length > 0) {
+      setIsConfirmModalOpen(true)
+      return
+    }
+
     // If user is authenticated, proceed with normal submission
     setIsSubmitting(true)
     try {
@@ -937,6 +954,99 @@ export default function ItineraryMakerModule() {
     }
   }
 
+  const handleGenerateFeedback = async () => {
+    if (
+      !itineraryData?.title ||
+      itineraryData.title === 'Itinerary Tanpa Judul'
+    ) {
+      toast.error('Itinerary harus memiliki judul')
+      return
+    }
+
+    if (
+      itineraryData.sections.length === 1 &&
+      (itineraryData.sections[0].blocks?.length ?? 0) <= 1
+    ) {
+      toast.error('Itinerary harus memiliki setidaknya satu bagian.')
+      return
+    }
+
+    const submissionData = {
+      itineraryData: {
+        title: itineraryData.title,
+        description: itineraryData.description,
+        coverImage: itineraryData.coverImage,
+        startDate: itineraryData.startDate,
+        endDate: itineraryData.endDate,
+        sections: itineraryData.sections.map((section) => ({
+          title: section.title,
+          blocks:
+            section.blocks?.map((block) => {
+              if (block.blockType === 'LOCATION') {
+                return {
+                  blockType: block.blockType,
+                  title: block.title,
+                  description: block.description,
+                  startTime: block.startTime,
+                  endTime: block.endTime,
+                  price: block.price,
+                }
+              } else if (block.blockType === 'NOTE') {
+                return {
+                  blockType: block.blockType,
+                  description: block.description,
+                }
+              }
+              return {}
+            }) ?? [],
+        })),
+      },
+    }
+
+    setIsGenerating(true)
+
+    try {
+      const response = await customFetch<{ feedback: FeedbackItem[] }>(
+        '/gemini/generate-feedback',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(submissionData),
+        }
+      )
+
+      setFeedbackItems(response.feedback)
+
+      const formatted = response.feedback.map((item) => {
+        const { sectionIndex, blockIndex, field } = item.target
+        let prefix = `Hari ${sectionIndex + 1}, Blok ${blockIndex + 1}`
+        if (field) prefix += ` (${field})`
+        return `${prefix}: ${item.suggestion}`
+      })
+
+      toast.success('Feedback berhasil di-generate')
+    } catch (error) {
+      toast.error('Gagal generate feedback. Silahkan coba lagi')
+    } finally {
+      setIsGenerating(false)
+    }
+  }
+
+  const dismissFeedback = (
+    sectionIndex: number,
+    blockIndex: number,
+    field?: string
+  ) => {
+    const key = `${sectionIndex}-${blockIndex}-${field ?? ''}`
+    setDismissedFeedbacks((prev) =>
+      prev.includes(key) ? prev : [...prev, key]
+    )
+  }
+
+  const showConfirmationModal = () => {
+    setIsConfirmModalOpen(true)
+  }
+
   return (
     <div className="container max-w-4xl mx-auto p-4 pt-24 min-h-screen">
       <ItineraryHeader
@@ -944,6 +1054,8 @@ export default function ItineraryMakerModule() {
         coverImage={itineraryData.coverImage}
         onTitleChange={handleTitleChange}
         isSubmitting={isSubmitting}
+        isGenerating={isGenerating}
+        onGenerateFeedback={handleGenerateFeedback}
         onSubmit={handleSubmit}
       />
       <div className="flex flex-wrap max-sm:justify-center items-center gap-2 mb-4">
@@ -1038,6 +1150,7 @@ export default function ItineraryMakerModule() {
         toggleInput={toggleInput}
         isInputVisible={isInputVisible}
         timeWarning={timeWarning}
+        feedbackItems={feedbackItems}
       />
       <div className="flex justify-center my-8">
         <Button
@@ -1048,6 +1161,58 @@ export default function ItineraryMakerModule() {
           <Plus className="h-4 w-4" /> Bagian
         </Button>
       </div>
+      {feedbackItems.length > 0 && (
+        <div className="mt-8">
+          <h3 className="font-semibold mb-4">Tips</h3>
+          <div className="flex flex-col gap-4">
+            {feedbackItems.map((item, index) => (
+              <div
+                key={index}
+                className="p-4 border border-[#0073E6] rounded-md shadow-md flex items-start"
+                style={{ boxShadow: '0px 0px 10px rgba(0, 115, 230, 0.5)' }}
+              >
+                <div className="flex-1">
+                  <p className="font-semibold">
+                    Hari {item.target.sectionIndex + 1} - Blok{' '}
+                    {item.target.blockIndex + 1}
+                    {item.target.field && ` (${item.target.field})`}
+                  </p>
+                  <p>{item.suggestion}</p>
+                </div>
+                <div className="ml-4 text-[#0073E6] drop-shadow-[0_4px_6px_rgba(0,115,230,1.5)]">
+                  <Lightbulb size={48} strokeWidth={1} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      {isConfirmModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center font-roboto">
+          <div className="bg-white p-8 rounded-lg shadow-lg">
+            <h2 className="text-xl font-semibold mb-4 text-center">
+              Apakah anda yakin?
+            </h2>
+            <p className="text-md mb-4">
+              Masih ada tips untuk mempercantik itinerary-mu
+            </p>
+            <div className="flex justify-center space-x-2">
+              <button
+                className="px-8 py-2 border-2 border-[#016CD7] bg-white rounded text-[#014285]"
+                onClick={() => setIsConfirmModalOpen(false)}
+              >
+                Batal
+              </button>
+              <button
+                className="px-8 py-2 bg-gradient-to-r from-[#016CD7] to-[#014285] text-white items-center rounded"
+                onClick={handleSubmit}
+              >
+                Simpan
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
