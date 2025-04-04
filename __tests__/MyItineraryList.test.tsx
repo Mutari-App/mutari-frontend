@@ -3,15 +3,27 @@ import '@testing-library/jest-dom'
 import MyItineraryList from '@/modules/ItineraryModule/sections/MyItineraryList'
 import type { ItineraryData } from '@/modules/ItineraryModule/module-elements/types'
 import { ImageProps } from 'next/image'
+import { ChevronRightIcon } from 'lucide-react'
 
 // Mock API response
 jest.mock('@/utils/customFetch')
 jest.mock('lucide-react', () => ({
   ChevronLeft: () => 'ChevronLeft',
+  ChevronRight: () => 'ChevronRight',
   ChevronRightIcon: () => 'ChevronRightIcon',
-  MapPinIcon: () => 'MapPinIcon',
-  EllipsisIcon: () => 'EllipsisIcon',
+  MapPin: () => 'MapPin',
+  Ellipsis: () => 'Ellipsis',
 }))
+
+jest.mock('@/modules/ItineraryModule/module-elements/ItineraryCard', () => ({
+  __esModule: true,
+  default: ({ item }: { item: Itinerary }) => (
+    <div data-testid="itinerary-card">
+      <h3>{item.title}</h3>
+    </div>
+  ),
+}))
+
 const mockPush = jest.fn()
 jest.mock('next/navigation', () => ({
   useRouter: () => ({
@@ -19,6 +31,7 @@ jest.mock('next/navigation', () => ({
     replace: jest.fn(),
   }),
 }))
+
 jest.mock('next/image', () => ({
   __esModule: true,
   default: ({ alt, ...props }: ImageProps) => {
@@ -71,7 +84,7 @@ const mockMetadata = {
 describe('MyItineraryList Component', () => {
   it('renders empty state when there is no data', async () => {
     render(
-      <MyItineraryList data={[]} metadata={mockMetadata} refresh={jest.fn} />
+      <MyItineraryList data={[]} metadata={mockMetadata} refresh={jest.fn()} />
     )
 
     await waitFor(() =>
@@ -86,7 +99,7 @@ describe('MyItineraryList Component', () => {
       <MyItineraryList
         metadata={mockMetadata}
         data={mockData}
-        refresh={jest.fn}
+        refresh={jest.fn()}
       />
     )
 
@@ -101,7 +114,7 @@ describe('MyItineraryList Component', () => {
       <MyItineraryList
         data={mockData}
         metadata={mockMetadata}
-        refresh={jest.fn}
+        refresh={jest.fn()}
       />
     )
 
