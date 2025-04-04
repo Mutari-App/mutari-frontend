@@ -141,6 +141,29 @@ export default function ItineraryMakerModule() {
                 toggleInput(block.id, 'time')
               if (block.price > 0) toggleInput(block.id, 'price')
               if (block.location) toggleInput(block.id, 'location')
+              const routeToNext = block.routeToNext
+                ? {
+                    sourceBlockId: block.routeToNext.sourceBlockId,
+                    destinationBlockId: block.routeToNext.destinationBlockId,
+                    distance: block.routeToNext.distance,
+                    duration: block.routeToNext.duration,
+                    polyline: block.routeToNext.polyline,
+                    transportMode: block.routeToNext
+                      .transportMode as TransportMode,
+                  }
+                : undefined
+              const routeFromPrevious = block.routeFromPrevious
+                ? {
+                    sourceBlockId: block.routeFromPrevious.sourceBlockId,
+                    destinationBlockId:
+                      block.routeFromPrevious.destinationBlockId,
+                    distance: block.routeFromPrevious.distance,
+                    duration: block.routeFromPrevious.duration,
+                    polyline: block.routeFromPrevious.polyline,
+                    transportMode: block.routeFromPrevious
+                      .transportMode as TransportMode,
+                  }
+                : undefined
               return {
                 id: block.id,
                 blockType: block.blockType,
@@ -150,6 +173,8 @@ export default function ItineraryMakerModule() {
                 endTime: block.endTime,
                 location: block.location,
                 price: block.price,
+                routeToNext,
+                routeFromPrevious,
               }
             }),
           }))
@@ -1149,16 +1174,36 @@ export default function ItineraryMakerModule() {
     // If user is authenticated, proceed with normal submission
     setIsSubmitting(true)
     try {
-      // Remove block IDs before submitting
       const submissionData = {
         ...itineraryData,
         sections: itineraryData.sections.map((section) => ({
           ...section,
           blocks:
-            section.blocks?.map(
+            section.blocks?.map((block) => {
+              // Create a new object without ID but preserving route information
               // eslint-disable-next-line @typescript-eslint/no-unused-vars
-              ({ id, ...blockWithoutId }) => blockWithoutId
-            ) ?? [],
+              const { id, ...blockWithoutId } = block
+              const routeToNext = block.routeToNext
+                ? {
+                    ...block.routeToNext,
+                    sourceBlockId: block.routeToNext.sourceBlockId,
+                    destinationBlockId: block.routeToNext.destinationBlockId,
+                  }
+                : undefined
+              const routeFromPrevious = block.routeFromPrevious
+                ? {
+                    ...block.routeFromPrevious,
+                    sourceBlockId: block.routeFromPrevious.sourceBlockId,
+                    destinationBlockId:
+                      block.routeFromPrevious.destinationBlockId,
+                  }
+                : undefined
+              return {
+                ...blockWithoutId,
+                routeToNext,
+                routeFromPrevious,
+              }
+            }) ?? [],
         })),
       }
 
@@ -1196,7 +1241,6 @@ export default function ItineraryMakerModule() {
       setIsSubmitting(false)
     }
   }
-
   return (
     <div className="container max-w-4xl mx-auto p-4 pt-24 min-h-screen">
       <ItineraryHeader
