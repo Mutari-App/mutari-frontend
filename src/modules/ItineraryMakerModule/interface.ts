@@ -62,3 +62,28 @@ export interface CreateItineraryResponse extends CustomFetchBaseResponse {
     }[]
   }[]
 }
+
+export interface GetPlaceDetailsResponse extends CustomFetchBaseResponse {
+  details: PlaceDetails
+}
+export interface Photo {
+  height: number
+  html_attributions: string[]
+  photo_reference: string
+  width: number
+}
+
+export interface PlaceResult {
+  name: string
+  photos: Photo[]
+  rating: number
+  user_ratings_total: number
+  vicinity?: string
+  international_phone_number?: string
+  website?: string
+}
+
+export interface PlaceDetails {
+  html_attributions: string[]
+  result: PlaceResult
+}
