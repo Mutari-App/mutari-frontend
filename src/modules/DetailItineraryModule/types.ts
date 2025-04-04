@@ -1,3 +1,11 @@
+enum TransportMode {
+  DRIVE = 'DRIVE',
+  WALK = 'WALK',
+  BICYCLE = 'BICYCLE',
+  TRANSIT = 'TRANSIT',
+  TWO_WHEELER = 'TWO_WHEELER',
+}
+
 interface Route {
   id: string
   createdAt: string
@@ -7,7 +15,7 @@ interface Route {
   distance: number
   duration: number
   polyline?: string
-  transportMode: string
+  transportMode: TransportMode
 }
 
 interface Block {
