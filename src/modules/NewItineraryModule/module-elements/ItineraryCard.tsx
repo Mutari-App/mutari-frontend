@@ -25,21 +25,16 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-
-const acceptedUsers = [
-  {
-    firstName: 'First',
-    lastName: 'Last',
-    id: 'tests',
-    email: 'test22@gmail.com',
-    photoProfile: '/placeholder.svg?height=40&width=40',
-  },
-]
+import { Badge } from '@/components/ui/badge'
 
 function ItineraryCard({
+  shared = false,
+  finished = false,
   item,
   refresh,
 }: {
+  shared?: boolean
+  finished?: boolean
   readonly item: Readonly<ItineraryData>
   readonly refresh: () => void
 }) {
@@ -231,6 +226,17 @@ function ItineraryCard({
           <p className="text-xs md:text-sm">
             {daysTotal} Hari • {item.locationCount} Destinasi
           </p>
+        </div>
+        <div className="flex gap-2">
+          {shared && <Badge variant={'outline'}>Dibagikan</Badge>}
+          {finished && (
+            <Badge
+              variant={'outline'}
+              className="border-[#4ADE80] text-[#4ADE80]"
+            >
+              Perjalanan Selesai
+            </Badge>
+          )}
         </div>
       </div>
       <DropdownMenu>

@@ -32,12 +32,14 @@ import { cn } from '@/lib/utils'
 import { useAuthContext } from '@/contexts/AuthContext'
 import { redirect, useParams, useRouter } from 'next/navigation'
 import NotFound from 'next/error'
+import Maps from './sections/Maps'
 
 const SAVED_ITINERARY_KEY = 'saved_itinerary_data'
 
 export default function ItineraryMakerModule() {
+  const { user } = useAuthContext()
   const launchingDate = new Date(
-    process.env.NEXT_PUBLIC_LAUNCHING_DATE || '2025-01-22T00:00:00'
+    process.env.NEXT_PUBLIC_LAUNCHING_DATE ?? '2025-01-22T00:00:00'
   )
   const nowDate = new Date()
   const isLaunching = nowDate > launchingDate
@@ -109,15 +111,22 @@ export default function ItineraryMakerModule() {
         )
 
         if (res.statusCode !== 200) throw new Error(res.message)
+        if (res.data.userId !== user?.id) {
+          toast.error('Anda tidak memiliki akses untuk mengedit itinerary ini')
+          router.push(`/itinerary/${itineraryId}`)
+          return
+        }
+
         setData(res.data)
-      } catch (err: any) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (error) {
         return <NotFound statusCode={404} />
       }
     }
     if (!wasAlreadyRequested.current) {
       void fetchData()
     }
-  }, [wasAlreadyRequested])
+  }, [itineraryId, wasAlreadyRequested])
 
   // Map existing data if fetched
   useEffect(() => {
@@ -193,8 +202,8 @@ export default function ItineraryMakerModule() {
         setHasUnsavedChanges(false)
         localStorage.removeItem(SAVED_ITINERARY_KEY)
       }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
-      console.error('Error loading saved itinerary:', error)
       toast.error('Gagal memuat itinerary yang tersimpan')
       localStorage.removeItem(SAVED_ITINERARY_KEY)
     }
@@ -215,8 +224,8 @@ export default function ItineraryMakerModule() {
         } else {
           toast.error('Gagal mengambil tag')
         }
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
-        console.error('Error fetching tags:', error)
         toast.error('Gagal mengambil tag')
       }
     }
@@ -515,6 +524,35 @@ export default function ItineraryMakerModule() {
             blockType,
             title: blockType === 'LOCATION' ? 'Masukkan Lokasi' : '',
             description: '',
+          }
+          return {
+            ...section,
+            blocks: [...(section.blocks ?? []), newBlock],
+          }
+        }
+        return section
+      })
+      return {
+        ...prev,
+        sections: updatedSections,
+      }
+    })
+  }
+
+  const addLocationToSection = (
+    sectionNumber: number,
+    title: string,
+    location: string
+  ) => {
+    setItineraryData((prev) => {
+      const updatedSections = prev.sections.map((section) => {
+        if (section.sectionNumber === sectionNumber) {
+          const newBlock = {
+            id: v4(),
+            blockType: 'LOCATION',
+            title,
+            description: '',
+            location,
           }
           return {
             ...section,
@@ -933,8 +971,8 @@ export default function ItineraryMakerModule() {
       }
 
       router.push(`/itinerary/${response.id}`)
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
-      console.error('Error creating or updating itinerary:', error)
       if (!itineraryId && typeof window !== 'undefined' && window.umami) {
         window.umami.track('create_itinerary_fail')
       }
@@ -947,115 +985,124 @@ export default function ItineraryMakerModule() {
   }
 
   return (
-    <div className="container max-w-4xl mx-auto p-4 min-h-screen">
-      <ItineraryHeader
-        title={itineraryData.title}
-        coverImage={itineraryData.coverImage}
-        onTitleChange={handleTitleChange}
-        isSubmitting={isSubmitting}
-        onSubmit={handleSubmit}
-      />
-      <div className="flex flex-wrap max-sm:justify-center items-center gap-2 mb-4">
-        <TagSelector
-          selectedTags={itineraryData.tags ?? []}
-          onChangeAction={handleTagsChange}
-          availableTags={availableTags}
+    <div className="flex max-h-screen">
+      <div className="container max-w-4xl mx-auto p-4 pt-24 min-h-screen max-h-screen overflow-auto">
+        <ItineraryHeader
+          title={itineraryData.title}
+          coverImage={itineraryData.coverImage}
+          onTitleChange={handleTitleChange}
+          isSubmitting={isSubmitting}
+          onSubmit={handleSubmit}
         />
-        <CldUploadButton
-          uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
-          onSuccess={handleImageUpload}
-          className={cn(buttonVariants({ variant: 'outline', size: 'sm' }))}
-          options={{
-            clientAllowedFormats: ['image'],
-            maxFiles: 1,
-            maxFileSize: 1024 * 256, // 256 KB
-          }}
-        >
-          Ganti foto cover
-        </CldUploadButton>
-        <div className="sm:ml-auto">
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex items-center gap-2"
+        <div className="flex flex-wrap max-sm:justify-center items-center gap-2 mb-4">
+          <TagSelector
+            selectedTags={itineraryData.tags ?? []}
+            onChangeAction={handleTagsChange}
+            availableTags={availableTags}
+          />
+          <CldUploadButton
+            uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
+            onSuccess={handleImageUpload}
+            className={cn(buttonVariants({ variant: 'outline', size: 'sm' }))}
+            options={{
+              clientAllowedFormats: ['image'],
+              maxFiles: 1,
+              maxFileSize: 1024 * 256, // 256 KB
+            }}
+          >
+            Ganti foto cover
+          </CldUploadButton>
+          <div className="sm:ml-auto">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-2"
+                >
+                  <CalendarIcon className="h-4 w-4" />
+                  {dateRange.from && dateRange.to
+                    ? `${format(dateRange.from, 'dd MMM')} - ${format(dateRange.to, 'dd MMM')}`
+                    : 'Masukkan Tanggal Perjalanan'}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="end">
+                <Calendar
+                  mode="range"
+                  selected={dateRange}
+                  onSelect={handleDateRangeChange}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+        </div>
+        {itineraryData.tags && itineraryData.tags.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-4">
+            {getSelectedTagNames().map((tagName, index) => (
+              <Badge
+                key={`tag-${tagName}-${itineraryData.tags![index]}`}
+                variant="secondary"
+                className="flex items-center gap-1"
               >
-                <CalendarIcon className="h-4 w-4" />
-                {dateRange.from && dateRange.to
-                  ? `${format(dateRange.from, 'dd MMM')} - ${format(dateRange.to, 'dd MMM')}`
-                  : 'Masukkan Tanggal Perjalanan'}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="end">
-              <Calendar
-                mode="range"
-                selected={dateRange}
-                onSelect={handleDateRangeChange}
-                initialFocus
-              />
-            </PopoverContent>
-          </Popover>
+                {tagName}
+                <button
+                  onClick={() => removeTag(itineraryData.tags![index])}
+                  className="ml-1 rounded-full hover:bg-gray-200 p-0.5"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </Badge>
+            ))}
+          </div>
+        )}
+        <DateRangeAlertDialog
+          open={showConfirmDialog}
+          onOpenChange={setShowConfirmDialog}
+          pendingDateRange={pendingDateRange.current}
+          currentSectionCount={itineraryData.sections.length}
+          onCancel={() => {
+            pendingDateRange.current = undefined
+            setShowConfirmDialog(false)
+          }}
+          onConfirm={() => {
+            if (pendingDateRange.current) {
+              applyDateRangeChange(pendingDateRange.current)
+              pendingDateRange.current = undefined
+            }
+            setShowConfirmDialog(false)
+          }}
+        />
+        <ItinerarySections
+          sections={itineraryData.sections}
+          updateSectionTitle={updateSectionTitle}
+          addSection={addSection}
+          removeSection={removeSection}
+          moveSection={moveSection}
+          addBlock={addBlock}
+          updateBlock={updateBlock}
+          removeBlock={removeBlock}
+          handleDragEnd={handleDragEnd}
+          toggleInput={toggleInput}
+          isInputVisible={isInputVisible}
+          timeWarning={timeWarning}
+        />
+        <div className="flex justify-center my-8">
+          <Button
+            size="sm"
+            className="-mt-4 w-[240px] bg-gradient-to-r from-[#0073E6] to-[#004080] text-white hover:from-[#0066cc] hover:to-[#003366] rounded-lg"
+            onClick={() => addSection()}
+          >
+            <Plus className="h-4 w-4" /> Bagian
+          </Button>
         </div>
       </div>
-      {itineraryData.tags && itineraryData.tags.length > 0 && (
-        <div className="flex flex-wrap gap-2 mb-4">
-          {getSelectedTagNames().map((tagName, index) => (
-            <Badge
-              key={`tag-${tagName}-${itineraryData.tags![index]}`}
-              variant="secondary"
-              className="flex items-center gap-1"
-            >
-              {tagName}
-              <button
-                onClick={() => removeTag(itineraryData.tags![index])}
-                className="ml-1 rounded-full hover:bg-gray-200 p-0.5"
-              >
-                <X className="h-3 w-3" />
-              </button>
-            </Badge>
-          ))}
-        </div>
-      )}
-      <DateRangeAlertDialog
-        open={showConfirmDialog}
-        onOpenChange={setShowConfirmDialog}
-        pendingDateRange={pendingDateRange.current}
-        currentSectionCount={itineraryData.sections.length}
-        onCancel={() => {
-          pendingDateRange.current = undefined
-          setShowConfirmDialog(false)
-        }}
-        onConfirm={() => {
-          if (pendingDateRange.current) {
-            applyDateRangeChange(pendingDateRange.current)
-            pendingDateRange.current = undefined
-          }
-          setShowConfirmDialog(false)
-        }}
-      />
-      <ItinerarySections
-        sections={itineraryData.sections}
-        updateSectionTitle={updateSectionTitle}
-        addSection={addSection}
-        removeSection={removeSection}
-        moveSection={moveSection}
-        addBlock={addBlock}
-        updateBlock={updateBlock}
-        removeBlock={removeBlock}
-        handleDragEnd={handleDragEnd}
-        toggleInput={toggleInput}
-        isInputVisible={isInputVisible}
-        timeWarning={timeWarning}
-      />
-      <div className="flex justify-center my-8">
-        <Button
-          size="sm"
-          className="-mt-4 w-[240px] bg-gradient-to-r from-[#0073E6] to-[#004080] text-white hover:from-[#0066cc] hover:to-[#003366] rounded-lg"
-          onClick={() => addSection()}
-        >
-          <Plus className="h-4 w-4" /> Bagian
-        </Button>
+      <div className="w-full min-h-screen hidden md:block">
+        <Maps
+          itineraryData={itineraryData.sections}
+          addLocationToSection={addLocationToSection}
+          isEditing
+        />
       </div>
     </div>
   )

@@ -63,8 +63,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  const user = await useUserServer()
-
+  const userResponse = await useUserServer()
   return (
     <html lang="id" className="scroll-smooth">
       <head>
@@ -100,7 +99,7 @@ export default async function RootLayout({
         className={`${epilogue.variable} ${poppins.variable} ${raleway.variable} ${roboto.variable} ${hammersmithOne.variable} font-poppins overflow-x-hidden max-w-screen`}
       >
         <Suspense>
-          <AuthContextProvider user={user}>
+          <AuthContextProvider userResponse={userResponse}>
             <Navbar />
             <main className="w-full bg-white min-h-[80dvh]">{children}</main>
             <Toaster
