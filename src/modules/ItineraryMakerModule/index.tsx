@@ -808,10 +808,11 @@ export default function ItineraryMakerModule() {
     location: string
   ) => {
     setItineraryData((prev) => {
+      const blockId = v4()
       const updatedSections = prev.sections.map((section) => {
         if (section.sectionNumber === sectionNumber) {
           const newBlock = {
-            id: v4(),
+            id: blockId,
             blockType: 'LOCATION',
             title,
             description: '',
@@ -824,10 +825,12 @@ export default function ItineraryMakerModule() {
         }
         return section
       })
-      return {
+      const result = {
         ...prev,
         sections: updatedSections,
       }
+      setTimeout(() => void updateRoutes(blockId), 0)
+      return result
     })
   }
 
