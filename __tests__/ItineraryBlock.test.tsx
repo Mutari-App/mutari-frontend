@@ -79,30 +79,6 @@ jest.mock('@/modules/ItineraryMakerModule/module-elements/PriceInput', () => ({
   ),
 }))
 
-jest.mock(
-  '@/modules/ItineraryMakerModule/module-elements/CoordinateInput',
-  () => ({
-    CoordinateInput: jest.fn(
-      ({
-        blockId,
-        isVisible,
-        toggleInput,
-      }: {
-        blockId: string
-        isVisible: boolean
-        toggleInput: (id: string, type: string) => void
-      }) => (
-        <div data-testid={`coordinate-input-${blockId}`}>
-          {isVisible ? 'Coordinate Input Visible' : 'Coordinate Input Button'}
-          <button onClick={() => toggleInput(blockId, 'location')}>
-            Toggle Coordinate
-          </button>
-        </div>
-      )
-    ),
-  })
-)
-
 jest.mock('@/modules/ItineraryMakerModule/module-elements/RouteInfo', () => ({
   RouteInfo: jest.fn(
     ({
@@ -283,9 +259,6 @@ describe('ItineraryBlock Component', () => {
     // Check if all the input components are rendered
     expect(screen.getByTestId(`time-input-${blockId}`)).toBeInTheDocument()
     expect(screen.getByTestId(`price-input-${blockId}`)).toBeInTheDocument()
-    expect(
-      screen.getByTestId(`coordinate-input-${blockId}`)
-    ).toBeInTheDocument()
 
     // Check if description input is rendered
     expect(
@@ -314,15 +287,12 @@ describe('ItineraryBlock Component', () => {
     expect(screen.getByTestId('textarea-Masukkan Catatan')).toBeInTheDocument()
     expect(screen.getByDisplayValue('This is a test note')).toBeInTheDocument()
 
-    // Verify that time, price, and coordinate inputs are NOT rendered for note blocks
+    // Verify that time and price are NOT rendered for note blocks
     expect(
       screen.queryByTestId(`time-input-${blockId}`)
     ).not.toBeInTheDocument()
     expect(
       screen.queryByTestId(`price-input-${blockId}`)
-    ).not.toBeInTheDocument()
-    expect(
-      screen.queryByTestId(`coordinate-input-${blockId}`)
     ).not.toBeInTheDocument()
   })
 
