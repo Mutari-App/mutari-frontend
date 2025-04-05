@@ -26,6 +26,7 @@ export interface CreateItineraryDto {
   endDate: string
   tags?: string[]
   sections: Section[]
+  reminderOption?: string
 }
 
 export interface Tag {

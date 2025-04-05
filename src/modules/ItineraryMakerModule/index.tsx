@@ -27,6 +27,7 @@ import { ItineraryHeader } from './sections/Header'
 import { ItinerarySections } from './sections/ItinerarySections'
 import { DateRangeAlertDialog } from './module-elements/DateRangeAlertDialog'
 import { TagSelector } from './module-elements/TagSelector'
+import { ReminderSelector } from './module-elements/ReminderSelector'
 import { CldUploadButton } from 'next-cloudinary'
 import { cn } from '@/lib/utils'
 import { useAuthContext } from '@/contexts/AuthContext'
@@ -43,6 +44,24 @@ export default function ItineraryMakerModule() {
   )
   const nowDate = new Date()
   const isLaunching = nowDate > launchingDate
+  const reminderOptions = [
+    {
+      label: 'Tidak ada notifikasi',
+      value: 'NONE',
+    },
+    {
+      label: '10 menit sebelum',
+      value: 'TEN_MINUTES_BEFORE',
+    },
+    {
+      label: '1 jam sebelum',
+      value: 'ONE_HOUR_BEFORE',
+    },
+    {
+      label: '1 hari sebelum',
+      value: 'ONE_DAY_BEFOERE',
+    },
+  ]
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [timeWarning, setTimeWarning] = useState<{
@@ -320,6 +339,13 @@ export default function ItineraryMakerModule() {
     setItineraryData((prev) => ({
       ...prev,
       tags,
+    }))
+  }
+
+  const handleReminderChange = (reminderOption: string) => {
+    setItineraryData((prev) => ({
+      ...prev,
+      reminderOption,
     }))
   }
 
@@ -1012,6 +1038,11 @@ export default function ItineraryMakerModule() {
             selectedTags={itineraryData.tags ?? []}
             onChangeAction={handleTagsChange}
             availableTags={availableTags}
+          />
+          <ReminderSelector
+            selectedReminder={itineraryData.reminderOption ?? 'NONE'}
+            onChangeAction={handleReminderChange}
+            reminderOptions={reminderOptions}
           />
           <CldUploadButton
             uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
