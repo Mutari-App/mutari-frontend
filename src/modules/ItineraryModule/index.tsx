@@ -88,11 +88,7 @@ export default function ItineraryModule() {
         <h1 className="font-semibold text-2xl text-center md:text-left md:text-[36px] self-start">
           Rencana Perjalanan Saya
         </h1>
-        <Link
-          href={'/itinerary/create'}
-          className="w-full md:w-1/3"
-          replace={true}
-        >
+        <Link href={'/itinerary/create'} className="w-full md:w-1/3">
           <Button className="bg-gradient-to-r from-[#016CD7] to-[#014285] text-white items-center flex gap-3 w-full">
             <PlusIcon />
             Buat Itinerary Baru

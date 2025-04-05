@@ -39,7 +39,7 @@ const SAVED_ITINERARY_KEY = 'saved_itinerary_data'
 
 export default function ItineraryMakerModule() {
   const launchingDate = new Date(
-    process.env.NEXT_PUBLIC_LAUNCHING_DATE ?? '2025-01-22T00:00:00'
+    process.env.NEXT_PUBLIC_LAUNCHING_DATE || '2025-01-22T00:00:00'
   )
   const nowDate = new Date()
   const isLaunching = nowDate > launchingDate
@@ -116,15 +116,14 @@ export default function ItineraryMakerModule() {
 
         if (res.statusCode !== 200) throw new Error(res.message)
         setData(res.data)
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      } catch (error) {
+      } catch (err: any) {
         return <NotFound statusCode={404} />
       }
     }
     if (!wasAlreadyRequested.current) {
       void fetchData()
     }
-  }, [itineraryId, wasAlreadyRequested])
+  }, [wasAlreadyRequested])
 
   // Map existing data if fetched
   useEffect(() => {
@@ -200,8 +199,8 @@ export default function ItineraryMakerModule() {
         setHasUnsavedChanges(false)
         localStorage.removeItem(SAVED_ITINERARY_KEY)
       }
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
+      console.error('Error loading saved itinerary:', error)
       toast.error('Gagal memuat itinerary yang tersimpan')
       localStorage.removeItem(SAVED_ITINERARY_KEY)
     }
@@ -222,8 +221,8 @@ export default function ItineraryMakerModule() {
         } else {
           toast.error('Gagal mengambil tag')
         }
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
+        console.error('Error fetching tags:', error)
         toast.error('Gagal mengambil tag')
       }
     }
@@ -944,8 +943,8 @@ export default function ItineraryMakerModule() {
       toast(`Itinerary ${itineraryId ? 'updated' : 'created'} successfully`)
 
       router.push(`/itinerary/${response.id}`)
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
+      console.error('Error creating or updating itinerary:', error)
       toast.error(
         `Failed to ${itineraryId ? 'updated' : 'created'} itinerary. Please try again.`
       )
