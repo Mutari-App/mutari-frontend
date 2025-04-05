@@ -1,4 +1,5 @@
 import { type CustomFetchBaseResponse } from '@/utils/customFetch/interface'
+import { type TransportMode } from '@/utils/maps'
 
 export interface Block {
   id: string
@@ -9,7 +10,17 @@ export interface Block {
   endTime?: string
   location?: string
   price?: number
-  photoUrl?: string
+  routeToNext?: Route
+  routeFromPrevious?: Route
+}
+
+export interface Route {
+  sourceBlockId: string
+  destinationBlockId: string
+  distance: number // Distance in meters
+  duration: number // Duration in seconds
+  polyline?: string
+  transportMode?: TransportMode
 }
 
 export interface Section {

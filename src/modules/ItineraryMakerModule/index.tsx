@@ -18,6 +18,7 @@ import {
   type Block,
   type CreateItineraryResponse,
   type Tag,
+  type Route,
 } from './interface'
 import { customFetch, customFetchBody } from '@/utils/customFetch'
 import { type DropResult } from '@hello-pangea/dnd'
@@ -32,6 +33,7 @@ import { cn } from '@/lib/utils'
 import { useAuthContext } from '@/contexts/AuthContext'
 import { redirect, useParams, useRouter } from 'next/navigation'
 import NotFound from 'next/error'
+import { calculateRoute, TransportMode } from '@/utils/maps'
 import Maps from './sections/Maps'
 
 const SAVED_ITINERARY_KEY = 'saved_itinerary_data'
@@ -96,6 +98,12 @@ export default function ItineraryMakerModule() {
     initialItineraryData.current
   )
 
+  const itineraryDataRef = useRef(itineraryData)
+
+  useEffect(() => {
+    itineraryDataRef.current = itineraryData
+  }, [itineraryData])
+
   // Fetch detail if id is provided
   useEffect(() => {
     const fetchData = async () => {
@@ -126,7 +134,7 @@ export default function ItineraryMakerModule() {
     if (!wasAlreadyRequested.current) {
       void fetchData()
     }
-  }, [itineraryId, wasAlreadyRequested])
+  }, [itineraryId, router, user?.id, wasAlreadyRequested])
 
   // Map existing data if fetched
   useEffect(() => {
@@ -141,6 +149,29 @@ export default function ItineraryMakerModule() {
                 toggleInput(block.id, 'time')
               if (block.price > 0) toggleInput(block.id, 'price')
               if (block.location) toggleInput(block.id, 'location')
+              const routeToNext = block.routeToNext
+                ? {
+                    sourceBlockId: block.routeToNext.sourceBlockId,
+                    destinationBlockId: block.routeToNext.destinationBlockId,
+                    distance: block.routeToNext.distance,
+                    duration: block.routeToNext.duration,
+                    polyline: block.routeToNext.polyline,
+                    transportMode: block.routeToNext
+                      .transportMode as TransportMode,
+                  }
+                : undefined
+              const routeFromPrevious = block.routeFromPrevious
+                ? {
+                    sourceBlockId: block.routeFromPrevious.sourceBlockId,
+                    destinationBlockId:
+                      block.routeFromPrevious.destinationBlockId,
+                    distance: block.routeFromPrevious.distance,
+                    duration: block.routeFromPrevious.duration,
+                    polyline: block.routeFromPrevious.polyline,
+                    transportMode: block.routeFromPrevious
+                      .transportMode as TransportMode,
+                  }
+                : undefined
               return {
                 id: block.id,
                 blockType: block.blockType,
@@ -150,6 +181,8 @@ export default function ItineraryMakerModule() {
                 endTime: block.endTime,
                 location: block.location,
                 price: block.price,
+                routeToNext,
+                routeFromPrevious,
               }
             }),
           }))
@@ -176,6 +209,7 @@ export default function ItineraryMakerModule() {
       } as CreateItineraryDto
       setItineraryData(initialItineraryData.current)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data])
 
   // Load saved itinerary data from local storage
@@ -229,7 +263,6 @@ export default function ItineraryMakerModule() {
         toast.error('Gagal mengambil tag')
       }
     }
-
     void fetchTags()
   }, [])
 
@@ -298,18 +331,248 @@ export default function ItineraryMakerModule() {
     }
   }, [hasUnsavedChanges])
 
+  const updateTransportMode = async (
+    blockId: string,
+    transportMode: TransportMode
+  ): Promise<boolean> => {
+    // First find the block and its next block to get origin and destination coordinates
+    let originLocation: string | undefined
+    let destinationLocation: string | undefined
+    let sourceBlockId: string | undefined
+    let destinationBlockId: string | undefined
+
+    for (const section of itineraryData.sections) {
+      if (!section.blocks) continue
+
+      const blockIndex = section.blocks.findIndex(
+        (block) => block.id === blockId
+      )
+      if (blockIndex !== -1 && blockIndex < section.blocks.length - 1) {
+        const currentBlock = section.blocks[blockIndex]
+        const nextBlock = section.blocks[blockIndex + 1]
+
+        if (currentBlock.location && nextBlock.location) {
+          originLocation = currentBlock.location
+          destinationLocation = nextBlock.location
+          sourceBlockId = currentBlock.id
+          destinationBlockId = nextBlock.id
+          break
+        }
+      }
+    }
+
+    // If we have origin and destination, recalculate the route
+    if (
+      originLocation &&
+      destinationLocation &&
+      sourceBlockId &&
+      destinationBlockId
+    ) {
+      try {
+        // Calculate new route with updated transport mode
+        const routeData = await calculateRoute(
+          originLocation,
+          destinationLocation,
+          transportMode
+        )
+
+        if (routeData) {
+          const routeObject: Route = {
+            sourceBlockId,
+            destinationBlockId,
+            distance: routeData.distance,
+            duration: routeData.duration,
+            polyline: routeData.polyline,
+            transportMode,
+          }
+
+          // Update itinerary data with new route information
+          setItineraryData((prev) => {
+            const updatedSections = prev.sections.map((section) => {
+              if (!section.blocks) return section
+
+              // Find the source block
+              const sourceBlockIndex = section.blocks.findIndex(
+                (block) => block.id === sourceBlockId
+              )
+              if (
+                sourceBlockIndex !== -1 &&
+                sourceBlockIndex < section.blocks.length - 1
+              ) {
+                const updatedBlocks = [...section.blocks]
+
+                // Update source block
+                const sourceBlock = { ...updatedBlocks[sourceBlockIndex] }
+                sourceBlock.routeToNext = routeObject
+                updatedBlocks[sourceBlockIndex] = sourceBlock
+
+                // Update destination block
+                const destBlock = { ...updatedBlocks[sourceBlockIndex + 1] }
+                destBlock.routeFromPrevious = routeObject
+                updatedBlocks[sourceBlockIndex + 1] = destBlock
+
+                return {
+                  ...section,
+                  blocks: updatedBlocks,
+                }
+              }
+
+              return section
+            })
+
+            return {
+              ...prev,
+              sections: updatedSections,
+            }
+          })
+          return true
+        } else {
+          return false
+        }
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (error) {
+        toast.error('Gagal memperbarui rute dengan mode transportasi baru')
+        return false
+      }
+    } else {
+      toast.error('Data lokasi tidak ditemukan untuk perhitungan rute')
+      return false
+    }
+  }
+
+  const updateRoutesBetweenBlocks = async (
+    sections: Section[],
+    blockId?: string
+  ) => {
+    const updatedSections = sections.map((section) => ({
+      ...section,
+      blocks: section.blocks ? [...section.blocks] : undefined,
+    }))
+
+    const updateBlockInSection = (
+      sectionIdx: number,
+      blockIdx: number,
+      newBlock: Block
+    ) => {
+      if (!updatedSections[sectionIdx].blocks) return
+      updatedSections[sectionIdx].blocks[blockIdx] = newBlock
+    }
+
+    const canCalculateRoute = (source: Block, dest: Block): boolean =>
+      source.blockType === 'LOCATION' &&
+      dest.blockType === 'LOCATION' &&
+      !!source.location &&
+      !!dest.location
+
+    const calculateAndUpdateRoute = async (
+      sourceBlock: Block,
+      destBlock: Block
+    ) => {
+      if (!canCalculateRoute(sourceBlock, destBlock)) {
+        return {
+          updatedSource: { ...sourceBlock, routeToNext: undefined },
+          updatedDest: { ...destBlock, routeFromPrevious: undefined },
+        }
+      }
+
+      try {
+        const transportMode =
+          sourceBlock.routeToNext?.transportMode ?? TransportMode.DRIVE
+        const routeData = await calculateRoute(
+          sourceBlock.location!,
+          destBlock.location!,
+          transportMode
+        )
+        if (routeData) {
+          const routeObject: Route = {
+            sourceBlockId: sourceBlock.id,
+            destinationBlockId: destBlock.id,
+            distance: routeData.distance,
+            duration: routeData.duration,
+            polyline: routeData.polyline,
+            transportMode,
+          }
+          return {
+            updatedSource: { ...sourceBlock, routeToNext: routeObject },
+            updatedDest: { ...destBlock, routeFromPrevious: routeObject },
+          }
+        } else {
+          return {
+            updatedSource: { ...sourceBlock, routeToNext: undefined },
+            updatedDest: { ...destBlock, routeFromPrevious: undefined },
+          }
+        }
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (error) {
+        toast.error('Failed to calculate route between locations')
+        return {
+          updatedSource: { ...sourceBlock, routeToNext: undefined },
+          updatedDest: { ...destBlock, routeFromPrevious: undefined },
+        }
+      }
+    }
+
+    const collectPairs = (blockId?: string) => {
+      if (blockId) return collectPairsForBlock(blockId, updatedSections)
+      return collectAllPairs(updatedSections)
+    }
+
+    const collectPairsForBlock = (
+      blockId: string,
+      sections: typeof updatedSections
+    ) => {
+      const pairs: Array<{ sectionIdx: number; currentBlockIdx: number }> = []
+      sections.forEach((section, sIdx) => {
+        if (!section.blocks) return
+        const blockIdx = section.blocks.findIndex((b) => b.id === blockId)
+        if (blockIdx > 0)
+          pairs.push({ sectionIdx: sIdx, currentBlockIdx: blockIdx - 1 })
+        if (blockIdx >= 0 && blockIdx < section.blocks.length - 1)
+          pairs.push({ sectionIdx: sIdx, currentBlockIdx: blockIdx })
+      })
+      return pairs
+    }
+
+    const collectAllPairs = (sections: typeof updatedSections) => {
+      const pairs: Array<{ sectionIdx: number; currentBlockIdx: number }> = []
+      sections.forEach((section, sIdx) => {
+        if (!section.blocks || section.blocks.length < 2) return
+        for (let bIdx = 0; bIdx < section.blocks.length - 1; bIdx++) {
+          pairs.push({ sectionIdx: sIdx, currentBlockIdx: bIdx })
+        }
+      })
+      return pairs
+    }
+
+    const pairs = collectPairs(blockId)
+
+    for (const { sectionIdx, currentBlockIdx } of pairs) {
+      const section = updatedSections[sectionIdx]
+      if (!section.blocks || currentBlockIdx >= section.blocks.length - 1)
+        continue
+      const currentBlock = section.blocks[currentBlockIdx]
+      const nextBlock = section.blocks[currentBlockIdx + 1]
+      const { updatedSource, updatedDest } = await calculateAndUpdateRoute(
+        currentBlock,
+        nextBlock
+      )
+      updateBlockInSection(sectionIdx, currentBlockIdx, updatedSource)
+      updateBlockInSection(sectionIdx, currentBlockIdx + 1, updatedDest)
+    }
+
+    return updatedSections
+  }
+
   const handleImageUpload = (result: any) => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     if (result?.info?.secure_url) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
       const imageUrl = result.info.secure_url
-
       setItineraryData((prev) => ({
         ...prev,
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         coverImage: imageUrl,
       }))
-
       toast.success('Cover image uploaded successfully')
     } else {
       toast.error('Failed to upload image')
@@ -545,10 +808,11 @@ export default function ItineraryMakerModule() {
     location: string
   ) => {
     setItineraryData((prev) => {
+      const blockId = v4()
       const updatedSections = prev.sections.map((section) => {
         if (section.sectionNumber === sectionNumber) {
           const newBlock = {
-            id: v4(),
+            id: blockId,
             blockType: 'LOCATION',
             title,
             description: '',
@@ -561,10 +825,12 @@ export default function ItineraryMakerModule() {
         }
         return section
       })
-      return {
+      const result = {
         ...prev,
         sections: updatedSections,
       }
+      setTimeout(() => void updateRoutes(blockId), 0)
+      return result
     })
   }
 
@@ -696,6 +962,17 @@ export default function ItineraryMakerModule() {
     return true
   }
 
+  const updateRoutes = async (blockId?: string) => {
+    const updatedSections = await updateRoutesBetweenBlocks(
+      itineraryDataRef.current.sections,
+      blockId
+    )
+    setItineraryData((prev) => ({
+      ...prev,
+      sections: updatedSections,
+    }))
+  }
+
   const updateBlock = <T extends keyof Block>(
     blockId: string,
     field: T,
@@ -710,6 +987,9 @@ export default function ItineraryMakerModule() {
         sections: updatedSections,
       }
     })
+    if (field === 'location') {
+      setTimeout(() => void updateRoutes(blockId), 100)
+    }
   }
 
   const getUpdatedSectionWithBlock = <T extends keyof Block>(
@@ -751,13 +1031,17 @@ export default function ItineraryMakerModule() {
   }
 
   const removeBlock = (blockId: string) => {
-    setItineraryData((prev) => ({
-      ...prev,
-      sections: filterBlockFromSections(prev.sections, blockId),
-    }))
+    setItineraryData((prev) => {
+      const updatedSections = filterBlockFromSections(prev.sections, blockId)
+      return {
+        ...prev,
+        sections: updatedSections,
+      }
+    })
     if (timeWarning && timeWarning.blockId === blockId) {
       setTimeWarning(null)
     }
+    setTimeout(() => void updateRoutes(), 0)
   }
 
   const filterBlockFromSections = (
@@ -849,6 +1133,8 @@ export default function ItineraryMakerModule() {
           sections: updatedSections,
         }
       })
+
+      setTimeout(() => void updateRoutes(), 0)
     }
     // Handle moving blocks between sections
     else if (sourceSection !== destinationSection) {
@@ -897,6 +1183,8 @@ export default function ItineraryMakerModule() {
           sections: updatedSections,
         }
       })
+
+      setTimeout(() => void updateRoutes(), 0)
     }
   }
 
@@ -982,12 +1270,35 @@ export default function ItineraryMakerModule() {
         sections: itineraryData.sections.map((section) => ({
           ...section,
           blocks:
-            section.blocks?.map(
-              ({ id, ...blockWithoutId }) => blockWithoutId
-            ) ?? [],
+            section.blocks?.map((block) => {
+              // Create a new object without ID but preserving route information
+              // eslint-disable-next-line @typescript-eslint/no-unused-vars
+              const { id, ...blockWithoutId } = block
+              const routeToNext = block.routeToNext
+                ? {
+                    ...block.routeToNext,
+                    sourceBlockId: block.routeToNext.sourceBlockId,
+                    destinationBlockId: block.routeToNext.destinationBlockId,
+                  }
+                : undefined
+              const routeFromPrevious = block.routeFromPrevious
+                ? {
+                    ...block.routeFromPrevious,
+                    sourceBlockId: block.routeFromPrevious.sourceBlockId,
+                    destinationBlockId:
+                      block.routeFromPrevious.destinationBlockId,
+                  }
+                : undefined
+              return {
+                ...blockWithoutId,
+                routeToNext,
+                routeFromPrevious,
+              }
+            }) ?? [],
         })),
       }
       await submitItinerary(submissionData)
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       toast.error(
         `Failed to ${itineraryId ? 'update' : 'create'} itinerary. Please try again.`
@@ -996,7 +1307,6 @@ export default function ItineraryMakerModule() {
       setIsSubmitting(false)
     }
   }
-
   return (
     <div className="flex max-h-screen">
       <div className="container max-w-4xl mx-auto p-4 pt-24 min-h-screen max-h-screen overflow-auto">
@@ -1099,6 +1409,7 @@ export default function ItineraryMakerModule() {
           toggleInput={toggleInput}
           isInputVisible={isInputVisible}
           timeWarning={timeWarning}
+          onTransportModeChange={updateTransportMode}
         />
         <div className="flex justify-center my-8">
           <Button
