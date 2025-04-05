@@ -6,7 +6,7 @@ import {
   Raleway,
   Roboto,
 } from 'next/font/google'
-import './../globals.css'
+import './globals.css'
 import { Suspense } from 'react'
 import { Toaster } from '@/components/ui/sonner'
 import { AuthContextProvider } from '@/contexts/AuthContext'
@@ -61,7 +61,6 @@ export default async function RootLayout({
   children: React.ReactNode
 }>) {
   const userResponse = await useUserServer()
-
   return (
     <html lang="id" className="scroll-smooth">
       <head>
@@ -98,7 +97,7 @@ export default async function RootLayout({
       >
         <Suspense>
           <AuthContextProvider userResponse={userResponse}>
-            <main className="w-full bg-white">{children}</main>
+            <main className="w-full bg-white min-h-[80dvh]">{children}</main>
             <Toaster
               toastOptions={{
                 classNames: {
