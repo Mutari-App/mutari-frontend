@@ -1,17 +1,15 @@
-import { ReadonlyRequestCookies } from 'next/dist/server/web/spec-extension/adapters/request-cookies'
+import { deleteCookie, getCookie } from 'cookies-next'
 import {
   type CustomFetchBaseResponse,
   type CustomFetchRequestInit,
 } from './interface'
-import { deleteCookie, getCookie } from 'cookies-next'
 
 let isRefreshing = false
 let refreshSubscribers: (() => void)[] = []
 
 export async function customFetch<T>(
   url: string,
-  options: CustomFetchRequestInit = { uploadFile: false },
-  cookies?: () => Promise<ReadonlyRequestCookies>
+  options: CustomFetchRequestInit = { uploadFile: false }
 ): Promise<CustomFetchBaseResponse & T> {
   const isServer = typeof window === 'undefined'
 
@@ -21,26 +19,6 @@ export async function customFetch<T>(
   const baseUrl = process.env.NEXT_PUBLIC_API_URL!
   const fullUrl = new URL(url, baseUrl)
 
-  if (options.isAuthorized) {
-    let token: string | undefined | null = null
-
-    if (cookies) {
-      // Server-side: use ReadonlyRequestCookies
-      const serverCookies = await cookies()
-      token = serverCookies.get('AT')?.value
-    } else {
-      // Client-side: use cookies-next with proper type handling
-      const clientToken = getCookie('AT')
-      token = typeof clientToken === 'string' ? clientToken : undefined
-    }
-
-    if (token) {
-      headers.authorization = `Bearer ${token}`
-    } else {
-      await deleteCookie('AT')
-    }
-  }
-
   if (options.uploadFile) {
     delete headers['Content-Type']
   }
@@ -48,13 +26,13 @@ export async function customFetch<T>(
   if (isServer) {
     const { cookies } = await import('next/headers')
     const serverCookies = await cookies()
-    headers.Cookies = serverCookies.toString()
+    headers.Cookie = serverCookies.toString()
   }
 
   let rawResult = await fetch(fullUrl.toString(), {
     headers,
-    ...options,
     credentials: 'include',
+    ...options,
   })
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -65,6 +43,15 @@ export async function customFetch<T>(
     result.message === 'token has expired' ||
     result.message === 'token not provided'
   ) {
+    if (isServer) {
+      const { cookies } = await import('next/headers')
+      const serverCookies = await cookies()
+      const refreshToken = serverCookies.get('refreshToken')
+      if (refreshToken) {
+        throw new Error('TokenExpiredOnServer')
+      }
+    }
+
     if (isRefreshing) {
       return new Promise((resolve) => {
         refreshSubscribers.push(() => {
@@ -82,8 +69,8 @@ export async function customFetch<T>(
     if (isRefreshSuccess) {
       rawResult = await fetch(fullUrl.toString(), {
         headers,
-        ...options,
         credentials: 'include',
+        ...options,
       })
 
       result = (await rawResult.json()) as CustomFetchBaseResponse
@@ -92,34 +79,22 @@ export async function customFetch<T>(
         method: 'POST',
         credentials: 'include',
       })
-      // throw new Error('Session expired, please login again.')
+      await deleteCookie('refreshToken')
+      await deleteCookie('accessToken')
+      throw new Error('Sesi habis, silahkan login kembali.')
     }
   }
 
   return result as T & CustomFetchBaseResponse
 }
 
-export function customFetchBody(body: object) {
-  return JSON.stringify(body)
-}
-
 async function handleRefreshToken(): Promise<boolean> {
-  const isServer = typeof window === 'undefined'
-
-  let serverCookies
-
-  if (isServer) {
-    const { cookies } = await import('next/headers')
-    serverCookies = await cookies()
-  }
-
   try {
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh-token`,
       {
         method: 'POST',
         credentials: 'include',
-        headers: isServer ? { Cookie: serverCookies!.toString() } : {},
       }
     )
 
@@ -133,4 +108,8 @@ async function handleRefreshToken(): Promise<boolean> {
   } catch (error) {
     return false
   }
+}
+
+export function customFetchBody(body: object) {
+  return JSON.stringify(body)
 }

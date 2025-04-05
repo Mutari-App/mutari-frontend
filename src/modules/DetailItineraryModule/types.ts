@@ -32,8 +32,8 @@ interface Block {
   location: string
   price: number
   photoUrl: string | undefined
-  routeToNext?: Route | null
-  routeFromPrevious?: Route | null
+  routeToNext?: Route
+  routeFromPrevious?: Route
 }
 
 interface Section {

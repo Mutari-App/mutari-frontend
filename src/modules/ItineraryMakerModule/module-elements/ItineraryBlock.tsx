@@ -31,6 +31,7 @@ const transportModeNames = {
   [TransportMode.TRANSIT]: 'Transportasi Umum',
   [TransportMode.TWO_WHEELER]: 'Motor',
 }
+import AutocompleteInput from './AutocompleteInput'
 
 interface ItineraryBlockProps {
   block: Block
@@ -110,12 +111,11 @@ export const ItineraryBlock: React.FC<ItineraryBlockProps> = ({
                   {block.blockType === 'LOCATION' ? (
                     <>
                       <div className="flex items-center mb-2">
-                        <Input
-                          className="text-sm sm:text-base md:text-lg font-medium border-none p-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
-                          value={block.title}
-                          onChange={(e) =>
-                            updateBlock(block.id, 'title', e.target.value)
-                          }
+                        <AutocompleteInput
+                          updateBlock={updateBlock}
+                          toggleInput={toggleInput}
+                          blockId={block.id}
+                          title={block.title}
                         />
                       </div>
                       <div className="flex flex-wrap gap-2 text-sm text-gray-500 mb-2">

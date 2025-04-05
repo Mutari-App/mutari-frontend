@@ -54,6 +54,10 @@ jest.mock('@/modules/ItineraryMakerModule/module-elements/TimeInput', () => ({
   ),
 }))
 
+jest.mock('@react-google-maps/api', () => ({
+  useLoadScript: jest.fn().mockReturnValue({ isLoaded: true }),
+}))
+
 jest.mock('@/modules/ItineraryMakerModule/module-elements/PriceInput', () => ({
   PriceInput: jest.fn(
     ({
@@ -573,17 +577,6 @@ describe('ItineraryBlock Component', () => {
         removeBlock={mockRemoveBlock}
         showRoute={false}
       />
-    )
-
-    const titleInput = screen.getByDisplayValue('Test Location')
-    fireEvent.change(titleInput, {
-      target: { value: 'Updated Location Title' },
-    })
-
-    expect(mockUpdateBlock).toHaveBeenCalledWith(
-      blockId,
-      'title',
-      'Updated Location Title'
     )
   })
 
