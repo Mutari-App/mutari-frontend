@@ -562,24 +562,6 @@ describe('ItineraryBlock Component', () => {
     })
   })
 
-  test('updates block title when title input changes', () => {
-    const locationBlock = createLocationBlock()
-
-    render(
-      <ItineraryBlock
-        block={locationBlock}
-        blockIndex={blockIndex}
-        sectionNumber={sectionNumber}
-        timeWarning={null}
-        isInputVisible={mockIsInputVisible}
-        toggleInput={mockToggleInput}
-        updateBlock={mockUpdateBlock}
-        removeBlock={mockRemoveBlock}
-        showRoute={false}
-      />
-    )
-  })
-
   test('updates block description when description input changes', () => {
     const locationBlock = createLocationBlock()
 
