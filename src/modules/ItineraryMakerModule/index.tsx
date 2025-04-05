@@ -988,7 +988,7 @@ export default function ItineraryMakerModule() {
       }
     })
     if (field === 'location') {
-      setTimeout(() => void updateRoutes(blockId), 0)
+      setTimeout(() => void updateRoutes(blockId), 100)
     }
   }
 
