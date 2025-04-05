@@ -13,7 +13,6 @@ import { X, GripVertical } from 'lucide-react'
 import { type Block } from '../interface'
 import { TimeInput } from './TimeInput'
 import { PriceInput } from './PriceInput'
-import { CoordinateInput } from './CoordinateInput'
 import { RouteInfo } from './RouteInfo'
 
 enum TransportMode {
@@ -132,13 +131,6 @@ export const ItineraryBlock: React.FC<ItineraryBlockProps> = ({
                           blockId={block.id}
                           price={block.price}
                           isVisible={isInputVisible(block.id, 'price')}
-                          toggleInput={toggleInput}
-                          updateBlock={updateBlock}
-                        />
-                        <CoordinateInput
-                          blockId={block.id}
-                          location={block.location}
-                          isVisible={isInputVisible(block.id, 'location')}
                           toggleInput={toggleInput}
                           updateBlock={updateBlock}
                         />
