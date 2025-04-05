@@ -134,7 +134,7 @@ export default function ItineraryMakerModule() {
     if (!wasAlreadyRequested.current) {
       void fetchData()
     }
-  }, [itineraryId, wasAlreadyRequested])
+  }, [itineraryId, router, user?.id, wasAlreadyRequested])
 
   // Map existing data if fetched
   useEffect(() => {
@@ -1185,6 +1185,59 @@ export default function ItineraryMakerModule() {
     }
   }
 
+  const submitItinerary = async (submissionData: object) => {
+    const validUmami = () => typeof window !== 'undefined' && window.umami
+    const isCreateAndValidUmami = () => !itineraryId && validUmami()
+
+    try {
+      const fetchCreateItinerary = async () => {
+        return await customFetch<CreateItineraryResponse>('/itineraries', {
+          method: 'POST',
+          body: customFetchBody(submissionData),
+          credentials: 'include',
+          isAuthorized: true,
+        })
+      }
+
+      const fetchUpdateItinerary = async () => {
+        return await customFetch<CreateItineraryResponse>(
+          `/itineraries/${itineraryId}`,
+          {
+            method: 'PATCH',
+            body: customFetchBody(submissionData),
+            credentials: 'include',
+            isAuthorized: true,
+          }
+        )
+      }
+
+      const response = itineraryId
+        ? await fetchUpdateItinerary()
+        : await fetchCreateItinerary()
+
+      if (!response.success) {
+        if (isCreateAndValidUmami()) {
+          window.umami.track('create_itinerary_fail')
+        }
+        throw new Error('Failed to create or edit itinerary')
+      }
+
+      setHasUnsavedChanges(false)
+      toast(`Itinerary ${itineraryId ? 'updated' : 'created'} successfully`)
+
+      if (isCreateAndValidUmami()) {
+        window.umami.track('create_itinerary_success')
+      }
+
+      router.push(`/itinerary/${response.id}`)
+    } catch (error) {
+      if (isCreateAndValidUmami()) {
+        window.umami.track('create_itinerary_fail')
+      }
+      throw error
+    }
+  }
+
   const handleSubmit = async () => {
     if (timeWarning) {
       toast.error(
@@ -1198,7 +1251,6 @@ export default function ItineraryMakerModule() {
       return
     }
 
-    // If user is not authenticated, save to local storage and redirect to login
     if (!isAuthenticated) {
       localStorage.setItem(SAVED_ITINERARY_KEY, JSON.stringify(itineraryData))
       setHasUnsavedChanges(false)
@@ -1208,7 +1260,6 @@ export default function ItineraryMakerModule() {
       )
     }
 
-    // If user is authenticated, proceed with normal submission
     setIsSubmitting(true)
     try {
       const submissionData = {
@@ -1243,36 +1294,11 @@ export default function ItineraryMakerModule() {
             }) ?? [],
         })),
       }
-
-      const response = itineraryId
-        ? await customFetch<CreateItineraryResponse>(
-            `/itineraries/${itineraryId}`,
-            {
-              method: 'PATCH',
-              body: customFetchBody(submissionData),
-              credentials: 'include',
-              isAuthorized: true,
-            }
-          )
-        : await customFetch<CreateItineraryResponse>('/itineraries', {
-            method: 'POST',
-            body: customFetchBody(submissionData),
-            credentials: 'include',
-            isAuthorized: true,
-          })
-
-      if (!response.success) {
-        throw new Error('Failed to create or edit itinerary')
-      }
-
-      setHasUnsavedChanges(false)
-      toast(`Itinerary ${itineraryId ? 'updated' : 'created'} successfully`)
-
-      router.push(`/itinerary/${response.id}`)
+      await submitItinerary(submissionData)
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       toast.error(
-        `Failed to ${itineraryId ? 'updated' : 'created'} itinerary. Please try again.`
+        `Failed to ${itineraryId ? 'update' : 'create'} itinerary. Please try again.`
       )
     } finally {
       setIsSubmitting(false)
