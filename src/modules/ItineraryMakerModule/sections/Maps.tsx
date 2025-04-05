@@ -64,7 +64,7 @@ function Maps({
       }) ?? []
   )
 
-  const libraries: Libraries = ['places']
+  const [libraries] = useState<Libraries>(['places'])
 
   const { isLoaded } = useLoadScript({
     googleMapsApiKey: apiKey,

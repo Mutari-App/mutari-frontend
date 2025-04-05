@@ -7,7 +7,7 @@ import usePlacesAutocomplete, {
   getLatLng,
 } from 'use-places-autocomplete'
 import { type Block } from '../interface'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
 function AutocompleteInput({
   updateBlock,
@@ -27,11 +27,11 @@ function AutocompleteInput({
   blockId: string
   title: string
 }) {
-  const libraries: Libraries = ['places']
+  const [libraries] = useState<Libraries>(['places'])
 
   const { isLoaded } = useLoadScript({
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? '',
-    libraries: libraries,
+    libraries,
   })
 
   const {
