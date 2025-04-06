@@ -55,16 +55,12 @@ function AutocompleteInput({
   }, [title, setValue])
 
   const handleSelect = async (address: string, formattedValue: string) => {
-    console.log('🧠 handleSelect called with', address, formattedValue)
-
     setValue(formattedValue, false)
     clearSuggestions()
 
     const results = await getGeocode({ address })
     const { lat, lng } = getLatLng(results[0])
-    console.log('✅ Calling updateBlock with location')
     updateBlock(blockId, 'location', `${lat},${lng}`)
-    toggleInput(blockId, 'location')
     updateBlock(blockId, 'title', formattedValue)
   }
 
