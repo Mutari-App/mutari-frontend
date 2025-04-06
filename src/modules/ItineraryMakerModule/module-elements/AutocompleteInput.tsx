@@ -15,6 +15,7 @@ function AutocompleteInput({
   toggleInput,
   blockId,
   title,
+  setPositionToView,
 }: {
   updateBlock: <T extends keyof Block>(
     blockId: string,
@@ -27,6 +28,9 @@ function AutocompleteInput({
   ) => void
   blockId: string
   title: string
+  setPositionToView: React.Dispatch<
+    React.SetStateAction<google.maps.LatLngLiteral | null>
+  >
 }) {
   const [libraries] = useState<Libraries>(['places'])
   const suggestionsRef = useRef<HTMLDivElement>(null)
@@ -74,6 +78,7 @@ function AutocompleteInput({
     updateBlock(blockId, 'location', `${lat},${lng}`)
     toggleInput(blockId, 'location')
     updateBlock(blockId, 'title', formattedValue)
+    setPositionToView({ lat, lng })
   }
 
   if (!isLoaded) return <div>Loading...</div>

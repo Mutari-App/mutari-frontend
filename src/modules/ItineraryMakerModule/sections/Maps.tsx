@@ -22,6 +22,7 @@ import { decodePolyline } from '../utils'
 type MapsProps = {
   readonly itineraryData: Readonly<Section[]>
   isEditing?: boolean
+  positionToView?: google.maps.LatLngLiteral | null
   addLocationToSection?: (
     sectionNumber: number,
     title: string,
@@ -77,6 +78,7 @@ function Maps({
   itineraryData,
   addLocationToSection,
   isEditing,
+  positionToView,
   _testSelectedPlace,
   _testSelectedPlaceDetails,
 }: MapsProps) {
@@ -95,7 +97,7 @@ function Maps({
       firstLoc
         ? { lat: parseFloat(firstLoc[0]), lng: parseFloat(firstLoc[1]) }
         : { lat: -6.3604, lng: 106.82719 },
-    [firstLoc]
+    []
   )
   const defaultSelectedPlace = { placeId: '', latLng: { lat: 0, lng: 0 } }
 
@@ -204,6 +206,12 @@ function Maps({
       void fetchPlaceDetails(selectedPlace.placeId)
     }
   }, [selectedPlace])
+
+  useEffect(() => {
+    if (positionToView && map) {
+      map.panTo(positionToView)
+    }
+  }, [positionToView, map])
 
   return (
     <div className="w-full h-full">

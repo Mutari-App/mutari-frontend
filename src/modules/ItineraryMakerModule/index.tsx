@@ -65,6 +65,8 @@ export default function ItineraryMakerModule() {
   const router = useRouter()
   const { id: itineraryId } = useParams<{ id: string }>()
   const [data, setData] = useState<Itinerary | null>(null)
+  const [positionToView, setPositionToView] =
+    useState<google.maps.LatLngLiteral | null>(null)
   const wasAlreadyRequested = useRef(false)
 
   const initialItineraryData = useRef<CreateItineraryDto>({
@@ -1569,6 +1571,7 @@ export default function ItineraryMakerModule() {
           isInputVisible={isInputVisible}
           timeWarning={timeWarning}
           onTransportModeChange={updateTransportMode}
+          setPositionToView={setPositionToView}
         />
 
         <div className="flex justify-center my-8">
@@ -1614,6 +1617,7 @@ export default function ItineraryMakerModule() {
           itineraryData={itineraryData.sections}
           addLocationToSection={addLocationToSection}
           isEditing
+          positionToView={positionToView}
         />
       </div>
     </div>
