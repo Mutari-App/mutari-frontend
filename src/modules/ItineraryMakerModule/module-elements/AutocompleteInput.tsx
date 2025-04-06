@@ -7,7 +7,8 @@ import usePlacesAutocomplete, {
   getLatLng,
 } from 'use-places-autocomplete'
 import { type Block } from '../interface'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import useOutsideClick from '@/hooks/useOutsideClick'
 
 function AutocompleteInput({
   updateBlock,
@@ -28,10 +29,20 @@ function AutocompleteInput({
   title: string
 }) {
   const [libraries] = useState<Libraries>(['places'])
+  const suggestionsRef = useRef<HTMLDivElement>(null)
+  const [optionsOpen, setOptionsOpen] = useState(false)
 
   const { isLoaded } = useLoadScript({
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? '',
     libraries,
+  })
+
+  useOutsideClick({
+    ref: suggestionsRef,
+    handler: () => {
+      setOptionsOpen(false)
+      updateBlock(blockId, 'title', value)
+    },
   })
 
   const {
@@ -55,14 +66,11 @@ function AutocompleteInput({
   }, [title, setValue])
 
   const handleSelect = async (address: string, formattedValue: string) => {
-    console.log('🧠 handleSelect called with', address, formattedValue)
-
     setValue(formattedValue, false)
     clearSuggestions()
 
     const results = await getGeocode({ address })
     const { lat, lng } = getLatLng(results[0])
-    console.log('✅ Calling updateBlock with location')
     updateBlock(blockId, 'location', `${lat},${lng}`)
     toggleInput(blockId, 'location')
     updateBlock(blockId, 'title', formattedValue)
@@ -77,11 +85,17 @@ function AutocompleteInput({
         className="text-sm sm:text-base md:text-lg font-medium border-none p-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
         placeholder="Search Location..."
         value={value}
-        onChange={(e) => setValue(e.target.value)}
+        onChange={(e) => {
+          setValue(e.target.value)
+          setOptionsOpen(true)
+        }}
         disabled={!ready}
       />
-      {status === 'OK' && (
-        <div className="absolute top-full w-full z-30 bg-white shadow-md border border-gray-200 rounded-md mt-1">
+      {status === 'OK' && optionsOpen && (
+        <div
+          ref={suggestionsRef}
+          className="absolute top-full w-full z-30 bg-white shadow-md border border-gray-200 rounded-md mt-1"
+        >
           {data.map(({ place_id, structured_formatting, description }) => (
             <div
               key={place_id}
