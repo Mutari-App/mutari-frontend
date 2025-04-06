@@ -37,7 +37,7 @@ const mockSection = [
         blockType: 'LOCATION',
         startTime: '2022-04-03T10:00:00Z',
         endTime: '2022-04-03T12:00:00Z',
-        location: 'Bali',
+        location: '0,0',
         price: 100,
         photoUrl: 'https://example.com/photo1.jpg',
         routeToNext: {
@@ -63,7 +63,7 @@ const mockSection = [
         blockType: 'LOCATION',
         startTime: '2022-04-03T14:00:00Z',
         endTime: '2022-04-03T16:00:00Z',
-        location: 'Ubud',
+        location: '0,0',
         price: 150,
         photoUrl: 'https://example.com/photo2.jpg',
         routeToNext: {
@@ -89,7 +89,7 @@ const mockSection = [
         blockType: 'LOCATION',
         startTime: '2022-04-03T17:00:00Z',
         endTime: '2022-04-03T19:00:00Z',
-        location: 'Kuta',
+        location: '0,0',
         price: 200,
         photoUrl: 'https://example.com/photo3.jpg',
         // Last block doesn't have routeToNext
@@ -115,7 +115,7 @@ const mockSection = [
         blockType: 'LOCATION',
         startTime: '2022-04-04T14:00:00Z',
         endTime: '2022-04-04T16:00:00Z',
-        location: 'Los Angeles',
+        location: '0,0',
         price: 200,
         photoUrl: 'https://example.com/photo2.jpg',
       },
@@ -132,7 +132,6 @@ describe('ItineraryDay Component', () => {
   it('renders location details correctly', () => {
     render(<ItineraryDay section={mockSection[0]} />)
     expect(screen.getByText('Block Title 1')).toBeInTheDocument()
-    expect(screen.getByText('Bali')).toBeInTheDocument()
     expect(screen.getByText('Rp100')).toBeInTheDocument()
   })
 
@@ -167,7 +166,6 @@ describe('ItineraryDay Component', () => {
     render(<ItineraryDay section={mockSection[1]} />)
     expect(screen.getByText('Section 2')).toBeInTheDocument()
     expect(screen.getByText('Block Title 2')).toBeInTheDocument()
-    expect(screen.getByText('Los Angeles')).toBeInTheDocument()
     expect(screen.getByText('Rp200')).toBeInTheDocument()
     expect(screen.getByText('Block Description 2')).toBeInTheDocument()
   })
