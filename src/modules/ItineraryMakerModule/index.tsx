@@ -1228,7 +1228,7 @@ export default function ItineraryMakerModule() {
     }
   }
 
-    const submitItinerary = async (submissionData: object) => {
+  const submitItinerary = async (submissionData: object) => {
     const validUmami = () => typeof window !== 'undefined' && window.umami
     const isCreateAndValidUmami = () => !itineraryId && validUmami()
 
@@ -1422,9 +1422,11 @@ export default function ItineraryMakerModule() {
         }
       )
 
-      console.log("API response: ", response);
-      console.log("Feedback content: ", JSON.stringify(response.feedback, null, 2));
-
+      console.log('API response: ', response)
+      console.log(
+        'Feedback content: ',
+        JSON.stringify(response.feedback, null, 2)
+      )
 
       setFeedbackItems(response.feedback)
 
@@ -1513,7 +1515,7 @@ export default function ItineraryMakerModule() {
             </Popover>
           </div>
         </div>
-  
+
         {itineraryData.tags && itineraryData.tags.length > 0 && (
           <div className="flex flex-wrap gap-2 mb-4">
             {getSelectedTagNames().map((tagName, index) => (
@@ -1533,7 +1535,7 @@ export default function ItineraryMakerModule() {
             ))}
           </div>
         )}
-  
+
         <DateRangeAlertDialog
           open={showConfirmDialog}
           onOpenChange={setShowConfirmDialog}
@@ -1551,7 +1553,7 @@ export default function ItineraryMakerModule() {
             setShowConfirmDialog(false)
           }}
         />
-  
+
         <ItinerarySections
           feedbackItems={feedbackItems}
           sections={itineraryData.sections}
@@ -1568,7 +1570,7 @@ export default function ItineraryMakerModule() {
           timeWarning={timeWarning}
           onTransportModeChange={updateTransportMode}
         />
-  
+
         <div className="flex justify-center my-8">
           <Button
             size="sm"
@@ -1578,7 +1580,7 @@ export default function ItineraryMakerModule() {
             <Plus className="h-4 w-4" /> Bagian
           </Button>
         </div>
-  
+
         {feedbackItems.length > 0 && (
           <div className="mt-8">
             <h3 className="font-semibold mb-4">Tips</h3>
@@ -1606,7 +1608,7 @@ export default function ItineraryMakerModule() {
           </div>
         )}
       </div>
-  
+
       <div className="w-full min-h-screen hidden md:block">
         <Maps
           itineraryData={itineraryData.sections}
@@ -1616,4 +1618,4 @@ export default function ItineraryMakerModule() {
       </div>
     </div>
   )
-}  
+}
