@@ -1,10 +1,6 @@
----
-name: Bug report
-about: Create a report to help us improve
-title: ''
-labels: ''
-assignees: ''
----
+| name       | about                              | title | labels | asignees |
+| ---------- | ---------------------------------- | ----- | ------ | -------- |
+| Bug report | Create a report to help us improve |       |        |          |
 
 **Describe the bug**
 A clear and concise description of what the bug is.
