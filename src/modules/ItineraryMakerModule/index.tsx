@@ -1303,11 +1303,7 @@ export default function ItineraryMakerModule() {
       )
     }
 
-    const remainingFeedbacks = feedbackItems.filter((item) => {
-      const { sectionIndex, blockIndex, field } = item.target
-      const key = `${sectionIndex}-${blockIndex}-${field ?? ''}`
-      return !dismissedFeedbacks.includes(key)
-    })
+    const remainingFeedbacks = feedbackItems
 
     if (remainingFeedbacks.length > 0) {
       setIsConfirmModalOpen(true)
@@ -1430,6 +1426,21 @@ export default function ItineraryMakerModule() {
     }
   }
 
+  const removeFeedbackForField = (
+    sectionIndex: number,
+    blockIndex: number,
+    field: 'title' | 'description' | 'startTime' | 'endTime' | 'price'
+  ) => {
+    setFeedbackItems((prev) =>
+      prev.filter(
+        (item) =>
+          item.target.sectionIndex !== sectionIndex ||
+          item.target.blockIndex !== blockIndex ||
+          item.target.field !== field
+      )
+    )
+  }
+
   return (
     <div className="flex max-h-screen">
       <div className="container max-w-4xl mx-auto p-4 pt-24 min-h-screen max-h-screen overflow-auto">
@@ -1523,6 +1534,7 @@ export default function ItineraryMakerModule() {
         />
         <ItinerarySections
           feedbackItems={feedbackItems}
+          removeFeedbackForField={removeFeedbackForField}
           sections={itineraryData.sections}
           updateSectionTitle={updateSectionTitle}
           addSection={addSection}
