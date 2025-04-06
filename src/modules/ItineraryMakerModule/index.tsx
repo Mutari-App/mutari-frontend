@@ -267,7 +267,7 @@ export default function ItineraryMakerModule() {
       // Validate available reminder option selection
       validateReminderOptionSelection(
         data.startDate,
-        itineraryData.sections[0]?.blocks?.[0]?.startTime
+        data.sections[0]?.blocks?.[0]?.startTime
       )
 
       initialItineraryData.current = {
