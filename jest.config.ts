@@ -33,7 +33,8 @@ const config: Config = {
     '<rootDir>/src/hooks/',
     '<rootDir>/src/icons/',
     '<rootDir>/src/lib/',
-    '<rootDir>/src/utils/',
+    '<rootDir>/src/utils/customFetch/',
+    '<rootDir>/src/utils/getImage.ts',
   ],
 }
 

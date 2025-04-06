@@ -1,12 +1,15 @@
 import React from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Wand2 } from 'lucide-react'
 
 interface ItineraryHeaderProps {
   title: string
   coverImage?: string
   onTitleChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   isSubmitting: boolean
+  isGenerating: boolean
+  onGenerateFeedback: () => void
   onSubmit: () => void
 }
 
@@ -15,6 +18,8 @@ export const ItineraryHeader: React.FC<ItineraryHeaderProps> = ({
   coverImage,
   onTitleChange,
   isSubmitting,
+  isGenerating,
+  onGenerateFeedback,
   onSubmit,
 }) => {
   return (
@@ -37,6 +42,17 @@ export const ItineraryHeader: React.FC<ItineraryHeaderProps> = ({
           placeholder="Enter trip title"
         />
       </div>
+
+      <Button
+        size="sm"
+        className="absolute top-4 left-4 z-10 bg-gradient-to-r from-[#0073E6] to-[#80004B] text-white hover:from-[#80004B] hover:to-[#0073E6]"
+        onClick={onGenerateFeedback}
+        disabled={isGenerating}
+      >
+        <Wand2 size={16} />
+        {isGenerating ? 'Generating...' : 'Generate AI Feedback'}
+      </Button>
+
       <Button
         size="sm"
         className="absolute top-4 right-4 z-10 bg-gradient-to-r from-[#0073E6] to-[#004080] text-white hover:from-[#0066cc] hover:to-[#003366]"

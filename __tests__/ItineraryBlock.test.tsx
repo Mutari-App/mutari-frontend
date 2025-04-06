@@ -1,9 +1,19 @@
 import React from 'react'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { ItineraryBlock } from '@/modules/ItineraryMakerModule/module-elements/ItineraryBlock'
 import '@testing-library/jest-dom'
-import { useLoadScript } from '@react-google-maps/api'
 import { type Block } from '@/modules/ItineraryMakerModule/interface'
+import { toast } from 'sonner'
+import { TransportMode } from '@/utils/maps'
+
+// Mock the sonner toast
+jest.mock('sonner', () => ({
+  toast: {
+    loading: jest.fn(),
+    success: jest.fn(),
+    error: jest.fn(),
+  },
+}))
 
 // Mock the drag and drop library
 jest.mock('@hello-pangea/dnd', () => ({
@@ -69,29 +79,35 @@ jest.mock('@/modules/ItineraryMakerModule/module-elements/PriceInput', () => ({
   ),
 }))
 
-jest.mock(
-  '@/modules/ItineraryMakerModule/module-elements/CoordinateInput',
-  () => ({
-    CoordinateInput: jest.fn(
-      ({
-        blockId,
-        isVisible,
-        toggleInput,
-      }: {
-        blockId: string
-        isVisible: boolean
-        toggleInput: (id: string, type: string) => void
-      }) => (
-        <div data-testid={`coordinate-input-${blockId}`}>
-          {isVisible ? 'Coordinate Input Visible' : 'Coordinate Input Button'}
-          <button onClick={() => toggleInput(blockId, 'location')}>
-            Toggle Coordinate
+jest.mock('@/modules/ItineraryMakerModule/module-elements/RouteInfo', () => ({
+  RouteInfo: jest.fn(
+    ({
+      distance,
+      duration,
+      transportMode,
+      onTransportModeChange,
+    }: {
+      distance: number
+      duration: number
+      transportMode?: TransportMode
+      onTransportModeChange?: (mode: TransportMode) => Promise<boolean>
+    }) => (
+      <div data-testid="route-info">
+        <span data-testid="route-distance">{distance}</span>
+        <span data-testid="route-duration">{duration}</span>
+        <span data-testid="route-mode">{transportMode}</span>
+        {onTransportModeChange && (
+          <button
+            data-testid="mode-walk"
+            onClick={() => onTransportModeChange(TransportMode.WALK)}
+          >
+            Change Mode
           </button>
-        </div>
-      )
-    ),
-  })
-)
+        )}
+      </div>
+    )
+  ),
+}))
 
 // Mock the UI components
 jest.mock('@/components/ui/card', () => ({
@@ -181,6 +197,10 @@ jest.mock('@/components/ui/button', () => ({
 jest.mock('lucide-react', () => ({
   X: () => 'X',
   GripVertical: () => 'GripVertical',
+  Car: () => 'Car',
+  Navigation: () => 'Navigation',
+  Bike: () => 'Bike',
+  Bus: () => 'Bus',
 }))
 
 describe('ItineraryBlock Component', () => {
@@ -229,6 +249,8 @@ describe('ItineraryBlock Component', () => {
         toggleInput={mockToggleInput}
         updateBlock={mockUpdateBlock}
         removeBlock={mockRemoveBlock}
+        feedbackItems={[]}
+        showRoute={false}
       />
     )
 
@@ -238,9 +260,6 @@ describe('ItineraryBlock Component', () => {
     // Check if all the input components are rendered
     expect(screen.getByTestId(`time-input-${blockId}`)).toBeInTheDocument()
     expect(screen.getByTestId(`price-input-${blockId}`)).toBeInTheDocument()
-    expect(
-      screen.getByTestId(`coordinate-input-${blockId}`)
-    ).toBeInTheDocument()
 
     // Check if description input is rendered
     expect(
@@ -261,6 +280,8 @@ describe('ItineraryBlock Component', () => {
         toggleInput={mockToggleInput}
         updateBlock={mockUpdateBlock}
         removeBlock={mockRemoveBlock}
+        feedbackItems={[]}
+        showRoute={false}
       />
     )
 
@@ -268,45 +289,256 @@ describe('ItineraryBlock Component', () => {
     expect(screen.getByTestId('textarea-Masukkan Catatan')).toBeInTheDocument()
     expect(screen.getByDisplayValue('This is a test note')).toBeInTheDocument()
 
-    // Verify that time, price, and coordinate inputs are NOT rendered for note blocks
+    // Verify that time and price are NOT rendered for note blocks
     expect(
       screen.queryByTestId(`time-input-${blockId}`)
     ).not.toBeInTheDocument()
     expect(
       screen.queryByTestId(`price-input-${blockId}`)
     ).not.toBeInTheDocument()
-    expect(
-      screen.queryByTestId(`coordinate-input-${blockId}`)
-    ).not.toBeInTheDocument()
   })
 
-  // test('updates block title when title input changes', () => {
-  //   const locationBlock = createLocationBlock()
+  test('renders RouteInfo when showRoute is true and routeInfo exists', () => {
+    const locationBlock = createLocationBlock()
+    const routeInfo = {
+      sourceBlockId: 'source-123',
+      destinationBlockId: 'dest-123',
+      distance: 10,
+      duration: 30,
+      polyline: 'test',
+      transportMode: TransportMode.DRIVE,
+    }
 
-  //   render(
-  //     <ItineraryBlock
-  //       block={locationBlock}
-  //       blockIndex={blockIndex}
-  //       sectionNumber={sectionNumber}
-  //       timeWarning={null}
-  //       isInputVisible={mockIsInputVisible}
-  //       toggleInput={mockToggleInput}
-  //       updateBlock={mockUpdateBlock}
-  //       removeBlock={mockRemoveBlock}
-  //     />
-  //   )
+    render(
+      <ItineraryBlock
+        block={locationBlock}
+        blockIndex={blockIndex}
+        sectionNumber={sectionNumber}
+        timeWarning={null}
+        isInputVisible={mockIsInputVisible}
+        toggleInput={mockToggleInput}
+        updateBlock={mockUpdateBlock}
+        removeBlock={mockRemoveBlock}
+        feedbackItems={[]}
+        showRoute={true}
+        routeInfo={routeInfo}
+      />
+    )
 
-  //   const titleInput = screen.getByDisplayValue('Test Location')
-  //   fireEvent.change(titleInput, {
-  //     target: { value: 'Updated Location Title' },
-  //   })
+    // Route info should be rendered with the correct data
+    expect(screen.getByTestId('route-info')).toBeInTheDocument()
+    expect(screen.getByTestId('route-distance').textContent).toBe('10')
+    expect(screen.getByTestId('route-duration').textContent).toBe('30')
+    expect(screen.getByTestId('route-mode').textContent).toBe(
+      TransportMode.DRIVE
+    )
+  })
 
-  //   expect(mockUpdateBlock).toHaveBeenCalledWith(
-  //     blockId,
-  //     'title',
-  //     'Updated Location Title'
-  //   )
-  // })
+  test('does not render RouteInfo when showRoute is false', () => {
+    const locationBlock = createLocationBlock()
+    const routeInfo = {
+      sourceBlockId: 'source-123',
+      destinationBlockId: 'dest-123',
+      distance: 10,
+      duration: 30,
+      polyline: 'test',
+      transportMode: TransportMode.DRIVE,
+    }
+
+    render(
+      <ItineraryBlock
+        block={locationBlock}
+        blockIndex={blockIndex}
+        sectionNumber={sectionNumber}
+        timeWarning={null}
+        isInputVisible={mockIsInputVisible}
+        toggleInput={mockToggleInput}
+        updateBlock={mockUpdateBlock}
+        removeBlock={mockRemoveBlock}
+        feedbackItems={[]}
+        showRoute={false}
+        routeInfo={routeInfo}
+      />
+    )
+
+    expect(screen.queryByTestId('route-info')).not.toBeInTheDocument()
+  })
+
+  test('handles successful transport mode change', async () => {
+    const locationBlock = createLocationBlock()
+    const routeInfo = {
+      sourceBlockId: 'source-123',
+      destinationBlockId: 'dest-123',
+      distance: 10,
+      duration: 30,
+      polyline: 'test',
+      transportMode: TransportMode.DRIVE,
+    }
+
+    // Mock to return success (true)
+    const mockOnTransportModeChange = jest.fn().mockResolvedValue(true)
+
+    render(
+      <ItineraryBlock
+        block={locationBlock}
+        blockIndex={blockIndex}
+        sectionNumber={sectionNumber}
+        timeWarning={null}
+        isInputVisible={mockIsInputVisible}
+        toggleInput={mockToggleInput}
+        updateBlock={mockUpdateBlock}
+        removeBlock={mockRemoveBlock}
+        feedbackItems={[]}
+        showRoute={true}
+        routeInfo={routeInfo}
+        onTransportModeChange={mockOnTransportModeChange}
+      />
+    )
+
+    // Click the button to change transport mode to WALK
+    fireEvent.click(screen.getByTestId('mode-walk'))
+
+    // Check that the loading toast was shown
+    expect(toast.loading).toHaveBeenCalled()
+
+    // Wait for the async function to complete
+    await waitFor(() => {
+      // Success callback should have been called
+      expect(mockOnTransportModeChange).toHaveBeenCalledWith(
+        locationBlock.id,
+        TransportMode.WALK
+      )
+      // Success toast should be shown
+      expect(toast.success).toHaveBeenCalledWith(
+        'Rute berhasil diperbarui',
+        expect.objectContaining({ id: 'route-calc' })
+      )
+    })
+  })
+
+  test('handles failed transport mode change', async () => {
+    const locationBlock = createLocationBlock()
+    const routeInfo = {
+      sourceBlockId: 'source-123',
+      destinationBlockId: 'dest-123',
+      distance: 10,
+      duration: 30,
+      polyline: 'test',
+      transportMode: TransportMode.DRIVE,
+    }
+
+    const mockOnTransportModeChange = jest.fn().mockResolvedValue(false)
+
+    render(
+      <ItineraryBlock
+        block={locationBlock}
+        blockIndex={blockIndex}
+        sectionNumber={sectionNumber}
+        timeWarning={null}
+        isInputVisible={mockIsInputVisible}
+        toggleInput={mockToggleInput}
+        updateBlock={mockUpdateBlock}
+        removeBlock={mockRemoveBlock}
+        feedbackItems={[]}
+        showRoute={true}
+        routeInfo={routeInfo}
+        onTransportModeChange={mockOnTransportModeChange}
+      />
+    )
+
+    fireEvent.click(screen.getByTestId('mode-walk'))
+    expect(toast.loading).toHaveBeenCalled()
+
+    await waitFor(() => {
+      expect(mockOnTransportModeChange).toHaveBeenCalledWith(
+        locationBlock.id,
+        TransportMode.WALK
+      )
+      expect(toast.success).not.toHaveBeenCalled()
+    })
+  })
+
+  test('handles errors during transport mode change', async () => {
+    const locationBlock = createLocationBlock()
+    const routeInfo = {
+      sourceBlockId: 'source-123',
+      destinationBlockId: 'dest-123',
+      distance: 10,
+      duration: 30,
+      polyline: 'test',
+      transportMode: TransportMode.DRIVE,
+    }
+
+    const mockOnTransportModeChange = jest
+      .fn()
+      .mockRejectedValue(new Error('Test error'))
+
+    render(
+      <ItineraryBlock
+        block={locationBlock}
+        blockIndex={blockIndex}
+        sectionNumber={sectionNumber}
+        timeWarning={null}
+        isInputVisible={mockIsInputVisible}
+        toggleInput={mockToggleInput}
+        updateBlock={mockUpdateBlock}
+        removeBlock={mockRemoveBlock}
+        feedbackItems={[]}
+        showRoute={true}
+        routeInfo={routeInfo}
+        onTransportModeChange={mockOnTransportModeChange}
+      />
+    )
+
+    fireEvent.click(screen.getByTestId('mode-walk'))
+
+    await waitFor(() => {
+      expect(mockOnTransportModeChange).toHaveBeenCalledWith(
+        locationBlock.id,
+        TransportMode.WALK
+      )
+      expect(toast.error).toHaveBeenCalledWith(
+        'Terjadi kesalahan saat memperbarui rute',
+        expect.objectContaining({ id: 'route-calc' })
+      )
+    })
+  })
+
+  test('handles case when onTransportModeChange is undefined', async () => {
+    const locationBlock = createLocationBlock()
+    const routeInfo = {
+      sourceBlockId: 'source-123',
+      destinationBlockId: 'dest-123',
+      distance: 10,
+      duration: 30,
+      polyline: 'test',
+      transportMode: TransportMode.DRIVE,
+    }
+
+    render(
+      <ItineraryBlock
+        block={locationBlock}
+        blockIndex={blockIndex}
+        sectionNumber={sectionNumber}
+        timeWarning={null}
+        isInputVisible={mockIsInputVisible}
+        toggleInput={mockToggleInput}
+        updateBlock={mockUpdateBlock}
+        removeBlock={mockRemoveBlock}
+        feedbackItems={[]}
+        showRoute={true}
+        routeInfo={routeInfo}
+        // Intentionally not providing onTransportModeChange
+      />
+    )
+
+    fireEvent.click(screen.getByTestId('mode-walk'))
+
+    await waitFor(() => {
+      expect(toast.loading).toHaveBeenCalled()
+      expect(toast.success).not.toHaveBeenCalled()
+    })
+  })
 
   test('updates block description when description input changes', () => {
     const locationBlock = createLocationBlock()
@@ -321,6 +553,8 @@ describe('ItineraryBlock Component', () => {
         toggleInput={mockToggleInput}
         updateBlock={mockUpdateBlock}
         removeBlock={mockRemoveBlock}
+        feedbackItems={[]}
+        showRoute={false}
       />
     )
 
@@ -349,6 +583,8 @@ describe('ItineraryBlock Component', () => {
         toggleInput={mockToggleInput}
         updateBlock={mockUpdateBlock}
         removeBlock={mockRemoveBlock}
+        feedbackItems={[]}
+        showRoute={false}
       />
     )
 
@@ -375,6 +611,8 @@ describe('ItineraryBlock Component', () => {
         toggleInput={mockToggleInput}
         updateBlock={mockUpdateBlock}
         removeBlock={mockRemoveBlock}
+        feedbackItems={[]}
+        showRoute={false}
       />
     )
 
@@ -402,10 +640,58 @@ describe('ItineraryBlock Component', () => {
         toggleInput={mockToggleInput}
         updateBlock={mockUpdateBlock}
         removeBlock={mockRemoveBlock}
+        feedbackItems={[]}
+        showRoute={false}
       />
     )
 
     const descriptionInput = screen.getByTestId('input-Tambahkan')
     expect(descriptionInput).toHaveValue('')
+  })
+
+  test('applies border-red-500 when there is a timeWarning for the block', () => {
+    const locationBlock = createLocationBlock()
+    const timeWarning = { blockId: blockId, message: 'Time conflict' }
+
+    render(
+      <ItineraryBlock
+        block={locationBlock}
+        blockIndex={blockIndex}
+        sectionNumber={sectionNumber}
+        timeWarning={timeWarning}
+        isInputVisible={mockIsInputVisible}
+        toggleInput={mockToggleInput}
+        updateBlock={mockUpdateBlock}
+        removeBlock={mockRemoveBlock}
+        feedbackItems={[]}
+        showRoute={false}
+      />
+    )
+
+    expect(screen.getByTestId('draggable-props')).toHaveClass('border-red-500')
+  })
+
+  test('does not apply border-red-500 when timeWarning is for different block', () => {
+    const locationBlock = createLocationBlock()
+    const timeWarning = { blockId: 'other-block', message: 'Time conflict' }
+
+    render(
+      <ItineraryBlock
+        block={locationBlock}
+        blockIndex={blockIndex}
+        sectionNumber={sectionNumber}
+        timeWarning={timeWarning}
+        isInputVisible={mockIsInputVisible}
+        toggleInput={mockToggleInput}
+        updateBlock={mockUpdateBlock}
+        removeBlock={mockRemoveBlock}
+        feedbackItems={[]}
+        showRoute={false}
+      />
+    )
+
+    expect(screen.getByTestId('draggable-props')).not.toHaveClass(
+      'border-red-500'
+    )
   })
 })

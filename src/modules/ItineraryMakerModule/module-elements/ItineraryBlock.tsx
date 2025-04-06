@@ -1,24 +1,45 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
+import { toast } from 'sonner'
 import {
   Draggable,
   type DraggableProvided,
   type DraggableStateSnapshot,
 } from '@hello-pangea/dnd'
-import { X, GripVertical } from 'lucide-react'
-import { type Block } from '../interface'
+import { X, GripVertical, OctagonAlert } from 'lucide-react'
+import { FeedbackItem, type Block } from '../interface'
 import { TimeInput } from './TimeInput'
 import { PriceInput } from './PriceInput'
+import { RouteInfo } from './RouteInfo'
 import { CoordinateInput } from './CoordinateInput'
+import { feedbackForField } from '../utils'
+import { TooltipField } from './TooltipField'
+
+enum TransportMode {
+  DRIVE = 'DRIVE',
+  WALK = 'WALK',
+  BICYCLE = 'BICYCLE',
+  TRANSIT = 'TRANSIT',
+  TWO_WHEELER = 'TWO_WHEELER',
+}
+
+const transportModeNames = {
+  [TransportMode.DRIVE]: 'Mobil',
+  [TransportMode.WALK]: 'Jalan Kaki',
+  [TransportMode.BICYCLE]: 'Sepeda',
+  [TransportMode.TRANSIT]: 'Transportasi Umum',
+  [TransportMode.TWO_WHEELER]: 'Motor',
+}
 import AutocompleteInput from './AutocompleteInput'
 
 interface ItineraryBlockProps {
   block: Block
   blockIndex: number
   sectionNumber: number
+  feedbackItems: FeedbackItem[]
   timeWarning: {
     blockId: string
     message: string
@@ -37,9 +58,23 @@ interface ItineraryBlockProps {
     value: Block[T]
   ) => void
   removeBlock: (blockId: string) => void
+  showRoute: boolean
+  routeInfo?: {
+    sourceBlockId: string
+    destinationBlockId: string
+    distance: number
+    duration: number
+    polyline?: string
+    transportMode?: TransportMode
+  }
+  onTransportModeChange?: (
+    blockId: string,
+    mode: TransportMode
+  ) => Promise<boolean>
 }
 
 export const ItineraryBlock: React.FC<ItineraryBlockProps> = ({
+  feedbackItems,
   block,
   blockIndex,
   sectionNumber,
@@ -48,8 +83,12 @@ export const ItineraryBlock: React.FC<ItineraryBlockProps> = ({
   toggleInput,
   updateBlock,
   removeBlock,
+  showRoute,
+  routeInfo,
+  onTransportModeChange,
 }) => {
   return (
+    <>
     <Draggable
       draggableId={`block-${sectionNumber}-${blockIndex}`}
       index={blockIndex}
@@ -58,7 +97,7 @@ export const ItineraryBlock: React.FC<ItineraryBlockProps> = ({
         <Card
           ref={provided.innerRef}
           {...provided.draggableProps}
-          className={`mb-4 ${snapshot.isDragging ? 'shadow-lg' : ''} ${
+          className={`${snapshot.isDragging ? 'shadow-lg' : ''} ${
             timeWarning && timeWarning.blockId === block.id
               ? 'border-red-500'
               : ''
@@ -84,6 +123,7 @@ export const ItineraryBlock: React.FC<ItineraryBlockProps> = ({
                       />
                     </div>
                     <div className="flex flex-wrap gap-2 text-sm text-gray-500 mb-2">
+                      {/* time */}
                       <TimeInput
                         blockId={block.id}
                         startTime={block.startTime}
@@ -93,6 +133,28 @@ export const ItineraryBlock: React.FC<ItineraryBlockProps> = ({
                         updateBlock={updateBlock}
                         timeWarning={timeWarning}
                       />
+                      {feedbackForField?.(
+                        feedbackItems,
+                        sectionNumber,
+                        blockIndex,
+                        'LOCATION',
+                        'startTime'
+                      ) && (
+                        <TooltipField
+                          feedback={
+                            feedbackForField(
+                              feedbackItems,
+                              sectionNumber,
+                              blockIndex,
+                              'LOCATION',
+                              'startTime'
+                            ) ?? undefined
+                          }
+                        >
+                          <OctagonAlert className="text-[#B62116]" />
+                        </TooltipField>
+                      )}
+                      {/* price */}
                       <PriceInput
                         blockId={block.id}
                         price={block.price}
@@ -100,13 +162,27 @@ export const ItineraryBlock: React.FC<ItineraryBlockProps> = ({
                         toggleInput={toggleInput}
                         updateBlock={updateBlock}
                       />
-                      <CoordinateInput
-                        blockId={block.id}
-                        location={block.location}
-                        isVisible={isInputVisible(block.id, 'location')}
-                        toggleInput={toggleInput}
-                        updateBlock={updateBlock}
-                      />
+                      {feedbackForField?.(
+                        feedbackItems,
+                        sectionNumber,
+                        blockIndex,
+                        'LOCATION',
+                        'price'
+                      ) && (
+                        <TooltipField
+                          feedback={
+                            feedbackForField(
+                              feedbackItems,
+                              sectionNumber,
+                              blockIndex,
+                              'LOCATION',
+                              'price'
+                            ) ?? undefined
+                          }
+                        >
+                          <OctagonAlert className="text-[#B62116]" />
+                        </TooltipField>
+                      )}
                     </div>
                     <Input
                       placeholder="Tambahkan catatan singkat..."
@@ -116,16 +192,60 @@ export const ItineraryBlock: React.FC<ItineraryBlockProps> = ({
                         updateBlock(block.id, 'description', e.target.value)
                       }
                     />
+                    {feedbackForField?.(
+                      feedbackItems,
+                      sectionNumber,
+                      blockIndex,
+                      'NOTE',
+                      'description'
+                    ) && (
+                      <TooltipField
+                        feedback={
+                          feedbackForField(
+                            feedbackItems,
+                            sectionNumber,
+                            blockIndex,
+                            'NOTE',
+                            'description'
+                          ) ?? undefined
+                        }
+                      >
+                        <OctagonAlert className="bg-[#B62116]" />
+                      </TooltipField>
+                    )}
                   </>
                 ) : (
-                  <Textarea
-                    placeholder="Masukkan Catatan"
-                    className="mt-2 text-sm md:text-base"
-                    value={block.description ?? ''}
-                    onChange={(e) =>
-                      updateBlock(block.id, 'description', e.target.value)
-                    }
-                  />
+                  <div>
+                    <Textarea
+                      placeholder="Masukkan Catatan"
+                      className="mt-2 text-sm md:text-base"
+                      value={block.description ?? ''}
+                      onChange={(e) =>
+                        updateBlock(block.id, 'description', e.target.value)
+                      }
+                    />
+                    {feedbackForField?.(
+                      feedbackItems,
+                      sectionNumber,
+                      blockIndex,
+                      'NOTE',
+                      'description'
+                    ) && (
+                      <TooltipField
+                        feedback={
+                          feedbackForField(
+                            feedbackItems,
+                            sectionNumber,
+                            blockIndex,
+                            'NOTE',
+                            'description'
+                          ) ?? undefined
+                        }
+                      >
+                        <OctagonAlert className="bg-[#B62116]" />
+                      </TooltipField>
+                    )}
+                  </div>
                 )}
               </div>
               <Button
@@ -140,5 +260,43 @@ export const ItineraryBlock: React.FC<ItineraryBlockProps> = ({
         </Card>
       )}
     </Draggable>
+    {showRoute && routeInfo && (
+      <RouteInfo
+        distance={routeInfo.distance}
+        duration={routeInfo.duration}
+        polyline={routeInfo.polyline}
+        transportMode={routeInfo.transportMode}
+        onTransportModeChange={async (mode) => {
+          toast.loading(
+            `Menghitung ulang rute dengan ${transportModeNames[mode]}...`,
+            { id: 'route-calc' }
+          )
+
+          try {
+            if (onTransportModeChange) {
+              const success = await onTransportModeChange(block.id, mode)
+
+              if (success) {
+                toast.success('Rute berhasil diperbarui', {
+                  id: 'route-calc',
+                  duration: 3000,
+                })
+                return true
+              }
+              return false
+            }
+            return false
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          } catch (err) {
+            toast.error('Terjadi kesalahan saat memperbarui rute', {
+              id: 'route-calc',
+              duration: 3000,
+            })
+            return false
+          }
+        }}
+      />
+    )}
+    </>
   )
 }

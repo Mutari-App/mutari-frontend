@@ -6,6 +6,7 @@ import {
   type Libraries,
   Marker,
   useLoadScript,
+  Polyline,
 } from '@react-google-maps/api'
 import type {
   GetPlaceDetailsResponse,
@@ -16,6 +17,7 @@ import { customFetch } from '@/utils/customFetch'
 import { Globe, Phone } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
+import { decodePolyline } from '../utils'
 
 type MapsProps = {
   readonly itineraryData: Readonly<Section[]>
@@ -42,8 +44,17 @@ function Maps({
   _testSelectedPlace,
   _testSelectedPlaceDetails,
 }: MapsProps) {
+  const firstLoc = itineraryData[0]?.blocks?.[0]?.location?.split(',')
+
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? ''
-  const defaultCenter = useMemo(() => ({ lat: -6.3604, lng: 106.82719 }), [])
+
+  const defaultCenter = useMemo(
+    () =>
+      firstLoc
+        ? { lat: parseFloat(firstLoc[0]), lng: parseFloat(firstLoc[1]) }
+        : { lat: -6.3604, lng: 106.82719 },
+    [firstLoc]
+  )
   const defaultSelectedPlace = { placeId: '', latLng: { lat: 0, lng: 0 } }
 
   const [selectedPlace, setSelectedPlace] = useState(
@@ -53,18 +64,42 @@ function Maps({
     useState<PlaceResult | null>(_testSelectedPlaceDetails ?? null)
   const [map, setMap] = useState<google.maps.Map | null>(null)
 
-  const locations = itineraryData?.flatMap(
-    (section) =>
-      section.blocks?.flatMap((block) => {
-        if (!block.location) return []
-        const [lat, lng] = block.location
-          .split(',')
-          .map((coord) => parseFloat(coord.trim()))
-        return { lat, lng }
-      }) ?? []
-  )
+  const { locations, routes } = useMemo(() => {
+    const locations: { lat: number; lng: number }[] = []
+    const routes: {
+      path: { lat: number; lng: number }[]
+      options?: google.maps.PolylineOptions
+    }[] = []
 
-  const libraries: Libraries = ['places']
+    itineraryData?.forEach((section) => {
+      if (section.blocks?.length) {
+        section.blocks.forEach((block, index) => {
+          if (block.location) {
+            const [lat, lng] = block.location
+              .split(',')
+              .map((coord) => parseFloat(coord.trim()))
+            locations.push({ lat, lng })
+          }
+
+          if (block.routeToNext?.polyline) {
+            const decodedPath = decodePolyline(block.routeToNext.polyline)
+            routes.push({
+              path: decodedPath,
+              options: {
+                strokeColor: '#4285F4',
+                strokeWeight: 4,
+                strokeOpacity: 0.8,
+              },
+            })
+          }
+        })
+      }
+    })
+
+    return { locations, routes }
+  }, [itineraryData])
+
+  const [libraries] = useState<Libraries>(['places'])
 
   const { isLoaded } = useLoadScript({
     googleMapsApiKey: apiKey,
@@ -111,7 +146,7 @@ function Maps({
     if (selectedPlaceDetails) {
       const { name } = selectedPlaceDetails
       const location = `${selectedPlace.latLng.lat}, ${selectedPlace.latLng.lng}`
-      const sectionNumber = 1 // Replace with the actual section number you want to add to
+      const sectionNumber = 1
       const title = name || 'New Place'
 
       if (addLocationToSection) {
@@ -140,6 +175,15 @@ function Maps({
           onLoad={(map) => setMap(map)}
           options={{
             streetViewControl: false,
+            restriction: {
+              latLngBounds: {
+                north: 8.0,
+                south: -11.0,
+                east: 141.0,
+                west: 95.0,
+              },
+              strictBounds: true,
+            },
           }}
           onClick={handleMapClick}
         >
@@ -148,6 +192,14 @@ function Maps({
               key={`${loc.lat}-${loc.lng}`}
               position={loc}
               data-testid="map-marker"
+            />
+          ))}
+
+          {routes.map((route, idx) => (
+            <Polyline
+              key={`polyline-${idx}`}
+              path={route.path}
+              options={route.options}
             />
           ))}
 
