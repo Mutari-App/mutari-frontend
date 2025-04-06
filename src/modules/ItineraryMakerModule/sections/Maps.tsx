@@ -42,9 +42,9 @@ function pathsDiffer(
   path1: google.maps.MVCArray<google.maps.LatLng>,
   path2: google.maps.LatLngLiteral[]
 ): boolean {
-  if (path1.getLength() != path2.length) return true
+  if (path1.getLength() !== path2.length) return true
   for (const [i, val] of path2.entries())
-    if (path1.getAt(i).toJSON() != val) return true
+    if (path1.getAt(i).toJSON() !== val) return true
   return false
 }
 
