@@ -1212,22 +1212,57 @@ export default function ItineraryMakerModule() {
     sections: Section[],
     blockId: string
   ): Section[] => {
-    return sections.map((section) => {
+    // First, find the block and its position
+    let blockToRemove: Block | null = null
+    let blockSectionIndex = -1
+    let blockIndex = -1
+
+    sections.forEach((section, sIndex) => {
+      if (!section.blocks) return
+
+      const index = section.blocks.findIndex((block) => block.id === blockId)
+      if (index !== -1) {
+        blockToRemove = section.blocks[index]
+        blockSectionIndex = sIndex
+        blockIndex = index
+      }
+    })
+
+    // Now process all sections, handling route connections
+    return sections.map((section, sectionIndex) => {
       if (!section.blocks) return section
 
-      const blockIndex = section.blocks.findIndex(
-        (block) => block.id === blockId
-      )
+      // If this is the section containing the block to remove
+      if (sectionIndex === blockSectionIndex) {
+        const updatedBlocks = [...section.blocks]
 
-      if (blockIndex === -1) return section
+        // Clear route connections with adjacent blocks
+        if (blockIndex > 0) {
+          // Clear routeToNext from previous block
+          updatedBlocks[blockIndex - 1] = {
+            ...updatedBlocks[blockIndex - 1],
+            routeToNext: undefined,
+          }
+        }
 
-      const updatedBlocks = [...section.blocks]
-      updatedBlocks.splice(blockIndex, 1)
+        if (blockIndex < updatedBlocks.length - 1) {
+          // Clear routeFromPrevious from next block
+          updatedBlocks[blockIndex + 1] = {
+            ...updatedBlocks[blockIndex + 1],
+            routeFromPrevious: undefined,
+          }
+        }
 
-      return {
-        ...section,
-        blocks: updatedBlocks,
+        // Remove the block
+        updatedBlocks.splice(blockIndex, 1)
+
+        return {
+          ...section,
+          blocks: updatedBlocks,
+        }
       }
+
+      return section
     })
   }
 
@@ -1665,9 +1700,11 @@ export default function ItineraryMakerModule() {
         }
       )
 
-      console.log("API response: ", response);
-      console.log("Feedback content: ", JSON.stringify(response.feedback, null, 2));
-
+      console.log('API response: ', response)
+      console.log(
+        'Feedback content: ',
+        JSON.stringify(response.feedback, null, 2)
+      )
 
       setFeedbackItems(response.feedback)
 
@@ -1761,7 +1798,7 @@ export default function ItineraryMakerModule() {
             </Popover>
           </div>
         </div>
-  
+
         {itineraryData.tags && itineraryData.tags.length > 0 && (
           <div className="flex flex-wrap gap-2 mb-4">
             {getSelectedTagNames().map((tagName, index) => (
@@ -1781,7 +1818,7 @@ export default function ItineraryMakerModule() {
             ))}
           </div>
         )}
-  
+
         <DateRangeAlertDialog
           open={showConfirmDialog}
           onOpenChange={setShowConfirmDialog}
@@ -1799,7 +1836,7 @@ export default function ItineraryMakerModule() {
             setShowConfirmDialog(false)
           }}
         />
-  
+
         <ItinerarySections
           feedbackItems={feedbackItems}
           sections={itineraryData.sections}
@@ -1816,7 +1853,7 @@ export default function ItineraryMakerModule() {
           timeWarning={timeWarning}
           onTransportModeChange={updateTransportMode}
         />
-  
+
         <div className="flex justify-center my-8">
           <Button
             size="sm"
@@ -1826,7 +1863,7 @@ export default function ItineraryMakerModule() {
             <Plus className="h-4 w-4" /> Bagian
           </Button>
         </div>
-  
+
         {feedbackItems.length > 0 && (
           <div className="mt-8">
             <h3 className="font-semibold mb-4">Tips</h3>
@@ -1854,7 +1891,7 @@ export default function ItineraryMakerModule() {
           </div>
         )}
       </div>
-  
+
       <div className="w-full min-h-screen hidden md:block">
         <Maps
           itineraryData={itineraryData.sections}
@@ -1864,4 +1901,4 @@ export default function ItineraryMakerModule() {
       </div>
     </div>
   )
-}  
+}

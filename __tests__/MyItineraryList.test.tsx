@@ -30,6 +30,16 @@ jest.mock('next/navigation', () => ({
     push: mockPush,
     replace: jest.fn(),
   }),
+  useSearchParams: () => ({
+    get: jest.fn(),
+    has: jest.fn(),
+    getAll: jest.fn(),
+    forEach: jest.fn(),
+    entries: jest.fn(),
+    keys: jest.fn(),
+    values: jest.fn(),
+  }),
+  usePathname: () => '/mock-path',
 }))
 
 jest.mock('next/image', () => ({
@@ -84,7 +94,12 @@ const mockMetadata = {
 describe('MyItineraryList Component', () => {
   it('renders empty state when there is no data', async () => {
     render(
-      <MyItineraryList data={[]} metadata={mockMetadata} refresh={jest.fn()} />
+      <MyItineraryList
+        searchQueryParams=""
+        data={[]}
+        metadata={mockMetadata}
+        refresh={jest.fn()}
+      />
     )
 
     await waitFor(() =>
@@ -100,6 +115,7 @@ describe('MyItineraryList Component', () => {
         metadata={mockMetadata}
         data={mockData}
         refresh={jest.fn()}
+        searchQueryParams=""
       />
     )
 
@@ -115,6 +131,7 @@ describe('MyItineraryList Component', () => {
         data={mockData}
         metadata={mockMetadata}
         refresh={jest.fn()}
+        searchQueryParams=""
       />
     )
 
