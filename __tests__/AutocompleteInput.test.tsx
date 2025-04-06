@@ -39,6 +39,7 @@ jest.mock('use-places-autocomplete', () => ({
 describe('AutocompleteInput Component', () => {
   const updateBlock = jest.fn()
   const toggleInput = jest.fn()
+  const mockSetPositionToView = jest.fn()
   const blockId = 'test-block'
   const title = 'Initial Title'
 
@@ -51,6 +52,7 @@ describe('AutocompleteInput Component', () => {
     render(
       <AutocompleteInput
         updateBlock={updateBlock}
+        setPositionToView={mockSetPositionToView}
         toggleInput={toggleInput}
         blockId={blockId}
         title={title}
@@ -64,6 +66,7 @@ describe('AutocompleteInput Component', () => {
     render(
       <AutocompleteInput
         updateBlock={updateBlock}
+        setPositionToView={mockSetPositionToView}
         toggleInput={toggleInput}
         blockId={blockId}
         title={title}
@@ -86,6 +89,7 @@ describe('AutocompleteInput Component', () => {
     render(
       <AutocompleteInput
         updateBlock={updateBlock}
+        setPositionToView={mockSetPositionToView}
         toggleInput={toggleInput}
         blockId={blockId}
         title={title}
@@ -121,6 +125,7 @@ describe('AutocompleteInput Component', () => {
     render(
       <AutocompleteInput
         updateBlock={updateBlock}
+        setPositionToView={mockSetPositionToView}
         toggleInput={toggleInput}
         blockId={blockId}
         title={title}
