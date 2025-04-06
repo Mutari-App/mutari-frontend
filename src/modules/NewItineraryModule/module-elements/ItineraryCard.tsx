@@ -5,7 +5,6 @@ import { MoreHorizontal, X } from 'lucide-react'
 import Image from 'next/image'
 import type React from 'react'
 import { useRef, useState, type KeyboardEvent } from 'react'
-import type { ItineraryData } from './types'
 import useOutsideClick from '@/hooks/useOutsideClick'
 import { customFetch } from '@/utils/customFetch'
 import { toast } from 'sonner'
@@ -26,6 +25,7 @@ import {
 } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
+import { ItineraryData } from './types'
 
 function ItineraryCard({
   shared = false,

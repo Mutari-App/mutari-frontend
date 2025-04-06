@@ -1,5 +1,5 @@
 'use client'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import MyItineraryList from './sections/MyItineraryList'
 import Link from 'next/link'
@@ -7,10 +7,8 @@ import { Button } from '@/components/ui/button'
 import { PlusIcon } from 'lucide-react'
 import Image from 'next/image'
 import { getImage } from '@/utils/getImage'
-import CompletedItineraryList from './sections/CompletedItineraryList'
 import { customFetch } from '@/utils/customFetch'
 import type {
-  CompletedItineraryResponse,
   ItineraryData,
   ItineraryResponse,
   metadataType,
@@ -19,17 +17,34 @@ import { toast } from 'sonner'
 
 export default function ItineraryModule() {
   const searchParams = useSearchParams()
-  const page = searchParams.get('page') ?? 1
+  const pathname = usePathname()
+  const router = useRouter()
 
-  const defaultMetadata = {
-    page: 1,
-    totalPages: 1,
+  const myItineraryPage = searchParams.get('myItineraryPage') ?? 1
+  const sharedItineraryPage = searchParams.get('sharedItineraryPage') ?? 1
+  const completedItineraryPage = searchParams.get('completedItineraryPage') ?? 1
+
+  const [myItineraryMetadata, setMyItineraryMetadata] = useState<metadataType>({
+    page: parseInt(myItineraryPage as string),
+    totalPages: 0,
     total: 0,
-  }
+  })
+  const [sharedItineraryMetadata, setSharedItineraryMetadata] =
+    useState<metadataType>({
+      page: parseInt(sharedItineraryPage as string),
+      totalPages: 0,
+      total: 0,
+    })
+  const [completedItineraryMetadata, setCompletedItineraryMetadata] =
+    useState<metadataType>({
+      page: parseInt(completedItineraryPage as string),
+      totalPages: 0,
+      total: 0,
+    })
+
   const [data, setData] = useState<ItineraryData[]>([])
   const [sharedData, setSharedData] = useState<ItineraryData[]>([])
   const [completedData, setCompletedData] = useState<ItineraryData[]>([])
-  const [metadata, setMetadata] = useState<metadataType>(defaultMetadata)
 
   const refreshAll = async () => {
     await fetchMyItinerary()
@@ -37,17 +52,35 @@ export default function ItineraryModule() {
     await fetchMySharedItinerary()
   }
 
+  function handleSearchparams(query: string, value: string) {
+    const params = new URLSearchParams(searchParams)
+    if (value) {
+      params.set(query, value)
+    } else {
+      params.delete(query)
+    }
+    router.replace(`${pathname}?${params.toString()}`)
+  }
+
   const fetchMyItinerary = async () => {
     try {
       const res = await customFetch<ItineraryResponse>(
-        `/itineraries/me?page=${page}`,
+        `/itineraries/me?page=${myItineraryPage}`,
         { isAuthorized: true }
       )
       if (res.statusCode === 401) return
+      if (res.statusCode === 400) {
+        handleSearchparams(
+          'myItineraryPage',
+          (parseInt(`${myItineraryPage}`) - 1).toString()
+        )
+        return
+      }
 
       if (res.statusCode !== 200) throw new Error(res.message)
+      console.log(res.itinerary)
       setData(res.itinerary.data)
-      setMetadata(res.itinerary.metadata)
+      setMyItineraryMetadata(res.itinerary.metadata)
     } catch (err: any) {
       if (err instanceof Error) toast.error(`${err.message}`)
     }
@@ -56,14 +89,20 @@ export default function ItineraryModule() {
   const fetchMySharedItinerary = async () => {
     try {
       const res = await customFetch<ItineraryResponse>(
-        `/itineraries/me/shared?page=${page}`,
+        `/itineraries/me/shared?page=${sharedItineraryPage}`,
         { isAuthorized: true }
       )
       if (res.statusCode === 401) return
-
+      if (res.statusCode === 400) {
+        handleSearchparams(
+          'sharedItineraryPage',
+          (parseInt(`${sharedItineraryPage}`) - 1).toString()
+        )
+        return
+      }
       if (res.statusCode !== 200) throw new Error(res.message)
       setSharedData(res.itinerary.data)
-      setMetadata(res.itinerary.metadata)
+      setSharedItineraryMetadata(res.itinerary.metadata)
     } catch (err: any) {
       if (err instanceof Error) toast.error(`${err.message}`)
     }
@@ -71,31 +110,39 @@ export default function ItineraryModule() {
 
   const fetchMyCompletedItinerary = async () => {
     try {
-      const res = await customFetch<CompletedItineraryResponse>(
-        `/itineraries/me/completed`,
+      const res = await customFetch<ItineraryResponse>(
+        `/itineraries/me/completed?page=${completedItineraryPage}`,
         {
           isAuthorized: true,
         }
       )
       if (res.statusCode === 401) return
+      if (res.statusCode === 400) {
+        handleSearchparams(
+          'completedItineraryPage',
+          (parseInt(`${completedItineraryPage}`) - 1).toString()
+        )
+        return
+      }
       if (res.statusCode !== 200) throw new Error(res.message)
-      setCompletedData(res.itinerary)
+      setCompletedData(res.itinerary.data)
+      setCompletedItineraryMetadata(res.itinerary.metadata)
     } catch (err: any) {
       if (err instanceof Error) toast.error(`${err.message}`)
     }
   }
 
   useEffect(() => {
-    fetchMyCompletedItinerary().catch((err) => console.log(err))
-  }, [])
+    fetchMyItinerary().catch((err) => console.log(err))
+  }, [myItineraryPage])
 
   useEffect(() => {
     fetchMySharedItinerary().catch((err) => console.log(err))
-  }, [])
+  }, [sharedItineraryPage])
 
   useEffect(() => {
-    fetchMyItinerary().catch((err) => console.log(err))
-  }, [page])
+    fetchMyCompletedItinerary().catch((err) => console.log(err))
+  }, [completedItineraryPage])
 
   return (
     <div className="flex flex-col items-center gap-7 pt-28">
@@ -116,8 +163,9 @@ export default function ItineraryModule() {
           </Link>
           <MyItineraryList
             data={data}
-            metadata={metadata}
+            metadata={myItineraryMetadata}
             refresh={refreshAll}
+            searchQueryParams="myItineraryPage"
           />
         </div>
         <div className="flex flex-col justify-start gap-7 w-full">
@@ -126,8 +174,9 @@ export default function ItineraryModule() {
           </h2>
           <MyItineraryList
             data={sharedData}
-            metadata={metadata}
+            metadata={sharedItineraryMetadata}
             refresh={refreshAll}
+            searchQueryParams="sharedItineraryPage"
           />
         </div>
 
@@ -135,7 +184,12 @@ export default function ItineraryModule() {
           <h2 className="font-semibold text-2xl md:text-left md:text-[36px] sel">
             Perjalanan Selesai
           </h2>
-          <CompletedItineraryList data={completedData} refresh={refreshAll} />
+          <MyItineraryList
+            data={completedData}
+            metadata={completedItineraryMetadata}
+            refresh={refreshAll}
+            searchQueryParams="completedItineraryPage"
+          />
         </div>
       </div>
       <div className="text-center text-sm">

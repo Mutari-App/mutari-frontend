@@ -26,16 +26,6 @@ import {
 } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
-const acceptedUsers = [
-  {
-    firstName: 'First',
-    lastName: 'Last',
-    id: 'tests',
-    email: 'test22@gmail.com',
-    photoProfile: '/placeholder.svg?height=40&width=40',
-  },
-]
-
 function ItineraryCard({
   item,
   refresh,
@@ -194,6 +184,11 @@ function ItineraryCard({
           method: 'DELETE',
         }
       )
+
+      if (response.statusCode === 404) {
+        refresh()
+        throw new Error('Pengguna tidak ditemukan')
+      }
 
       if (response.statusCode !== 200) throw new Error(response.message)
       toast.success('User berhasil dihapus!')
