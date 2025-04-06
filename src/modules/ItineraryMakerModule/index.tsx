@@ -293,15 +293,11 @@ export default function ItineraryMakerModule() {
     }
 
     if (reminderData) {
-      initialItineraryReminderData.current = {
-        itineraryId: itineraryId,
-        recipient: user?.email,
-        recipientName: reminderData.recipientName,
-        tripName: reminderData.tripName,
+      setItineraryReminderData((prev) => ({
+        ...prev,
         reminderOption: reminderData.reminderOption,
         startDate: reminderData.startDate,
-      } as ItineraryReminderDto
-      setItineraryReminderData(initialItineraryReminderData.current)
+      }))
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data, reminderData])
@@ -888,7 +884,7 @@ export default function ItineraryMakerModule() {
 
     setItineraryReminderData((prev) => ({
       ...prev,
-      tripname: e.target.value,
+      tripName: e.target.value,
     }))
   }
 
