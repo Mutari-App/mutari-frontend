@@ -18,6 +18,8 @@ import {
   type Block,
   type CreateItineraryResponse,
   type Tag,
+  type ItineraryReminderDto,
+  CreateItineraryReminderResponse,
 } from './interface'
 import { customFetch, customFetchBody } from '@/utils/customFetch'
 import { type DropResult } from '@hello-pangea/dnd'
@@ -76,6 +78,9 @@ export default function ItineraryMakerModule() {
   const router = useRouter()
   const { id: itineraryId } = useParams<{ id: string }>()
   const [data, setData] = useState<Itinerary | null>(null)
+  const [reminderData, setReminderData] = useState<ItineraryReminder | null>(
+    null
+  )
   const wasAlreadyRequested = useRef(false)
 
   const initialItineraryData = useRef<CreateItineraryDto>({
@@ -100,6 +105,15 @@ export default function ItineraryMakerModule() {
     ],
   })
 
+  const initialItineraryReminderData = useRef<ItineraryReminderDto>({
+    itineraryId: '',
+    recipient: user?.email,
+    recipientName: 'User',
+    tripName: 'Itinerary Tanpa Judul',
+    startDate: '',
+    reminderOption: 'NONE',
+  })
+
   const [visibleInputs, setVisibleInputs] = useState<
     Record<
       string,
@@ -115,11 +129,15 @@ export default function ItineraryMakerModule() {
     initialItineraryData.current
   )
 
+  const [itineraryReminderData, setItineraryReminderData] =
+    useState<ItineraryReminderDto>(initialItineraryReminderData.current)
+
   // Fetch detail if id is provided
   useEffect(() => {
     const fetchData = async () => {
+      // get Itinerary data
+      wasAlreadyRequested.current = true
       try {
-        wasAlreadyRequested.current = true
         const res = await customFetch<ItineraryDetailResponse>(
           `/itineraries/${itineraryId}`,
           {
@@ -141,6 +159,23 @@ export default function ItineraryMakerModule() {
       } catch (error) {
         return <NotFound statusCode={404} />
       }
+
+      // get Itinerary Reminder data
+      try {
+        const res = await customFetch<ItineraryReminderResponse>(
+          `/notification/${itineraryId}`,
+          {
+            method: 'GET',
+            credentials: 'include',
+            isAuthorized: true,
+          }
+        )
+
+        if (res.statusCode !== 200) throw new Error(res.message)
+
+        setReminderData(res.data)
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (error) {}
     }
     if (!wasAlreadyRequested.current) {
       void fetchData()
@@ -194,8 +229,30 @@ export default function ItineraryMakerModule() {
         sections: mappedSections,
       } as CreateItineraryDto
       setItineraryData(initialItineraryData.current)
+
+      initialItineraryReminderData.current = {
+        itineraryId: itineraryId,
+        recipient: user?.email,
+        recipientName: user?.firstName,
+        tripName: data.title,
+        reminderOption: 'NONE',
+        startDate: data.startDate,
+      } as ItineraryReminderDto
+      setItineraryReminderData(initialItineraryReminderData.current)
     }
-  }, [data])
+
+    if (reminderData) {
+      initialItineraryReminderData.current = {
+        itineraryId: itineraryId,
+        recipient: user?.email,
+        recipientName: reminderData.recipientName,
+        tripName: reminderData.tripName,
+        reminderOption: reminderData.reminderOption,
+        startDate: reminderData.startDate,
+      } as ItineraryReminderDto
+      setItineraryReminderData(initialItineraryReminderData.current)
+    }
+  }, [data, reminderData])
 
   // Load saved itinerary data from local storage
   useEffect(() => {
@@ -343,7 +400,7 @@ export default function ItineraryMakerModule() {
   }
 
   const handleReminderChange = (reminderOption: string) => {
-    setItineraryData((prev) => ({
+    setItineraryReminderData((prev) => ({
       ...prev,
       reminderOption,
     }))
@@ -538,6 +595,11 @@ export default function ItineraryMakerModule() {
     setItineraryData((prev) => ({
       ...prev,
       title: e.target.value,
+    }))
+
+    setItineraryReminderData((prev) => ({
+      ...prev,
+      tripname: e.target.value,
     }))
   }
 
@@ -979,6 +1041,62 @@ export default function ItineraryMakerModule() {
     }
   }
 
+  const submitItineraryReminder = async (submissionData: object) => {
+    const validUmami = () => typeof window !== 'undefined' && window.umami
+    const isCreateAndValidUmami = () => !itineraryId && validUmami()
+
+    try {
+      const fetchCreateItineraryReminder = async () => {
+        return await customFetch<CreateItineraryReminderResponse>(
+          '/notification',
+          {
+            method: 'POST',
+            body: customFetchBody(submissionData),
+            credentials: 'include',
+            isAuthorized: true,
+          }
+        )
+      }
+
+      const fetchUpdateItineraryReminder = async () => {
+        return await customFetch<CreateItineraryReminderResponse>(
+          `/notification/${itineraryId}`,
+          {
+            method: 'PATCH',
+            body: customFetchBody(submissionData),
+            credentials: 'include',
+            isAuthorized: true,
+          }
+        )
+      }
+
+      const response = reminderData
+        ? await fetchUpdateItineraryReminder()
+        : await fetchCreateItineraryReminder()
+
+      if (!response.success) {
+        if (isCreateAndValidUmami()) {
+          window.umami.track('create_itineraryreminder_fail')
+        }
+        throw new Error('Failed to create or edit itinerary reminder')
+      }
+
+      setHasUnsavedChanges(false)
+      toast(
+        `Itinerary Reminder ${itineraryId ? 'updated' : 'created'} successfully`
+      )
+
+      if (isCreateAndValidUmami()) {
+        window.umami.track('create_itineraryreminder_success')
+      }
+    } catch (error) {
+      if (isCreateAndValidUmami()) {
+        window.umami.track('create_itineraryreminder_fail')
+      }
+      throw error
+    }
+  }
+
   const handleSubmit = async () => {
     if (timeWarning) {
       toast.error(
@@ -1001,6 +1119,25 @@ export default function ItineraryMakerModule() {
       )
     }
 
+    // Submit itinerary reminder changes
+    setIsSubmitting(true)
+    try {
+      if (itineraryReminderData.reminderOption === 'NONE') return
+      const submissionData = {
+        ...itineraryReminderData,
+      }
+      console.log('fuck you')
+      console.log(submissionData)
+      await submitItineraryReminder(submissionData)
+    } catch (error) {
+      toast.error(
+        `Failed to ${itineraryId ? 'update' : 'create'} itinerary reminder. Please try again.`
+      )
+    } finally {
+      setIsSubmitting(false)
+    }
+
+    // Submit itinerary changes
     setIsSubmitting(true)
     try {
       const submissionData = {
@@ -1040,7 +1177,7 @@ export default function ItineraryMakerModule() {
             availableTags={availableTags}
           />
           <ReminderSelector
-            selectedReminder={itineraryData.reminderOption ?? 'NONE'}
+            selectedReminder={itineraryReminderData.reminderOption ?? 'NONE'}
             onChangeAction={handleReminderChange}
             reminderOptions={reminderOptions}
           />
