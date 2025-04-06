@@ -264,6 +264,12 @@ export default function ItineraryMakerModule() {
           to: new Date(data.endDate),
         })
       }
+      // Validate available reminder option selection
+      validateReminderOptionSelection(
+        data.startDate,
+        itineraryData.sections[0]?.blocks?.[0]?.startTime
+      )
+
       initialItineraryData.current = {
         title: data.title,
         description: data.description,
@@ -866,6 +872,12 @@ export default function ItineraryMakerModule() {
     } else {
       applyDateRangeChange(range)
     }
+
+    const startDate = range.from.toString()
+    validateReminderOptionSelection(
+      startDate,
+      itineraryData.sections[0]?.blocks?.[0]?.startTime
+    )
   }
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -1064,6 +1076,52 @@ export default function ItineraryMakerModule() {
     return true
   }
 
+  // Validate reminder selection (end time should be after start time)
+  const validateReminderOptionSelection = (
+    startDate: string | null,
+    startTime: string | undefined
+  ) => {
+    if (startTime && startDate) {
+      const itineraryTime = new Date(startDate)
+      const itineraryFirstBlockTime = new Date(startTime)
+      const joinedDateTime =
+        itineraryTime.getTime() +
+        itineraryFirstBlockTime.getHours() * 60 * 60 * 1000 +
+        itineraryFirstBlockTime.getMinutes() * 1 * 60 * 1000
+      const timeDifference = joinedDateTime - nowDate.getTime()
+
+      setReminderOptionAvailability((prev) =>
+        prev.map((option) => ({
+          ...option,
+          available: (() => {
+            if (option.value === 'TEN_MINUTES_BEFORE')
+              return timeDifference >= 10 * 60 * 1000
+            if (option.value === 'ONE_HOUR_BEFORE')
+              return timeDifference >= 60 * 60 * 1000
+            if (option.value === 'ONE_DAY_BEFORE')
+              return timeDifference >= 24 * 60 * 60 * 1000
+            return true
+          })(),
+        }))
+      )
+
+      setItineraryReminderData((prev) => ({
+        ...prev,
+        startDate: new Date(joinedDateTime).toISOString(),
+      }))
+    } else {
+      setReminderOptionAvailability((prev) =>
+        prev.map((option) => ({
+          ...option,
+          available: (() => {
+            if (option.value === 'NONE') return true
+            return false
+          })(),
+        }))
+      )
+    }
+  }
+
   const updateRoutes = async (blockId?: string) => {
     const updatedSections = await updateRoutesBetweenBlocks(
       itineraryDataRef.current.sections,
@@ -1123,6 +1181,14 @@ export default function ItineraryMakerModule() {
         updatedBlock.startTime,
         updatedBlock.endTime
       )
+    }
+
+    if (blockIndex === 0 && section.sectionNumber === 1) {
+      if (itineraryData.startDate && field === 'startTime')
+        validateReminderOptionSelection(
+          itineraryData.startDate,
+          updatedBlock.startTime
+        )
     }
 
     updatedBlocks[blockIndex] = updatedBlock
