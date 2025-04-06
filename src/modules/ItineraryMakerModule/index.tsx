@@ -144,10 +144,10 @@ export default function ItineraryMakerModule() {
   const [itineraryData, setItineraryData] = useState<CreateItineraryDto>(
     initialItineraryData.current
   )
-  
+
   const [itineraryReminderData, setItineraryReminderData] =
     useState<ItineraryReminderDto>(initialItineraryReminderData.current)
-          
+
   const itineraryDataRef = useRef(itineraryData)
   useEffect(() => {
     itineraryDataRef.current = itineraryData
@@ -1533,35 +1533,6 @@ export default function ItineraryMakerModule() {
       redirect(
         isLaunching ? '/login?redirect=/itinerary/create' : '/#praregistrasi'
       )
-    }
-
-    // Submit itinerary reminder changes
-    setIsSubmitting(true)
-    try {
-      if (itineraryReminderData.reminderOption === 'NONE') return
-      const submissionData = {
-        ...itineraryReminderData,
-      }
-      console.log('fuck you')
-      console.log(submissionData)
-      await submitItineraryReminder(submissionData)
-    } catch (error) {
-      toast.error(
-        `Failed to ${itineraryId ? 'update' : 'create'} itinerary reminder. Please try again.`
-      )
-    } finally {
-      setIsSubmitting(false)
-    }
-
-    const remainingFeedbacks = feedbackItems.filter((item) => {
-      const { sectionIndex, blockIndex, field } = item.target
-      const key = `${sectionIndex}-${blockIndex}-${field ?? ''}`
-      return !dismissedFeedbacks.includes(key)
-    })
-
-    if (remainingFeedbacks.length > 0) {
-      setIsConfirmModalOpen(true)
-      return
     }
 
     // If user is authenticated, proceed with normal submission
