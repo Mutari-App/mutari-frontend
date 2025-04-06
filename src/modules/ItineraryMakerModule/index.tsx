@@ -1593,7 +1593,6 @@ export default function ItineraryMakerModule() {
         ...itineraryReminderData,
         itineraryId: newItineraryId,
       }
-      console.log(submissionData)
       await submitItineraryReminder(submissionData)
     } catch (error) {
       toast.error(
