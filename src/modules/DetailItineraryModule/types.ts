@@ -1,3 +1,23 @@
+enum TransportMode {
+  DRIVE = 'DRIVE',
+  WALK = 'WALK',
+  BICYCLE = 'BICYCLE',
+  TRANSIT = 'TRANSIT',
+  TWO_WHEELER = 'TWO_WHEELER',
+}
+
+interface Route {
+  id: string
+  createdAt: string
+  updatedAt: string
+  sourceBlockId: string
+  destinationBlockId: string
+  distance: number
+  duration: number
+  polyline?: string
+  transportMode: TransportMode
+}
+
 interface Block {
   updatedAt: string
   createdAt: string
@@ -12,6 +32,8 @@ interface Block {
   location: string
   price: number
   photoUrl: string | undefined
+  routeToNext?: Route
+  routeFromPrevious?: Route
 }
 
 interface Section {

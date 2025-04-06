@@ -19,6 +19,7 @@ import {
   type CreateItineraryResponse,
   type Tag,
   FeedbackItem,
+  type Route,
 } from './interface'
 import { customFetch, customFetchBody } from '@/utils/customFetch'
 import { type DropResult } from '@hello-pangea/dnd'
@@ -34,10 +35,13 @@ import { useAuthContext } from '@/contexts/AuthContext'
 import { redirect, useParams, useRouter } from 'next/navigation'
 import NotFound from 'next/error'
 import { Lightbulb } from 'lucide-react'
+import { calculateRoute, TransportMode } from '@/utils/maps'
+import Maps from './sections/Maps'
 
 const SAVED_ITINERARY_KEY = 'saved_itinerary_data'
 
 export default function ItineraryMakerModule() {
+  const { user } = useAuthContext()
   const launchingDate = new Date(
     process.env.NEXT_PUBLIC_LAUNCHING_DATE || '2025-01-22T00:00:00'
   )
@@ -100,6 +104,12 @@ export default function ItineraryMakerModule() {
     initialItineraryData.current
   )
 
+  const itineraryDataRef = useRef(itineraryData)
+
+  useEffect(() => {
+    itineraryDataRef.current = itineraryData
+  }, [itineraryData])
+
   // Fetch detail if id is provided
   useEffect(() => {
     const fetchData = async () => {
@@ -115,6 +125,12 @@ export default function ItineraryMakerModule() {
         )
 
         if (res.statusCode !== 200) throw new Error(res.message)
+        if (res.data.userId !== user?.id) {
+          toast.error('Anda tidak memiliki akses untuk mengedit itinerary ini')
+          router.push(`/itinerary/${itineraryId}`)
+          return
+        }
+
         setData(res.data)
       } catch (err: any) {
         return <NotFound statusCode={404} />
@@ -123,7 +139,7 @@ export default function ItineraryMakerModule() {
     if (!wasAlreadyRequested.current) {
       void fetchData()
     }
-  }, [wasAlreadyRequested])
+  }, [itineraryId, router, user?.id, wasAlreadyRequested])
 
   // Map existing data if fetched
   useEffect(() => {
@@ -138,6 +154,29 @@ export default function ItineraryMakerModule() {
                 toggleInput(block.id, 'time')
               if (block.price > 0) toggleInput(block.id, 'price')
               if (block.location) toggleInput(block.id, 'location')
+              const routeToNext = block.routeToNext
+                ? {
+                    sourceBlockId: block.routeToNext.sourceBlockId,
+                    destinationBlockId: block.routeToNext.destinationBlockId,
+                    distance: block.routeToNext.distance,
+                    duration: block.routeToNext.duration,
+                    polyline: block.routeToNext.polyline,
+                    transportMode: block.routeToNext
+                      .transportMode as TransportMode,
+                  }
+                : undefined
+              const routeFromPrevious = block.routeFromPrevious
+                ? {
+                    sourceBlockId: block.routeFromPrevious.sourceBlockId,
+                    destinationBlockId:
+                      block.routeFromPrevious.destinationBlockId,
+                    distance: block.routeFromPrevious.distance,
+                    duration: block.routeFromPrevious.duration,
+                    polyline: block.routeFromPrevious.polyline,
+                    transportMode: block.routeFromPrevious
+                      .transportMode as TransportMode,
+                  }
+                : undefined
               return {
                 id: block.id,
                 blockType: block.blockType,
@@ -147,6 +186,8 @@ export default function ItineraryMakerModule() {
                 endTime: block.endTime,
                 location: block.location,
                 price: block.price,
+                routeToNext,
+                routeFromPrevious,
               }
             }),
           }))
@@ -173,6 +214,7 @@ export default function ItineraryMakerModule() {
       } as CreateItineraryDto
       setItineraryData(initialItineraryData.current)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data])
 
   // Load saved itinerary data from local storage
@@ -226,7 +268,6 @@ export default function ItineraryMakerModule() {
         toast.error('Gagal mengambil tag')
       }
     }
-
     void fetchTags()
   }, [])
 
@@ -295,18 +336,248 @@ export default function ItineraryMakerModule() {
     }
   }, [hasUnsavedChanges])
 
+  const updateTransportMode = async (
+    blockId: string,
+    transportMode: TransportMode
+  ): Promise<boolean> => {
+    // First find the block and its next block to get origin and destination coordinates
+    let originLocation: string | undefined
+    let destinationLocation: string | undefined
+    let sourceBlockId: string | undefined
+    let destinationBlockId: string | undefined
+
+    for (const section of itineraryData.sections) {
+      if (!section.blocks) continue
+
+      const blockIndex = section.blocks.findIndex(
+        (block) => block.id === blockId
+      )
+      if (blockIndex !== -1 && blockIndex < section.blocks.length - 1) {
+        const currentBlock = section.blocks[blockIndex]
+        const nextBlock = section.blocks[blockIndex + 1]
+
+        if (currentBlock.location && nextBlock.location) {
+          originLocation = currentBlock.location
+          destinationLocation = nextBlock.location
+          sourceBlockId = currentBlock.id
+          destinationBlockId = nextBlock.id
+          break
+        }
+      }
+    }
+
+    // If we have origin and destination, recalculate the route
+    if (
+      originLocation &&
+      destinationLocation &&
+      sourceBlockId &&
+      destinationBlockId
+    ) {
+      try {
+        // Calculate new route with updated transport mode
+        const routeData = await calculateRoute(
+          originLocation,
+          destinationLocation,
+          transportMode
+        )
+
+        if (routeData) {
+          const routeObject: Route = {
+            sourceBlockId,
+            destinationBlockId,
+            distance: routeData.distance,
+            duration: routeData.duration,
+            polyline: routeData.polyline,
+            transportMode,
+          }
+
+          // Update itinerary data with new route information
+          setItineraryData((prev) => {
+            const updatedSections = prev.sections.map((section) => {
+              if (!section.blocks) return section
+
+              // Find the source block
+              const sourceBlockIndex = section.blocks.findIndex(
+                (block) => block.id === sourceBlockId
+              )
+              if (
+                sourceBlockIndex !== -1 &&
+                sourceBlockIndex < section.blocks.length - 1
+              ) {
+                const updatedBlocks = [...section.blocks]
+
+                // Update source block
+                const sourceBlock = { ...updatedBlocks[sourceBlockIndex] }
+                sourceBlock.routeToNext = routeObject
+                updatedBlocks[sourceBlockIndex] = sourceBlock
+
+                // Update destination block
+                const destBlock = { ...updatedBlocks[sourceBlockIndex + 1] }
+                destBlock.routeFromPrevious = routeObject
+                updatedBlocks[sourceBlockIndex + 1] = destBlock
+
+                return {
+                  ...section,
+                  blocks: updatedBlocks,
+                }
+              }
+
+              return section
+            })
+
+            return {
+              ...prev,
+              sections: updatedSections,
+            }
+          })
+          return true
+        } else {
+          return false
+        }
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (error) {
+        toast.error('Gagal memperbarui rute dengan mode transportasi baru')
+        return false
+      }
+    } else {
+      toast.error('Data lokasi tidak ditemukan untuk perhitungan rute')
+      return false
+    }
+  }
+
+  const updateRoutesBetweenBlocks = async (
+    sections: Section[],
+    blockId?: string
+  ) => {
+    const updatedSections = sections.map((section) => ({
+      ...section,
+      blocks: section.blocks ? [...section.blocks] : undefined,
+    }))
+
+    const updateBlockInSection = (
+      sectionIdx: number,
+      blockIdx: number,
+      newBlock: Block
+    ) => {
+      if (!updatedSections[sectionIdx].blocks) return
+      updatedSections[sectionIdx].blocks[blockIdx] = newBlock
+    }
+
+    const canCalculateRoute = (source: Block, dest: Block): boolean =>
+      source.blockType === 'LOCATION' &&
+      dest.blockType === 'LOCATION' &&
+      !!source.location &&
+      !!dest.location
+
+    const calculateAndUpdateRoute = async (
+      sourceBlock: Block,
+      destBlock: Block
+    ) => {
+      if (!canCalculateRoute(sourceBlock, destBlock)) {
+        return {
+          updatedSource: { ...sourceBlock, routeToNext: undefined },
+          updatedDest: { ...destBlock, routeFromPrevious: undefined },
+        }
+      }
+
+      try {
+        const transportMode =
+          sourceBlock.routeToNext?.transportMode ?? TransportMode.DRIVE
+        const routeData = await calculateRoute(
+          sourceBlock.location!,
+          destBlock.location!,
+          transportMode
+        )
+        if (routeData) {
+          const routeObject: Route = {
+            sourceBlockId: sourceBlock.id,
+            destinationBlockId: destBlock.id,
+            distance: routeData.distance,
+            duration: routeData.duration,
+            polyline: routeData.polyline,
+            transportMode,
+          }
+          return {
+            updatedSource: { ...sourceBlock, routeToNext: routeObject },
+            updatedDest: { ...destBlock, routeFromPrevious: routeObject },
+          }
+        } else {
+          return {
+            updatedSource: { ...sourceBlock, routeToNext: undefined },
+            updatedDest: { ...destBlock, routeFromPrevious: undefined },
+          }
+        }
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (error) {
+        toast.error('Failed to calculate route between locations')
+        return {
+          updatedSource: { ...sourceBlock, routeToNext: undefined },
+          updatedDest: { ...destBlock, routeFromPrevious: undefined },
+        }
+      }
+    }
+
+    const collectPairs = (blockId?: string) => {
+      if (blockId) return collectPairsForBlock(blockId, updatedSections)
+      return collectAllPairs(updatedSections)
+    }
+
+    const collectPairsForBlock = (
+      blockId: string,
+      sections: typeof updatedSections
+    ) => {
+      const pairs: Array<{ sectionIdx: number; currentBlockIdx: number }> = []
+      sections.forEach((section, sIdx) => {
+        if (!section.blocks) return
+        const blockIdx = section.blocks.findIndex((b) => b.id === blockId)
+        if (blockIdx > 0)
+          pairs.push({ sectionIdx: sIdx, currentBlockIdx: blockIdx - 1 })
+        if (blockIdx >= 0 && blockIdx < section.blocks.length - 1)
+          pairs.push({ sectionIdx: sIdx, currentBlockIdx: blockIdx })
+      })
+      return pairs
+    }
+
+    const collectAllPairs = (sections: typeof updatedSections) => {
+      const pairs: Array<{ sectionIdx: number; currentBlockIdx: number }> = []
+      sections.forEach((section, sIdx) => {
+        if (!section.blocks || section.blocks.length < 2) return
+        for (let bIdx = 0; bIdx < section.blocks.length - 1; bIdx++) {
+          pairs.push({ sectionIdx: sIdx, currentBlockIdx: bIdx })
+        }
+      })
+      return pairs
+    }
+
+    const pairs = collectPairs(blockId)
+
+    for (const { sectionIdx, currentBlockIdx } of pairs) {
+      const section = updatedSections[sectionIdx]
+      if (!section.blocks || currentBlockIdx >= section.blocks.length - 1)
+        continue
+      const currentBlock = section.blocks[currentBlockIdx]
+      const nextBlock = section.blocks[currentBlockIdx + 1]
+      const { updatedSource, updatedDest } = await calculateAndUpdateRoute(
+        currentBlock,
+        nextBlock
+      )
+      updateBlockInSection(sectionIdx, currentBlockIdx, updatedSource)
+      updateBlockInSection(sectionIdx, currentBlockIdx + 1, updatedDest)
+    }
+
+    return updatedSections
+  }
+
   const handleImageUpload = (result: any) => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     if (result?.info?.secure_url) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
       const imageUrl = result.info.secure_url
-
       setItineraryData((prev) => ({
         ...prev,
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         coverImage: imageUrl,
       }))
-
       toast.success('Cover image uploaded successfully')
     } else {
       toast.error('Failed to upload image')
@@ -536,6 +807,38 @@ export default function ItineraryMakerModule() {
     })
   }
 
+  const addLocationToSection = (
+    sectionNumber: number,
+    title: string,
+    location: string
+  ) => {
+    setItineraryData((prev) => {
+      const blockId = v4()
+      const updatedSections = prev.sections.map((section) => {
+        if (section.sectionNumber === sectionNumber) {
+          const newBlock = {
+            id: blockId,
+            blockType: 'LOCATION',
+            title,
+            description: '',
+            location,
+          }
+          return {
+            ...section,
+            blocks: [...(section.blocks ?? []), newBlock],
+          }
+        }
+        return section
+      })
+      const result = {
+        ...prev,
+        sections: updatedSections,
+      }
+      setTimeout(() => void updateRoutes(blockId), 0)
+      return result
+    })
+  }
+
   const addSection = (position?: 'after' | 'before', relativeTo?: number) => {
     const newSectionNumber = itineraryData.sections.length + 1
 
@@ -664,6 +967,17 @@ export default function ItineraryMakerModule() {
     return true
   }
 
+  const updateRoutes = async (blockId?: string) => {
+    const updatedSections = await updateRoutesBetweenBlocks(
+      itineraryDataRef.current.sections,
+      blockId
+    )
+    setItineraryData((prev) => ({
+      ...prev,
+      sections: updatedSections,
+    }))
+  }
+
   const updateBlock = <T extends keyof Block>(
     blockId: string,
     field: T,
@@ -678,6 +992,9 @@ export default function ItineraryMakerModule() {
         sections: updatedSections,
       }
     })
+    if (field === 'location') {
+      setTimeout(() => void updateRoutes(blockId), 100)
+    }
   }
 
   const getUpdatedSectionWithBlock = <T extends keyof Block>(
@@ -719,13 +1036,17 @@ export default function ItineraryMakerModule() {
   }
 
   const removeBlock = (blockId: string) => {
-    setItineraryData((prev) => ({
-      ...prev,
-      sections: filterBlockFromSections(prev.sections, blockId),
-    }))
+    setItineraryData((prev) => {
+      const updatedSections = filterBlockFromSections(prev.sections, blockId)
+      return {
+        ...prev,
+        sections: updatedSections,
+      }
+    })
     if (timeWarning && timeWarning.blockId === blockId) {
       setTimeWarning(null)
     }
+    setTimeout(() => void updateRoutes(), 0)
   }
 
   const filterBlockFromSections = (
@@ -817,6 +1138,8 @@ export default function ItineraryMakerModule() {
           sections: updatedSections,
         }
       })
+
+      setTimeout(() => void updateRoutes(), 0)
     }
     // Handle moving blocks between sections
     else if (sourceSection !== destinationSection) {
@@ -865,6 +1188,61 @@ export default function ItineraryMakerModule() {
           sections: updatedSections,
         }
       })
+
+      setTimeout(() => void updateRoutes(), 0)
+    }
+  }
+
+    const submitItinerary = async (submissionData: object) => {
+    const validUmami = () => typeof window !== 'undefined' && window.umami
+    const isCreateAndValidUmami = () => !itineraryId && validUmami()
+
+    try {
+      const fetchCreateItinerary = async () => {
+        return await customFetch<CreateItineraryResponse>('/itineraries', {
+          method: 'POST',
+          body: customFetchBody(submissionData),
+          credentials: 'include',
+          isAuthorized: true,
+        })
+      }
+
+      const fetchUpdateItinerary = async () => {
+        return await customFetch<CreateItineraryResponse>(
+          `/itineraries/${itineraryId}`,
+          {
+            method: 'PATCH',
+            body: customFetchBody(submissionData),
+            credentials: 'include',
+            isAuthorized: true,
+          }
+        )
+      }
+
+      const response = itineraryId
+        ? await fetchUpdateItinerary()
+        : await fetchCreateItinerary()
+
+      if (!response.success) {
+        if (isCreateAndValidUmami()) {
+          window.umami.track('create_itinerary_fail')
+        }
+        throw new Error('Failed to create or edit itinerary')
+      }
+
+      setHasUnsavedChanges(false)
+      toast(`Itinerary ${itineraryId ? 'updated' : 'created'} successfully`)
+
+      if (isCreateAndValidUmami()) {
+        window.umami.track('create_itinerary_success')
+      }
+
+      router.push(`/itinerary/${response.id}`)
+    } catch (error) {
+      if (isCreateAndValidUmami()) {
+        window.umami.track('create_itinerary_fail')
+      }
+      throw error
     }
   }
 
@@ -881,7 +1259,6 @@ export default function ItineraryMakerModule() {
       return
     }
 
-    // If user is not authenticated, save to local storage and redirect to login
     if (!isAuthenticated) {
       localStorage.setItem(SAVED_ITINERARY_KEY, JSON.stringify(itineraryData))
       setHasUnsavedChanges(false)
@@ -905,48 +1282,44 @@ export default function ItineraryMakerModule() {
     // If user is authenticated, proceed with normal submission
     setIsSubmitting(true)
     try {
-      // Remove block IDs before submitting
       const submissionData = {
         ...itineraryData,
         sections: itineraryData.sections.map((section) => ({
           ...section,
           blocks:
-            section.blocks?.map(
+            section.blocks?.map((block) => {
+              // Create a new object without ID but preserving route information
               // eslint-disable-next-line @typescript-eslint/no-unused-vars
-              ({ id, ...blockWithoutId }) => blockWithoutId
-            ) ?? [],
+              const { id, ...blockWithoutId } = block
+              const routeToNext = block.routeToNext
+                ? {
+                    ...block.routeToNext,
+                    sourceBlockId: block.routeToNext.sourceBlockId,
+                    destinationBlockId: block.routeToNext.destinationBlockId,
+                  }
+                : undefined
+              const routeFromPrevious = block.routeFromPrevious
+                ? {
+                    ...block.routeFromPrevious,
+                    sourceBlockId: block.routeFromPrevious.sourceBlockId,
+                    destinationBlockId:
+                      block.routeFromPrevious.destinationBlockId,
+                  }
+                : undefined
+              return {
+                ...blockWithoutId,
+                routeToNext,
+                routeFromPrevious,
+              }
+            }) ?? [],
         })),
       }
-
-      const response = itineraryId
-        ? await customFetch<CreateItineraryResponse>(
-            `/itineraries/${itineraryId}`,
-            {
-              method: 'PATCH',
-              body: customFetchBody(submissionData),
-              credentials: 'include',
-              isAuthorized: true,
-            }
-          )
-        : await customFetch<CreateItineraryResponse>('/itineraries', {
-            method: 'POST',
-            body: customFetchBody(submissionData),
-            credentials: 'include',
-            isAuthorized: true,
-          })
-
-      if (!response.success) {
-        throw new Error('Failed to create or edit itinerary')
-      }
-
-      setHasUnsavedChanges(false)
-      toast(`Itinerary ${itineraryId ? 'updated' : 'created'} successfully`)
-
-      router.push(`/itinerary/${response.id}`)
+      await submitItinerary(submissionData)
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       console.error('Error creating or updating itinerary:', error)
       toast.error(
-        `Failed to ${itineraryId ? 'updated' : 'created'} itinerary. Please try again.`
+        `Failed to ${itineraryId ? 'update' : 'create'} itinerary. Please try again.`
       )
     } finally {
       setIsSubmitting(false)
@@ -1014,6 +1387,10 @@ export default function ItineraryMakerModule() {
         }
       )
 
+      console.log("API response: ", response);
+      console.log("Feedback content: ", JSON.stringify(response.feedback, null, 2));
+
+
       setFeedbackItems(response.feedback)
 
       const formatted = response.feedback.map((item) => {
@@ -1047,171 +1424,161 @@ export default function ItineraryMakerModule() {
   }
 
   return (
-    <div className="container max-w-4xl mx-auto p-4 pt-24 min-h-screen">
-      <ItineraryHeader
-        title={itineraryData.title}
-        coverImage={itineraryData.coverImage}
-        onTitleChange={handleTitleChange}
-        isSubmitting={isSubmitting}
-        isGenerating={isGenerating}
-        onGenerateFeedback={handleGenerateFeedback}
-        onSubmit={handleSubmit}
-      />
-      <div className="flex flex-wrap max-sm:justify-center items-center gap-2 mb-4">
-        <TagSelector
-          selectedTags={itineraryData.tags ?? []}
-          onChangeAction={handleTagsChange}
-          availableTags={availableTags}
+    <div className="flex max-h-screen">
+      <div className="container max-w-4xl mx-auto p-4 pt-24 min-h-screen max-h-screen overflow-auto">
+        <ItineraryHeader
+          title={itineraryData.title}
+          coverImage={itineraryData.coverImage}
+          onTitleChange={handleTitleChange}
+          isSubmitting={isSubmitting}
+          onSubmit={handleSubmit}
+          onGenerateFeedback={handleGenerateFeedback}
+          isGenerating={isGenerating}
         />
-        <CldUploadButton
-          uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
-          onSuccess={handleImageUpload}
-          className={cn(buttonVariants({ variant: 'outline', size: 'sm' }))}
-          options={{
-            clientAllowedFormats: ['image'],
-            maxFiles: 1,
-            maxFileSize: 1024 * 256, // 256 KB
-          }}
-        >
-          Ganti foto cover
-        </CldUploadButton>
-        <div className="sm:ml-auto">
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex items-center gap-2"
-              >
-                <CalendarIcon className="h-4 w-4" />
-                {dateRange.from && dateRange.to
-                  ? `${format(dateRange.from, 'dd MMM')} - ${format(dateRange.to, 'dd MMM')}`
-                  : 'Masukkan Tanggal Perjalanan'}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="end">
-              <Calendar
-                mode="range"
-                selected={dateRange}
-                onSelect={handleDateRangeChange}
-                initialFocus
-              />
-            </PopoverContent>
-          </Popover>
+        <div className="flex flex-wrap max-sm:justify-center items-center gap-2 mb-4">
+          <TagSelector
+            selectedTags={itineraryData.tags ?? []}
+            onChangeAction={handleTagsChange}
+            availableTags={availableTags}
+          />
+          <CldUploadButton
+            uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
+            onSuccess={handleImageUpload}
+            className={cn(buttonVariants({ variant: 'outline', size: 'sm' }))}
+            options={{
+              clientAllowedFormats: ['image'],
+              maxFiles: 1,
+              maxFileSize: 1024 * 256, // 256 KB
+            }}
+          >
+            Ganti foto cover
+          </CldUploadButton>
+          <div className="sm:ml-auto">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-2"
+                >
+                  <CalendarIcon className="h-4 w-4" />
+                  {dateRange.from && dateRange.to
+                    ? `${format(dateRange.from, 'dd MMM')} - ${format(dateRange.to, 'dd MMM')}`
+                    : 'Masukkan Tanggal Perjalanan'}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="end">
+                <Calendar
+                  mode="range"
+                  selected={dateRange}
+                  onSelect={handleDateRangeChange}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
         </div>
-      </div>
-      {itineraryData.tags && itineraryData.tags.length > 0 && (
-        <div className="flex flex-wrap gap-2 mb-4">
-          {getSelectedTagNames().map((tagName, index) => (
-            <Badge
-              key={`tag-${tagName}-${itineraryData.tags![index]}`}
-              variant="secondary"
-              className="flex items-center gap-1"
-            >
-              {tagName}
-              <button
-                onClick={() => removeTag(itineraryData.tags![index])}
-                className="ml-1 rounded-full hover:bg-gray-200 p-0.5"
+  
+        {itineraryData.tags && itineraryData.tags.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-4">
+            {getSelectedTagNames().map((tagName, index) => (
+              <Badge
+                key={`tag-${tagName}-${itineraryData.tags![index]}`}
+                variant="secondary"
+                className="flex items-center gap-1"
               >
-                <X className="h-3 w-3" />
-              </button>
-            </Badge>
-          ))}
-        </div>
-      )}
-      <DateRangeAlertDialog
-        open={showConfirmDialog}
-        onOpenChange={setShowConfirmDialog}
-        pendingDateRange={pendingDateRange.current}
-        currentSectionCount={itineraryData.sections.length}
-        onCancel={() => {
-          pendingDateRange.current = undefined
-          setShowConfirmDialog(false)
-        }}
-        onConfirm={() => {
-          if (pendingDateRange.current) {
-            applyDateRangeChange(pendingDateRange.current)
-            pendingDateRange.current = undefined
-          }
-          setShowConfirmDialog(false)
-        }}
-      />
-      <ItinerarySections
-        sections={itineraryData.sections}
-        updateSectionTitle={updateSectionTitle}
-        addSection={addSection}
-        removeSection={removeSection}
-        moveSection={moveSection}
-        addBlock={addBlock}
-        updateBlock={updateBlock}
-        removeBlock={removeBlock}
-        handleDragEnd={handleDragEnd}
-        toggleInput={toggleInput}
-        isInputVisible={isInputVisible}
-        timeWarning={timeWarning}
-        feedbackItems={feedbackItems}
-      />
-      <div className="flex justify-center my-8">
-        <Button
-          size="sm"
-          className="-mt-4 w-[240px] bg-gradient-to-r from-[#0073E6] to-[#004080] text-white hover:from-[#0066cc] hover:to-[#003366] rounded-lg"
-          onClick={() => addSection()}
-        >
-          <Plus className="h-4 w-4" /> Bagian
-        </Button>
-      </div>
-      {feedbackItems.length > 0 && (
-        <div className="mt-8">
-          <h3 className="font-semibold mb-4">Tips</h3>
-          <div className="flex flex-col gap-4">
-            {feedbackItems.map((item, index) => (
-              <div
-                key={index}
-                className="p-4 border border-[#0073E6] rounded-md shadow-md flex items-start"
-                style={{ boxShadow: '0px 0px 10px rgba(0, 115, 230, 0.5)' }}
-              >
-                <div className="flex-1">
-                  <p className="font-semibold">
-                    Hari {item.target.sectionIndex + 1} - Blok{' '}
-                    {item.target.blockIndex + 1}
-                    {item.target.field && ` (${item.target.field})`}
-                  </p>
-                  <p>{item.suggestion}</p>
-                </div>
-                <div className="ml-4 text-[#0073E6] drop-shadow-[0_4px_6px_rgba(0,115,230,1.5)]">
-                  <Lightbulb size={48} strokeWidth={1} />
-                </div>
-              </div>
+                {tagName}
+                <button
+                  onClick={() => removeTag(itineraryData.tags![index])}
+                  className="ml-1 rounded-full hover:bg-gray-200 p-0.5"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </Badge>
             ))}
           </div>
+        )}
+  
+        <DateRangeAlertDialog
+          open={showConfirmDialog}
+          onOpenChange={setShowConfirmDialog}
+          pendingDateRange={pendingDateRange.current}
+          currentSectionCount={itineraryData.sections.length}
+          onCancel={() => {
+            pendingDateRange.current = undefined
+            setShowConfirmDialog(false)
+          }}
+          onConfirm={() => {
+            if (pendingDateRange.current) {
+              applyDateRangeChange(pendingDateRange.current)
+              pendingDateRange.current = undefined
+            }
+            setShowConfirmDialog(false)
+          }}
+        />
+  
+        <ItinerarySections
+          feedbackItems={feedbackItems}
+          sections={itineraryData.sections}
+          updateSectionTitle={updateSectionTitle}
+          addSection={addSection}
+          removeSection={removeSection}
+          moveSection={moveSection}
+          addBlock={addBlock}
+          updateBlock={updateBlock}
+          removeBlock={removeBlock}
+          handleDragEnd={handleDragEnd}
+          toggleInput={toggleInput}
+          isInputVisible={isInputVisible}
+          timeWarning={timeWarning}
+          onTransportModeChange={updateTransportMode}
+        />
+  
+        <div className="flex justify-center my-8">
+          <Button
+            size="sm"
+            className="-mt-4 w-[240px] bg-gradient-to-r from-[#0073E6] to-[#004080] text-white hover:from-[#0066cc] hover:to-[#003366] rounded-lg"
+            onClick={() => addSection()}
+          >
+            <Plus className="h-4 w-4" /> Bagian
+          </Button>
         </div>
-      )}
-      {isConfirmModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center font-roboto">
-          <div className="bg-white p-8 rounded-lg shadow-lg">
-            <h2 className="text-xl font-semibold mb-4 text-center">
-              Apakah anda yakin?
-            </h2>
-            <p className="text-md mb-4">
-              Masih ada tips untuk mempercantik itinerary-mu
-            </p>
-            <div className="flex justify-center space-x-2">
-              <button
-                className="px-8 py-2 border-2 border-[#016CD7] bg-white rounded text-[#014285]"
-                onClick={() => setIsConfirmModalOpen(false)}
-              >
-                Batal
-              </button>
-              <button
-                className="px-8 py-2 bg-gradient-to-r from-[#016CD7] to-[#014285] text-white items-center rounded"
-                onClick={handleSubmit}
-              >
-                Simpan
-              </button>
+  
+        {feedbackItems.length > 0 && (
+          <div className="mt-8">
+            <h3 className="font-semibold mb-4">Tips</h3>
+            <div className="flex flex-col gap-4">
+              {feedbackItems.map((item, index) => (
+                <div
+                  key={index}
+                  className="p-4 border border-[#0073E6] rounded-md shadow-md flex items-start"
+                  style={{ boxShadow: '0px 0px 10px rgba(0, 115, 230, 0.5)' }}
+                >
+                  <div className="flex-1">
+                    <p className="font-semibold">
+                      Hari {item.target.sectionIndex + 1} - Blok{' '}
+                      {item.target.blockIndex + 1}
+                      {item.target.field && ` (${item.target.field})`}
+                    </p>
+                    <p>{item.suggestion}</p>
+                  </div>
+                  <div className="ml-4 text-[#0073E6] drop-shadow-[0_4px_6px_rgba(0,115,230,1.5)]">
+                    <Lightbulb size={48} strokeWidth={1} />
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
+  
+      <div className="w-full min-h-screen hidden md:block">
+        <Maps
+          itineraryData={itineraryData.sections}
+          addLocationToSection={addLocationToSection}
+          isEditing
+        />
+      </div>
     </div>
   )
-}
+}  
