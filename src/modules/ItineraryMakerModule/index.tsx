@@ -1303,11 +1303,7 @@ export default function ItineraryMakerModule() {
       )
     }
 
-    const remainingFeedbacks = feedbackItems.filter((item) => {
-      const { sectionIndex, blockIndex, field } = item.target
-      const key = `${sectionIndex}-${blockIndex}-${field ?? ''}`
-      return !dismissedFeedbacks.includes(key)
-    })
+    const remainingFeedbacks = feedbackItems
 
     if (remainingFeedbacks.length > 0) {
       setIsConfirmModalOpen(true)
@@ -1421,22 +1417,7 @@ export default function ItineraryMakerModule() {
           body: JSON.stringify(submissionData),
         }
       )
-
-      console.log('API response: ', response)
-      console.log(
-        'Feedback content: ',
-        JSON.stringify(response.feedback, null, 2)
-      )
-
       setFeedbackItems(response.feedback)
-
-      const formatted = response.feedback.map((item) => {
-        const { sectionIndex, blockIndex, field } = item.target
-        let prefix = `Hari ${sectionIndex + 1}, Blok ${blockIndex + 1}`
-        if (field) prefix += ` (${field})`
-        return `${prefix}: ${item.suggestion}`
-      })
-
       toast.success('Feedback berhasil di-generate')
     } catch (error) {
       toast.error('Gagal generate feedback. Silahkan coba lagi')
@@ -1445,19 +1426,19 @@ export default function ItineraryMakerModule() {
     }
   }
 
-  const dismissFeedback = (
+  const removeFeedbackForField = (
     sectionIndex: number,
     blockIndex: number,
-    field?: string
+    field: 'title' | 'description' | 'startTime' | 'endTime' | 'price'
   ) => {
-    const key = `${sectionIndex}-${blockIndex}-${field ?? ''}`
-    setDismissedFeedbacks((prev) =>
-      prev.includes(key) ? prev : [...prev, key]
+    setFeedbackItems((prev) =>
+      prev.filter(
+        (item) =>
+          item.target.sectionIndex !== sectionIndex ||
+          item.target.blockIndex !== blockIndex ||
+          item.target.field !== field
+      )
     )
-  }
-
-  const showConfirmationModal = () => {
-    setIsConfirmModalOpen(true)
   }
 
   return (
@@ -1515,7 +1496,6 @@ export default function ItineraryMakerModule() {
             </Popover>
           </div>
         </div>
-
         {itineraryData.tags && itineraryData.tags.length > 0 && (
           <div className="flex flex-wrap gap-2 mb-4">
             {getSelectedTagNames().map((tagName, index) => (
@@ -1535,7 +1515,6 @@ export default function ItineraryMakerModule() {
             ))}
           </div>
         )}
-
         <DateRangeAlertDialog
           open={showConfirmDialog}
           onOpenChange={setShowConfirmDialog}
@@ -1553,9 +1532,9 @@ export default function ItineraryMakerModule() {
             setShowConfirmDialog(false)
           }}
         />
-
         <ItinerarySections
           feedbackItems={feedbackItems}
+          removeFeedbackForField={removeFeedbackForField}
           sections={itineraryData.sections}
           updateSectionTitle={updateSectionTitle}
           addSection={addSection}
@@ -1570,7 +1549,6 @@ export default function ItineraryMakerModule() {
           timeWarning={timeWarning}
           onTransportModeChange={updateTransportMode}
         />
-
         <div className="flex justify-center my-8">
           <Button
             size="sm"
@@ -1580,7 +1558,6 @@ export default function ItineraryMakerModule() {
             <Plus className="h-4 w-4" /> Bagian
           </Button>
         </div>
-
         {feedbackItems.length > 0 && (
           <div className="mt-8">
             <h3 className="font-semibold mb-4">Tips</h3>
@@ -1608,7 +1585,6 @@ export default function ItineraryMakerModule() {
           </div>
         )}
       </div>
-
       <div className="w-full min-h-screen hidden md:block">
         <Maps
           itineraryData={itineraryData.sections}
@@ -1616,6 +1592,32 @@ export default function ItineraryMakerModule() {
           isEditing
         />
       </div>
+      {isConfirmModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center font-roboto">
+          <div className="bg-white p-8 rounded-lg shadow-lg">
+            <h2 className="text-xl font-semibold mb-4 text-center">
+              Apakah anda yakin?
+            </h2>
+            <p className="text-md mb-4">
+              Masih ada tips untuk mempercantik itinerary-mu
+            </p>
+            <div className="flex justify-center space-x-2">
+              <button
+                className="px-8 py-2 border-2 border-[#016CD7] bg-white rounded text-[#014285]"
+                onClick={() => setIsConfirmModalOpen(false)}
+              >
+                Batal
+              </button>
+              <button
+                className="px-8 py-2 bg-gradient-to-r from-[#016CD7] to-[#014285] text-white items-center rounded"
+                onClick={handleSubmit}
+              >
+                Simpan
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
