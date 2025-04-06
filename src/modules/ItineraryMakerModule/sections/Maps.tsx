@@ -1,5 +1,5 @@
 'use client'
-
+import useDeepCompareEffect from 'use-deep-compare-effect'
 import { useEffect, useMemo, useState } from 'react'
 import {
   GoogleMap,
@@ -35,6 +35,42 @@ type MapsProps = {
     }
   }
   _testSelectedPlaceDetails?: PlaceResult
+}
+
+// bonkers IMO that this isn't a method on MVCArray, but here we are
+function pathsDiffer(
+  path1: google.maps.MVCArray<google.maps.LatLng>,
+  path2: google.maps.LatLngLiteral[]
+): boolean {
+  if (path1.getLength() !== path2.length) return true
+  for (const [i, val] of path2.entries())
+    if (path1.getAt(i).toJSON() !== val) return true
+  return false
+}
+
+function PolyLine(props: {
+  map: google.maps.Map | null
+  path: google.maps.LatLngLiteral[]
+  options: google.maps.PolylineOptions
+}) {
+  const [polyline, setPolyline] = useState<google.maps.Polyline | null>(null)
+  useDeepCompareEffect(() => {
+    // Create polyline after map initialized.
+    if (!polyline && props.map)
+      setPolyline(new google.maps.Polyline(props.options))
+
+    // Synchronize map polyline with component props.
+    if (polyline && polyline.getMap() != props.map) polyline.setMap(props.map)
+    if (polyline && pathsDiffer(polyline.getPath(), props.path))
+      polyline.setPath(props.path)
+
+    return () => {
+      // Cleanup: remove line from map
+      if (polyline) polyline.setMap(null)
+    }
+  }, [props, polyline])
+
+  return null
 }
 
 function Maps({
@@ -196,10 +232,11 @@ function Maps({
           ))}
 
           {routes.map((route, idx) => (
-            <Polyline
+            <PolyLine
               key={`polyline-${idx}`}
+              map={map}
               path={route.path}
-              options={route.options}
+              options={route.options!}
             />
           ))}
 

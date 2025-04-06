@@ -1053,22 +1053,57 @@ export default function ItineraryMakerModule() {
     sections: Section[],
     blockId: string
   ): Section[] => {
-    return sections.map((section) => {
+    // First, find the block and its position
+    let blockToRemove: Block | null = null
+    let blockSectionIndex = -1
+    let blockIndex = -1
+
+    sections.forEach((section, sIndex) => {
+      if (!section.blocks) return
+
+      const index = section.blocks.findIndex((block) => block.id === blockId)
+      if (index !== -1) {
+        blockToRemove = section.blocks[index]
+        blockSectionIndex = sIndex
+        blockIndex = index
+      }
+    })
+
+    // Now process all sections, handling route connections
+    return sections.map((section, sectionIndex) => {
       if (!section.blocks) return section
 
-      const blockIndex = section.blocks.findIndex(
-        (block) => block.id === blockId
-      )
+      // If this is the section containing the block to remove
+      if (sectionIndex === blockSectionIndex) {
+        const updatedBlocks = [...section.blocks]
 
-      if (blockIndex === -1) return section
+        // Clear route connections with adjacent blocks
+        if (blockIndex > 0) {
+          // Clear routeToNext from previous block
+          updatedBlocks[blockIndex - 1] = {
+            ...updatedBlocks[blockIndex - 1],
+            routeToNext: undefined,
+          }
+        }
 
-      const updatedBlocks = [...section.blocks]
-      updatedBlocks.splice(blockIndex, 1)
+        if (blockIndex < updatedBlocks.length - 1) {
+          // Clear routeFromPrevious from next block
+          updatedBlocks[blockIndex + 1] = {
+            ...updatedBlocks[blockIndex + 1],
+            routeFromPrevious: undefined,
+          }
+        }
 
-      return {
-        ...section,
-        blocks: updatedBlocks,
+        // Remove the block
+        updatedBlocks.splice(blockIndex, 1)
+
+        return {
+          ...section,
+          blocks: updatedBlocks,
+        }
       }
+
+      return section
     })
   }
 
