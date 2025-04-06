@@ -17,12 +17,12 @@ import {
 } from '@/components/ui/popover'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
-import MyItineraryList from '../ItineraryModule/sections/MyItineraryList'
 import {
   ItineraryData,
   ItineraryResponse,
   metadataType,
 } from '../ItineraryModule/module-elements/types'
+import MyItineraryList from './sections/MyItineraryList'
 
 interface FilterState {
   shared: boolean

@@ -12,28 +12,29 @@ import {
   PaginationPrevious,
 } from '@/components/ui/pagination'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { useAuthContext } from '@/contexts/AuthContext'
 
 function MyItineraryList({
   data,
   metadata,
   refresh,
-  searchQueryParams,
 }: {
   readonly data: readonly Readonly<ItineraryData>[]
   readonly metadata: metadataType
   readonly refresh: () => void
-  readonly searchQueryParams: string
 }) {
+  const { user } = useAuthContext()
+
   const searchParams = useSearchParams()
   const pathname = usePathname()
   const router = useRouter()
 
-  function handleSearchparams(value: string) {
+  function handleSearchparams(query: string, value: string) {
     const params = new URLSearchParams(searchParams)
     if (value) {
-      params.set(searchQueryParams, value)
+      params.set(query, value)
     } else {
-      params.delete(searchQueryParams)
+      params.delete(query)
     }
     router.replace(`${pathname}?${params.toString()}`)
   }
@@ -43,7 +44,13 @@ function MyItineraryList({
       {data.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 w-full">
           {data.map((item) => (
-            <ItineraryCard item={item} key={item.id} refresh={refresh} />
+            <ItineraryCard
+              shared={!!user && user?.id !== item.userId}
+              finished={item.isCompleted}
+              item={item}
+              key={item.id}
+              refresh={refresh}
+            />
           ))}
         </div>
       ) : (
@@ -60,7 +67,7 @@ function MyItineraryList({
                 e.preventDefault()
                 if (metadata.page > 1) {
                   const newPage = metadata.page - 1
-                  handleSearchparams(newPage.toString())
+                  handleSearchparams('page', newPage.toString())
                 }
               }}
               className={
@@ -77,7 +84,7 @@ function MyItineraryList({
                 isActive={metadata.page === 1}
                 onClick={(e) => {
                   e.preventDefault()
-                  handleSearchparams('1')
+                  handleSearchparams('page', '1')
                 }}
               >
                 1
@@ -106,7 +113,7 @@ function MyItineraryList({
                       isActive={page === metadata.page}
                       onClick={(e) => {
                         e.preventDefault()
-                        handleSearchparams(page.toString())
+                        handleSearchparams('page', page.toString())
                       }}
                     >
                       {page}
@@ -133,7 +140,7 @@ function MyItineraryList({
                 isActive={metadata.page === metadata.totalPages}
                 onClick={(e) => {
                   e.preventDefault()
-                  handleSearchparams(metadata.totalPages.toString())
+                  handleSearchparams('page', metadata.totalPages.toString())
                 }}
               >
                 {metadata.totalPages}
@@ -149,7 +156,7 @@ function MyItineraryList({
                 if (metadata.page < metadata.totalPages) {
                   // Update to next page
                   const newPage = metadata.page + 1
-                  handleSearchparams(newPage.toString())
+                  handleSearchparams('page', newPage.toString())
                 }
               }}
               className={
