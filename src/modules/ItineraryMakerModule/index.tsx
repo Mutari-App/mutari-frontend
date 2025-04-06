@@ -292,15 +292,8 @@ export default function ItineraryMakerModule() {
       setItineraryReminderData(initialItineraryReminderData.current)
     }
 
-    if (reminderData) {
-      setItineraryReminderData((prev) => ({
-        ...prev,
-        reminderOption: reminderData.reminderOption,
-        startDate: reminderData.startDate,
-      }))
-    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data, reminderData])
+  }, [data])
 
   // Load saved itinerary data from local storage
   useEffect(() => {
