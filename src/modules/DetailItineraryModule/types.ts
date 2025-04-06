@@ -53,3 +53,22 @@ interface ItineraryDetailResponse {
   message: string
   data: Itinerary
 }
+
+interface ItineraryReminder {
+  updatedAt: string
+  createdAt: string
+  id: string
+  itineraryId: string
+  recipient: string
+  recipientName: string
+  tripName: string
+  startDate: string
+  reminderOption: string
+}
+
+interface ItineraryReminderResponse {
+  statusCode: number
+  success: boolean
+  message: string
+  data: ItineraryReminder
+}
