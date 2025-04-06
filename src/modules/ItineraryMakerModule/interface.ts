@@ -130,3 +130,9 @@ export interface CreateItineraryReminderResponse
   startDate: string
   reminderOption: string
 }
+
+export interface ReminderOption {
+  label: string
+  value: 'NONE' | 'TEN_MINUTES_BEFORE' | 'ONE_HOUR_BEFORE' | 'ONE_DAY_BEFORE'
+  available: boolean
+}
