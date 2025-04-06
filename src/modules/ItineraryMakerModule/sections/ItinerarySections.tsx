@@ -27,6 +27,11 @@ import { ItineraryBlock } from '../module-elements/ItineraryBlock'
 interface ItinerarySectionsProps {
   sections: Section[]
   feedbackItems: FeedbackItem[]
+  removeFeedbackForField: (
+    sectionIndex: number,
+    blockIndex: number,
+    field: 'title' | 'description' | 'startTime' | 'endTime' | 'price'
+  ) => void
   timeWarning: {
     blockId: string
     message: string
@@ -61,6 +66,7 @@ export const ItinerarySections: React.FC<ItinerarySectionsProps> = ({
   sections,
   timeWarning,
   feedbackItems,
+  removeFeedbackForField,
   isInputVisible,
   toggleInput,
   updateSectionTitle,
@@ -150,6 +156,7 @@ export const ItinerarySections: React.FC<ItinerarySectionsProps> = ({
                   <ItineraryBlock
                     key={`block-${section.sectionNumber}-${blockIndex}`}
                     feedbackItems={feedbackItems}
+                    removeFeedbackForField={removeFeedbackForField}
                     block={block}
                     blockIndex={blockIndex}
                     sectionNumber={section.sectionNumber}

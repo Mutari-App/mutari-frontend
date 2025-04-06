@@ -32,7 +32,9 @@ jest.mock('lucide-react', () => ({
 describe('TimeInput Component', () => {
   const mockToggleInput = jest.fn()
   const mockUpdateBlock = jest.fn()
+  const mockRemoveFeedbackForField = jest.fn()
   const blockId = 'test-block-123'
+  const sectionNumber = 1
 
   beforeEach(() => {
     jest.clearAllMocks()
@@ -41,10 +43,12 @@ describe('TimeInput Component', () => {
   test('renders the "Set Waktu" button when not visible', () => {
     render(
       <TimeInput
+        sectionNumber={sectionNumber}
         blockId={blockId}
         isVisible={false}
         toggleInput={mockToggleInput}
         updateBlock={mockUpdateBlock}
+        removeFeedbackForField={mockRemoveFeedbackForField}
         timeWarning={null}
       />
     )
@@ -59,12 +63,14 @@ describe('TimeInput Component', () => {
   test('renders the time pickers when visible', () => {
     render(
       <TimeInput
+        sectionNumber={sectionNumber}
         blockId={blockId}
         isVisible={true}
         startTime="2023-01-01T09:00:00Z"
         endTime="2023-01-01T11:00:00Z"
         toggleInput={mockToggleInput}
         updateBlock={mockUpdateBlock}
+        removeFeedbackForField={mockRemoveFeedbackForField}
         timeWarning={null}
       />
     )
@@ -83,10 +89,12 @@ describe('TimeInput Component', () => {
   test('calls updateBlock when time values change', () => {
     render(
       <TimeInput
+        sectionNumber={sectionNumber}
         blockId={blockId}
         isVisible={true}
         toggleInput={mockToggleInput}
         updateBlock={mockUpdateBlock}
+        removeFeedbackForField={mockRemoveFeedbackForField}
         timeWarning={null}
       />
     )
@@ -112,10 +120,12 @@ describe('TimeInput Component', () => {
     const warningMessage = 'Waktu akhir harus setelah waktu awal'
     render(
       <TimeInput
+        sectionNumber={sectionNumber}
         blockId={blockId}
         isVisible={true}
         toggleInput={mockToggleInput}
         updateBlock={mockUpdateBlock}
+        removeFeedbackForField={mockRemoveFeedbackForField}
         timeWarning={{
           blockId,
           message: warningMessage,
@@ -130,10 +140,12 @@ describe('TimeInput Component', () => {
     const warningMessage = 'Waktu akhir harus setelah waktu awal'
     render(
       <TimeInput
+        sectionNumber={sectionNumber}
         blockId={blockId}
         isVisible={true}
         toggleInput={mockToggleInput}
         updateBlock={mockUpdateBlock}
+        removeFeedbackForField={mockRemoveFeedbackForField}
         timeWarning={{
           blockId: 'different-block-id',
           message: warningMessage,
@@ -150,12 +162,14 @@ describe('TimeInput Component', () => {
 
     render(
       <TimeInput
+        sectionNumber={sectionNumber}
         blockId={blockId}
         isVisible={true}
         startTime={startTime}
         endTime={endTime}
         toggleInput={mockToggleInput}
         updateBlock={mockUpdateBlock}
+        removeFeedbackForField={mockRemoveFeedbackForField}
         timeWarning={null}
       />
     )
