@@ -1397,6 +1397,7 @@ export default function ItineraryMakerModule() {
       }
 
       router.push(`/itinerary/${response.id}`)
+      return response
     } catch (error) {
       if (isCreateAndValidUmami()) {
         window.umami.track('create_itinerary_fail')
@@ -1514,6 +1515,7 @@ export default function ItineraryMakerModule() {
 
     // If user is authenticated, proceed with normal submission
     setIsSubmitting(true)
+    let newItineraryId: string = itineraryId
     try {
       const submissionData = {
         ...itineraryData,
@@ -1547,15 +1549,42 @@ export default function ItineraryMakerModule() {
             }) ?? [],
         })),
       }
-      await submitItinerary(submissionData)
+      // Edge case: new itinerary and create reminder
+      const response = await submitItinerary(submissionData)
+      newItineraryId = response.id
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       console.error('Error creating or updating itinerary:', error)
       toast.error(
         `Failed to ${itineraryId ? 'update' : 'create'} itinerary. Please try again.`
       )
+    }
+
+    // Submit itinerary reminder changes
+    try {
+      const submissionData = {
+        ...itineraryReminderData,
+        itineraryId: newItineraryId,
+      }
+      console.log(submissionData)
+      await submitItineraryReminder(submissionData)
+    } catch (error) {
+      toast.error(
+        `Failed to ${itineraryId ? 'update' : 'create'} itinerary reminder. Please try again.`
+      )
     } finally {
       setIsSubmitting(false)
+    }
+
+    const remainingFeedbacks = feedbackItems.filter((item) => {
+      const { sectionIndex, blockIndex, field } = item.target
+      const key = `${sectionIndex}-${blockIndex}-${field ?? ''}`
+      return !dismissedFeedbacks.includes(key)
+    })
+
+    if (remainingFeedbacks.length > 0) {
+      setIsConfirmModalOpen(true)
+      return
     }
   }
 
