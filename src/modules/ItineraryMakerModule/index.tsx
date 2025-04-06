@@ -1352,7 +1352,7 @@ export default function ItineraryMakerModule() {
     }
   }
 
-    const submitItinerary = async (submissionData: object) => {
+  const submitItinerary = async (submissionData: object) => {
     const validUmami = () => typeof window !== 'undefined' && window.umami
     const isCreateAndValidUmami = () => !itineraryId && validUmami()
 
@@ -1406,7 +1406,9 @@ export default function ItineraryMakerModule() {
     }
   }
 
-  const submitItineraryReminder = async (submissionData: object) => {
+  const submitItineraryReminder = async (
+    submissionData: ItineraryReminderDto
+  ) => {
     const validUmami = () => typeof window !== 'undefined' && window.umami
     const isCreateAndValidUmami = () => !itineraryId && validUmami()
 
@@ -1435,20 +1437,34 @@ export default function ItineraryMakerModule() {
         )
       }
 
+      const fetchDeleteItineraryReminder = async () => {
+        return await customFetch<CreateItineraryReminderResponse>(
+          `/notification/${itineraryId}`,
+          {
+            method: 'DELETE',
+            body: customFetchBody(submissionData),
+            credentials: 'include',
+            isAuthorized: true,
+          }
+        )
+      }
+
       const response = reminderData
-        ? await fetchUpdateItineraryReminder()
+        ? submissionData.reminderOption == 'NONE'
+          ? await fetchDeleteItineraryReminder()
+          : await fetchUpdateItineraryReminder()
         : await fetchCreateItineraryReminder()
 
       if (!response.success) {
         if (isCreateAndValidUmami()) {
           window.umami.track('create_itineraryreminder_fail')
         }
-        throw new Error('Failed to create or edit itinerary reminder')
+        throw new Error('Failed to create or edit or delete itinerary reminder')
       }
 
       setHasUnsavedChanges(false)
       toast(
-        `Itinerary Reminder ${itineraryId ? 'updated' : 'created'} successfully`
+        `Itinerary Reminder ${itineraryId ? (submissionData.reminderOption == 'NONE' ? 'deleted' : 'updated') : 'created'} successfully`
       )
 
       if (isCreateAndValidUmami()) {
