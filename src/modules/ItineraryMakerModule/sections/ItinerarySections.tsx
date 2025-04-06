@@ -20,12 +20,13 @@ import {
   ChevronDown,
   Trash,
 } from 'lucide-react'
-import { type Block, type Section } from '../interface'
+import { FeedbackItem, type Block, type Section } from '../interface'
 import { type TransportMode } from '@/utils/maps'
 import { ItineraryBlock } from '../module-elements/ItineraryBlock'
 
 interface ItinerarySectionsProps {
   sections: Section[]
+  feedbackItems: FeedbackItem[]
   timeWarning: {
     blockId: string
     message: string
@@ -59,6 +60,7 @@ interface ItinerarySectionsProps {
 export const ItinerarySections: React.FC<ItinerarySectionsProps> = ({
   sections,
   timeWarning,
+  feedbackItems,
   isInputVisible,
   toggleInput,
   updateSectionTitle,
@@ -147,6 +149,7 @@ export const ItinerarySections: React.FC<ItinerarySectionsProps> = ({
                 {section.blocks?.map((block, blockIndex) => (
                   <ItineraryBlock
                     key={`block-${section.sectionNumber}-${blockIndex}`}
+                    feedbackItems={feedbackItems}
                     block={block}
                     blockIndex={blockIndex}
                     sectionNumber={section.sectionNumber}

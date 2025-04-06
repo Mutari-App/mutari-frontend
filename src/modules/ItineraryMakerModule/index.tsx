@@ -18,6 +18,7 @@ import {
   type Block,
   type CreateItineraryResponse,
   type Tag,
+  FeedbackItem,
   type Route,
 } from './interface'
 import { customFetch, customFetchBody } from '@/utils/customFetch'
@@ -33,6 +34,7 @@ import { cn } from '@/lib/utils'
 import { useAuthContext } from '@/contexts/AuthContext'
 import { redirect, useParams, useRouter } from 'next/navigation'
 import NotFound from 'next/error'
+import { Lightbulb } from 'lucide-react'
 import { calculateRoute, TransportMode } from '@/utils/maps'
 import Maps from './sections/Maps'
 
@@ -41,12 +43,16 @@ const SAVED_ITINERARY_KEY = 'saved_itinerary_data'
 export default function ItineraryMakerModule() {
   const { user } = useAuthContext()
   const launchingDate = new Date(
-    process.env.NEXT_PUBLIC_LAUNCHING_DATE ?? '2025-01-22T00:00:00'
+    process.env.NEXT_PUBLIC_LAUNCHING_DATE || '2025-01-22T00:00:00'
   )
   const nowDate = new Date()
   const isLaunching = nowDate > launchingDate
 
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isGenerating, setIsGenerating] = useState(false)
+  const [dismissedFeedbacks, setDismissedFeedbacks] = useState<string[]>([])
+  const [feedbackItems, setFeedbackItems] = useState<FeedbackItem[]>([])
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false)
   const [timeWarning, setTimeWarning] = useState<{
     blockId: string
     message: string
@@ -126,8 +132,7 @@ export default function ItineraryMakerModule() {
         }
 
         setData(res.data)
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      } catch (error) {
+      } catch (err: any) {
         return <NotFound statusCode={404} />
       }
     }
@@ -236,8 +241,8 @@ export default function ItineraryMakerModule() {
         setHasUnsavedChanges(false)
         localStorage.removeItem(SAVED_ITINERARY_KEY)
       }
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
+      console.error('Error loading saved itinerary:', error)
       toast.error('Gagal memuat itinerary yang tersimpan')
       localStorage.removeItem(SAVED_ITINERARY_KEY)
     }
@@ -258,8 +263,8 @@ export default function ItineraryMakerModule() {
         } else {
           toast.error('Gagal mengambil tag')
         }
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
+        console.error('Error fetching tags:', error)
         toast.error('Gagal mengambil tag')
       }
     }
@@ -1188,7 +1193,7 @@ export default function ItineraryMakerModule() {
     }
   }
 
-  const submitItinerary = async (submissionData: object) => {
+    const submitItinerary = async (submissionData: object) => {
     const validUmami = () => typeof window !== 'undefined' && window.umami
     const isCreateAndValidUmami = () => !itineraryId && validUmami()
 
@@ -1263,6 +1268,18 @@ export default function ItineraryMakerModule() {
       )
     }
 
+    const remainingFeedbacks = feedbackItems.filter((item) => {
+      const { sectionIndex, blockIndex, field } = item.target
+      const key = `${sectionIndex}-${blockIndex}-${field ?? ''}`
+      return !dismissedFeedbacks.includes(key)
+    })
+
+    if (remainingFeedbacks.length > 0) {
+      setIsConfirmModalOpen(true)
+      return
+    }
+
+    // If user is authenticated, proceed with normal submission
     setIsSubmitting(true)
     try {
       const submissionData = {
@@ -1300,6 +1317,7 @@ export default function ItineraryMakerModule() {
       await submitItinerary(submissionData)
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
+      console.error('Error creating or updating itinerary:', error)
       toast.error(
         `Failed to ${itineraryId ? 'update' : 'create'} itinerary. Please try again.`
       )
@@ -1307,6 +1325,104 @@ export default function ItineraryMakerModule() {
       setIsSubmitting(false)
     }
   }
+
+  const handleGenerateFeedback = async () => {
+    if (
+      !itineraryData?.title ||
+      itineraryData.title === 'Itinerary Tanpa Judul'
+    ) {
+      toast.error('Itinerary harus memiliki judul')
+      return
+    }
+
+    if (
+      itineraryData.sections.length === 1 &&
+      (itineraryData.sections[0].blocks?.length ?? 0) <= 1
+    ) {
+      toast.error('Itinerary harus memiliki setidaknya satu bagian.')
+      return
+    }
+
+    const submissionData = {
+      itineraryData: {
+        title: itineraryData.title,
+        description: itineraryData.description,
+        coverImage: itineraryData.coverImage,
+        startDate: itineraryData.startDate,
+        endDate: itineraryData.endDate,
+        sections: itineraryData.sections.map((section) => ({
+          title: section.title,
+          blocks:
+            section.blocks?.map((block) => {
+              if (block.blockType === 'LOCATION') {
+                return {
+                  blockType: block.blockType,
+                  title: block.title,
+                  description: block.description,
+                  startTime: block.startTime,
+                  endTime: block.endTime,
+                  price: block.price,
+                }
+              } else if (block.blockType === 'NOTE') {
+                return {
+                  blockType: block.blockType,
+                  description: block.description,
+                }
+              }
+              return {}
+            }) ?? [],
+        })),
+      },
+    }
+
+    setIsGenerating(true)
+
+    try {
+      const response = await customFetch<{ feedback: FeedbackItem[] }>(
+        '/gemini/generate-feedback',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(submissionData),
+        }
+      )
+
+      console.log("API response: ", response);
+      console.log("Feedback content: ", JSON.stringify(response.feedback, null, 2));
+
+
+      setFeedbackItems(response.feedback)
+
+      const formatted = response.feedback.map((item) => {
+        const { sectionIndex, blockIndex, field } = item.target
+        let prefix = `Hari ${sectionIndex + 1}, Blok ${blockIndex + 1}`
+        if (field) prefix += ` (${field})`
+        return `${prefix}: ${item.suggestion}`
+      })
+
+      toast.success('Feedback berhasil di-generate')
+    } catch (error) {
+      toast.error('Gagal generate feedback. Silahkan coba lagi')
+    } finally {
+      setIsGenerating(false)
+    }
+  }
+
+  const dismissFeedback = (
+    sectionIndex: number,
+    blockIndex: number,
+    field?: string
+  ) => {
+    const key = `${sectionIndex}-${blockIndex}-${field ?? ''}`
+    setDismissedFeedbacks((prev) =>
+      prev.includes(key) ? prev : [...prev, key]
+    )
+  }
+
+  const showConfirmationModal = () => {
+    setIsConfirmModalOpen(true)
+  }
+
   return (
     <div className="flex max-h-screen">
       <div className="container max-w-4xl mx-auto p-4 pt-24 min-h-screen max-h-screen overflow-auto">
@@ -1316,6 +1432,8 @@ export default function ItineraryMakerModule() {
           onTitleChange={handleTitleChange}
           isSubmitting={isSubmitting}
           onSubmit={handleSubmit}
+          onGenerateFeedback={handleGenerateFeedback}
+          isGenerating={isGenerating}
         />
         <div className="flex flex-wrap max-sm:justify-center items-center gap-2 mb-4">
           <TagSelector
@@ -1360,6 +1478,7 @@ export default function ItineraryMakerModule() {
             </Popover>
           </div>
         </div>
+  
         {itineraryData.tags && itineraryData.tags.length > 0 && (
           <div className="flex flex-wrap gap-2 mb-4">
             {getSelectedTagNames().map((tagName, index) => (
@@ -1379,6 +1498,7 @@ export default function ItineraryMakerModule() {
             ))}
           </div>
         )}
+  
         <DateRangeAlertDialog
           open={showConfirmDialog}
           onOpenChange={setShowConfirmDialog}
@@ -1396,7 +1516,9 @@ export default function ItineraryMakerModule() {
             setShowConfirmDialog(false)
           }}
         />
+  
         <ItinerarySections
+          feedbackItems={feedbackItems}
           sections={itineraryData.sections}
           updateSectionTitle={updateSectionTitle}
           addSection={addSection}
@@ -1411,6 +1533,7 @@ export default function ItineraryMakerModule() {
           timeWarning={timeWarning}
           onTransportModeChange={updateTransportMode}
         />
+  
         <div className="flex justify-center my-8">
           <Button
             size="sm"
@@ -1420,7 +1543,35 @@ export default function ItineraryMakerModule() {
             <Plus className="h-4 w-4" /> Bagian
           </Button>
         </div>
+  
+        {feedbackItems.length > 0 && (
+          <div className="mt-8">
+            <h3 className="font-semibold mb-4">Tips</h3>
+            <div className="flex flex-col gap-4">
+              {feedbackItems.map((item, index) => (
+                <div
+                  key={index}
+                  className="p-4 border border-[#0073E6] rounded-md shadow-md flex items-start"
+                  style={{ boxShadow: '0px 0px 10px rgba(0, 115, 230, 0.5)' }}
+                >
+                  <div className="flex-1">
+                    <p className="font-semibold">
+                      Hari {item.target.sectionIndex + 1} - Blok{' '}
+                      {item.target.blockIndex + 1}
+                      {item.target.field && ` (${item.target.field})`}
+                    </p>
+                    <p>{item.suggestion}</p>
+                  </div>
+                  <div className="ml-4 text-[#0073E6] drop-shadow-[0_4px_6px_rgba(0,115,230,1.5)]">
+                    <Lightbulb size={48} strokeWidth={1} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
+  
       <div className="w-full min-h-screen hidden md:block">
         <Maps
           itineraryData={itineraryData.sections}
@@ -1430,4 +1581,4 @@ export default function ItineraryMakerModule() {
       </div>
     </div>
   )
-}
+}  

@@ -249,6 +249,7 @@ describe('ItineraryBlock Component', () => {
         toggleInput={mockToggleInput}
         updateBlock={mockUpdateBlock}
         removeBlock={mockRemoveBlock}
+        feedbackItems={[]}
         showRoute={false}
       />
     )
@@ -279,6 +280,7 @@ describe('ItineraryBlock Component', () => {
         toggleInput={mockToggleInput}
         updateBlock={mockUpdateBlock}
         removeBlock={mockRemoveBlock}
+        feedbackItems={[]}
         showRoute={false}
       />
     )
@@ -317,6 +319,7 @@ describe('ItineraryBlock Component', () => {
         toggleInput={mockToggleInput}
         updateBlock={mockUpdateBlock}
         removeBlock={mockRemoveBlock}
+        feedbackItems={[]}
         showRoute={true}
         routeInfo={routeInfo}
       />
@@ -352,6 +355,7 @@ describe('ItineraryBlock Component', () => {
         toggleInput={mockToggleInput}
         updateBlock={mockUpdateBlock}
         removeBlock={mockRemoveBlock}
+        feedbackItems={[]}
         showRoute={false}
         routeInfo={routeInfo}
       />
@@ -384,6 +388,7 @@ describe('ItineraryBlock Component', () => {
         toggleInput={mockToggleInput}
         updateBlock={mockUpdateBlock}
         removeBlock={mockRemoveBlock}
+        feedbackItems={[]}
         showRoute={true}
         routeInfo={routeInfo}
         onTransportModeChange={mockOnTransportModeChange}
@@ -434,6 +439,7 @@ describe('ItineraryBlock Component', () => {
         toggleInput={mockToggleInput}
         updateBlock={mockUpdateBlock}
         removeBlock={mockRemoveBlock}
+        feedbackItems={[]}
         showRoute={true}
         routeInfo={routeInfo}
         onTransportModeChange={mockOnTransportModeChange}
@@ -477,6 +483,7 @@ describe('ItineraryBlock Component', () => {
         toggleInput={mockToggleInput}
         updateBlock={mockUpdateBlock}
         removeBlock={mockRemoveBlock}
+        feedbackItems={[]}
         showRoute={true}
         routeInfo={routeInfo}
         onTransportModeChange={mockOnTransportModeChange}
@@ -518,6 +525,7 @@ describe('ItineraryBlock Component', () => {
         toggleInput={mockToggleInput}
         updateBlock={mockUpdateBlock}
         removeBlock={mockRemoveBlock}
+        feedbackItems={[]}
         showRoute={true}
         routeInfo={routeInfo}
         // Intentionally not providing onTransportModeChange
@@ -545,6 +553,7 @@ describe('ItineraryBlock Component', () => {
         toggleInput={mockToggleInput}
         updateBlock={mockUpdateBlock}
         removeBlock={mockRemoveBlock}
+        feedbackItems={[]}
         showRoute={false}
       />
     )
@@ -574,6 +583,7 @@ describe('ItineraryBlock Component', () => {
         toggleInput={mockToggleInput}
         updateBlock={mockUpdateBlock}
         removeBlock={mockRemoveBlock}
+        feedbackItems={[]}
         showRoute={false}
       />
     )
@@ -601,6 +611,7 @@ describe('ItineraryBlock Component', () => {
         toggleInput={mockToggleInput}
         updateBlock={mockUpdateBlock}
         removeBlock={mockRemoveBlock}
+        feedbackItems={[]}
         showRoute={false}
       />
     )
@@ -629,6 +640,7 @@ describe('ItineraryBlock Component', () => {
         toggleInput={mockToggleInput}
         updateBlock={mockUpdateBlock}
         removeBlock={mockRemoveBlock}
+        feedbackItems={[]}
         showRoute={false}
       />
     )
@@ -651,6 +663,7 @@ describe('ItineraryBlock Component', () => {
         toggleInput={mockToggleInput}
         updateBlock={mockUpdateBlock}
         removeBlock={mockRemoveBlock}
+        feedbackItems={[]}
         showRoute={false}
       />
     )
@@ -672,6 +685,7 @@ describe('ItineraryBlock Component', () => {
         toggleInput={mockToggleInput}
         updateBlock={mockUpdateBlock}
         removeBlock={mockRemoveBlock}
+        feedbackItems={[]}
         showRoute={false}
       />
     )

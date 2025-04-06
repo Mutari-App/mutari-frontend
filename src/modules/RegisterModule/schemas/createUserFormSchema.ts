@@ -31,5 +31,47 @@ export const createUserFormSchema = z.object({
         )
         .optional(),
     })
+    .superRefine((data, ctx) => {
+      if (!data.day || !data.month || !data.year) return
+
+      const { day, month, year } = data
+      const date = new Date(year, month - 1, day)
+
+      if (date.getDate() !== day || date.getMonth() !== month - 1) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Tanggal lahir tidak valid.',
+          path: ['day'],
+        })
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Bulan lahir tidak valid.',
+          path: ['month'],
+        })
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Tahun lahir tidak valid.',
+          path: ['year'],
+        })
+      }
+
+      if (date > new Date()) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Tanggal lahir tidak boleh di masa depan.',
+          path: ['day'],
+        })
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Tanggal lahir tidak boleh di masa depan.',
+          path: ['month'],
+        })
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'Tanggal lahir tidak boleh di masa depan.',
+          path: ['year'],
+        })
+      }
+    })
     .optional(),
 })
