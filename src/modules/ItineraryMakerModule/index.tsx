@@ -1498,25 +1498,27 @@ export default function ItineraryMakerModule() {
       }
 
       const response = reminderData
-        ? submissionData.reminderOption == 'NONE'
+        ? submissionData.reminderOption === 'NONE'
           ? await fetchDeleteItineraryReminder()
           : await fetchUpdateItineraryReminder()
-        : await fetchCreateItineraryReminder()
+        : submissionData.reminderOption !== 'NONE'
+          ? await fetchCreateItineraryReminder()
+          : null
 
-      if (!response.success) {
+      if (response && !response.success) {
         if (isCreateAndValidUmami()) {
           window.umami.track('create_itineraryreminder_fail')
         }
-        toast.error(
-           response.message
-        )
-        throw new Error('Failed to create or edit or delete itinerary reminder')
+        throw new Error('Failed with scheduling itinerary reminder')
       }
 
       setHasUnsavedChanges(false)
-      toast(
-        `Itinerary Reminder ${itineraryId ? (submissionData.reminderOption == 'NONE' ? 'deleted' : 'updated') : 'created'} successfully`
-      )
+      if (reminderData && submissionData.reminderOption === 'NONE')
+        toast('You will no longer be reminded for this itinerary')
+      else if (reminderData && submissionData.reminderOption !== 'NONE')
+        toast('Updated reminder for this itinerary')
+      else if (!reminderData && submissionData.reminderOption !== 'NONE')
+        toast('You will be reminded for this itinerary')
 
       if (isCreateAndValidUmami()) {
         window.umami.track('create_itineraryreminder_success')
@@ -1607,7 +1609,7 @@ export default function ItineraryMakerModule() {
       await submitItineraryReminder(submissionData)
     } catch (error) {
       toast.error(
-        `Failed to ${itineraryId ? 'update' : 'create'} itinerary reminder. Please try again.`
+        `Failed with scheduling itinerary reminder`
       )
     } finally {
       setIsSubmitting(false)
