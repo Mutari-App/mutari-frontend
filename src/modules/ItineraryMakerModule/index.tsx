@@ -61,7 +61,7 @@ export default function ItineraryMakerModule() {
     },
     {
       label: '1 hari sebelum',
-      value: 'ONE_DAY_BEFOERE',
+      value: 'ONE_DAY_BEFORE',
     },
   ]
 
@@ -285,6 +285,7 @@ export default function ItineraryMakerModule() {
     }
   }, [])
 
+  // Fetch tags
   useEffect(() => {
     const fetchTags = async () => {
       try {
@@ -309,6 +310,7 @@ export default function ItineraryMakerModule() {
     void fetchTags()
   }, [])
 
+  // Run unsaved changes check everytime ItineraryData is updated
   useEffect(() => {
     // Check for unsaved changes by comparing current data with initial data
     const checkIsBlockModified = (section: Section, section_index: number) => {
