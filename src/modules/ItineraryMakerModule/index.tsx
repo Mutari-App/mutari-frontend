@@ -22,6 +22,7 @@ import {
   CreateItineraryReminderResponse,
   FeedbackItem,
   type Route,
+  type ReminderOption,
 } from './interface'
 import { customFetch, customFetchBody } from '@/utils/customFetch'
 import { type DropResult } from '@hello-pangea/dnd'
@@ -50,24 +51,31 @@ export default function ItineraryMakerModule() {
   )
   const nowDate = new Date()
   const isLaunching = nowDate > launchingDate
-  const reminderOptions = [
+
+  const [reminderOptions, setReminderOptionAvailability] = useState<
+    ReminderOption[]
+  >([
     {
       label: 'Tidak ada notifikasi',
       value: 'NONE',
+      available: true,
     },
     {
       label: '10 menit sebelum',
       value: 'TEN_MINUTES_BEFORE',
+      available: false,
     },
     {
       label: '1 jam sebelum',
       value: 'ONE_HOUR_BEFORE',
+      available: false,
     },
     {
       label: '1 hari sebelum',
       value: 'ONE_DAY_BEFORE',
+      available: false,
     },
-  ]
+  ])
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isGenerating, setIsGenerating] = useState(false)
