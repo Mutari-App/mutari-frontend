@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -10,11 +10,10 @@ import {
   type DraggableStateSnapshot,
 } from '@hello-pangea/dnd'
 import { X, GripVertical, OctagonAlert } from 'lucide-react'
-import { FeedbackItem, type Block } from '../interface'
+import { type FeedbackItem, type Block } from '../interface'
 import { TimeInput } from './TimeInput'
 import { PriceInput } from './PriceInput'
 import { RouteInfo } from './RouteInfo'
-import { CoordinateInput } from './CoordinateInput'
 import { feedbackForField } from '../utils'
 import { TooltipField } from './TooltipField'
 
@@ -97,7 +96,7 @@ export const ItineraryBlock: React.FC<ItineraryBlockProps> = ({
           <Card
             ref={provided.innerRef}
             {...provided.draggableProps}
-            className={`${snapshot.isDragging ? 'shadow-lg' : ''} ${
+            className={`${!showRoute || !routeInfo ? 'mb-2 md:mb-4' : ''} ${snapshot.isDragging ? 'shadow-lg' : ''} ${
               timeWarning && timeWarning.blockId === block.id
                 ? 'border-red-500'
                 : ''
