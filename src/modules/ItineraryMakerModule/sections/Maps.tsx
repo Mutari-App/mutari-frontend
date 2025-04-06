@@ -81,6 +81,12 @@ function Maps({
   _testSelectedPlaceDetails,
 }: MapsProps) {
   const firstLoc = itineraryData[0]?.blocks?.[0]?.location?.split(',')
+  const INDONESIA_BOUNDS = {
+    north: 8.0,
+    south: -11.0,
+    east: 141.1,
+    west: 95.0,
+  }
 
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? ''
 
@@ -212,13 +218,8 @@ function Maps({
           options={{
             streetViewControl: false,
             restriction: {
-              latLngBounds: {
-                north: 8.0,
-                south: -11.0,
-                east: 141.0,
-                west: 95.0,
-              },
-              strictBounds: true,
+              latLngBounds: INDONESIA_BOUNDS,
+              strictBounds: false,
             },
           }}
           onClick={handleMapClick}
