@@ -9,11 +9,12 @@ import {
 import { Button } from '@/components/ui/button'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group-item'
 import { BellIcon } from 'lucide-react'
+import { ReminderOption } from '../interface'
 
 interface ReminderSelectorProps {
   selectedReminder: string
   onChangeAction: (value: string) => void
-  reminderOptions: { label: string; value: string }[]
+  reminderOptions: ReminderOption[]
 }
 
 export const ReminderSelector: React.FC<ReminderSelectorProps> = ({
@@ -39,7 +40,10 @@ export const ReminderSelector: React.FC<ReminderSelectorProps> = ({
                   key={option.value}
                   className="flex items-center gap-2 cursor-pointer"
                 >
-                  <RadioGroupItem value={option.value} />
+                  <RadioGroupItem
+                    value={option.value}
+                    disabled={!option.available}
+                  />
                   {option.label}
                 </label>
               ))}
