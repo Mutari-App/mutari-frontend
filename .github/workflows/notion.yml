@@ -15,12 +15,15 @@ jobs:
         run: |
           PBI_NUMBER=$(echo "${{ github.event.pull_request.title }}" | grep -oE 'PBI [0-9]+' | awk '{print $2}')
           if [ -z "$PBI_NUMBER" ]; then
-            echo "PBI number not found in PR title"
-            exit 1
+            echo "PBI number not found in PR title, skipping Notion update"
+            echo "HAS_PBI=false" >> $GITHUB_ENV
+          else
+            echo "PBI_NUMBER=$PBI_NUMBER" >> $GITHUB_ENV
+            echo "HAS_PBI=true" >> $GITHUB_ENV
           fi
-          echo "PBI_NUMBER=$PBI_NUMBER" >> $GITHUB_ENV
 
       - name: Determine Task Status
+        if: env.HAS_PBI == 'true'
         run: |
           if [[ "${{ github.event.pull_request.merged }}" == "true" ]]; then
             echo "TASK_STATUS=Done" >> $GITHUB_ENV
@@ -29,6 +32,7 @@ jobs:
           fi
 
       - name: Get Notion Page ID by PBI Number
+        if: env.HAS_PBI == 'true'
         run: |
           RESPONSE=$(curl -X POST "https://api.notion.com/v1/databases/${{ secrets.NOTION_DATABASE_ID }}/query" \
           -H "Authorization: Bearer ${{ secrets.NOTION_API_KEY }}" \
@@ -53,6 +57,7 @@ jobs:
           echo "PAGE_ID=$PAGE_ID" >> $GITHUB_ENV
 
       - name: Update Task Status in Notion
+        if: env.HAS_PBI == 'true'
         run: |
           curl -X PATCH "https://api.notion.com/v1/pages/$PAGE_ID" \
           -H "Authorization: Bearer ${{ secrets.NOTION_API_KEY }}" \
