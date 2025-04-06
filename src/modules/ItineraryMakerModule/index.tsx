@@ -1598,6 +1598,8 @@ export default function ItineraryMakerModule() {
       toast.error(
         `Failed to ${itineraryId ? 'update' : 'create'} itinerary. Please try again.`
       )
+      setIsSubmitting(false)
+      return
     }
 
     // Submit itinerary reminder changes
@@ -1608,9 +1610,7 @@ export default function ItineraryMakerModule() {
       }
       await submitItineraryReminder(submissionData)
     } catch (error) {
-      toast.error(
-        `Failed with scheduling itinerary reminder`
-      )
+      toast.error(`Failed with scheduling itinerary reminder`)
     } finally {
       setIsSubmitting(false)
     }
