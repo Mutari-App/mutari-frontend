@@ -5,6 +5,7 @@ import { TimePicker } from './TimePicker'
 import { type Block } from '../interface'
 
 interface TimeInputProps {
+  sectionNumber: number
   blockId: string
   startTime?: string
   endTime?: string
@@ -22,9 +23,15 @@ interface TimeInputProps {
     blockId: string
     message: string
   } | null
+  removeFeedbackForField: (
+    sectionNumber: number,
+    blockId: string,
+    field: keyof Block
+  ) => void
 }
 
 export const TimeInput: React.FC<TimeInputProps> = ({
+  sectionNumber,
   blockId,
   startTime,
   endTime,
@@ -32,6 +39,7 @@ export const TimeInput: React.FC<TimeInputProps> = ({
   toggleInput,
   updateBlock,
   timeWarning,
+  removeFeedbackForField,
 }) => {
   if (!isVisible) {
     return (
@@ -53,17 +61,19 @@ export const TimeInput: React.FC<TimeInputProps> = ({
         <TimePicker
           label="Awal"
           value={startTime ? new Date(startTime) : undefined}
-          onChange={(date) =>
+          onChange={(date) => {
+            removeFeedbackForField(sectionNumber, blockId, 'startTime')
             updateBlock(blockId, 'startTime', date?.toISOString())
-          }
+          }}
         />
         <span className="mx-1">-</span>
         <TimePicker
           label="Akhir"
           value={endTime ? new Date(endTime) : undefined}
-          onChange={(date) =>
+          onChange={(date) => {
+            removeFeedbackForField(sectionNumber, blockId, 'startTime')
             updateBlock(blockId, 'endTime', date?.toISOString())
-          }
+          }}
         />
         <Button
           variant="ghost"
