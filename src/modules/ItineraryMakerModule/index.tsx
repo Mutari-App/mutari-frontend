@@ -771,6 +771,14 @@ export default function ItineraryMakerModule() {
         blockToUpdate.location = undefined
       }
 
+      if (blockIndex === 0 && section.sectionNumber === 1) {
+        if (itineraryData.startDate && inputType === 'time')
+          validateReminderOptionSelection(
+            itineraryData.startDate,
+            blockToUpdate.startTime
+          )
+      }
+
       updatedBlocks[blockIndex] = blockToUpdate
       return {
         ...section,
@@ -1499,6 +1507,9 @@ export default function ItineraryMakerModule() {
         if (isCreateAndValidUmami()) {
           window.umami.track('create_itineraryreminder_fail')
         }
+        toast.error(
+           response.message
+        )
         throw new Error('Failed to create or edit or delete itinerary reminder')
       }
 
