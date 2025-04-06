@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils'
-import { Clock, MapPin, Tag } from 'lucide-react'
+import { Clock, Tag } from 'lucide-react'
 import { RouteInfo } from './RouteInfo'
 
 export const ItineraryDay = ({ section }: { section: Section }) => {
@@ -13,11 +13,13 @@ export const ItineraryDay = ({ section }: { section: Section }) => {
       {section.blocks.map((block, index) => {
         const isLastBlock = index === section.blocks.length - 1
         const formatTime = (time: string) =>
-          new Date(time).toLocaleTimeString('id-ID', {
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: false,
-          })
+          time
+            ? new Date(time).toLocaleTimeString('id-ID', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false,
+              })
+            : null
         return (
           <div key={block.id}>
             <div
@@ -32,16 +34,17 @@ export const ItineraryDay = ({ section }: { section: Section }) => {
                     {block.title}
                   </h3>
                   <div className="flex items-center gap-4 md:text-lg text-[#024C98] font-roboto font-medium">
-                    <div className="flex items-center gap-1">
-                      <Clock size={16} /> {formatTime(block.startTime)} -{' '}
-                      {formatTime(block.endTime)}
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Tag size={16} /> Rp{block.price.toLocaleString()}
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <MapPin size={16} /> {block.location}
-                    </div>
+                    {block.startTime && block.endTime && (
+                      <div className="flex items-center gap-1">
+                        <Clock size={16} /> {formatTime(block.startTime)} -{' '}
+                        {formatTime(block.endTime)}
+                      </div>
+                    )}
+                    {block.price > 0 && (
+                      <div className="flex items-center gap-1">
+                        <Tag size={16} /> Rp{block.price.toLocaleString()}
+                      </div>
+                    )}
                   </div>
                   <p className="md:text-lg font-roboto">{block.description}</p>
                 </>
@@ -53,7 +56,6 @@ export const ItineraryDay = ({ section }: { section: Section }) => {
                 <div className="absolute -left-1 bottom-8 w-4 border-t-2 border-[#94A3B8]"></div>
               )}
             </div>
-
             {!isLastBlock && block.routeToNext && (
               <div className="ml-6 my-2">
                 <RouteInfo
