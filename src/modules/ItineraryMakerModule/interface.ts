@@ -26,7 +26,6 @@ export interface CreateItineraryDto {
   endDate: string
   tags?: string[]
   sections: Section[]
-  reminderOption?: string
 }
 
 export interface Tag {
@@ -87,4 +86,26 @@ export interface PlaceResult {
 export interface PlaceDetails {
   html_attributions: string[]
   result: PlaceResult
+}
+
+export interface ItineraryReminderDto {
+  itineraryId: string
+  recipient?: string
+  recipientName?: string
+  tripName?: string
+  startDate: string
+  reminderOption: string
+}
+
+export interface CreateItineraryReminderResponse
+  extends CustomFetchBaseResponse {
+  id: string
+  updatedAt: string
+  createdAt: string
+  itineraryId: string
+  recipient: string
+  recipientName: string
+  tripName: string
+  startDate: string
+  reminderOption: string
 }
