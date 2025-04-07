@@ -51,8 +51,6 @@ export async function customFetch<T>(
     headers.Cookies = serverCookies.toString()
   }
 
-  console.log(headers.authorization)
-
   let rawResult = await fetch(fullUrl.toString(), {
     headers,
     ...options,

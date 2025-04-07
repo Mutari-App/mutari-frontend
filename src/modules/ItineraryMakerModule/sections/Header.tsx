@@ -1,21 +1,32 @@
 import React from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Wand2 } from 'lucide-react'
 
 interface ItineraryHeaderProps {
   title: string
+  description?: string
   coverImage?: string
   onTitleChange: (e: React.ChangeEvent<HTMLInputElement>) => void
+  onDescChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   isSubmitting: boolean
+  isGenerating: boolean
+  onGenerateFeedback: () => void
   onSubmit: () => void
+  isContingency: boolean
 }
 
 export const ItineraryHeader: React.FC<ItineraryHeaderProps> = ({
   title,
+  description,
   coverImage,
   onTitleChange,
+  onDescChange,
   isSubmitting,
+  isGenerating,
+  onGenerateFeedback,
   onSubmit,
+  isContingency,
 }) => {
   return (
     <div
@@ -29,14 +40,37 @@ export const ItineraryHeader: React.FC<ItineraryHeaderProps> = ({
       }}
     >
       <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
-      <div className="absolute bottom-0 left-0 flex p-2 md:p-4 z-10">
-        <Input
-          className="text-lg md:text-4xl font-bold text-white bg-transparent border-none h-fit focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
-          value={title}
-          onChange={onTitleChange}
-          placeholder="Enter trip title"
-        />
+      <div className="absolute bottom-0 left-0 z-10 p-2 md:p-4">
+        <div className="flex flex-col">
+          <Input
+            className="text-lg md:text-4xl font-bold text-white bg-transparent border-none h-fit focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 disabled:opacity-100 disabled:text-white disabled:bg-transparent"
+            value={title}
+            onChange={onTitleChange}
+            placeholder="Enter trip title"
+            disabled={isContingency}
+          />
+          <Input
+            className="text-sm md:text-md font-raleway text-[#94A3B8] bg-transparent border-none h-fit focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 disabled:opacity-100 disabled:text-[#94A3B8] disabled:bg-transparent"
+            value={description}
+            onChange={onDescChange}
+            placeholder="Masukkan Deskripsi Perjalanan"
+            disabled={isContingency}
+          />
+        </div>
       </div>
+
+      {!isContingency && (
+        <Button
+          size="sm"
+          className="absolute top-4 left-4 z-10 bg-gradient-to-r from-[#0073E6] to-[#80004B] text-white hover:from-[#80004B] hover:to-[#0073E6]"
+          onClick={onGenerateFeedback}
+          disabled={isGenerating}
+        >
+          <Wand2 size={16} />
+          {isGenerating ? 'Generating...' : 'Generate AI Feedback'}
+        </Button>
+      )}
+
       <Button
         size="sm"
         className="absolute top-4 right-4 z-10 bg-gradient-to-r from-[#0073E6] to-[#004080] text-white hover:from-[#0066cc] hover:to-[#003366]"

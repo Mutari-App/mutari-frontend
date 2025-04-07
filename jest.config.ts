@@ -23,6 +23,19 @@ const config: Config = {
       },
     ],
   },
+  coveragePathIgnorePatterns: [
+    '<rootDir>/node_modules/',
+    '<rootDir>/.next/',
+    '<rootDir>/dist/',
+    '<rootDir>/coverage/',
+    '<rootDir>/src/components/',
+    '<rootDir>/src/contexts/',
+    '<rootDir>/src/hooks/',
+    '<rootDir>/src/icons/',
+    '<rootDir>/src/lib/',
+    '<rootDir>/src/utils/customFetch/',
+    '<rootDir>/src/utils/getImage.ts',
+  ],
 }
 
 // createJestConfig is exported this way to ensure that next/jest can load the Next.js config which is async

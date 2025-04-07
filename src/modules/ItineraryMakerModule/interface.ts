@@ -1,4 +1,5 @@
 import { type CustomFetchBaseResponse } from '@/utils/customFetch/interface'
+import { type TransportMode } from '@/utils/maps'
 
 export interface Block {
   id: string
@@ -9,7 +10,17 @@ export interface Block {
   endTime?: string
   location?: string
   price?: number
-  photoUrl?: string
+  routeToNext?: Route
+  routeFromPrevious?: Route
+}
+
+export interface Route {
+  sourceBlockId: string
+  destinationBlockId: string
+  distance: number // Distance in meters
+  duration: number // Duration in seconds
+  polyline?: string
+  transportMode?: TransportMode
 }
 
 export interface Section {
@@ -61,4 +72,84 @@ export interface CreateItineraryResponse extends CustomFetchBaseResponse {
       photoUrl?: string
     }[]
   }[]
+}
+
+export interface FeedbackItem {
+  target: {
+    sectionIndex: number
+    blockIndex: number
+    blockType: 'LOCATION' | 'NOTE'
+    field?: 'startTime' | 'endTime' | 'price' | 'description' | 'title'
+  }
+  suggestion: string
+}
+
+export interface GetPlaceDetailsResponse extends CustomFetchBaseResponse {
+  details: PlaceDetails
+}
+export interface Photo {
+  height: number
+  html_attributions: string[]
+  photo_reference: string
+  width: number
+}
+
+export interface PlaceResult {
+  name: string
+  photos: Photo[]
+  rating: number
+  user_ratings_total: number
+  vicinity?: string
+  international_phone_number?: string
+  website?: string
+}
+
+export interface PlaceDetails {
+  html_attributions: string[]
+  result: PlaceResult
+}
+
+export interface ItineraryReminderDto {
+  itineraryId: string
+  recipient?: string
+  recipientName?: string
+  tripName?: string
+  startDate: string
+  reminderOption: string
+}
+
+export interface CreateItineraryReminderResponse
+  extends CustomFetchBaseResponse {
+  id: string
+  updatedAt: string
+  createdAt: string
+  itineraryId: string
+  recipient: string
+  recipientName: string
+  tripName: string
+  startDate: string
+  reminderOption: string
+}
+
+export interface ReminderOption {
+  label: string
+  value: 'NONE' | 'TEN_MINUTES_BEFORE' | 'ONE_HOUR_BEFORE' | 'ONE_DAY_BEFORE'
+  available: boolean
+}
+
+export interface ItineraryMakerModuleProps {
+  isContingency?: boolean
+  isEdit?: boolean
+}
+
+export interface ContingencyPlanDto {
+  id: string
+  itineraryId: string
+  title: string
+  description?: string
+  sections: Section[]
+}
+
+export interface ContingencyPlanResponse extends CustomFetchBaseResponse {
+  contingency: ContingencyPlanDto[]
 }

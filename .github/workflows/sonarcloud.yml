@@ -31,7 +31,7 @@ jobs:
         run: pnpm install
 
       - name: Run tests & generate coverage
-        run: pnpm jest "__tests__/PreRegisterForm.test.tsx" --coverage
+        run: pnpm test:cov
 
       - uses: SonarSource/sonarqube-scan-action@v4
         env:

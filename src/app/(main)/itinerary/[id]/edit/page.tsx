@@ -9,5 +9,5 @@ export function generateMetadata(): Metadata {
 }
 
 export default function EditItineraryPage() {
-  return <ItineraryMakerModule />
+  return <ItineraryMakerModule isEdit={true} />
 }

@@ -7,7 +7,7 @@ import React, {
   useRef,
   useState,
 } from 'react'
-import { getCookie, setCookie, getCookies } from 'cookies-next/client'
+import { setCookie } from 'cookies-next/client'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { toast } from 'sonner'
 import { useBaseUrlWithPath } from '@/hooks/useBaseUrlWithPath'
@@ -18,14 +18,16 @@ import {
   type User,
   type ValidateResponse,
 } from './interface'
-import { customFetch, customFetchBody } from '@/utils/customFetch'
+import { customFetch, customFetchBody } from '@/utils/newCustomFetch'
+import { deleteCookie, getCookie } from 'cookies-next'
+import { Loader2 } from 'lucide-react'
 
 const AuthContext = createContext({} as AuthContextInterface)
 
 export const useAuthContext = () => useContext(AuthContext)
 
 export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
-  user: userFromServer,
+  userResponse,
   children,
 }) => {
   const launchingDate = new Date(
@@ -34,8 +36,13 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
   const nowDate = new Date()
   const isLaunching = nowDate > launchingDate
 
-  const [user, setUser] = useState<null | User>(userFromServer)
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false)
+  const [user, setUser] = useState<null | User>(userResponse.user)
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(
+    !!userResponse.user
+  )
+  const [loadingRefreshToken, setLoadingRefreshToken] = useState<boolean>(
+    userResponse.statusCode === 401
+  )
   const searchParams = useSearchParams()
   const router = useRouter()
   const developmentLock = useRef(false)
@@ -54,8 +61,7 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
       setCookie('AT', response.accessToken)
       setIsAuthenticated(true)
       const responseUser = await customFetch<UserResponseInterface>(
-        '/pre-register/referral-code',
-        { isAuthorized: true }
+        '/pre-register/referral-code'
       )
 
       if (responseUser.statusCode !== 200) throw new Error(responseUser.message)
@@ -105,23 +111,36 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
   const logout = async () => {
     const response = await customFetch('/auth/logout', {
       method: 'POST',
+      credentials: 'include',
     })
+    setIsAuthenticated(false)
+    await deleteCookie('accessToken')
+    await deleteCookie('refreshToken')
     return response
   }
 
   const getMe = async () => {
-    try {
-      // TODO: change this endpoint to a more proper protected endpoint
-      const response = await customFetch('/itineraries/me/completed')
+    const refreshToken = getCookie('refreshToken')
+    if (userResponse.statusCode === 401 && !!refreshToken) {
+      try {
+        setLoadingRefreshToken(true)
+        const response = await customFetch<UserResponseInterface>('/auth/me')
 
-      if (response.statusCode === 200) {
-        setIsAuthenticated(true)
-      } else {
+        if (response.statusCode === 200) {
+          setIsAuthenticated(true)
+          setUser(response.user)
+        } else {
+          setIsAuthenticated(false)
+          setUser(null)
+        }
+      } catch (err) {
         setIsAuthenticated(false)
+        setUser(null)
+      } finally {
+        setLoadingRefreshToken(false)
       }
-    } catch (err) {
-      setIsAuthenticated(false)
     }
+    setLoadingRefreshToken(false)
   }
 
   useEffect(() => {
@@ -131,7 +150,9 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
       const accessToken = getCookie('AT')
       setIsAuthenticated(!!accessToken)
     }
+  }, [])
 
+  useEffect(() => {
     if (
       !isLaunching &&
       (!developmentLock.current || process.env.NODE_ENV === 'production')
@@ -165,8 +186,15 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
     login,
     logout,
   }
-
   return (
-    <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>
+    <AuthContext.Provider value={contextValue}>
+      {loadingRefreshToken ? (
+        <div className="flex items-center justify-center h-screen">
+          <Loader2 className="animate-spin w-6 h-6 mr-2" />
+        </div>
+      ) : (
+        children
+      )}
+    </AuthContext.Provider>
   )
 }
