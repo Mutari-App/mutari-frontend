@@ -50,29 +50,7 @@ export const Navbar: React.FC = () => {
       window.removeEventListener('scroll', handleScroll)
     }
   }, [])
-
-  const [isValidItinerary, setIsValidItinerary] = useState<boolean | null>(null)
-
-  useEffect(() => {
-    void (async () => {
-      const pathnameParts = pathname.split('/')
-      const itineraryId = pathnameParts[2]
-
-      if (!itineraryId || itineraryId === 'create') return
-
-      try {
-        const res = await customFetch<{ id: string }>(
-          `/itineraries/${itineraryId}`,
-          {
-            isAuthorized: true,
-          }
-        )
-        setIsValidItinerary(res.statusCode === 200)
-      } catch {
-        setIsValidItinerary(false)
-      }
-    })()
-  }, [pathname])
+  console.log({ isAuthenticated })
 
   const handleLogout = async () => {
     try {
@@ -82,13 +60,13 @@ export const Navbar: React.FC = () => {
       }
       router.push('/login')
       toast.success('Logout berhasil!')
-    } catch (err: any) {
-      toast.error((err as Error).message)
+    } catch (error) {
+      if (error instanceof Error) {
+        toast.error(error.message)
+      } else {
+        toast.error('Terjadi kesalahan tidak terduga.')
+      }
     }
-  }
-
-  if (pathname === '/itinerary/create' || isValidItinerary) {
-    return null
   }
 
   return (

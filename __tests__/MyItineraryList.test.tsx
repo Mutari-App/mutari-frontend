@@ -2,14 +2,58 @@ import { render, screen, waitFor } from '@testing-library/react'
 import '@testing-library/jest-dom'
 import MyItineraryList from '@/modules/ItineraryModule/sections/MyItineraryList'
 import type { ItineraryData } from '@/modules/ItineraryModule/module-elements/types'
+import { ImageProps } from 'next/image'
+import { ChevronRightIcon } from 'lucide-react'
 
 // Mock API response
 jest.mock('@/utils/customFetch')
 jest.mock('lucide-react', () => ({
   ChevronLeft: () => 'ChevronLeft',
+  ChevronRight: () => 'ChevronRight',
   ChevronRightIcon: () => 'ChevronRightIcon',
-  MapPinIcon: () => 'MapPinIcon',
-  EllipsisIcon: () => 'EllipsisIcon',
+  MapPin: () => 'MapPin',
+  Ellipsis: () => 'Ellipsis',
+}))
+
+jest.mock('@/modules/ItineraryModule/module-elements/ItineraryCard', () => ({
+  __esModule: true,
+  default: ({ item }: { item: Itinerary }) => (
+    <div data-testid="itinerary-card">
+      <h3>{item.title}</h3>
+    </div>
+  ),
+}))
+
+const mockPush = jest.fn()
+jest.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push: mockPush,
+    replace: jest.fn(),
+  }),
+  useSearchParams: () => ({
+    get: jest.fn(),
+    has: jest.fn(),
+    getAll: jest.fn(),
+    forEach: jest.fn(),
+    entries: jest.fn(),
+    keys: jest.fn(),
+    values: jest.fn(),
+  }),
+  usePathname: () => '/mock-path',
+}))
+
+jest.mock('next/image', () => ({
+  __esModule: true,
+  default: ({ alt, ...props }: ImageProps) => {
+    // eslint-disable-next-line @next/next/no-img-element
+    return (
+      <img
+        {...props}
+        alt={alt || ''}
+        src={typeof props.src === 'string' ? props.src : ''}
+      />
+    )
+  },
 }))
 
 const mockData: ItineraryData[] = [
@@ -19,10 +63,12 @@ const mockData: ItineraryData[] = [
     title: 'Trip to Bali',
     startDate: '2025-03-01',
     endDate: '2025-03-05',
-    coverImage: 'bali.jpg',
+    coverImage: 'https://example.com/images/bali.jpg',
     isPublished: false,
     isCompleted: false,
     locationCount: 0,
+    pendingInvites: [],
+    invitedUsers: [],
   },
   {
     id: 'itinerary2',
@@ -30,10 +76,12 @@ const mockData: ItineraryData[] = [
     title: 'Trip to Japan',
     startDate: '2025-04-10',
     endDate: '2025-04-20',
-    coverImage: 'japan.jpg',
+    coverImage: 'https://example.com/images/japan.jpg',
     isPublished: true,
     isCompleted: false,
     locationCount: 5,
+    pendingInvites: [],
+    invitedUsers: [],
   },
 ]
 
@@ -46,7 +94,12 @@ const mockMetadata = {
 describe('MyItineraryList Component', () => {
   it('renders empty state when there is no data', async () => {
     render(
-      <MyItineraryList data={[]} metadata={mockMetadata} refresh={jest.fn} />
+      <MyItineraryList
+        searchQueryParams=""
+        data={[]}
+        metadata={mockMetadata}
+        refresh={jest.fn()}
+      />
     )
 
     await waitFor(() =>
@@ -61,7 +114,8 @@ describe('MyItineraryList Component', () => {
       <MyItineraryList
         metadata={mockMetadata}
         data={mockData}
-        refresh={jest.fn}
+        refresh={jest.fn()}
+        searchQueryParams=""
       />
     )
 
@@ -76,7 +130,8 @@ describe('MyItineraryList Component', () => {
       <MyItineraryList
         data={mockData}
         metadata={mockMetadata}
-        refresh={jest.fn}
+        refresh={jest.fn()}
+        searchQueryParams=""
       />
     )
 

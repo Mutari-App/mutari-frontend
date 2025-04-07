@@ -5,6 +5,7 @@ import { Tag, X } from 'lucide-react'
 import { type Block } from '../interface'
 
 interface PriceInputProps {
+  sectionNumber: number
   blockId: string
   price?: number
   isVisible: boolean
@@ -17,14 +18,21 @@ interface PriceInputProps {
     field: T,
     value: Block[T]
   ) => void
+  removeFeedbackForField: (
+    sectionNumber: number,
+    blockId: string,
+    field: keyof Block
+  ) => void
 }
 
 export const PriceInput: React.FC<PriceInputProps> = ({
+  sectionNumber,
   blockId,
   price,
   isVisible,
   toggleInput,
   updateBlock,
+  removeFeedbackForField,
 }) => {
   if (!isVisible) {
     return (
@@ -46,15 +54,16 @@ export const PriceInput: React.FC<PriceInputProps> = ({
       <Input
         type="number"
         placeholder="50000"
-        className="w-24 h-6 text-sm focus-visible:ring-1 focus-visible:ring-offset-0"
+        className="w-[74px] h-6 text-sm focus-visible:ring-1 focus-visible:ring-offset-0"
         value={price ?? ''}
-        onChange={(e) =>
+        onChange={(e) => {
+          removeFeedbackForField(sectionNumber, blockId, 'price')
           updateBlock(
             blockId,
             'price',
             e.target.value ? Number(e.target.value) : undefined
           )
-        }
+        }}
       />
       <Button
         variant="ghost"

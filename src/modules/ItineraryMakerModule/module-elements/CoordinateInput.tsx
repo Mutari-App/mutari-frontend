@@ -43,7 +43,7 @@ export const CoordinateInput: React.FC<CoordinateInputProps> = ({
     <div className="flex items-center gap-1 bg-gray-100 p-1 rounded-md h-8">
       <MapPin className="h-[22px] w-[22px] ml-1" />
       <Input
-        className="w-36 h-6 text-sm focus-visible:ring-1 focus-visible:ring-offset-0"
+        className="w-full min-[500px]:w-80 h-6 text-sm focus-visible:ring-1 focus-visible:ring-offset-0"
         placeholder="0,0"
         value={location ?? ''}
         onChange={(e) => updateBlock(blockId, 'location', e.target.value)}

@@ -1,6 +1,14 @@
 import { render, screen } from '@testing-library/react'
 import { ItineraryHeader } from '@/modules/DetailItineraryModule/module-elements/ItineraryHeader'
 import React from 'react'
+import userEvent from '@testing-library/user-event'
+
+// Mock the auth context
+jest.mock('@/contexts/AuthContext', () => ({
+  useAuthContext: jest.fn(() => ({
+    user: { id: 'USR-123' }, // Default to matching userId in mockData
+  })),
+}))
 
 jest.mock('next/image', () => ({
   __esModule: true,
@@ -14,45 +22,22 @@ jest.mock('@/utils/getImage', () => ({
 }))
 
 const mockData = {
+  id: 'itinerary-123',
   userId: 'USR-123',
-  id: 'ITN-123',
   title: 'Trip to Bali',
   description: 'A fun trip to Bali!',
-  coverImage: 'https://example.com/bali.jpg',
-  startDate: '2025-06-10',
-  endDate: '2025-06-15',
+  coverImage: '/images/bali.jpg',
+  startDate: '2023-06-01',
+  endDate: '2023-06-10',
+  createdAt: '2023-05-01T10:00:00Z',
+  updatedAt: '2023-05-10T10:00:00Z',
   isPublished: true,
   isCompleted: false,
-  updatedAt: '2025-06-10',
-  createdAt: '2025-06-15',
-  tags: [],
-  sections: [
-    {
-      id: 'section1',
-      itineraryId: 'ITN-123',
-      sectionNumber: 1,
-      updatedAt: '03-04-2022',
-      createdAt: '03-04-2022',
-      title: 'Section 1',
-      blocks: [
-        {
-          id: 'block1',
-          updatedAt: '03-04-2022',
-          createdAt: '03-04-2022',
-          title: 'Block Title',
-          description: 'Block Description',
-          sectionId: 'section1',
-          position: 1,
-          blockType: 'LOCATION',
-          startTime: '03-04-2022',
-          endTime: '03-04-2022',
-          location: 'New York',
-          price: 100,
-          photoUrl: 'https://example.com/photo.jpg',
-        },
-      ],
-    },
+  tags: [
+    { tag: { id: 'tag-1', name: 'Beach' } },
+    { tag: { id: 'tag-2', name: 'Adventure' } },
   ],
+  sections: [],
 }
 
 describe('ItineraryHeader Component', () => {
@@ -62,8 +47,34 @@ describe('ItineraryHeader Component', () => {
     expect(screen.getByText('A fun trip to Bali!')).toBeInTheDocument()
   })
 
-  it('renders the edit button', () => {
+  it('renders the edit button when user is the owner', () => {
     render(<ItineraryHeader data={mockData} />)
     expect(screen.getByText('Edit')).toBeInTheDocument()
+  })
+
+  it('does not render the edit button when user is not the owner', () => {
+    // Update the mock to return a different user ID
+    const authContextMock = jest.requireMock('@/contexts/AuthContext') as {
+      useAuthContext: jest.Mock
+    }
+    authContextMock.useAuthContext.mockReturnValueOnce({
+      user: { id: 'different-user' },
+    })
+
+    render(<ItineraryHeader data={mockData} />)
+    expect(screen.queryByText('Edit')).not.toBeInTheDocument()
+  })
+
+  it('navigates to edit page when edit button is clicked', async () => {
+    // Mock the location.href property
+    Object.defineProperty(window, 'location', {
+      value: { href: '' },
+      writable: true,
+    })
+
+    render(<ItineraryHeader data={mockData} />)
+    await userEvent.click(screen.getByText('Edit'))
+
+    expect(window.location.href).toBe(`${mockData.id}/edit`)
   })
 })

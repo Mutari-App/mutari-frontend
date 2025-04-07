@@ -1,3 +1,23 @@
+enum TransportMode {
+  DRIVE = 'DRIVE',
+  WALK = 'WALK',
+  BICYCLE = 'BICYCLE',
+  TRANSIT = 'TRANSIT',
+  TWO_WHEELER = 'TWO_WHEELER',
+}
+
+interface Route {
+  id: string
+  createdAt: string
+  updatedAt: string
+  sourceBlockId: string
+  destinationBlockId: string
+  distance: number
+  duration: number
+  polyline?: string
+  transportMode: TransportMode
+}
+
 interface Block {
   updatedAt: string
   createdAt: string
@@ -12,6 +32,8 @@ interface Block {
   location: string
   price: number
   photoUrl: string | undefined
+  routeToNext?: Route
+  routeFromPrevious?: Route
 }
 
 interface Section {
@@ -52,4 +74,23 @@ interface ItineraryDetailResponse {
   success: boolean
   message: string
   data: Itinerary
+}
+
+interface ItineraryReminder {
+  updatedAt: string
+  createdAt: string
+  id: string
+  itineraryId: string
+  recipient: string
+  recipientName: string
+  tripName: string
+  startDate: string
+  reminderOption: string
+}
+
+interface ItineraryReminderResponse {
+  statusCode: number
+  success: boolean
+  message: string
+  data: ItineraryReminder
 }

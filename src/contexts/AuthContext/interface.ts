@@ -3,7 +3,10 @@ import { type CustomFetchBaseResponse } from '@/utils/customFetch/interface'
 
 export interface AuthContextProviderProps {
   children: ReactNode
-  user: User | null
+  userResponse: {
+    statusCode: number
+    user: User | null
+  }
 }
 
 export interface AuthContextInterface {
@@ -22,7 +25,9 @@ export interface AuthContextInterface {
 }
 
 export interface User {
+  id: string
   email: string
+  firstName: string
   referralCode: string
   usedCount: number
 }

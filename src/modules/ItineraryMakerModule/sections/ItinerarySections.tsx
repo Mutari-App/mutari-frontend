@@ -20,11 +20,18 @@ import {
   ChevronDown,
   Trash,
 } from 'lucide-react'
-import { type Block, type Section } from '../interface'
+import { FeedbackItem, type Block, type Section } from '../interface'
+import { type TransportMode } from '@/utils/maps'
 import { ItineraryBlock } from '../module-elements/ItineraryBlock'
 
 interface ItinerarySectionsProps {
   sections: Section[]
+  feedbackItems: FeedbackItem[]
+  removeFeedbackForField: (
+    sectionIndex: number,
+    blockIndex: number,
+    field: 'title' | 'description' | 'startTime' | 'endTime' | 'price'
+  ) => void
   timeWarning: {
     blockId: string
     message: string
@@ -49,11 +56,17 @@ interface ItinerarySectionsProps {
   ) => void
   removeBlock: (blockId: string) => void
   handleDragEnd: (result: DropResult) => void
+  onTransportModeChange?: (
+    blockId: string,
+    mode: TransportMode
+  ) => Promise<boolean>
 }
 
 export const ItinerarySections: React.FC<ItinerarySectionsProps> = ({
   sections,
   timeWarning,
+  feedbackItems,
+  removeFeedbackForField,
   isInputVisible,
   toggleInput,
   updateSectionTitle,
@@ -64,7 +77,26 @@ export const ItinerarySections: React.FC<ItinerarySectionsProps> = ({
   updateBlock,
   removeBlock,
   handleDragEnd,
+  onTransportModeChange,
 }) => {
+  // Helper function to check if a block should show route information
+  const shouldShowRoute = (section: Section, blockIndex: number): boolean => {
+    if (!section.blocks) return false
+
+    // Current block must be a location block
+    const currentBlock = section.blocks[blockIndex]
+    if (currentBlock.blockType !== 'LOCATION' || !currentBlock.location)
+      return false
+
+    // Must have a next block that is also a location block
+    const nextBlock = section.blocks[blockIndex + 1]
+    if (!nextBlock || nextBlock.blockType !== 'LOCATION' || !nextBlock.location)
+      return false
+
+    // Must have route information
+    return !!currentBlock.routeToNext
+  }
+
   return (
     <DragDropContext onDragEnd={handleDragEnd}>
       {sections.map((section) => (
@@ -123,6 +155,8 @@ export const ItinerarySections: React.FC<ItinerarySectionsProps> = ({
                 {section.blocks?.map((block, blockIndex) => (
                   <ItineraryBlock
                     key={`block-${section.sectionNumber}-${blockIndex}`}
+                    feedbackItems={feedbackItems}
+                    removeFeedbackForField={removeFeedbackForField}
                     block={block}
                     blockIndex={blockIndex}
                     sectionNumber={section.sectionNumber}
@@ -131,6 +165,9 @@ export const ItinerarySections: React.FC<ItinerarySectionsProps> = ({
                     toggleInput={toggleInput}
                     updateBlock={updateBlock}
                     removeBlock={removeBlock}
+                    showRoute={shouldShowRoute(section, blockIndex)}
+                    routeInfo={block.routeToNext}
+                    onTransportModeChange={onTransportModeChange}
                   />
                 ))}
                 {provided.placeholder}

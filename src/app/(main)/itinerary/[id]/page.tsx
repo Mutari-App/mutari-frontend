@@ -7,6 +7,6 @@ export function generateMetadata(): Metadata {
   }
 }
 
-export default function Home() {
+export default function ItineraryDetailPage() {
   return <DetailItineraryModule />
 }
