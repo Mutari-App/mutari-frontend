@@ -108,3 +108,31 @@ export interface PlaceDetails {
   html_attributions: string[]
   result: PlaceResult
 }
+
+export interface ItineraryReminderDto {
+  itineraryId: string
+  recipient?: string
+  recipientName?: string
+  tripName?: string
+  startDate: string
+  reminderOption: string
+}
+
+export interface CreateItineraryReminderResponse
+  extends CustomFetchBaseResponse {
+  id: string
+  updatedAt: string
+  createdAt: string
+  itineraryId: string
+  recipient: string
+  recipientName: string
+  tripName: string
+  startDate: string
+  reminderOption: string
+}
+
+export interface ReminderOption {
+  label: string
+  value: 'NONE' | 'TEN_MINUTES_BEFORE' | 'ONE_HOUR_BEFORE' | 'ONE_DAY_BEFORE'
+  available: boolean
+}
