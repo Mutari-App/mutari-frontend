@@ -76,7 +76,6 @@ function AutocompleteInput({
     const results = await getGeocode({ address })
     const { lat, lng } = getLatLng(results[0])
     updateBlock(blockId, 'location', `${lat},${lng}`)
-    toggleInput(blockId, 'location')
     updateBlock(blockId, 'title', formattedValue)
     setPositionToView({ lat, lng })
   }

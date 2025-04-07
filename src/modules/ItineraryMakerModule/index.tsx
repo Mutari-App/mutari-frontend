@@ -18,8 +18,11 @@ import {
   type Block,
   type CreateItineraryResponse,
   type Tag,
+  type ItineraryReminderDto,
+  CreateItineraryReminderResponse,
   FeedbackItem,
   type Route,
+  type ReminderOption,
 } from './interface'
 import { customFetch, customFetchBody } from '@/utils/customFetch'
 import { type DropResult } from '@hello-pangea/dnd'
@@ -29,6 +32,7 @@ import { ItineraryHeader } from './sections/Header'
 import { ItinerarySections } from './sections/ItinerarySections'
 import { DateRangeAlertDialog } from './module-elements/DateRangeAlertDialog'
 import { TagSelector } from './module-elements/TagSelector'
+import { ReminderSelector } from './module-elements/ReminderSelector'
 import { CldUploadButton } from 'next-cloudinary'
 import { cn } from '@/lib/utils'
 import { useAuthContext } from '@/contexts/AuthContext'
@@ -48,9 +52,33 @@ export default function ItineraryMakerModule() {
   const nowDate = new Date()
   const isLaunching = nowDate > launchingDate
 
+  const [reminderOptions, setReminderOptionAvailability] = useState<
+    ReminderOption[]
+  >([
+    {
+      label: 'Tidak ada notifikasi',
+      value: 'NONE',
+      available: true,
+    },
+    {
+      label: '10 menit sebelum',
+      value: 'TEN_MINUTES_BEFORE',
+      available: false,
+    },
+    {
+      label: '1 jam sebelum',
+      value: 'ONE_HOUR_BEFORE',
+      available: false,
+    },
+    {
+      label: '1 hari sebelum',
+      value: 'ONE_DAY_BEFORE',
+      available: false,
+    },
+  ])
+
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isGenerating, setIsGenerating] = useState(false)
-  const [dismissedFeedbacks, setDismissedFeedbacks] = useState<string[]>([])
   const [feedbackItems, setFeedbackItems] = useState<FeedbackItem[]>([])
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false)
   const [timeWarning, setTimeWarning] = useState<{
@@ -67,6 +95,9 @@ export default function ItineraryMakerModule() {
   const [data, setData] = useState<Itinerary | null>(null)
   const [positionToView, setPositionToView] =
     useState<google.maps.LatLngLiteral | null>(null)
+  const [reminderData, setReminderData] = useState<ItineraryReminder | null>(
+    null
+  )
   const wasAlreadyRequested = useRef(false)
 
   const initialItineraryData = useRef<CreateItineraryDto>({
@@ -91,6 +122,15 @@ export default function ItineraryMakerModule() {
     ],
   })
 
+  const initialItineraryReminderData = useRef<ItineraryReminderDto>({
+    itineraryId: '',
+    recipient: user?.email,
+    recipientName: 'User',
+    tripName: 'Itinerary Tanpa Judul',
+    startDate: '',
+    reminderOption: 'NONE',
+  })
+
   const [visibleInputs, setVisibleInputs] = useState<
     Record<
       string,
@@ -106,8 +146,10 @@ export default function ItineraryMakerModule() {
     initialItineraryData.current
   )
 
-  const itineraryDataRef = useRef(itineraryData)
+  const [itineraryReminderData, setItineraryReminderData] =
+    useState<ItineraryReminderDto>(initialItineraryReminderData.current)
 
+  const itineraryDataRef = useRef(itineraryData)
   useEffect(() => {
     itineraryDataRef.current = itineraryData
   }, [itineraryData])
@@ -115,8 +157,9 @@ export default function ItineraryMakerModule() {
   // Fetch detail if id is provided
   useEffect(() => {
     const fetchData = async () => {
+      // get Itinerary data
+      wasAlreadyRequested.current = true
       try {
-        wasAlreadyRequested.current = true
         const res = await customFetch<ItineraryDetailResponse>(
           `/itineraries/${itineraryId}`,
           {
@@ -137,6 +180,23 @@ export default function ItineraryMakerModule() {
       } catch (err: any) {
         return <NotFound statusCode={404} />
       }
+
+      // get Itinerary Reminder data
+      try {
+        const res = await customFetch<ItineraryReminderResponse>(
+          `/notification/${itineraryId}`,
+          {
+            method: 'GET',
+            credentials: 'include',
+            isAuthorized: true,
+          }
+        )
+
+        if (res.statusCode !== 200) throw new Error(res.message)
+
+        setReminderData(res.data)
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (error) {}
     }
     if (!wasAlreadyRequested.current) {
       void fetchData()
@@ -205,6 +265,12 @@ export default function ItineraryMakerModule() {
           to: new Date(data.endDate),
         })
       }
+      // Validate available reminder option selection
+      validateReminderOptionSelection(
+        data.startDate,
+        data.sections[0]?.blocks?.[0]?.startTime
+      )
+
       initialItineraryData.current = {
         title: data.title,
         description: data.description,
@@ -215,9 +281,32 @@ export default function ItineraryMakerModule() {
         sections: mappedSections,
       } as CreateItineraryDto
       setItineraryData(initialItineraryData.current)
+
+      initialItineraryReminderData.current = {
+        itineraryId: itineraryId,
+        recipient: user?.email,
+        recipientName: user?.firstName,
+        tripName: data.title,
+        reminderOption: 'NONE',
+        startDate: data.startDate,
+      } as ItineraryReminderDto
+      setItineraryReminderData(initialItineraryReminderData.current)
     }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data])
+
+  // Map if reminder data is found
+  useEffect(() => {
+    if (reminderData) {
+      setItineraryReminderData((prev) => ({
+        ...prev,
+        reminderOption: reminderData.reminderOption,
+        startDate: reminderData.startDate,
+      }))
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reminderData])
 
   // Load saved itinerary data from local storage
   useEffect(() => {
@@ -250,6 +339,7 @@ export default function ItineraryMakerModule() {
     }
   }, [])
 
+  // Fetch tags
   useEffect(() => {
     const fetchTags = async () => {
       try {
@@ -273,6 +363,7 @@ export default function ItineraryMakerModule() {
     void fetchTags()
   }, [])
 
+  // Run unsaved changes check everytime ItineraryData is updated
   useEffect(() => {
     // Check for unsaved changes by comparing current data with initial data
     const checkIsBlockModified = (section: Section, section_index: number) => {
@@ -593,6 +684,13 @@ export default function ItineraryMakerModule() {
     }))
   }
 
+  const handleReminderChange = (reminderOption: string) => {
+    setItineraryReminderData((prev) => ({
+      ...prev,
+      reminderOption,
+    }))
+  }
+
   const removeTag = (tagId: string) => {
     setItineraryData((prev) => ({
       ...prev,
@@ -672,6 +770,14 @@ export default function ItineraryMakerModule() {
         blockToUpdate.price = undefined
       } else if (inputType === 'location') {
         blockToUpdate.location = undefined
+      }
+
+      if (blockIndex === 0 && section.sectionNumber === 1) {
+        if (itineraryData.startDate && inputType === 'time')
+          validateReminderOptionSelection(
+            itineraryData.startDate,
+            blockToUpdate.startTime
+          )
       }
 
       updatedBlocks[blockIndex] = blockToUpdate
@@ -776,12 +882,30 @@ export default function ItineraryMakerModule() {
     } else {
       applyDateRangeChange(range)
     }
+
+    const startDate = range.from.toString()
+    validateReminderOptionSelection(
+      startDate,
+      itineraryData.sections[0]?.blocks?.[0]?.startTime
+    )
   }
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setItineraryData((prev) => ({
       ...prev,
       title: e.target.value,
+    }))
+
+    setItineraryReminderData((prev) => ({
+      ...prev,
+      tripName: e.target.value,
+    }))
+  }
+
+  const handleDescChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setItineraryData((prev) => ({
+      ...prev,
+      description: e.target.value,
     }))
   }
 
@@ -969,6 +1093,52 @@ export default function ItineraryMakerModule() {
     return true
   }
 
+  // Validate reminder selection (end time should be after start time)
+  const validateReminderOptionSelection = (
+    startDate: string | null,
+    startTime: string | undefined
+  ) => {
+    if (startTime && startDate) {
+      const itineraryTime = new Date(startDate)
+      const itineraryFirstBlockTime = new Date(startTime)
+      const joinedDateTime =
+        itineraryTime.getTime() +
+        itineraryFirstBlockTime.getHours() * 60 * 60 * 1000 +
+        itineraryFirstBlockTime.getMinutes() * 1 * 60 * 1000
+      const timeDifference = joinedDateTime - nowDate.getTime()
+
+      setReminderOptionAvailability((prev) =>
+        prev.map((option) => ({
+          ...option,
+          available: (() => {
+            if (option.value === 'TEN_MINUTES_BEFORE')
+              return timeDifference >= 10 * 60 * 1000
+            if (option.value === 'ONE_HOUR_BEFORE')
+              return timeDifference >= 60 * 60 * 1000
+            if (option.value === 'ONE_DAY_BEFORE')
+              return timeDifference >= 24 * 60 * 60 * 1000
+            return true
+          })(),
+        }))
+      )
+
+      setItineraryReminderData((prev) => ({
+        ...prev,
+        startDate: new Date(joinedDateTime).toISOString(),
+      }))
+    } else {
+      setReminderOptionAvailability((prev) =>
+        prev.map((option) => ({
+          ...option,
+          available: (() => {
+            if (option.value === 'NONE') return true
+            return false
+          })(),
+        }))
+      )
+    }
+  }
+
   const updateRoutes = async (blockId?: string) => {
     const updatedSections = await updateRoutesBetweenBlocks(
       itineraryDataRef.current.sections,
@@ -1028,6 +1198,14 @@ export default function ItineraryMakerModule() {
         updatedBlock.startTime,
         updatedBlock.endTime
       )
+    }
+
+    if (blockIndex === 0 && section.sectionNumber === 1) {
+      if (itineraryData.startDate && field === 'startTime')
+        validateReminderOptionSelection(
+          itineraryData.startDate,
+          updatedBlock.startTime
+        )
     }
 
     updatedBlocks[blockIndex] = updatedBlock
@@ -1275,9 +1453,87 @@ export default function ItineraryMakerModule() {
       }
 
       router.push(`/itinerary/${response.id}`)
+      return response
     } catch (error) {
       if (isCreateAndValidUmami()) {
         window.umami.track('create_itinerary_fail')
+      }
+      throw error
+    }
+  }
+
+  const submitItineraryReminder = async (
+    submissionData: ItineraryReminderDto
+  ) => {
+    const validUmami = () => typeof window !== 'undefined' && window.umami
+    const isCreateAndValidUmami = () => !itineraryId && validUmami()
+
+    try {
+      const fetchCreateItineraryReminder = async () => {
+        return await customFetch<CreateItineraryReminderResponse>(
+          '/notification',
+          {
+            method: 'POST',
+            body: customFetchBody(submissionData),
+            credentials: 'include',
+            isAuthorized: true,
+          }
+        )
+      }
+
+      const fetchUpdateItineraryReminder = async () => {
+        return await customFetch<CreateItineraryReminderResponse>(
+          `/notification/${itineraryId}`,
+          {
+            method: 'PATCH',
+            body: customFetchBody(submissionData),
+            credentials: 'include',
+            isAuthorized: true,
+          }
+        )
+      }
+
+      const fetchDeleteItineraryReminder = async () => {
+        return await customFetch<CreateItineraryReminderResponse>(
+          `/notification/${itineraryId}`,
+          {
+            method: 'DELETE',
+            body: customFetchBody(submissionData),
+            credentials: 'include',
+            isAuthorized: true,
+          }
+        )
+      }
+
+      const response = reminderData
+        ? submissionData.reminderOption === 'NONE'
+          ? await fetchDeleteItineraryReminder()
+          : await fetchUpdateItineraryReminder()
+        : submissionData.reminderOption !== 'NONE'
+          ? await fetchCreateItineraryReminder()
+          : null
+
+      if (response && !response.success) {
+        if (isCreateAndValidUmami()) {
+          window.umami.track('create_itineraryreminder_fail')
+        }
+        throw new Error('Failed with scheduling itinerary reminder')
+      }
+
+      setHasUnsavedChanges(false)
+      if (reminderData && submissionData.reminderOption === 'NONE')
+        toast('You will no longer be reminded for this itinerary')
+      else if (reminderData && submissionData.reminderOption !== 'NONE')
+        toast('Updated reminder for this itinerary')
+      else if (!reminderData && submissionData.reminderOption !== 'NONE')
+        toast('You will be reminded for this itinerary')
+
+      if (isCreateAndValidUmami()) {
+        window.umami.track('create_itineraryreminder_success')
+      }
+    } catch (error) {
+      if (isCreateAndValidUmami()) {
+        window.umami.track('create_itineraryreminder_fail')
       }
       throw error
     }
@@ -1305,19 +1561,20 @@ export default function ItineraryMakerModule() {
       )
     }
 
-    const remainingFeedbacks = feedbackItems.filter((item) => {
-      const { sectionIndex, blockIndex, field } = item.target
-      const key = `${sectionIndex}-${blockIndex}-${field ?? ''}`
-      return !dismissedFeedbacks.includes(key)
-    })
-
+    // check remaining feedback
+    const remainingFeedbacks = feedbackItems
     if (remainingFeedbacks.length > 0) {
       setIsConfirmModalOpen(true)
       return
     }
 
+    await handleFinalSubmit()
+  }
+
+  const handleFinalSubmit = async () => {
     // If user is authenticated, proceed with normal submission
     setIsSubmitting(true)
+    let newItineraryId: string = itineraryId
     try {
       const submissionData = {
         ...itineraryData,
@@ -1351,13 +1608,28 @@ export default function ItineraryMakerModule() {
             }) ?? [],
         })),
       }
-      await submitItinerary(submissionData)
+      // Edge case: new itinerary and create reminder
+      const response = await submitItinerary(submissionData)
+      newItineraryId = response.id
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       console.error('Error creating or updating itinerary:', error)
       toast.error(
         `Failed to ${itineraryId ? 'update' : 'create'} itinerary. Please try again.`
       )
+      setIsSubmitting(false)
+      return
+    }
+
+    // Submit itinerary reminder changes
+    try {
+      const submissionData = {
+        ...itineraryReminderData,
+        itineraryId: newItineraryId,
+      }
+      await submitItineraryReminder(submissionData)
+    } catch (error) {
+      toast.error(`Failed with scheduling itinerary reminder`)
     } finally {
       setIsSubmitting(false)
     }
@@ -1423,22 +1695,7 @@ export default function ItineraryMakerModule() {
           body: JSON.stringify(submissionData),
         }
       )
-
-      console.log('API response: ', response)
-      console.log(
-        'Feedback content: ',
-        JSON.stringify(response.feedback, null, 2)
-      )
-
       setFeedbackItems(response.feedback)
-
-      const formatted = response.feedback.map((item) => {
-        const { sectionIndex, blockIndex, field } = item.target
-        let prefix = `Hari ${sectionIndex + 1}, Blok ${blockIndex + 1}`
-        if (field) prefix += ` (${field})`
-        return `${prefix}: ${item.suggestion}`
-      })
-
       toast.success('Feedback berhasil di-generate')
     } catch (error) {
       toast.error('Gagal generate feedback. Silahkan coba lagi')
@@ -1447,19 +1704,19 @@ export default function ItineraryMakerModule() {
     }
   }
 
-  const dismissFeedback = (
+  const removeFeedbackForField = (
     sectionIndex: number,
     blockIndex: number,
-    field?: string
+    field: 'title' | 'description' | 'startTime' | 'endTime' | 'price'
   ) => {
-    const key = `${sectionIndex}-${blockIndex}-${field ?? ''}`
-    setDismissedFeedbacks((prev) =>
-      prev.includes(key) ? prev : [...prev, key]
+    setFeedbackItems((prev) =>
+      prev.filter(
+        (item) =>
+          item.target.sectionIndex !== sectionIndex ||
+          item.target.blockIndex !== blockIndex ||
+          item.target.field !== field
+      )
     )
-  }
-
-  const showConfirmationModal = () => {
-    setIsConfirmModalOpen(true)
   }
 
   return (
@@ -1467,8 +1724,10 @@ export default function ItineraryMakerModule() {
       <div className="container max-w-4xl mx-auto p-4 pt-24 min-h-screen max-h-screen overflow-auto">
         <ItineraryHeader
           title={itineraryData.title}
+          description={itineraryData.description}
           coverImage={itineraryData.coverImage}
           onTitleChange={handleTitleChange}
+          onDescChange={handleDescChange}
           isSubmitting={isSubmitting}
           onSubmit={handleSubmit}
           onGenerateFeedback={handleGenerateFeedback}
@@ -1479,6 +1738,11 @@ export default function ItineraryMakerModule() {
             selectedTags={itineraryData.tags ?? []}
             onChangeAction={handleTagsChange}
             availableTags={availableTags}
+          />
+          <ReminderSelector
+            selectedReminder={itineraryReminderData.reminderOption ?? 'NONE'}
+            onChangeAction={handleReminderChange}
+            reminderOptions={reminderOptions}
           />
           <CldUploadButton
             uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
@@ -1517,7 +1781,6 @@ export default function ItineraryMakerModule() {
             </Popover>
           </div>
         </div>
-
         {itineraryData.tags && itineraryData.tags.length > 0 && (
           <div className="flex flex-wrap gap-2 mb-4">
             {getSelectedTagNames().map((tagName, index) => (
@@ -1537,7 +1800,6 @@ export default function ItineraryMakerModule() {
             ))}
           </div>
         )}
-
         <DateRangeAlertDialog
           open={showConfirmDialog}
           onOpenChange={setShowConfirmDialog}
@@ -1555,9 +1817,9 @@ export default function ItineraryMakerModule() {
             setShowConfirmDialog(false)
           }}
         />
-
         <ItinerarySections
           feedbackItems={feedbackItems}
+          removeFeedbackForField={removeFeedbackForField}
           sections={itineraryData.sections}
           updateSectionTitle={updateSectionTitle}
           addSection={addSection}
@@ -1573,7 +1835,6 @@ export default function ItineraryMakerModule() {
           onTransportModeChange={updateTransportMode}
           setPositionToView={setPositionToView}
         />
-
         <div className="flex justify-center my-8">
           <Button
             size="sm"
@@ -1583,7 +1844,6 @@ export default function ItineraryMakerModule() {
             <Plus className="h-4 w-4" /> Bagian
           </Button>
         </div>
-
         {feedbackItems.length > 0 && (
           <div className="mt-8">
             <h3 className="font-semibold mb-4">Tips</h3>
@@ -1611,7 +1871,6 @@ export default function ItineraryMakerModule() {
           </div>
         )}
       </div>
-
       <div className="w-full min-h-screen hidden md:block">
         <Maps
           itineraryData={itineraryData.sections}
@@ -1620,6 +1879,33 @@ export default function ItineraryMakerModule() {
           positionToView={positionToView}
         />
       </div>
+      {isConfirmModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center font-roboto">
+          <div className="bg-white p-8 rounded-lg shadow-lg">
+            <h2 className="text-xl font-semibold mb-4 text-center">
+              Apakah anda yakin?
+            </h2>
+            <p className="text-md mb-4">
+              Masih ada tips untuk mempercantik itinerary-mu
+            </p>
+            <div className="flex justify-center space-x-2">
+              <button
+                className="px-8 py-2 border-2 border-[#016CD7] bg-white rounded text-[#014285]"
+                onClick={() => setIsConfirmModalOpen(false)}
+              >
+                Batal
+              </button>
+              <button
+                className="px-8 py-2 bg-gradient-to-r from-[#016CD7] to-[#014285] text-white items-center rounded"
+                disabled={isSubmitting}
+                onClick={handleFinalSubmit}
+              >
+                Simpan
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

@@ -26,6 +26,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
 import { ItineraryData } from './types'
+import { useAuthContext } from '@/contexts/AuthContext'
 
 function ItineraryCard({
   shared = false,
@@ -38,6 +39,7 @@ function ItineraryCard({
   readonly item: Readonly<ItineraryData>
   readonly refresh: () => void
 }) {
+  const { user } = useAuthContext()
   const [openOptions, setOpenOptions] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [showInviteDialog, setShowInviteDialog] = useState(false)
@@ -239,31 +241,35 @@ function ItineraryCard({
           )}
         </div>
       </div>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <button
-            data-testid="option-btn"
-            className="absolute top-2 right-2 p-2 rounded-full hover:bg-black/10"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <MoreHorizontal />
-          </button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
-          <DropdownMenuItem onClick={openInviteDialog}>Invite</DropdownMenuItem>
-          {!item.isCompleted && (
-            <DropdownMenuItem onClick={markAsComplete}>
-              Mark as Completed
+      {user?.id === item.userId && (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              data-testid="option-btn"
+              className="absolute top-2 right-2 p-2 rounded-full hover:bg-black/10"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <MoreHorizontal />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+            <DropdownMenuItem onClick={openInviteDialog}>
+              Invite
             </DropdownMenuItem>
-          )}
-          <DropdownMenuItem
-            onClick={openDeleteConfirmation}
-            className="text-red-500 focus:text-red-500"
-          >
-            Delete
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+            {!item.isCompleted && (
+              <DropdownMenuItem onClick={markAsComplete}>
+                Mark as Completed
+              </DropdownMenuItem>
+            )}
+            <DropdownMenuItem
+              onClick={openDeleteConfirmation}
+              className="text-red-500 focus:text-red-500"
+            >
+              Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )}
 
       {/* Invite Dialog */}
       <Dialog open={showInviteDialog} onOpenChange={setShowInviteDialog}>

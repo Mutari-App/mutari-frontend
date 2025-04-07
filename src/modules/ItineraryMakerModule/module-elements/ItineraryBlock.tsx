@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -10,11 +10,10 @@ import {
   type DraggableStateSnapshot,
 } from '@hello-pangea/dnd'
 import { X, GripVertical, OctagonAlert } from 'lucide-react'
-import { FeedbackItem, type Block } from '../interface'
+import { type FeedbackItem, type Block } from '../interface'
 import { TimeInput } from './TimeInput'
 import { PriceInput } from './PriceInput'
 import { RouteInfo } from './RouteInfo'
-import { CoordinateInput } from './CoordinateInput'
 import { feedbackForField } from '../utils'
 import { TooltipField } from './TooltipField'
 
@@ -35,11 +34,18 @@ const transportModeNames = {
 }
 import AutocompleteInput from './AutocompleteInput'
 
+const timeField: 'startTime' | 'endTime' = 'startTime'
+
 interface ItineraryBlockProps {
   block: Block
   blockIndex: number
   sectionNumber: number
   feedbackItems: FeedbackItem[]
+  removeFeedbackForField: (
+    sectionIndex: number,
+    blockIndex: number,
+    field: 'title' | 'description' | 'startTime' | 'endTime' | 'price'
+  ) => void
   timeWarning: {
     blockId: string
     message: string
@@ -78,6 +84,7 @@ interface ItineraryBlockProps {
 
 export const ItineraryBlock: React.FC<ItineraryBlockProps> = ({
   feedbackItems,
+  removeFeedbackForField,
   block,
   blockIndex,
   sectionNumber,
@@ -101,7 +108,7 @@ export const ItineraryBlock: React.FC<ItineraryBlockProps> = ({
           <Card
             ref={provided.innerRef}
             {...provided.draggableProps}
-            className={`${snapshot.isDragging ? 'shadow-lg' : ''} ${
+            className={`${!showRoute || !routeInfo ? 'mb-2 md:mb-4' : ''} ${snapshot.isDragging ? 'shadow-lg' : ''} ${
               timeWarning && timeWarning.blockId === block.id
                 ? 'border-red-500'
                 : ''
@@ -130,12 +137,20 @@ export const ItineraryBlock: React.FC<ItineraryBlockProps> = ({
                       <div className="flex flex-wrap gap-2 text-sm text-gray-500 mb-2">
                         {/* time */}
                         <TimeInput
+                          sectionNumber={sectionNumber}
                           blockId={block.id}
                           startTime={block.startTime}
                           endTime={block.endTime}
                           isVisible={isInputVisible(block.id, 'time')}
                           toggleInput={toggleInput}
                           updateBlock={updateBlock}
+                          removeFeedbackForField={() =>
+                            removeFeedbackForField(
+                              sectionNumber,
+                              blockIndex,
+                              timeField ? 'startTime' : 'endTime'
+                            )
+                          }
                           timeWarning={timeWarning}
                         />
                         {feedbackForField?.(
@@ -143,7 +158,7 @@ export const ItineraryBlock: React.FC<ItineraryBlockProps> = ({
                           sectionNumber,
                           blockIndex,
                           'LOCATION',
-                          'startTime'
+                          timeField ? 'startTime' : 'endTime'
                         ) && (
                           <TooltipField
                             feedback={
@@ -152,7 +167,7 @@ export const ItineraryBlock: React.FC<ItineraryBlockProps> = ({
                                 sectionNumber,
                                 blockIndex,
                                 'LOCATION',
-                                'startTime'
+                                timeField ? 'startTime' : 'endTime'
                               ) ?? undefined
                             }
                           >
@@ -161,11 +176,19 @@ export const ItineraryBlock: React.FC<ItineraryBlockProps> = ({
                         )}
                         {/* price */}
                         <PriceInput
+                          sectionNumber={sectionNumber}
                           blockId={block.id}
                           price={block.price}
                           isVisible={isInputVisible(block.id, 'price')}
                           toggleInput={toggleInput}
                           updateBlock={updateBlock}
+                          removeFeedbackForField={() =>
+                            removeFeedbackForField(
+                              sectionNumber,
+                              blockIndex,
+                              'price'
+                            )
+                          }
                         />
                         {feedbackForField?.(
                           feedbackItems,
@@ -193,15 +216,20 @@ export const ItineraryBlock: React.FC<ItineraryBlockProps> = ({
                         placeholder="Tambahkan catatan singkat..."
                         className="mt-2 text-sm md:text-base"
                         value={block.description ?? ''}
-                        onChange={(e) =>
+                        onChange={(e) => {
                           updateBlock(block.id, 'description', e.target.value)
-                        }
+                          removeFeedbackForField(
+                            sectionNumber,
+                            blockIndex,
+                            'description'
+                          )
+                        }}
                       />
                       {feedbackForField?.(
                         feedbackItems,
                         sectionNumber,
                         blockIndex,
-                        'NOTE',
+                        'LOCATION',
                         'description'
                       ) && (
                         <TooltipField
@@ -210,12 +238,12 @@ export const ItineraryBlock: React.FC<ItineraryBlockProps> = ({
                               feedbackItems,
                               sectionNumber,
                               blockIndex,
-                              'NOTE',
+                              'LOCATION',
                               'description'
                             ) ?? undefined
                           }
                         >
-                          <OctagonAlert className="bg-[#B62116]" />
+                          <OctagonAlert className="text-[#B62116]" />
                         </TooltipField>
                       )}
                     </>
@@ -225,9 +253,14 @@ export const ItineraryBlock: React.FC<ItineraryBlockProps> = ({
                         placeholder="Masukkan Catatan"
                         className="mt-2 text-sm md:text-base"
                         value={block.description ?? ''}
-                        onChange={(e) =>
+                        onChange={(e) => {
                           updateBlock(block.id, 'description', e.target.value)
-                        }
+                          removeFeedbackForField(
+                            sectionNumber,
+                            blockIndex,
+                            'description'
+                          )
+                        }}
                       />
                       {feedbackForField?.(
                         feedbackItems,
@@ -247,7 +280,7 @@ export const ItineraryBlock: React.FC<ItineraryBlockProps> = ({
                             ) ?? undefined
                           }
                         >
-                          <OctagonAlert className="bg-[#B62116]" />
+                          <OctagonAlert className="text-[#B62116]" />
                         </TooltipField>
                       )}
                     </div>

@@ -27,6 +27,7 @@ export interface AuthContextInterface {
 export interface User {
   id: string
   email: string
+  firstName: string
   referralCode: string
   usedCount: number
 }
