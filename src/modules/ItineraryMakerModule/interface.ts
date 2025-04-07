@@ -74,6 +74,16 @@ export interface CreateItineraryResponse extends CustomFetchBaseResponse {
   }[]
 }
 
+export interface FeedbackItem {
+  target: {
+    sectionIndex: number
+    blockIndex: number
+    blockType: 'LOCATION' | 'NOTE'
+    field?: 'startTime' | 'endTime' | 'price' | 'description' | 'title'
+  }
+  suggestion: string
+}
+
 export interface GetPlaceDetailsResponse extends CustomFetchBaseResponse {
   details: PlaceDetails
 }
@@ -97,6 +107,34 @@ export interface PlaceResult {
 export interface PlaceDetails {
   html_attributions: string[]
   result: PlaceResult
+}
+
+export interface ItineraryReminderDto {
+  itineraryId: string
+  recipient?: string
+  recipientName?: string
+  tripName?: string
+  startDate: string
+  reminderOption: string
+}
+
+export interface CreateItineraryReminderResponse
+  extends CustomFetchBaseResponse {
+  id: string
+  updatedAt: string
+  createdAt: string
+  itineraryId: string
+  recipient: string
+  recipientName: string
+  tripName: string
+  startDate: string
+  reminderOption: string
+}
+
+export interface ReminderOption {
+  label: string
+  value: 'NONE' | 'TEN_MINUTES_BEFORE' | 'ONE_HOUR_BEFORE' | 'ONE_DAY_BEFORE'
+  available: boolean
 }
 
 export interface ItineraryMakerModuleProps {

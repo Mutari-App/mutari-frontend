@@ -25,16 +25,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-
-const acceptedUsers = [
-  {
-    firstName: 'First',
-    lastName: 'Last',
-    id: 'tests',
-    email: 'test22@gmail.com',
-    photoProfile: '/placeholder.svg?height=40&width=40',
-  },
-]
+import { useAuthContext } from '@/contexts/AuthContext'
 
 function ItineraryCard({
   item,
@@ -43,6 +34,7 @@ function ItineraryCard({
   readonly item: Readonly<ItineraryData>
   readonly refresh: () => void
 }) {
+  const { user } = useAuthContext()
   const [openOptions, setOpenOptions] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [showInviteDialog, setShowInviteDialog] = useState(false)
@@ -195,6 +187,11 @@ function ItineraryCard({
         }
       )
 
+      if (response.statusCode === 404) {
+        refresh()
+        throw new Error('Pengguna tidak ditemukan')
+      }
+
       if (response.statusCode !== 200) throw new Error(response.message)
       toast.success('User berhasil dihapus!')
       refresh()
@@ -233,31 +230,35 @@ function ItineraryCard({
           </p>
         </div>
       </div>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <button
-            data-testid="option-btn"
-            className="absolute top-2 right-2 p-2 rounded-full hover:bg-black/10"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <MoreHorizontal />
-          </button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
-          <DropdownMenuItem onClick={openInviteDialog}>Invite</DropdownMenuItem>
-          {!item.isCompleted && (
-            <DropdownMenuItem onClick={markAsComplete}>
-              Mark as Completed
+      {user?.id === item.userId && (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              data-testid="option-btn"
+              className="absolute top-2 right-2 p-2 rounded-full hover:bg-black/10"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <MoreHorizontal />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+            <DropdownMenuItem onClick={openInviteDialog}>
+              Invite
             </DropdownMenuItem>
-          )}
-          <DropdownMenuItem
-            onClick={openDeleteConfirmation}
-            className="text-red-500 focus:text-red-500"
-          >
-            Delete
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+            {!item.isCompleted && (
+              <DropdownMenuItem onClick={markAsComplete}>
+                Mark as Completed
+              </DropdownMenuItem>
+            )}
+            <DropdownMenuItem
+              onClick={openDeleteConfirmation}
+              className="text-red-500 focus:text-red-500"
+            >
+              Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )}
 
       {/* Invite Dialog */}
       <Dialog open={showInviteDialog} onOpenChange={setShowInviteDialog}>

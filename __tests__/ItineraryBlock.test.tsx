@@ -208,6 +208,8 @@ describe('ItineraryBlock Component', () => {
   const mockToggleInput = jest.fn()
   const mockUpdateBlock = jest.fn()
   const mockRemoveBlock = jest.fn()
+  const mockSetPositionToView = jest.fn()
+  const mockRemoveFeedbackForField = jest.fn()
 
   const blockId = 'test-block-123'
   const blockIndex = 0
@@ -249,7 +251,10 @@ describe('ItineraryBlock Component', () => {
         toggleInput={mockToggleInput}
         updateBlock={mockUpdateBlock}
         removeBlock={mockRemoveBlock}
+        removeFeedbackForField={mockRemoveFeedbackForField}
+        feedbackItems={[]}
         showRoute={false}
+        setPositionToView={mockSetPositionToView}
       />
     )
 
@@ -279,6 +284,9 @@ describe('ItineraryBlock Component', () => {
         toggleInput={mockToggleInput}
         updateBlock={mockUpdateBlock}
         removeBlock={mockRemoveBlock}
+        setPositionToView={mockSetPositionToView}
+        removeFeedbackForField={mockRemoveFeedbackForField}
+        feedbackItems={[]}
         showRoute={false}
       />
     )
@@ -317,8 +325,11 @@ describe('ItineraryBlock Component', () => {
         toggleInput={mockToggleInput}
         updateBlock={mockUpdateBlock}
         removeBlock={mockRemoveBlock}
+        removeFeedbackForField={mockRemoveFeedbackForField}
+        feedbackItems={[]}
         showRoute={true}
         routeInfo={routeInfo}
+        setPositionToView={mockSetPositionToView}
       />
     )
 
@@ -352,8 +363,11 @@ describe('ItineraryBlock Component', () => {
         toggleInput={mockToggleInput}
         updateBlock={mockUpdateBlock}
         removeBlock={mockRemoveBlock}
+        removeFeedbackForField={mockRemoveFeedbackForField}
+        feedbackItems={[]}
         showRoute={false}
         routeInfo={routeInfo}
+        setPositionToView={mockSetPositionToView}
       />
     )
 
@@ -384,9 +398,12 @@ describe('ItineraryBlock Component', () => {
         toggleInput={mockToggleInput}
         updateBlock={mockUpdateBlock}
         removeBlock={mockRemoveBlock}
+        removeFeedbackForField={mockRemoveFeedbackForField}
+        feedbackItems={[]}
         showRoute={true}
         routeInfo={routeInfo}
         onTransportModeChange={mockOnTransportModeChange}
+        setPositionToView={mockSetPositionToView}
       />
     )
 
@@ -434,9 +451,12 @@ describe('ItineraryBlock Component', () => {
         toggleInput={mockToggleInput}
         updateBlock={mockUpdateBlock}
         removeBlock={mockRemoveBlock}
+        removeFeedbackForField={mockRemoveFeedbackForField}
+        feedbackItems={[]}
         showRoute={true}
         routeInfo={routeInfo}
         onTransportModeChange={mockOnTransportModeChange}
+        setPositionToView={mockSetPositionToView}
       />
     )
 
@@ -477,9 +497,12 @@ describe('ItineraryBlock Component', () => {
         toggleInput={mockToggleInput}
         updateBlock={mockUpdateBlock}
         removeBlock={mockRemoveBlock}
+        removeFeedbackForField={mockRemoveFeedbackForField}
+        feedbackItems={[]}
         showRoute={true}
         routeInfo={routeInfo}
         onTransportModeChange={mockOnTransportModeChange}
+        setPositionToView={mockSetPositionToView}
       />
     )
 
@@ -518,8 +541,11 @@ describe('ItineraryBlock Component', () => {
         toggleInput={mockToggleInput}
         updateBlock={mockUpdateBlock}
         removeBlock={mockRemoveBlock}
+        removeFeedbackForField={mockRemoveFeedbackForField}
+        feedbackItems={[]}
         showRoute={true}
         routeInfo={routeInfo}
+        setPositionToView={mockSetPositionToView}
         // Intentionally not providing onTransportModeChange
       />
     )
@@ -544,7 +570,10 @@ describe('ItineraryBlock Component', () => {
         isInputVisible={mockIsInputVisible}
         toggleInput={mockToggleInput}
         updateBlock={mockUpdateBlock}
+        setPositionToView={mockSetPositionToView}
         removeBlock={mockRemoveBlock}
+        removeFeedbackForField={mockRemoveFeedbackForField}
+        feedbackItems={[]}
         showRoute={false}
       />
     )
@@ -573,7 +602,10 @@ describe('ItineraryBlock Component', () => {
         isInputVisible={mockIsInputVisible}
         toggleInput={mockToggleInput}
         updateBlock={mockUpdateBlock}
+        setPositionToView={mockSetPositionToView}
         removeBlock={mockRemoveBlock}
+        removeFeedbackForField={mockRemoveFeedbackForField}
+        feedbackItems={[]}
         showRoute={false}
       />
     )
@@ -600,7 +632,10 @@ describe('ItineraryBlock Component', () => {
         isInputVisible={mockIsInputVisible}
         toggleInput={mockToggleInput}
         updateBlock={mockUpdateBlock}
+        setPositionToView={mockSetPositionToView}
         removeBlock={mockRemoveBlock}
+        removeFeedbackForField={mockRemoveFeedbackForField}
+        feedbackItems={[]}
         showRoute={false}
       />
     )
@@ -628,7 +663,10 @@ describe('ItineraryBlock Component', () => {
         isInputVisible={mockIsInputVisible}
         toggleInput={mockToggleInput}
         updateBlock={mockUpdateBlock}
+        setPositionToView={mockSetPositionToView}
         removeBlock={mockRemoveBlock}
+        removeFeedbackForField={mockRemoveFeedbackForField}
+        feedbackItems={[]}
         showRoute={false}
       />
     )
@@ -650,7 +688,10 @@ describe('ItineraryBlock Component', () => {
         isInputVisible={mockIsInputVisible}
         toggleInput={mockToggleInput}
         updateBlock={mockUpdateBlock}
+        setPositionToView={mockSetPositionToView}
         removeBlock={mockRemoveBlock}
+        removeFeedbackForField={mockRemoveFeedbackForField}
+        feedbackItems={[]}
         showRoute={false}
       />
     )
@@ -671,7 +712,10 @@ describe('ItineraryBlock Component', () => {
         isInputVisible={mockIsInputVisible}
         toggleInput={mockToggleInput}
         updateBlock={mockUpdateBlock}
+        setPositionToView={mockSetPositionToView}
         removeBlock={mockRemoveBlock}
+        removeFeedbackForField={mockRemoveFeedbackForField}
+        feedbackItems={[]}
         showRoute={false}
       />
     )

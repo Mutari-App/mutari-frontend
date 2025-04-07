@@ -11,7 +11,9 @@ jest.mock('lucide-react', () => ({
 describe('PriceInput Component', () => {
   const mockToggleInput = jest.fn()
   const mockUpdateBlock = jest.fn()
+  const mockRemoveFeedbackForField = jest.fn()
   const blockId = 'test-block-123'
+  const sectionNumber = 1
 
   beforeEach(() => {
     jest.clearAllMocks()
@@ -20,10 +22,12 @@ describe('PriceInput Component', () => {
   test('renders the "Set Harga" button when not visible', () => {
     render(
       <PriceInput
+        sectionNumber={sectionNumber}
         blockId={blockId}
         isVisible={false}
         toggleInput={mockToggleInput}
         updateBlock={mockUpdateBlock}
+        removeFeedbackForField={mockRemoveFeedbackForField}
       />
     )
 
@@ -37,10 +41,12 @@ describe('PriceInput Component', () => {
   test('renders the price input field when visible', () => {
     render(
       <PriceInput
+        sectionNumber={sectionNumber}
         blockId={blockId}
         isVisible={true}
         toggleInput={mockToggleInput}
         updateBlock={mockUpdateBlock}
+        removeFeedbackForField={mockRemoveFeedbackForField}
       />
     )
 
@@ -58,10 +64,12 @@ describe('PriceInput Component', () => {
   test('calls updateBlock when price value changes', () => {
     render(
       <PriceInput
+        sectionNumber={sectionNumber}
         blockId={blockId}
         isVisible={true}
         toggleInput={mockToggleInput}
         updateBlock={mockUpdateBlock}
+        removeFeedbackForField={mockRemoveFeedbackForField}
       />
     )
 
@@ -76,11 +84,13 @@ describe('PriceInput Component', () => {
 
     render(
       <PriceInput
+        sectionNumber={sectionNumber}
         blockId={blockId}
         price={currentPrice}
         isVisible={true}
         toggleInput={mockToggleInput}
         updateBlock={mockUpdateBlock}
+        removeFeedbackForField={mockRemoveFeedbackForField}
       />
     )
 
@@ -91,11 +101,13 @@ describe('PriceInput Component', () => {
   test('handles empty price input correctly', () => {
     render(
       <PriceInput
+        sectionNumber={sectionNumber}
         blockId={blockId}
         isVisible={true}
         toggleInput={mockToggleInput}
         updateBlock={mockUpdateBlock}
         price={50000}
+        removeFeedbackForField={mockRemoveFeedbackForField}
       />
     )
 

@@ -1,11 +1,12 @@
 'use client'
-
+import useDeepCompareEffect from 'use-deep-compare-effect'
 import { useEffect, useMemo, useState } from 'react'
 import {
   GoogleMap,
   type Libraries,
   Marker,
   useLoadScript,
+  Polyline,
 } from '@react-google-maps/api'
 import type {
   GetPlaceDetailsResponse,
@@ -16,10 +17,12 @@ import { customFetch } from '@/utils/customFetch'
 import { Globe, Phone } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
+import { decodePolyline } from '../utils'
 
 type MapsProps = {
   readonly itineraryData: Readonly<Section[]>
   isEditing?: boolean
+  positionToView?: google.maps.LatLngLiteral | null
   addLocationToSection?: (
     sectionNumber: number,
     title: string,
@@ -35,15 +38,67 @@ type MapsProps = {
   _testSelectedPlaceDetails?: PlaceResult
 }
 
+// bonkers IMO that this isn't a method on MVCArray, but here we are
+function pathsDiffer(
+  path1: google.maps.MVCArray<google.maps.LatLng>,
+  path2: google.maps.LatLngLiteral[]
+): boolean {
+  if (path1.getLength() !== path2.length) return true
+  for (const [i, val] of path2.entries())
+    if (path1.getAt(i).toJSON() !== val) return true
+  return false
+}
+
+function PolyLine(props: {
+  map: google.maps.Map | null
+  path: google.maps.LatLngLiteral[]
+  options: google.maps.PolylineOptions
+}) {
+  const [polyline, setPolyline] = useState<google.maps.Polyline | null>(null)
+  useDeepCompareEffect(() => {
+    // Create polyline after map initialized.
+    if (!polyline && props.map)
+      setPolyline(new google.maps.Polyline(props.options))
+
+    // Synchronize map polyline with component props.
+    if (polyline && polyline.getMap() != props.map) polyline.setMap(props.map)
+    if (polyline && pathsDiffer(polyline.getPath(), props.path))
+      polyline.setPath(props.path)
+
+    return () => {
+      // Cleanup: remove line from map
+      if (polyline) polyline.setMap(null)
+    }
+  }, [props, polyline])
+
+  return null
+}
+
 function Maps({
   itineraryData,
   addLocationToSection,
   isEditing,
+  positionToView,
   _testSelectedPlace,
   _testSelectedPlaceDetails,
 }: MapsProps) {
+  const firstLoc = itineraryData[0]?.blocks?.[0]?.location?.split(',')
+  const INDONESIA_BOUNDS = {
+    north: 8.0,
+    south: -11.0,
+    east: 141.1,
+    west: 95.0,
+  }
+
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? ''
-  const defaultCenter = useMemo(() => ({ lat: -6.3604, lng: 106.82719 }), [])
+
+  const defaultCenter = useMemo(
+    () =>
+      firstLoc
+        ? { lat: parseFloat(firstLoc[0]), lng: parseFloat(firstLoc[1]) }
+        : { lat: -6.3604, lng: 106.82719 },
+    []
+  )
   const defaultSelectedPlace = { placeId: '', latLng: { lat: 0, lng: 0 } }
 
   const [selectedPlace, setSelectedPlace] = useState(
@@ -53,16 +108,40 @@ function Maps({
     useState<PlaceResult | null>(_testSelectedPlaceDetails ?? null)
   const [map, setMap] = useState<google.maps.Map | null>(null)
 
-  const locations = itineraryData?.flatMap(
-    (section) =>
-      section.blocks?.flatMap((block) => {
-        if (!block.location) return []
-        const [lat, lng] = block.location
-          .split(',')
-          .map((coord) => parseFloat(coord.trim()))
-        return { lat, lng }
-      }) ?? []
-  )
+  const { locations, routes } = useMemo(() => {
+    const locations: { lat: number; lng: number }[] = []
+    const routes: {
+      path: { lat: number; lng: number }[]
+      options?: google.maps.PolylineOptions
+    }[] = []
+
+    itineraryData?.forEach((section) => {
+      if (section.blocks?.length) {
+        section.blocks.forEach((block, index) => {
+          if (block.location) {
+            const [lat, lng] = block.location
+              .split(',')
+              .map((coord) => parseFloat(coord.trim()))
+            locations.push({ lat, lng })
+          }
+
+          if (block.routeToNext?.polyline) {
+            const decodedPath = decodePolyline(block.routeToNext.polyline)
+            routes.push({
+              path: decodedPath,
+              options: {
+                strokeColor: '#4285F4',
+                strokeWeight: 4,
+                strokeOpacity: 0.8,
+              },
+            })
+          }
+        })
+      }
+    })
+
+    return { locations, routes }
+  }, [itineraryData])
 
   const [libraries] = useState<Libraries>(['places'])
 
@@ -111,7 +190,7 @@ function Maps({
     if (selectedPlaceDetails) {
       const { name } = selectedPlaceDetails
       const location = `${selectedPlace.latLng.lat}, ${selectedPlace.latLng.lng}`
-      const sectionNumber = 1 // Replace with the actual section number you want to add to
+      const sectionNumber = 1
       const title = name || 'New Place'
 
       if (addLocationToSection) {
@@ -128,6 +207,12 @@ function Maps({
     }
   }, [selectedPlace])
 
+  useEffect(() => {
+    if (positionToView && map) {
+      map.panTo(positionToView)
+    }
+  }, [positionToView, map])
+
   return (
     <div className="w-full h-full">
       {!isLoaded ? (
@@ -140,6 +225,10 @@ function Maps({
           onLoad={(map) => setMap(map)}
           options={{
             streetViewControl: false,
+            restriction: {
+              latLngBounds: INDONESIA_BOUNDS,
+              strictBounds: false,
+            },
           }}
           onClick={handleMapClick}
         >
@@ -148,6 +237,15 @@ function Maps({
               key={`${loc.lat}-${loc.lng}`}
               position={loc}
               data-testid="map-marker"
+            />
+          ))}
+
+          {routes.map((route, idx) => (
+            <PolyLine
+              key={`polyline-${idx}`}
+              map={map}
+              path={route.path}
+              options={route.options!}
             />
           ))}
 

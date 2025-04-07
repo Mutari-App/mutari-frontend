@@ -1,18 +1,13 @@
 'use client'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import MyItineraryList from './sections/MyItineraryList'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { PlusIcon, FilterIcon } from 'lucide-react'
 import Image from 'next/image'
 import { getImage } from '@/utils/getImage'
 import { customFetch } from '@/utils/customFetch'
-import type {
-  ItineraryData,
-  ItineraryResponse,
-  metadataType,
-} from './module-elements/types'
+
 import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -22,6 +17,12 @@ import {
 } from '@/components/ui/popover'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
+import {
+  ItineraryData,
+  ItineraryResponse,
+  metadataType,
+} from '../ItineraryModule/module-elements/types'
+import MyItineraryList from './sections/MyItineraryList'
 
 interface FilterState {
   shared: boolean

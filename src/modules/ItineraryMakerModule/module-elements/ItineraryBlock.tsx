@@ -9,11 +9,13 @@ import {
   type DraggableProvided,
   type DraggableStateSnapshot,
 } from '@hello-pangea/dnd'
-import { X, GripVertical } from 'lucide-react'
-import { type Block } from '../interface'
+import { X, GripVertical, OctagonAlert } from 'lucide-react'
+import { type FeedbackItem, type Block } from '../interface'
 import { TimeInput } from './TimeInput'
 import { PriceInput } from './PriceInput'
 import { RouteInfo } from './RouteInfo'
+import { feedbackForField } from '../utils'
+import { TooltipField } from './TooltipField'
 
 enum TransportMode {
   DRIVE = 'DRIVE',
@@ -32,10 +34,18 @@ const transportModeNames = {
 }
 import AutocompleteInput from './AutocompleteInput'
 
+const timeField: 'startTime' | 'endTime' = 'startTime'
+
 interface ItineraryBlockProps {
   block: Block
   blockIndex: number
   sectionNumber: number
+  feedbackItems: FeedbackItem[]
+  removeFeedbackForField: (
+    sectionIndex: number,
+    blockIndex: number,
+    field: 'title' | 'description' | 'startTime' | 'endTime' | 'price'
+  ) => void
   timeWarning: {
     blockId: string
     message: string
@@ -67,9 +77,14 @@ interface ItineraryBlockProps {
     blockId: string,
     mode: TransportMode
   ) => Promise<boolean>
+  setPositionToView: React.Dispatch<
+    React.SetStateAction<google.maps.LatLngLiteral | null>
+  >
 }
 
 export const ItineraryBlock: React.FC<ItineraryBlockProps> = ({
+  feedbackItems,
+  removeFeedbackForField,
   block,
   blockIndex,
   sectionNumber,
@@ -81,6 +96,7 @@ export const ItineraryBlock: React.FC<ItineraryBlockProps> = ({
   showRoute,
   routeInfo,
   onTransportModeChange,
+  setPositionToView,
 }) => {
   return (
     <>
@@ -92,7 +108,7 @@ export const ItineraryBlock: React.FC<ItineraryBlockProps> = ({
           <Card
             ref={provided.innerRef}
             {...provided.draggableProps}
-            className={`${showRoute && routeInfo ? '' : 'mb-4'} ${snapshot.isDragging ? 'shadow-lg' : ''} ${
+            className={`${!showRoute || !routeInfo ? 'mb-2 md:mb-4' : ''} ${snapshot.isDragging ? 'shadow-lg' : ''} ${
               timeWarning && timeWarning.blockId === block.id
                 ? 'border-red-500'
                 : ''
@@ -114,45 +130,160 @@ export const ItineraryBlock: React.FC<ItineraryBlockProps> = ({
                           updateBlock={updateBlock}
                           toggleInput={toggleInput}
                           blockId={block.id}
+                          setPositionToView={setPositionToView}
                           title={block.title}
                         />
                       </div>
                       <div className="flex flex-wrap gap-2 text-sm text-gray-500 mb-2">
+                        {/* time */}
                         <TimeInput
+                          sectionNumber={sectionNumber}
                           blockId={block.id}
                           startTime={block.startTime}
                           endTime={block.endTime}
                           isVisible={isInputVisible(block.id, 'time')}
                           toggleInput={toggleInput}
                           updateBlock={updateBlock}
+                          removeFeedbackForField={() =>
+                            removeFeedbackForField(
+                              sectionNumber,
+                              blockIndex,
+                              timeField ? 'startTime' : 'endTime'
+                            )
+                          }
                           timeWarning={timeWarning}
                         />
+                        {feedbackForField?.(
+                          feedbackItems,
+                          sectionNumber,
+                          blockIndex,
+                          'LOCATION',
+                          timeField ? 'startTime' : 'endTime'
+                        ) && (
+                          <TooltipField
+                            feedback={
+                              feedbackForField(
+                                feedbackItems,
+                                sectionNumber,
+                                blockIndex,
+                                'LOCATION',
+                                timeField ? 'startTime' : 'endTime'
+                              ) ?? undefined
+                            }
+                          >
+                            <OctagonAlert className="text-[#B62116]" />
+                          </TooltipField>
+                        )}
+                        {/* price */}
                         <PriceInput
+                          sectionNumber={sectionNumber}
                           blockId={block.id}
                           price={block.price}
                           isVisible={isInputVisible(block.id, 'price')}
                           toggleInput={toggleInput}
                           updateBlock={updateBlock}
+                          removeFeedbackForField={() =>
+                            removeFeedbackForField(
+                              sectionNumber,
+                              blockIndex,
+                              'price'
+                            )
+                          }
                         />
+                        {feedbackForField?.(
+                          feedbackItems,
+                          sectionNumber,
+                          blockIndex,
+                          'LOCATION',
+                          'price'
+                        ) && (
+                          <TooltipField
+                            feedback={
+                              feedbackForField(
+                                feedbackItems,
+                                sectionNumber,
+                                blockIndex,
+                                'LOCATION',
+                                'price'
+                              ) ?? undefined
+                            }
+                          >
+                            <OctagonAlert className="text-[#B62116]" />
+                          </TooltipField>
+                        )}
                       </div>
                       <Input
                         placeholder="Tambahkan catatan singkat..."
                         className="mt-2 text-sm md:text-base"
                         value={block.description ?? ''}
-                        onChange={(e) =>
+                        onChange={(e) => {
                           updateBlock(block.id, 'description', e.target.value)
-                        }
+                          removeFeedbackForField(
+                            sectionNumber,
+                            blockIndex,
+                            'description'
+                          )
+                        }}
                       />
+                      {feedbackForField?.(
+                        feedbackItems,
+                        sectionNumber,
+                        blockIndex,
+                        'LOCATION',
+                        'description'
+                      ) && (
+                        <TooltipField
+                          feedback={
+                            feedbackForField(
+                              feedbackItems,
+                              sectionNumber,
+                              blockIndex,
+                              'LOCATION',
+                              'description'
+                            ) ?? undefined
+                          }
+                        >
+                          <OctagonAlert className="text-[#B62116]" />
+                        </TooltipField>
+                      )}
                     </>
                   ) : (
-                    <Textarea
-                      placeholder="Masukkan Catatan"
-                      className="mt-2 text-sm md:text-base"
-                      value={block.description ?? ''}
-                      onChange={(e) =>
-                        updateBlock(block.id, 'description', e.target.value)
-                      }
-                    />
+                    <div>
+                      <Textarea
+                        placeholder="Masukkan Catatan"
+                        className="mt-2 text-sm md:text-base"
+                        value={block.description ?? ''}
+                        onChange={(e) => {
+                          updateBlock(block.id, 'description', e.target.value)
+                          removeFeedbackForField(
+                            sectionNumber,
+                            blockIndex,
+                            'description'
+                          )
+                        }}
+                      />
+                      {feedbackForField?.(
+                        feedbackItems,
+                        sectionNumber,
+                        blockIndex,
+                        'NOTE',
+                        'description'
+                      ) && (
+                        <TooltipField
+                          feedback={
+                            feedbackForField(
+                              feedbackItems,
+                              sectionNumber,
+                              blockIndex,
+                              'NOTE',
+                              'description'
+                            ) ?? undefined
+                          }
+                        >
+                          <OctagonAlert className="text-[#B62116]" />
+                        </TooltipField>
+                      )}
+                    </div>
                   )}
                 </div>
                 <Button
