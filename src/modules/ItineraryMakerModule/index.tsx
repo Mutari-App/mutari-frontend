@@ -635,7 +635,7 @@ export default function ItineraryMakerModule() {
       const pairs: Array<{ sectionIdx: number; currentBlockIdx: number }> = []
       sections.forEach((section, sIdx) => {
         if (!section.blocks || section.blocks.length < 2) return
-        for (let bIdx = 0; bIdx < section.blocks.length - 1; bIdx++) {
+        for (let bIdx = 0; bIdx < section.blocks.length; bIdx++) {
           pairs.push({ sectionIdx: sIdx, currentBlockIdx: bIdx })
         }
       })
@@ -646,16 +646,22 @@ export default function ItineraryMakerModule() {
 
     for (const { sectionIdx, currentBlockIdx } of pairs) {
       const section = updatedSections[sectionIdx]
-      if (!section.blocks || currentBlockIdx >= section.blocks.length - 1)
-        continue
-      const currentBlock = section.blocks[currentBlockIdx]
-      const nextBlock = section.blocks[currentBlockIdx + 1]
-      const { updatedSource, updatedDest } = await calculateAndUpdateRoute(
-        currentBlock,
-        nextBlock
-      )
-      updateBlockInSection(sectionIdx, currentBlockIdx, updatedSource)
-      updateBlockInSection(sectionIdx, currentBlockIdx + 1, updatedDest)
+      if (!!section.blocks) {
+        if (currentBlockIdx === section.blocks.length - 1) {
+          const lastBlock = section.blocks[currentBlockIdx]
+          const updatedLastBlock = { ...lastBlock, routeToNext: undefined }
+          updateBlockInSection(sectionIdx, currentBlockIdx, updatedLastBlock)
+        } else if (currentBlockIdx < section.blocks.length - 1) {
+          const currentBlock = section.blocks[currentBlockIdx]
+          const nextBlock = section.blocks[currentBlockIdx + 1]
+          const { updatedSource, updatedDest } = await calculateAndUpdateRoute(
+            currentBlock,
+            nextBlock
+          )
+          updateBlockInSection(sectionIdx, currentBlockIdx, updatedSource)
+          updateBlockInSection(sectionIdx, currentBlockIdx + 1, updatedDest)
+        }
+      }
     }
 
     return updatedSections
