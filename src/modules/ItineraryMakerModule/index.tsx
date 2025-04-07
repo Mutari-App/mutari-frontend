@@ -79,7 +79,6 @@ export default function ItineraryMakerModule() {
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isGenerating, setIsGenerating] = useState(false)
-  const [dismissedFeedbacks, setDismissedFeedbacks] = useState<string[]>([])
   const [feedbackItems, setFeedbackItems] = useState<FeedbackItem[]>([])
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false)
   const [timeWarning, setTimeWarning] = useState<{
@@ -94,6 +93,8 @@ export default function ItineraryMakerModule() {
   const router = useRouter()
   const { id: itineraryId } = useParams<{ id: string }>()
   const [data, setData] = useState<Itinerary | null>(null)
+  const [positionToView, setPositionToView] =
+    useState<google.maps.LatLngLiteral | null>(null)
   const [reminderData, setReminderData] = useState<ItineraryReminder | null>(
     null
   )
@@ -901,6 +902,13 @@ export default function ItineraryMakerModule() {
     }))
   }
 
+  const handleDescChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setItineraryData((prev) => ({
+      ...prev,
+      description: e.target.value,
+    }))
+  }
+
   const addBlock = (sectionNumber: number, blockType: string) => {
     setItineraryData((prev) => {
       const updatedSections = prev.sections.map((section) => {
@@ -1553,6 +1561,17 @@ export default function ItineraryMakerModule() {
       )
     }
 
+    // check remaining feedback
+    const remainingFeedbacks = feedbackItems
+    if (remainingFeedbacks.length > 0) {
+      setIsConfirmModalOpen(true)
+      return
+    }
+
+    await handleFinalSubmit()
+  }
+
+  const handleFinalSubmit = async () => {
     // If user is authenticated, proceed with normal submission
     setIsSubmitting(true)
     let newItineraryId: string = itineraryId
@@ -1613,17 +1632,6 @@ export default function ItineraryMakerModule() {
       toast.error(`Failed with scheduling itinerary reminder`)
     } finally {
       setIsSubmitting(false)
-    }
-
-    const remainingFeedbacks = feedbackItems.filter((item) => {
-      const { sectionIndex, blockIndex, field } = item.target
-      const key = `${sectionIndex}-${blockIndex}-${field ?? ''}`
-      return !dismissedFeedbacks.includes(key)
-    })
-
-    if (remainingFeedbacks.length > 0) {
-      setIsConfirmModalOpen(true)
-      return
     }
   }
 
@@ -1716,8 +1724,10 @@ export default function ItineraryMakerModule() {
       <div className="container max-w-4xl mx-auto p-4 pt-24 min-h-screen max-h-screen overflow-auto">
         <ItineraryHeader
           title={itineraryData.title}
+          description={itineraryData.description}
           coverImage={itineraryData.coverImage}
           onTitleChange={handleTitleChange}
+          onDescChange={handleDescChange}
           isSubmitting={isSubmitting}
           onSubmit={handleSubmit}
           onGenerateFeedback={handleGenerateFeedback}
@@ -1823,6 +1833,7 @@ export default function ItineraryMakerModule() {
           isInputVisible={isInputVisible}
           timeWarning={timeWarning}
           onTransportModeChange={updateTransportMode}
+          setPositionToView={setPositionToView}
         />
         <div className="flex justify-center my-8">
           <Button
@@ -1865,6 +1876,7 @@ export default function ItineraryMakerModule() {
           itineraryData={itineraryData.sections}
           addLocationToSection={addLocationToSection}
           isEditing
+          positionToView={positionToView}
         />
       </div>
       {isConfirmModalOpen && (
@@ -1885,7 +1897,8 @@ export default function ItineraryMakerModule() {
               </button>
               <button
                 className="px-8 py-2 bg-gradient-to-r from-[#016CD7] to-[#014285] text-white items-center rounded"
-                onClick={handleSubmit}
+                disabled={isSubmitting}
+                onClick={handleFinalSubmit}
               >
                 Simpan
               </button>

@@ -5,8 +5,10 @@ import { Wand2 } from 'lucide-react'
 
 interface ItineraryHeaderProps {
   title: string
+  description?: string
   coverImage?: string
   onTitleChange: (e: React.ChangeEvent<HTMLInputElement>) => void
+  onDescChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   isSubmitting: boolean
   isGenerating: boolean
   onGenerateFeedback: () => void
@@ -15,8 +17,10 @@ interface ItineraryHeaderProps {
 
 export const ItineraryHeader: React.FC<ItineraryHeaderProps> = ({
   title,
+  description,
   coverImage,
   onTitleChange,
+  onDescChange,
   isSubmitting,
   isGenerating,
   onGenerateFeedback,
@@ -34,13 +38,21 @@ export const ItineraryHeader: React.FC<ItineraryHeaderProps> = ({
       }}
     >
       <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
-      <div className="absolute bottom-0 left-0 flex p-2 md:p-4 z-10">
-        <Input
-          className="text-lg md:text-4xl font-bold text-white bg-transparent border-none h-fit focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
-          value={title}
-          onChange={onTitleChange}
-          placeholder="Enter trip title"
-        />
+      <div className="absolute bottom-0 left-0 z-10 p-2 md:p-4">
+        <div className="flex flex-col">
+          <Input
+            className="text-lg md:text-4xl font-bold text-white bg-transparent border-none h-fit focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
+            value={title}
+            onChange={onTitleChange}
+            placeholder="Enter trip title"
+          />
+          <Input
+            className="text-sm md:text-md font-raleway text-[#94A3B8] bg-transparent border-none h-fit focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
+            value={description}
+            onChange={onDescChange}
+            placeholder="Masukkan Deskripsi Perjalanan"
+          />
+        </div>
       </div>
 
       <Button
