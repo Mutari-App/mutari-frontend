@@ -1631,17 +1631,6 @@ export default function ItineraryMakerModule() {
     } finally {
       setIsSubmitting(false)
     }
-
-    const remainingFeedbacks = feedbackItems.filter((item) => {
-      const { sectionIndex, blockIndex, field } = item.target
-      const key = `${sectionIndex}-${blockIndex}-${field ?? ''}`
-      return !dismissedFeedbacks.includes(key)
-    })
-
-    if (remainingFeedbacks.length > 0) {
-      setIsConfirmModalOpen(true)
-      return
-    }
   }
 
   const handleGenerateFeedback = async () => {
