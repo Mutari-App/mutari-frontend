@@ -42,6 +42,7 @@ interface Section {
   id: string
   itineraryId: string
   sectionNumber: number
+  contingencyPlanId: string | null
   title: string
   blocks: Block[]
 }
@@ -74,4 +75,29 @@ interface ItineraryDetailResponse {
   success: boolean
   message: string
   data: Itinerary
+}
+
+interface ContingencyPlan {
+  id: string
+  createdAt: string
+  updatedAt: string
+  itineraryId: string
+  title: string
+  description: string
+  isSelected: boolean
+  sections: Section[]
+}
+
+interface ContingencyPlansResponse {
+  statusCode: number
+  success: boolean
+  message: string
+  contingencies: ContingencyPlan[]
+}
+
+interface ContingencyPlanResponse {
+  statusCode: number
+  success: boolean
+  message: string
+  contingency: ContingencyPlan
 }

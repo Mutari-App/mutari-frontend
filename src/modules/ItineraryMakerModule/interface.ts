@@ -98,3 +98,20 @@ export interface PlaceDetails {
   html_attributions: string[]
   result: PlaceResult
 }
+
+export interface ItineraryMakerModuleProps {
+  isContingency?: boolean
+  isEdit?: boolean
+}
+
+export interface ContingencyPlanDto {
+  id: string
+  itineraryId: string
+  title: string
+  description?: string
+  sections: Section[]
+}
+
+export interface ContingencyPlanResponse extends CustomFetchBaseResponse {
+  contingency: ContingencyPlanDto[]
+}

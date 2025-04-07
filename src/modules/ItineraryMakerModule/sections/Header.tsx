@@ -8,6 +8,7 @@ interface ItineraryHeaderProps {
   onTitleChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   isSubmitting: boolean
   onSubmit: () => void
+  isContingency: boolean
 }
 
 export const ItineraryHeader: React.FC<ItineraryHeaderProps> = ({
@@ -16,6 +17,7 @@ export const ItineraryHeader: React.FC<ItineraryHeaderProps> = ({
   onTitleChange,
   isSubmitting,
   onSubmit,
+  isContingency,
 }) => {
   return (
     <div
@@ -35,6 +37,7 @@ export const ItineraryHeader: React.FC<ItineraryHeaderProps> = ({
           value={title}
           onChange={onTitleChange}
           placeholder="Enter trip title"
+          disabled={isContingency}
         />
       </div>
       <Button
