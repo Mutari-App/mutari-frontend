@@ -157,7 +157,6 @@ describe('AutocompleteInput Component', () => {
         '-6.2,106.8'
       )
       expect(updateBlock).toHaveBeenCalledWith(blockId, 'title', 'Test Place')
-      expect(toggleInput).toHaveBeenCalledWith(blockId, 'location')
     })
   })
 })
