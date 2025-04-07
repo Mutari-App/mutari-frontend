@@ -20,7 +20,7 @@ import {
   ChevronDown,
   Trash,
 } from 'lucide-react'
-import { FeedbackItem, type Block, type Section } from '../interface'
+import { type FeedbackItem, type Block, type Section } from '../interface'
 import { type TransportMode } from '@/utils/maps'
 import { ItineraryBlock } from '../module-elements/ItineraryBlock'
 
@@ -151,7 +151,11 @@ export const ItinerarySections: React.FC<ItinerarySectionsProps> = ({
           </div>
           <Droppable droppableId={`section-${section.sectionNumber}`}>
             {(provided: DroppableProvided) => (
-              <div ref={provided.innerRef} {...provided.droppableProps}>
+              <div
+                className="min-h-px"
+                ref={provided.innerRef}
+                {...provided.droppableProps}
+              >
                 {section.blocks?.map((block, blockIndex) => (
                   <ItineraryBlock
                     key={`block-${section.sectionNumber}-${blockIndex}`}
