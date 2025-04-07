@@ -783,6 +783,13 @@ export default function ItineraryMakerModule() {
     }))
   }
 
+  const handleDescChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setItineraryData((prev) => ({
+      ...prev,
+      description: e.target.value,
+    }))
+  }
+
   const addBlock = (sectionNumber: number, blockType: string) => {
     setItineraryData((prev) => {
       const updatedSections = prev.sections.map((section) => {
@@ -1446,8 +1453,10 @@ export default function ItineraryMakerModule() {
       <div className="container max-w-4xl mx-auto p-4 pt-24 min-h-screen max-h-screen overflow-auto">
         <ItineraryHeader
           title={itineraryData.title}
+          description={itineraryData.description}
           coverImage={itineraryData.coverImage}
           onTitleChange={handleTitleChange}
+          onDescChange={handleDescChange}
           isSubmitting={isSubmitting}
           onSubmit={handleSubmit}
           onGenerateFeedback={handleGenerateFeedback}
