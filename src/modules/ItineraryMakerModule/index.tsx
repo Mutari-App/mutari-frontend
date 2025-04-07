@@ -50,7 +50,6 @@ export default function ItineraryMakerModule() {
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isGenerating, setIsGenerating] = useState(false)
-  const [dismissedFeedbacks, setDismissedFeedbacks] = useState<string[]>([])
   const [feedbackItems, setFeedbackItems] = useState<FeedbackItem[]>([])
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false)
   const [timeWarning, setTimeWarning] = useState<{
@@ -1295,12 +1294,12 @@ export default function ItineraryMakerModule() {
       )
       return
     }
-
+  
     if (!itineraryData.startDate || !itineraryData.endDate) {
       toast.error('Silakan masukkan tanggal perjalanan')
       return
     }
-
+  
     if (!isAuthenticated) {
       localStorage.setItem(SAVED_ITINERARY_KEY, JSON.stringify(itineraryData))
       setHasUnsavedChanges(false)
@@ -1310,13 +1309,17 @@ export default function ItineraryMakerModule() {
       )
     }
 
+    // check remaining feedback
     const remainingFeedbacks = feedbackItems
-
     if (remainingFeedbacks.length > 0) {
       setIsConfirmModalOpen(true)
       return
     }
+  
+    await handleFinalSubmit()
+  }
 
+  const handleFinalSubmit = async () => {
     // If user is authenticated, proceed with normal submission
     setIsSubmitting(true)
     try {
@@ -1619,7 +1622,8 @@ export default function ItineraryMakerModule() {
               </button>
               <button
                 className="px-8 py-2 bg-gradient-to-r from-[#016CD7] to-[#014285] text-white items-center rounded"
-                onClick={handleSubmit}
+                disabled={isSubmitting}
+                onClick={handleFinalSubmit}
               >
                 Simpan
               </button>
