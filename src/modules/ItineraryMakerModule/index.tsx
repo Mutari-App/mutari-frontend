@@ -79,7 +79,6 @@ export default function ItineraryMakerModule() {
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isGenerating, setIsGenerating] = useState(false)
-  const [dismissedFeedbacks, setDismissedFeedbacks] = useState<string[]>([])
   const [feedbackItems, setFeedbackItems] = useState<FeedbackItem[]>([])
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false)
   const [timeWarning, setTimeWarning] = useState<{
@@ -1560,6 +1559,17 @@ export default function ItineraryMakerModule() {
       )
     }
 
+    // check remaining feedback
+    const remainingFeedbacks = feedbackItems
+    if (remainingFeedbacks.length > 0) {
+      setIsConfirmModalOpen(true)
+      return
+    }
+
+    await handleFinalSubmit()
+  }
+
+  const handleFinalSubmit = async () => {
     // If user is authenticated, proceed with normal submission
     setIsSubmitting(true)
     let newItineraryId: string = itineraryId
@@ -1620,17 +1630,6 @@ export default function ItineraryMakerModule() {
       toast.error(`Failed with scheduling itinerary reminder`)
     } finally {
       setIsSubmitting(false)
-    }
-
-    const remainingFeedbacks = feedbackItems.filter((item) => {
-      const { sectionIndex, blockIndex, field } = item.target
-      const key = `${sectionIndex}-${blockIndex}-${field ?? ''}`
-      return !dismissedFeedbacks.includes(key)
-    })
-
-    if (remainingFeedbacks.length > 0) {
-      setIsConfirmModalOpen(true)
-      return
     }
   }
 
@@ -1894,7 +1893,8 @@ export default function ItineraryMakerModule() {
               </button>
               <button
                 className="px-8 py-2 bg-gradient-to-r from-[#016CD7] to-[#014285] text-white items-center rounded"
-                onClick={handleSubmit}
+                disabled={isSubmitting}
+                onClick={handleFinalSubmit}
               >
                 Simpan
               </button>
