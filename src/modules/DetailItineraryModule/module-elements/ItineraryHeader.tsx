@@ -16,7 +16,11 @@ export const ItineraryHeader = ({ data }: { data: Itinerary }) => {
       />
       <div className="absolute inset-0 flex flex-col justify-end p-6 text-white">
         <h1 className="md:text-4xl font-bold">{data.title}</h1>
-        {data.description && <p className="text-md text-[#94A3B8] font-raleway">{data.description}</p>}
+        {data.description && (
+          <p className="text-md text-[#94A3B8] font-raleway">
+            {data.description}
+          </p>
+        )}
       </div>
       {user?.id === data.userId && (
         <button
