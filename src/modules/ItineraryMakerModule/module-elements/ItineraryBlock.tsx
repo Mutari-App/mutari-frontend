@@ -143,7 +143,7 @@ export const ItineraryBlock: React.FC<ItineraryBlockProps> = ({
                             removeFeedbackForField(
                               sectionNumber,
                               blockIndex,
-                              'startTime'
+                              timeField ? 'startTime' : 'endTime'
                             )
                           }
                           timeWarning={timeWarning}
