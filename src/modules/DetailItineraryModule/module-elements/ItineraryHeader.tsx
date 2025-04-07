@@ -1,8 +1,16 @@
+import { Button } from '@/components/ui/button'
 import { useAuthContext } from '@/contexts/AuthContext'
 import { getImage } from '@/utils/getImage'
 import Image from 'next/image'
+import Link from 'next/link'
 
-export const ItineraryHeader = ({ data }: { data: Itinerary }) => {
+export const ItineraryHeader = ({
+  data,
+  contingencyId,
+}: {
+  data: Itinerary
+  contingencyId?: string
+}) => {
   const { user } = useAuthContext()
 
   return (
@@ -23,12 +31,13 @@ export const ItineraryHeader = ({ data }: { data: Itinerary }) => {
         )}
       </div>
       {user?.id === data.userId && (
-        <button
-          onClick={() => (window.location.href = `${data.id}/edit`)}
-          className="absolute top-4 right-4 bg-gradient-to-r from-[#016CD7] to-[#014285] text-white px-4 py-2 rounded-md text-sm font-roboto"
+        <Link
+          href={contingencyId ? `${contingencyId}/edit` : `${data.id}/edit`}
         >
-          Edit
-        </button>
+          <Button className="absolute top-4 right-4 bg-gradient-to-r from-[#016CD7] to-[#014285] text-white px-4 py-2 rounded-md text-sm font-roboto">
+            Edit
+          </Button>
+        </Link>
       )}
     </div>
   )

@@ -23,6 +23,7 @@ import {
   FeedbackItem,
   type Route,
   type ReminderOption,
+  ItineraryMakerModuleProps,
 } from './interface'
 import { customFetch, customFetchBody } from '@/utils/customFetch'
 import { type DropResult } from '@hello-pangea/dnd'
@@ -36,7 +37,7 @@ import { ReminderSelector } from './module-elements/ReminderSelector'
 import { CldUploadButton } from 'next-cloudinary'
 import { cn } from '@/lib/utils'
 import { useAuthContext } from '@/contexts/AuthContext'
-import { redirect, useParams, useRouter } from 'next/navigation'
+import { notFound, redirect, useParams, useRouter } from 'next/navigation'
 import NotFound from 'next/error'
 import { Lightbulb } from 'lucide-react'
 import { calculateRoute, TransportMode } from '@/utils/maps'
@@ -44,7 +45,10 @@ import Maps from './sections/Maps'
 
 const SAVED_ITINERARY_KEY = 'saved_itinerary_data'
 
-export default function ItineraryMakerModule() {
+export default function ItineraryMakerModule({
+  isContingency = false,
+  isEdit = false,
+}: Readonly<ItineraryMakerModuleProps>) {
   const { user } = useAuthContext()
   const launchingDate = new Date(
     process.env.NEXT_PUBLIC_LAUNCHING_DATE || '2025-01-22T00:00:00'
@@ -91,7 +95,10 @@ export default function ItineraryMakerModule() {
   const [availableTags, setAvailableTags] = useState<Tag[]>([])
   const { isAuthenticated } = useAuthContext()
   const router = useRouter()
-  const { id: itineraryId } = useParams<{ id: string }>()
+  const { id: itineraryId, contingencyId } = useParams<{
+    id: string
+    contingencyId: string
+  }>()
   const [data, setData] = useState<Itinerary | null>(null)
   const [positionToView, setPositionToView] =
     useState<google.maps.LatLngLiteral | null>(null)
@@ -99,6 +106,7 @@ export default function ItineraryMakerModule() {
     null
   )
   const wasAlreadyRequested = useRef(false)
+  const [contingency, setContingency] = useState<ContingencyPlan | null>(null)
 
   const initialItineraryData = useRef<CreateItineraryDto>({
     title: 'Itinerary Tanpa Judul',
@@ -175,8 +183,11 @@ export default function ItineraryMakerModule() {
           router.push(`/itinerary/${itineraryId}`)
           return
         }
-
         setData(res.data)
+        if (contingencyId) {
+          const mapped = await fetchContingencyDetail()
+          setData({ ...res.data, sections: mapped })
+        }
       } catch (err: any) {
         return <NotFound statusCode={404} />
       }
@@ -197,6 +208,31 @@ export default function ItineraryMakerModule() {
         setReminderData(res.data)
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {}
+    }
+    const fetchContingencyDetail = async () => {
+      try {
+        const res = await customFetch<ContingencyPlanResponse>(
+          `itineraries/${itineraryId}/contingencies/${contingencyId}`,
+          {
+            credentials: 'include',
+            isAuthorized: true,
+          }
+        )
+
+        if (res.statusCode === 404) {
+          notFound()
+        }
+
+        const mappedSections = res.contingency.sections.map((section) => ({
+          ...section,
+          sectionNumber: section.sectionNumber % 1000,
+        }))
+
+        setContingency({ ...res.contingency, sections: mappedSections })
+        return mappedSections
+      } catch (err: any) {
+        notFound()
+      }
     }
     if (!wasAlreadyRequested.current) {
       void fetchData()
@@ -1414,35 +1450,57 @@ export default function ItineraryMakerModule() {
     }
   }
 
-  const submitItinerary = async (submissionData: object) => {
-    const validUmami = () => typeof window !== 'undefined' && window.umami
-    const isCreateAndValidUmami = () => !itineraryId && validUmami()
-
-    try {
-      const fetchCreateItinerary = async () => {
-        return await customFetch<CreateItineraryResponse>('/itineraries', {
-          method: 'POST',
-          body: customFetchBody(submissionData),
-          credentials: 'include',
-          isAuthorized: true,
-        })
-      }
-
-      const fetchUpdateItinerary = async () => {
-        return await customFetch<CreateItineraryResponse>(
-          `/itineraries/${itineraryId}`,
+  const createFetchMap = (submissionData: object) => ({
+    contingency: {
+      create: () =>
+        customFetch<ContingencyPlanResponse>(
+          `/itineraries/${itineraryId}/contingencies`,
+          {
+            method: 'POST',
+            body: customFetchBody(submissionData),
+            credentials: 'include',
+            isAuthorized: true,
+          }
+        ),
+      update: () =>
+        customFetch<ContingencyPlanResponse>(
+          `/itineraries/${itineraryId}/contingencies/${contingencyId}`,
           {
             method: 'PATCH',
             body: customFetchBody(submissionData),
             credentials: 'include',
             isAuthorized: true,
           }
-        )
-      }
+        ),
+    },
+    main: {
+      create: () =>
+        customFetch<CreateItineraryResponse>('/itineraries', {
+          method: 'POST',
+          body: customFetchBody(submissionData),
+          credentials: 'include',
+          isAuthorized: true,
+        }),
+      update: () =>
+        customFetch<CreateItineraryResponse>(`/itineraries/${itineraryId}`, {
+          method: 'PATCH',
+          body: customFetchBody(submissionData),
+          credentials: 'include',
+          isAuthorized: true,
+        }),
+    },
+  })
 
-      const response = itineraryId
-        ? await fetchUpdateItinerary()
-        : await fetchCreateItinerary()
+  const validUmami = () => typeof window !== 'undefined' && window.umami
+  const isCreateAndValidUmami = () => !itineraryId && validUmami()
+
+  const submitItinerary = async (submissionData: object) => {
+    try {
+      const fetchMap = createFetchMap(submissionData)
+      const itineraryType = isContingency ? 'contingency' : 'main'
+      const operation = isEdit ? 'update' : 'create'
+
+      const response = await fetchMap[itineraryType][operation]()
 
       if (!response.success) {
         if (isCreateAndValidUmami()) {
@@ -1451,20 +1509,139 @@ export default function ItineraryMakerModule() {
         throw new Error('Failed to create or edit itinerary')
       }
 
-      setHasUnsavedChanges(false)
-      toast(`Itinerary ${itineraryId ? 'updated' : 'created'} successfully`)
-
-      if (isCreateAndValidUmami()) {
-        window.umami.track('create_itinerary_success')
+      if (itineraryType === 'contingency') {
+        return handleSuccessfulContingencySubmission(
+          response as ContingencyPlanResponse
+        )
+      } else {
+        return handleSuccessfulSubmission(response as CreateItineraryResponse)
       }
-
-      router.push(`/itinerary/${response.id}`)
-      return response
     } catch (error) {
       if (isCreateAndValidUmami()) {
         window.umami.track('create_itinerary_fail')
       }
-      throw error
+      throw new Error('Failed to create or edit itinerary')
+    }
+  }
+
+  const handleSuccessfulSubmission = (response: CreateItineraryResponse) => {
+    setHasUnsavedChanges(false)
+    const action = isEdit ? 'updated' : 'created'
+    toast.success(`Contingency ${action} successfully`)
+
+    if (isCreateAndValidUmami()) {
+      window.umami.track('create_itinerary_success')
+    }
+
+    router.push(`/itinerary/${response.id}`)
+    return response.id
+  }
+
+  const handleSuccessfulContingencySubmission = (
+    response: ContingencyPlanResponse
+  ) => {
+    setHasUnsavedChanges(false)
+    const action = isEdit ? 'updated' : 'created'
+    toast.success(`Contingency ${action} successfully`)
+    router.push(
+      `/itinerary/${itineraryId}/contingency/${response.contingency.id}`
+    )
+    return itineraryId
+  }
+
+  const handleSubmit = async () => {
+    if (timeWarning) {
+      toast.error(
+        'Ada kesalahan pada pengaturan waktu. Silakan periksa kembali.'
+      )
+      return
+    }
+
+    if (!itineraryData.startDate || !itineraryData.endDate) {
+      toast.error('Silakan masukkan tanggal perjalanan')
+      return
+    }
+
+    if (!isAuthenticated) {
+      localStorage.setItem(SAVED_ITINERARY_KEY, JSON.stringify(itineraryData))
+      setHasUnsavedChanges(false)
+      toast.info('Silakan login untuk menyimpan itinerary Anda')
+      redirect(
+        isLaunching ? '/login?redirect=/itinerary/create' : '/#praregistrasi'
+      )
+    }
+
+    // check remaining feedback
+    const remainingFeedbacks = feedbackItems
+    if (remainingFeedbacks.length > 0) {
+      setIsConfirmModalOpen(true)
+      return
+    }
+
+    await handleFinalSubmit()
+  }
+
+  const handleFinalSubmit = async () => {
+    // If user is authenticated, proceed with normal submission
+    setIsSubmitting(true)
+    let newItineraryId: string = itineraryId
+    try {
+      const submissionData = {
+        ...itineraryData,
+        sections: itineraryData.sections.map((section) => ({
+          ...section,
+          blocks:
+            section.blocks?.map((block) => {
+              // Create a new object without ID but preserving route information
+              // eslint-disable-next-line @typescript-eslint/no-unused-vars
+              const { id, ...blockWithoutId } = block
+              const routeToNext = block.routeToNext
+                ? {
+                    ...block.routeToNext,
+                    sourceBlockId: block.routeToNext.sourceBlockId,
+                    destinationBlockId: block.routeToNext.destinationBlockId,
+                  }
+                : undefined
+              const routeFromPrevious = block.routeFromPrevious
+                ? {
+                    ...block.routeFromPrevious,
+                    sourceBlockId: block.routeFromPrevious.sourceBlockId,
+                    destinationBlockId:
+                      block.routeFromPrevious.destinationBlockId,
+                  }
+                : undefined
+              return {
+                ...blockWithoutId,
+                routeToNext,
+                routeFromPrevious,
+              }
+            }) ?? [],
+        })),
+      }
+      // Edge case: new itinerary and create reminder
+      const response = await submitItinerary(submissionData)
+      newItineraryId = response
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (error) {
+      console.error('Error creating or updating itinerary:', error)
+      toast.error(
+        `Failed to ${isEdit ? 'update' : 'create'} itinerary. Please try again.`
+      )
+      setIsSubmitting(false)
+      return
+    }
+
+    // Submit itinerary reminder changes
+    try {
+      const submissionData = {
+        ...itineraryReminderData,
+        itineraryId: newItineraryId,
+      }
+      await submitItineraryReminder(submissionData)
+    } catch (error) {
+      toast.error(`Failed with scheduling itinerary reminder`)
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -1545,100 +1722,16 @@ export default function ItineraryMakerModule() {
     }
   }
 
-  const handleSubmit = async () => {
-    if (timeWarning) {
-      toast.error(
-        'Ada kesalahan pada pengaturan waktu. Silakan periksa kembali.'
-      )
-      return
+  const _getHeaderTitle = () => {
+    if (isContingency) {
+      return isEdit ? `Edit ${contingency?.title}` : 'Buat contingency plan'
     }
 
-    if (!itineraryData.startDate || !itineraryData.endDate) {
-      toast.error('Silakan masukkan tanggal perjalanan')
-      return
+    if (itineraryData.title) {
+      return itineraryData.title
     }
 
-    if (!isAuthenticated) {
-      localStorage.setItem(SAVED_ITINERARY_KEY, JSON.stringify(itineraryData))
-      setHasUnsavedChanges(false)
-      toast.info('Silakan login untuk menyimpan itinerary Anda')
-      redirect(
-        isLaunching ? '/login?redirect=/itinerary/create' : '/#praregistrasi'
-      )
-    }
-
-    // check remaining feedback
-    const remainingFeedbacks = feedbackItems
-    if (remainingFeedbacks.length > 0) {
-      setIsConfirmModalOpen(true)
-      return
-    }
-
-    await handleFinalSubmit()
-  }
-
-  const handleFinalSubmit = async () => {
-    // If user is authenticated, proceed with normal submission
-    setIsSubmitting(true)
-    let newItineraryId: string = itineraryId
-    try {
-      const submissionData = {
-        ...itineraryData,
-        sections: itineraryData.sections.map((section) => ({
-          ...section,
-          blocks:
-            section.blocks?.map((block) => {
-              // Create a new object without ID but preserving route information
-              // eslint-disable-next-line @typescript-eslint/no-unused-vars
-              const { id, ...blockWithoutId } = block
-              const routeToNext = block.routeToNext
-                ? {
-                    ...block.routeToNext,
-                    sourceBlockId: block.routeToNext.sourceBlockId,
-                    destinationBlockId: block.routeToNext.destinationBlockId,
-                  }
-                : undefined
-              const routeFromPrevious = block.routeFromPrevious
-                ? {
-                    ...block.routeFromPrevious,
-                    sourceBlockId: block.routeFromPrevious.sourceBlockId,
-                    destinationBlockId:
-                      block.routeFromPrevious.destinationBlockId,
-                  }
-                : undefined
-              return {
-                ...blockWithoutId,
-                routeToNext,
-                routeFromPrevious,
-              }
-            }) ?? [],
-        })),
-      }
-      // Edge case: new itinerary and create reminder
-      const response = await submitItinerary(submissionData)
-      newItineraryId = response.id
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (error) {
-      console.error('Error creating or updating itinerary:', error)
-      toast.error(
-        `Failed to ${itineraryId ? 'update' : 'create'} itinerary. Please try again.`
-      )
-      setIsSubmitting(false)
-      return
-    }
-
-    // Submit itinerary reminder changes
-    try {
-      const submissionData = {
-        ...itineraryReminderData,
-        itineraryId: newItineraryId,
-      }
-      await submitItineraryReminder(submissionData)
-    } catch (error) {
-      toast.error(`Failed with scheduling itinerary reminder`)
-    } finally {
-      setIsSubmitting(false)
-    }
+    return 'Buat Itinerary'
   }
 
   const handleGenerateFeedback = async () => {
@@ -1729,7 +1822,7 @@ export default function ItineraryMakerModule() {
     <div className="flex max-h-screen">
       <div className="container max-w-4xl mx-auto p-4 pt-24 min-h-screen max-h-screen overflow-auto">
         <ItineraryHeader
-          title={itineraryData.title}
+          title={_getHeaderTitle()}
           description={itineraryData.description}
           coverImage={itineraryData.coverImage}
           onTitleChange={handleTitleChange}
@@ -1738,22 +1831,31 @@ export default function ItineraryMakerModule() {
           onSubmit={handleSubmit}
           onGenerateFeedback={handleGenerateFeedback}
           isGenerating={isGenerating}
+          isContingency={!!contingencyId}
         />
         <div className="flex flex-wrap max-sm:justify-center items-center gap-2 mb-4">
           <TagSelector
             selectedTags={itineraryData.tags ?? []}
             onChangeAction={handleTagsChange}
             availableTags={availableTags}
+            isContingency={isContingency}
           />
-          <ReminderSelector
-            selectedReminder={itineraryReminderData.reminderOption ?? 'NONE'}
-            onChangeAction={handleReminderChange}
-            reminderOptions={reminderOptions}
-          />
+          {!isContingency && (
+            <ReminderSelector
+              selectedReminder={itineraryReminderData.reminderOption ?? 'NONE'}
+              onChangeAction={handleReminderChange}
+              reminderOptions={reminderOptions}
+            />
+          )}
+
           <CldUploadButton
             uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
             onSuccess={handleImageUpload}
-            className={cn(buttonVariants({ variant: 'outline', size: 'sm' }))}
+            className={cn(
+              buttonVariants({ variant: 'outline', size: 'sm' }),
+              isContingency &&
+                'opacity-50 cursor-not-allowed pointer-events-none'
+            )}
             options={{
               clientAllowedFormats: ['image'],
               maxFiles: 1,
@@ -1769,6 +1871,7 @@ export default function ItineraryMakerModule() {
                   variant="outline"
                   size="sm"
                   className="flex items-center gap-2"
+                  disabled={isContingency}
                 >
                   <CalendarIcon className="h-4 w-4" />
                   {dateRange.from && dateRange.to
@@ -1796,12 +1899,14 @@ export default function ItineraryMakerModule() {
                 className="flex items-center gap-1"
               >
                 {tagName}
-                <button
-                  onClick={() => removeTag(itineraryData.tags![index])}
-                  className="ml-1 rounded-full hover:bg-gray-200 p-0.5"
-                >
-                  <X className="h-3 w-3" />
-                </button>
+                {!isContingency && (
+                  <button
+                    onClick={() => removeTag(itineraryData.tags![index])}
+                    className="ml-1 rounded-full hover:bg-gray-200 p-0.5"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                )}
               </Badge>
             ))}
           </div>
