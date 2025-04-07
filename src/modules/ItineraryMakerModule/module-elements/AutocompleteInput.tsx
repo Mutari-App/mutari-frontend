@@ -95,7 +95,7 @@ function AutocompleteInput({
           setOptionsOpen(true)
         }}
         disabled={!ready}
-        data-testid='autocomplete-input'
+        data-testid="autocomplete-input"
       />
       {status === 'OK' && optionsOpen && (
         <div

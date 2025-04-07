@@ -44,7 +44,7 @@ describe('AutocompleteInput Component', () => {
   const title = 'Initial Title'
 
   beforeEach(() => {
-    (useLoadScript as jest.Mock).mockReturnValue({ isLoaded: true })
+    ;(useLoadScript as jest.Mock).mockReturnValue({ isLoaded: true })
   })
 
   afterEach(() => {
@@ -124,19 +124,18 @@ describe('AutocompleteInput Component', () => {
       clearSuggestions: jest.fn(),
     })
 
-    
     render(
       <AutocompleteInput
-      updateBlock={updateBlock}
-      setPositionToView={mockSetPositionToView}
-      toggleInput={toggleInput}
-      blockId={blockId}
-      title={title}
+        updateBlock={updateBlock}
+        setPositionToView={mockSetPositionToView}
+        toggleInput={toggleInput}
+        blockId={blockId}
+        title={title}
       />
     )
 
-    const input = screen.getByTestId('autocomplete-input');
-    fireEvent.change(input, { target: { value: 'Jakarta' } });
+    const input = screen.getByTestId('autocomplete-input')
+    fireEvent.change(input, { target: { value: 'Jakarta' } })
 
     // Pastikan input muncul
     const inputField = screen.getByPlaceholderText(/Search Location/i)
