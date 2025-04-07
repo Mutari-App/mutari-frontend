@@ -1294,12 +1294,12 @@ export default function ItineraryMakerModule() {
       )
       return
     }
-  
+
     if (!itineraryData.startDate || !itineraryData.endDate) {
       toast.error('Silakan masukkan tanggal perjalanan')
       return
     }
-  
+
     if (!isAuthenticated) {
       localStorage.setItem(SAVED_ITINERARY_KEY, JSON.stringify(itineraryData))
       setHasUnsavedChanges(false)
@@ -1315,7 +1315,7 @@ export default function ItineraryMakerModule() {
       setIsConfirmModalOpen(true)
       return
     }
-  
+
     await handleFinalSubmit()
   }
 
