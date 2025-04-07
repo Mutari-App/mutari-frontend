@@ -43,30 +43,33 @@ export const ItineraryHeader: React.FC<ItineraryHeaderProps> = ({
       <div className="absolute bottom-0 left-0 z-10 p-2 md:p-4">
         <div className="flex flex-col">
           <Input
-            className="text-lg md:text-4xl font-bold text-white bg-transparent border-none h-fit focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
+            className="text-lg md:text-4xl font-bold text-white bg-transparent border-none h-fit focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 disabled:opacity-100 disabled:text-white disabled:bg-transparent"
             value={title}
             onChange={onTitleChange}
             placeholder="Enter trip title"
             disabled={isContingency}
           />
           <Input
-            className="text-sm md:text-md font-raleway text-[#94A3B8] bg-transparent border-none h-fit focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
+            className="text-sm md:text-md font-raleway text-[#94A3B8] bg-transparent border-none h-fit focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 disabled:opacity-100 disabled:text-[#94A3B8] disabled:bg-transparent"
             value={description}
             onChange={onDescChange}
             placeholder="Masukkan Deskripsi Perjalanan"
+            disabled={isContingency}
           />
         </div>
       </div>
 
-      <Button
-        size="sm"
-        className="absolute top-4 left-4 z-10 bg-gradient-to-r from-[#0073E6] to-[#80004B] text-white hover:from-[#80004B] hover:to-[#0073E6]"
-        onClick={onGenerateFeedback}
-        disabled={isGenerating}
-      >
-        <Wand2 size={16} />
-        {isGenerating ? 'Generating...' : 'Generate AI Feedback'}
-      </Button>
+      {!isContingency && (
+        <Button
+          size="sm"
+          className="absolute top-4 left-4 z-10 bg-gradient-to-r from-[#0073E6] to-[#80004B] text-white hover:from-[#80004B] hover:to-[#0073E6]"
+          onClick={onGenerateFeedback}
+          disabled={isGenerating}
+        >
+          <Wand2 size={16} />
+          {isGenerating ? 'Generating...' : 'Generate AI Feedback'}
+        </Button>
+      )}
 
       <Button
         size="sm"

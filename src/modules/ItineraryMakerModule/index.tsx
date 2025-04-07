@@ -1834,11 +1834,14 @@ export default function ItineraryMakerModule({
             availableTags={availableTags}
             isContingency={isContingency}
           />
-          <ReminderSelector
-            selectedReminder={itineraryReminderData.reminderOption ?? 'NONE'}
-            onChangeAction={handleReminderChange}
-            reminderOptions={reminderOptions}
-          />
+          {!isContingency && (
+            <ReminderSelector
+              selectedReminder={itineraryReminderData.reminderOption ?? 'NONE'}
+              onChangeAction={handleReminderChange}
+              reminderOptions={reminderOptions}
+            />
+          )}
+
           <CldUploadButton
             uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
             onSuccess={handleImageUpload}

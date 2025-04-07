@@ -16,7 +16,7 @@ export const PlanPicker = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false)
   return (
-    <div className="fixed py-7 px-2 space-x-0 left-0 bottom-5 bg-gradient-to-r from-[#004080] to-[#0073E6] text-white rounded-r-full min-w-16 h-10 flex items-center justify-center">
+    <div className="fixed py-7 pl-2 pr-0 space-x-0 left-0 bottom-3 bg-gradient-to-r from-[#004080] to-[#0073E6] text-white rounded-r-full min-w-16 h-10 flex items-center justify-center">
       {isOpen && (
         <div className="flex flex-row items-center justify-center gap-3 px-1">
           <Link href={`/itinerary/${itineraryId}`}>
@@ -60,13 +60,13 @@ export const PlanPicker = ({
       )}
       <Button
         onClick={() => setIsOpen(!isOpen)}
-        className="bg-transparent hover:bg-transparent active:bg-transparent focus:bg-transparent focus:ring-0 focus:outline-none"
+        className="p-0 flex gap-0 bg-transparent hover:bg-transparent active:bg-transparent focus:bg-transparent focus:ring-0 focus:outline-none"
       >
         <Layers className="!w-[24px] !h-[24px]" strokeWidth={1} />
         {isOpen ? (
           <ChevronLeft className="!w-[24px] !h-[24px]" />
         ) : (
-          <ChevronRight className="!w-[30px] !h-[24px]" />
+          <ChevronRight className="!w-[24px] !h-[24px]" />
         )}
       </Button>
     </div>
