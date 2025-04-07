@@ -1,11 +1,11 @@
 'use client'
 
 import { Input } from '@/components/ui/input'
-import { type Libraries, useLoadScript } from '@react-google-maps/api'
 import usePlacesAutocomplete, {
   getGeocode,
   getLatLng,
 } from 'use-places-autocomplete'
+import { type Libraries, useLoadScript } from '@react-google-maps/api'
 import { type Block } from '../interface'
 import { useEffect, useRef, useState } from 'react'
 import useOutsideClick from '@/hooks/useOutsideClick'
@@ -95,6 +95,7 @@ function AutocompleteInput({
           setOptionsOpen(true)
         }}
         disabled={!ready}
+        data-testid='autocomplete-input'
       />
       {status === 'OK' && optionsOpen && (
         <div

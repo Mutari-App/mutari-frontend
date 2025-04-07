@@ -1,7 +1,7 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import AutocompleteInput from '@/modules/ItineraryMakerModule/module-elements/AutocompleteInput'
 import { useLoadScript } from '@react-google-maps/api'
-import usePlacesAutocomplete, { getGeocode } from 'use-places-autocomplete'
+import usePlacesAutocomplete from 'use-places-autocomplete'
 
 jest.mock('@react-google-maps/api', () => ({
   useLoadScript: jest.fn(),
@@ -44,6 +44,10 @@ describe('AutocompleteInput Component', () => {
   const title = 'Initial Title'
 
   beforeEach(() => {
+    (useLoadScript as jest.Mock).mockReturnValue({ isLoaded: true })
+  })
+
+  afterEach(() => {
     jest.clearAllMocks()
   })
 
@@ -75,7 +79,7 @@ describe('AutocompleteInput Component', () => {
     expect(screen.getByPlaceholderText(/Search Location/i)).toBeInTheDocument()
   })
 
-  test('updates input value on change', () => {
+  test('updates input value on change', async () => {
     const setValueMock = jest.fn()
     ;(useLoadScript as jest.Mock).mockReturnValueOnce({ isLoaded: true })
     ;(usePlacesAutocomplete as jest.Mock).mockReturnValue({
@@ -103,7 +107,6 @@ describe('AutocompleteInput Component', () => {
 
   test('handles selecting a location correctly', async () => {
     ;(useLoadScript as jest.Mock).mockReturnValueOnce({ isLoaded: true })
-    // Mock getGeocode dan getLatLng agar tidak memanggil API
     ;(usePlacesAutocomplete as jest.Mock).mockReturnValue({
       ready: true,
       value: '',
@@ -120,17 +123,20 @@ describe('AutocompleteInput Component', () => {
       },
       clearSuggestions: jest.fn(),
     })
-    // ;(getGeocode as jest.Mock).mockResolvedValue([{ geometry: { location: { lat: () => -6.2, lng: () => 106.8 } } }]);
 
+    
     render(
       <AutocompleteInput
-        updateBlock={updateBlock}
-        setPositionToView={mockSetPositionToView}
-        toggleInput={toggleInput}
-        blockId={blockId}
-        title={title}
+      updateBlock={updateBlock}
+      setPositionToView={mockSetPositionToView}
+      toggleInput={toggleInput}
+      blockId={blockId}
+      title={title}
       />
     )
+
+    const input = screen.getByTestId('autocomplete-input');
+    fireEvent.change(input, { target: { value: 'Jakarta' } });
 
     // Pastikan input muncul
     const inputField = screen.getByPlaceholderText(/Search Location/i)
