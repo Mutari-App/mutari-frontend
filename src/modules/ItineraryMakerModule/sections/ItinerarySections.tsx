@@ -60,6 +60,9 @@ interface ItinerarySectionsProps {
     blockId: string,
     mode: TransportMode
   ) => Promise<boolean>
+  setPositionToView: React.Dispatch<
+    React.SetStateAction<google.maps.LatLngLiteral | null>
+  >
 }
 
 export const ItinerarySections: React.FC<ItinerarySectionsProps> = ({
@@ -78,6 +81,7 @@ export const ItinerarySections: React.FC<ItinerarySectionsProps> = ({
   removeBlock,
   handleDragEnd,
   onTransportModeChange,
+  setPositionToView,
 }) => {
   // Helper function to check if a block should show route information
   const shouldShowRoute = (section: Section, blockIndex: number): boolean => {
@@ -172,6 +176,7 @@ export const ItinerarySections: React.FC<ItinerarySectionsProps> = ({
                     showRoute={shouldShowRoute(section, blockIndex)}
                     routeInfo={block.routeToNext}
                     onTransportModeChange={onTransportModeChange}
+                    setPositionToView={setPositionToView}
                   />
                 ))}
                 {provided.placeholder}

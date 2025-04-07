@@ -77,6 +77,9 @@ interface ItineraryBlockProps {
     blockId: string,
     mode: TransportMode
   ) => Promise<boolean>
+  setPositionToView: React.Dispatch<
+    React.SetStateAction<google.maps.LatLngLiteral | null>
+  >
 }
 
 export const ItineraryBlock: React.FC<ItineraryBlockProps> = ({
@@ -93,6 +96,7 @@ export const ItineraryBlock: React.FC<ItineraryBlockProps> = ({
   showRoute,
   routeInfo,
   onTransportModeChange,
+  setPositionToView,
 }) => {
   return (
     <>
@@ -126,6 +130,7 @@ export const ItineraryBlock: React.FC<ItineraryBlockProps> = ({
                           updateBlock={updateBlock}
                           toggleInput={toggleInput}
                           blockId={block.id}
+                          setPositionToView={setPositionToView}
                           title={block.title}
                         />
                       </div>
