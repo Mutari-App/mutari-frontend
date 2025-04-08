@@ -19,11 +19,11 @@ import {
   type CreateItineraryResponse,
   type Tag,
   type ItineraryReminderDto,
-  CreateItineraryReminderResponse,
-  FeedbackItem,
+  type CreateItineraryReminderResponse,
+  type FeedbackItem,
   type Route,
   type ReminderOption,
-  ItineraryMakerModuleProps,
+  type ItineraryMakerModuleProps,
 } from './interface'
 import { customFetch, customFetchBody } from '@/utils/customFetch'
 import { type DropResult } from '@hello-pangea/dnd'
@@ -341,7 +341,6 @@ export default function ItineraryMakerModule({
         startDate: reminderData.startDate,
       }))
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reminderData])
 
   // Load saved itinerary data from local storage
@@ -671,7 +670,7 @@ export default function ItineraryMakerModule({
       const pairs: Array<{ sectionIdx: number; currentBlockIdx: number }> = []
       sections.forEach((section, sIdx) => {
         if (!section.blocks || section.blocks.length < 2) return
-        for (let bIdx = 0; bIdx < section.blocks.length - 1; bIdx++) {
+        for (let bIdx = 0; bIdx < section.blocks.length; bIdx++) {
           pairs.push({ sectionIdx: sIdx, currentBlockIdx: bIdx })
         }
       })
@@ -682,16 +681,22 @@ export default function ItineraryMakerModule({
 
     for (const { sectionIdx, currentBlockIdx } of pairs) {
       const section = updatedSections[sectionIdx]
-      if (!section.blocks || currentBlockIdx >= section.blocks.length - 1)
-        continue
-      const currentBlock = section.blocks[currentBlockIdx]
-      const nextBlock = section.blocks[currentBlockIdx + 1]
-      const { updatedSource, updatedDest } = await calculateAndUpdateRoute(
-        currentBlock,
-        nextBlock
-      )
-      updateBlockInSection(sectionIdx, currentBlockIdx, updatedSource)
-      updateBlockInSection(sectionIdx, currentBlockIdx + 1, updatedDest)
+      if (!!section.blocks) {
+        if (currentBlockIdx === section.blocks.length - 1) {
+          const lastBlock = section.blocks[currentBlockIdx]
+          const updatedLastBlock = { ...lastBlock, routeToNext: undefined }
+          updateBlockInSection(sectionIdx, currentBlockIdx, updatedLastBlock)
+        } else if (currentBlockIdx < section.blocks.length - 1) {
+          const currentBlock = section.blocks[currentBlockIdx]
+          const nextBlock = section.blocks[currentBlockIdx + 1]
+          const { updatedSource, updatedDest } = await calculateAndUpdateRoute(
+            currentBlock,
+            nextBlock
+          )
+          updateBlockInSection(sectionIdx, currentBlockIdx, updatedSource)
+          updateBlockInSection(sectionIdx, currentBlockIdx + 1, updatedDest)
+        }
+      }
     }
 
     return updatedSections
@@ -1551,6 +1556,11 @@ export default function ItineraryMakerModule({
       return
     }
 
+    if (!itineraryData.title || itineraryData.title.trim() === '') {
+      toast.error('Silakan masukkan judul itinerary')
+      return
+    }
+
     if (!itineraryData.startDate || !itineraryData.endDate) {
       toast.error('Silakan masukkan tanggal perjalanan')
       return
@@ -1615,7 +1625,6 @@ export default function ItineraryMakerModule({
       // Edge case: new itinerary and create reminder
       const response = await submitItinerary(submissionData)
       newItineraryId = response
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       console.error('Error creating or updating itinerary:', error)
       toast.error(
@@ -1627,9 +1636,11 @@ export default function ItineraryMakerModule({
 
     // Submit itinerary reminder changes
     try {
-      const submissionData = {
+      const submissionData: ItineraryReminderDto = {
         ...itineraryReminderData,
         itineraryId: newItineraryId,
+        recipient: user?.email,
+        recipientName: user?.firstName,
       }
       await submitItineraryReminder(submissionData)
     } catch (error) {
@@ -1725,7 +1736,7 @@ export default function ItineraryMakerModule({
       return itineraryData.title
     }
 
-    return 'Buat Itinerary'
+    return ''
   }
 
   const handleGenerateFeedback = async () => {
