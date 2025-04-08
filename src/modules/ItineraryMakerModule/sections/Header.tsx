@@ -50,7 +50,7 @@ export const ItineraryHeader: React.FC<ItineraryHeaderProps> = ({
             disabled={isContingency}
           />
           <Input
-            className="text-sm md:text-md font-raleway text-[#94A3B8] bg-transparent border-none h-fit focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 disabled:opacity-100 disabled:text-[#94A3B8] disabled:bg-transparent"
+            className="text-sm md:text-md font-raleway text-white bg-transparent border-none h-fit focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 disabled:opacity-100 disabled:text-white disabled:bg-transparent"
             value={description}
             onChange={onDescChange}
             placeholder="Masukkan Deskripsi Perjalanan"
