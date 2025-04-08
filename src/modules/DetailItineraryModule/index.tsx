@@ -128,7 +128,13 @@ export default function DetailItineraryModule() {
         />
       </div>
       <div className="w-full min-h-screen hidden md:block">
-        <Maps itineraryData={data.sections ?? []} />
+        <Maps
+          itineraryData={
+            selectedContingency
+              ? selectedContingency.sections || []
+              : (data.sections ?? [])
+          }
+        />
       </div>
     </div>
   )
