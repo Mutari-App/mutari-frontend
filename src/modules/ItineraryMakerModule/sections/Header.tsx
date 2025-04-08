@@ -80,7 +80,7 @@ export const ItineraryHeader: React.FC<ItineraryHeaderProps> = ({
 
           <span className="relative flex items-center gap-1.5">
             <Wand2 size={16} />
-            {isGenerating ? 'Memproses...' : 'AI Feedback'}
+            {isGenerating ? 'Memproses...' : 'Buat Saran AI'}
           </span>
         </Button>
       )}
