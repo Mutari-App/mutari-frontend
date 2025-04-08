@@ -1636,9 +1636,11 @@ export default function ItineraryMakerModule({
 
     // Submit itinerary reminder changes
     try {
-      const submissionData = {
+      const submissionData: ItineraryReminderDto = {
         ...itineraryReminderData,
         itineraryId: newItineraryId,
+        recipient: user?.email,
+        recipientName: user?.firstName,
       }
       await submitItineraryReminder(submissionData)
     } catch (error) {
