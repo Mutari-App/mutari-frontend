@@ -23,6 +23,11 @@ export async function customFetch<T>(
     delete headers['Content-Type']
   }
 
+  const AT = await getCookie('AT')
+
+  if (AT) {
+    headers.authorization = `Bearer ${String(AT)}`
+  }
   if (isServer) {
     const { cookies } = await import('next/headers')
     const serverCookies = await cookies()

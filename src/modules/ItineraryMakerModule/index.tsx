@@ -25,7 +25,7 @@ import {
   type ReminderOption,
   type ItineraryMakerModuleProps,
 } from './interface'
-import { customFetch, customFetchBody } from '@/utils/customFetch'
+import { customFetch, customFetchBody } from '@/utils/newCustomFetch'
 import { type DropResult } from '@hello-pangea/dnd'
 import { type DateRange } from 'react-day-picker'
 import { v4 } from 'uuid'
@@ -173,7 +173,6 @@ export default function ItineraryMakerModule({
           {
             method: 'GET',
             credentials: 'include',
-            isAuthorized: true,
           }
         )
 
@@ -199,7 +198,6 @@ export default function ItineraryMakerModule({
           {
             method: 'GET',
             credentials: 'include',
-            isAuthorized: true,
           }
         )
 
@@ -215,7 +213,6 @@ export default function ItineraryMakerModule({
           `itineraries/${itineraryId}/contingencies/${contingencyId}`,
           {
             credentials: 'include',
-            isAuthorized: true,
           }
         )
 
@@ -1458,7 +1455,6 @@ export default function ItineraryMakerModule({
             method: 'POST',
             body: customFetchBody(submissionData),
             credentials: 'include',
-            isAuthorized: true,
           }
         ),
       update: () =>
@@ -1468,7 +1464,6 @@ export default function ItineraryMakerModule({
             method: 'PATCH',
             body: customFetchBody(submissionData),
             credentials: 'include',
-            isAuthorized: true,
           }
         ),
     },
@@ -1478,14 +1473,12 @@ export default function ItineraryMakerModule({
           method: 'POST',
           body: customFetchBody(submissionData),
           credentials: 'include',
-          isAuthorized: true,
         }),
       update: () =>
         customFetch<CreateItineraryResponse>(`/itineraries/${itineraryId}`, {
           method: 'PATCH',
           body: customFetchBody(submissionData),
           credentials: 'include',
-          isAuthorized: true,
         }),
     },
   })
@@ -1664,7 +1657,6 @@ export default function ItineraryMakerModule({
             method: 'POST',
             body: customFetchBody(submissionData),
             credentials: 'include',
-            isAuthorized: true,
           }
         )
       }
@@ -1676,7 +1668,6 @@ export default function ItineraryMakerModule({
             method: 'PATCH',
             body: customFetchBody(submissionData),
             credentials: 'include',
-            isAuthorized: true,
           }
         )
       }
@@ -1688,7 +1679,6 @@ export default function ItineraryMakerModule({
             method: 'DELETE',
             body: customFetchBody(submissionData),
             credentials: 'include',
-            isAuthorized: true,
           }
         )
       }

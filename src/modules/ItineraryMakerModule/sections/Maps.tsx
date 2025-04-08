@@ -13,7 +13,7 @@ import type {
   PlaceResult,
   Section,
 } from '../interface'
-import { customFetch } from '@/utils/customFetch'
+import { customFetch } from '@/utils/newCustomFetch'
 import { Globe, Phone } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
