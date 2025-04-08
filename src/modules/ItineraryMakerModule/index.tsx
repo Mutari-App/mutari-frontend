@@ -1519,7 +1519,7 @@ export default function ItineraryMakerModule({
   const handleSuccessfulSubmission = (response: CreateItineraryResponse) => {
     setHasUnsavedChanges(false)
     const action = isEdit ? 'updated' : 'created'
-    toast.success(`Contingency ${action} successfully`)
+    toast.success(`Itinerary ${action} successfully`)
 
     if (isCreateAndValidUmami()) {
       window.umami.track('create_itinerary_success')
