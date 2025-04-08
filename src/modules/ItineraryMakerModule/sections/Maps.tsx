@@ -190,7 +190,7 @@ function Maps({
     if (selectedPlaceDetails) {
       const { name } = selectedPlaceDetails
       const location = `${selectedPlace.latLng.lat}, ${selectedPlace.latLng.lng}`
-      const sectionNumber = 1
+      const sectionNumber = itineraryData.length
       const title = name || 'New Place'
 
       if (addLocationToSection) {
@@ -284,7 +284,7 @@ function Maps({
                   variant={'gradient'}
                   onClick={handleAddToItinerary}
                 >
-                  Add to Itinerary
+                  Tambahkan ke itinerary
                 </Button>
               </div>
 
