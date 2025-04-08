@@ -162,7 +162,7 @@ describe('Maps Component', () => {
     )
 
     // Simulate selecting a place
-    fireEvent.click(screen.getByText('Add to Itinerary'))
+    fireEvent.click(screen.getByText('Tambahkan ke itinerary'))
 
     await waitFor(() => {
       expect(addLocationToSectionMock).toHaveBeenCalled()

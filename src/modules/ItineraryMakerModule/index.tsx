@@ -19,11 +19,11 @@ import {
   type CreateItineraryResponse,
   type Tag,
   type ItineraryReminderDto,
-  CreateItineraryReminderResponse,
-  FeedbackItem,
+  type CreateItineraryReminderResponse,
+  type FeedbackItem,
   type Route,
   type ReminderOption,
-  ItineraryMakerModuleProps,
+  type ItineraryMakerModuleProps,
 } from './interface'
 import { customFetch, customFetchBody } from '@/utils/newCustomFetch'
 import { type DropResult } from '@hello-pangea/dnd'
@@ -338,7 +338,6 @@ export default function ItineraryMakerModule({
         startDate: reminderData.startDate,
       }))
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reminderData])
 
   // Load saved itinerary data from local storage
@@ -1550,6 +1549,11 @@ export default function ItineraryMakerModule({
       return
     }
 
+    if (!itineraryData.title || itineraryData.title.trim() === '') {
+      toast.error('Silakan masukkan judul itinerary')
+      return
+    }
+
     if (!itineraryData.startDate || !itineraryData.endDate) {
       toast.error('Silakan masukkan tanggal perjalanan')
       return
@@ -1614,7 +1618,6 @@ export default function ItineraryMakerModule({
       // Edge case: new itinerary and create reminder
       const response = await submitItinerary(submissionData)
       newItineraryId = response
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       console.error('Error creating or updating itinerary:', error)
       toast.error(
@@ -1626,9 +1629,11 @@ export default function ItineraryMakerModule({
 
     // Submit itinerary reminder changes
     try {
-      const submissionData = {
+      const submissionData: ItineraryReminderDto = {
         ...itineraryReminderData,
         itineraryId: newItineraryId,
+        recipient: user?.email,
+        recipientName: user?.firstName,
       }
       await submitItineraryReminder(submissionData)
     } catch (error) {
@@ -1721,7 +1726,7 @@ export default function ItineraryMakerModule({
       return itineraryData.title
     }
 
-    return 'Buat Itinerary'
+    return ''
   }
 
   const handleGenerateFeedback = async () => {
