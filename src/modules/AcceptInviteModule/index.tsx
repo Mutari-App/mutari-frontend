@@ -11,13 +11,23 @@ import { customFetch } from '@/utils/newCustomFetch'
 export const AcceptInviteModule: React.FC<AcceptInviteModuleProps> = ({
   itineraryId,
 }) => {
+  const launchingDate = new Date(
+    process.env.NEXT_PUBLIC_LAUNCHING_DATE || '2025-01-22T00:00:00'
+  )
+  const nowDate = new Date()
+  const isLaunching = nowDate > launchingDate
+
   const { isAuthenticated } = useAuthContext()
   const router = useRouter()
 
   const getInvitation = async () => {
     if (!isAuthenticated) {
       toast.error('Silahkan login terlebih dahulu!')
-      router.push(`/login?redirect=/itinerary/${itineraryId}/accept-invite`)
+      if (isLaunching) {
+        router.push(`/login?redirect=/itinerary/${itineraryId}/accept-invite`)
+      } else {
+        router.push('/#praregistrasi')
+      }
     } else {
       try {
         const acceptResponse = await customFetch<AcceptInvitationInteface>(
