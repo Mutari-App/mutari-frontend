@@ -34,8 +34,6 @@ const transportModeNames = {
 }
 import AutocompleteInput from './AutocompleteInput'
 
-const timeField: 'startTime' | 'endTime' = 'startTime'
-
 interface ItineraryBlockProps {
   block: Block
   blockIndex: number
@@ -43,8 +41,8 @@ interface ItineraryBlockProps {
   feedbackItems: FeedbackItem[]
   removeFeedbackForField: (
     sectionIndex: number,
-    blockIndex: number,
-    field: 'title' | 'description' | 'startTime' | 'endTime' | 'price'
+    blockId: string,
+    field: 'title' | 'description' | 'time' | 'price'
   ) => void
   timeWarning: {
     blockId: string
@@ -147,8 +145,8 @@ export const ItineraryBlock: React.FC<ItineraryBlockProps> = ({
                           removeFeedbackForField={() =>
                             removeFeedbackForField(
                               sectionNumber,
-                              blockIndex,
-                              timeField ? 'startTime' : 'endTime'
+                              block.id,
+                              'time'
                             )
                           }
                           timeWarning={timeWarning}
@@ -156,18 +154,18 @@ export const ItineraryBlock: React.FC<ItineraryBlockProps> = ({
                         {feedbackForField?.(
                           feedbackItems,
                           sectionNumber,
-                          blockIndex,
+                          block.id,
                           'LOCATION',
-                          timeField ? 'startTime' : 'endTime'
+                          'time'
                         ) && (
                           <TooltipField
                             feedback={
                               feedbackForField(
                                 feedbackItems,
                                 sectionNumber,
-                                blockIndex,
+                                block.id,
                                 'LOCATION',
-                                timeField ? 'startTime' : 'endTime'
+                                'time'
                               ) ?? undefined
                             }
                           >
@@ -185,7 +183,7 @@ export const ItineraryBlock: React.FC<ItineraryBlockProps> = ({
                           removeFeedbackForField={() =>
                             removeFeedbackForField(
                               sectionNumber,
-                              blockIndex,
+                              block.id,
                               'price'
                             )
                           }
@@ -193,7 +191,7 @@ export const ItineraryBlock: React.FC<ItineraryBlockProps> = ({
                         {feedbackForField?.(
                           feedbackItems,
                           sectionNumber,
-                          blockIndex,
+                          block.id,
                           'LOCATION',
                           'price'
                         ) && (
@@ -202,7 +200,7 @@ export const ItineraryBlock: React.FC<ItineraryBlockProps> = ({
                               feedbackForField(
                                 feedbackItems,
                                 sectionNumber,
-                                blockIndex,
+                                block.id,
                                 'LOCATION',
                                 'price'
                               ) ?? undefined
@@ -220,7 +218,7 @@ export const ItineraryBlock: React.FC<ItineraryBlockProps> = ({
                           updateBlock(block.id, 'description', e.target.value)
                           removeFeedbackForField(
                             sectionNumber,
-                            blockIndex,
+                            block.id,
                             'description'
                           )
                         }}
@@ -228,7 +226,7 @@ export const ItineraryBlock: React.FC<ItineraryBlockProps> = ({
                       {feedbackForField?.(
                         feedbackItems,
                         sectionNumber,
-                        blockIndex,
+                        block.id,
                         'LOCATION',
                         'description'
                       ) && (
@@ -237,7 +235,7 @@ export const ItineraryBlock: React.FC<ItineraryBlockProps> = ({
                             feedbackForField(
                               feedbackItems,
                               sectionNumber,
-                              blockIndex,
+                              block.id,
                               'LOCATION',
                               'description'
                             ) ?? undefined
@@ -257,7 +255,7 @@ export const ItineraryBlock: React.FC<ItineraryBlockProps> = ({
                           updateBlock(block.id, 'description', e.target.value)
                           removeFeedbackForField(
                             sectionNumber,
-                            blockIndex,
+                            block.id,
                             'description'
                           )
                         }}
@@ -265,7 +263,7 @@ export const ItineraryBlock: React.FC<ItineraryBlockProps> = ({
                       {feedbackForField?.(
                         feedbackItems,
                         sectionNumber,
-                        blockIndex,
+                        block.id,
                         'NOTE',
                         'description'
                       ) && (
@@ -274,7 +272,7 @@ export const ItineraryBlock: React.FC<ItineraryBlockProps> = ({
                             feedbackForField(
                               feedbackItems,
                               sectionNumber,
-                              blockIndex,
+                              block.id,
                               'NOTE',
                               'description'
                             ) ?? undefined

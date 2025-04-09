@@ -77,9 +77,9 @@ export interface CreateItineraryResponse extends CustomFetchBaseResponse {
 export interface FeedbackItem {
   target: {
     sectionIndex: number
-    blockIndex: number
+    blockId: string
     blockType: 'LOCATION' | 'NOTE'
-    field?: 'startTime' | 'endTime' | 'price' | 'description' | 'title'
+    field?: 'time' | 'price' | 'description' | 'title'
   }
   suggestion: string
 }
