@@ -136,3 +136,20 @@ export interface ReminderOption {
   value: 'NONE' | 'TEN_MINUTES_BEFORE' | 'ONE_HOUR_BEFORE' | 'ONE_DAY_BEFORE'
   available: boolean
 }
+
+export interface ItineraryMakerModuleProps {
+  isContingency?: boolean
+  isEdit?: boolean
+}
+
+export interface ContingencyPlanDto {
+  id: string
+  itineraryId: string
+  title: string
+  description?: string
+  sections: Section[]
+}
+
+export interface ContingencyPlanResponse extends CustomFetchBaseResponse {
+  contingency: ContingencyPlanDto[]
+}

@@ -14,12 +14,14 @@ interface TagSelectorProps {
   selectedTags: string[]
   onChangeAction: (tags: string[]) => void
   availableTags: Tag[]
+  isContingency: boolean
 }
 
 export const TagSelector: React.FC<TagSelectorProps> = ({
   selectedTags,
   onChangeAction,
   availableTags,
+  isContingency,
 }) => {
   const [searchQuery, setSearchQuery] = useState('')
   const [isOpen, setIsOpen] = useState(false)
@@ -39,7 +41,7 @@ export const TagSelector: React.FC<TagSelectorProps> = ({
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
-        <Button variant="outline" size="sm">
+        <Button variant="outline" size="sm" disabled={isContingency}>
           Tambahkan tag
         </Button>
       </PopoverTrigger>

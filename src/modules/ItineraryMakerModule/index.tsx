@@ -19,12 +19,13 @@ import {
   type CreateItineraryResponse,
   type Tag,
   type ItineraryReminderDto,
-  CreateItineraryReminderResponse,
-  FeedbackItem,
+  type CreateItineraryReminderResponse,
+  type FeedbackItem,
   type Route,
   type ReminderOption,
+  type ItineraryMakerModuleProps,
 } from './interface'
-import { customFetch, customFetchBody } from '@/utils/customFetch'
+import { customFetch, customFetchBody } from '@/utils/newCustomFetch'
 import { type DropResult } from '@hello-pangea/dnd'
 import { type DateRange } from 'react-day-picker'
 import { v4 } from 'uuid'
@@ -36,7 +37,7 @@ import { ReminderSelector } from './module-elements/ReminderSelector'
 import { CldUploadButton } from 'next-cloudinary'
 import { cn } from '@/lib/utils'
 import { useAuthContext } from '@/contexts/AuthContext'
-import { redirect, useParams, useRouter } from 'next/navigation'
+import { notFound, redirect, useParams, useRouter } from 'next/navigation'
 import NotFound from 'next/error'
 import { Lightbulb } from 'lucide-react'
 import { calculateRoute, TransportMode } from '@/utils/maps'
@@ -44,7 +45,10 @@ import Maps from './sections/Maps'
 
 const SAVED_ITINERARY_KEY = 'saved_itinerary_data'
 
-export default function ItineraryMakerModule() {
+export default function ItineraryMakerModule({
+  isContingency = false,
+  isEdit = false,
+}: Readonly<ItineraryMakerModuleProps>) {
   const { user } = useAuthContext()
   const launchingDate = new Date(
     process.env.NEXT_PUBLIC_LAUNCHING_DATE || '2025-01-22T00:00:00'
@@ -91,12 +95,18 @@ export default function ItineraryMakerModule() {
   const [availableTags, setAvailableTags] = useState<Tag[]>([])
   const { isAuthenticated } = useAuthContext()
   const router = useRouter()
-  const { id: itineraryId } = useParams<{ id: string }>()
+  const { id: itineraryId, contingencyId } = useParams<{
+    id: string
+    contingencyId: string
+  }>()
   const [data, setData] = useState<Itinerary | null>(null)
+  const [positionToView, setPositionToView] =
+    useState<google.maps.LatLngLiteral | null>(null)
   const [reminderData, setReminderData] = useState<ItineraryReminder | null>(
     null
   )
   const wasAlreadyRequested = useRef(false)
+  const [contingency, setContingency] = useState<ContingencyPlan | null>(null)
 
   const initialItineraryData = useRef<CreateItineraryDto>({
     title: 'Itinerary Tanpa Judul',
@@ -163,7 +173,6 @@ export default function ItineraryMakerModule() {
           {
             method: 'GET',
             credentials: 'include',
-            isAuthorized: true,
           }
         )
 
@@ -173,8 +182,11 @@ export default function ItineraryMakerModule() {
           router.push(`/itinerary/${itineraryId}`)
           return
         }
-
         setData(res.data)
+        if (contingencyId) {
+          const mapped = await fetchContingencyDetail()
+          setData({ ...res.data, sections: mapped })
+        }
       } catch (err: any) {
         return <NotFound statusCode={404} />
       }
@@ -186,7 +198,6 @@ export default function ItineraryMakerModule() {
           {
             method: 'GET',
             credentials: 'include',
-            isAuthorized: true,
           }
         )
 
@@ -195,6 +206,30 @@ export default function ItineraryMakerModule() {
         setReminderData(res.data)
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {}
+    }
+    const fetchContingencyDetail = async () => {
+      try {
+        const res = await customFetch<ContingencyPlanResponse>(
+          `itineraries/${itineraryId}/contingencies/${contingencyId}`,
+          {
+            credentials: 'include',
+          }
+        )
+
+        if (res.statusCode === 404) {
+          notFound()
+        }
+
+        const mappedSections = res.contingency.sections.map((section) => ({
+          ...section,
+          sectionNumber: section.sectionNumber % 1000,
+        }))
+
+        setContingency({ ...res.contingency, sections: mappedSections })
+        return mappedSections
+      } catch (err: any) {
+        notFound()
+      }
     }
     if (!wasAlreadyRequested.current) {
       void fetchData()
@@ -303,7 +338,6 @@ export default function ItineraryMakerModule() {
         startDate: reminderData.startDate,
       }))
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reminderData])
 
   // Load saved itinerary data from local storage
@@ -633,7 +667,7 @@ export default function ItineraryMakerModule() {
       const pairs: Array<{ sectionIdx: number; currentBlockIdx: number }> = []
       sections.forEach((section, sIdx) => {
         if (!section.blocks || section.blocks.length < 2) return
-        for (let bIdx = 0; bIdx < section.blocks.length - 1; bIdx++) {
+        for (let bIdx = 0; bIdx < section.blocks.length; bIdx++) {
           pairs.push({ sectionIdx: sIdx, currentBlockIdx: bIdx })
         }
       })
@@ -644,16 +678,22 @@ export default function ItineraryMakerModule() {
 
     for (const { sectionIdx, currentBlockIdx } of pairs) {
       const section = updatedSections[sectionIdx]
-      if (!section.blocks || currentBlockIdx >= section.blocks.length - 1)
-        continue
-      const currentBlock = section.blocks[currentBlockIdx]
-      const nextBlock = section.blocks[currentBlockIdx + 1]
-      const { updatedSource, updatedDest } = await calculateAndUpdateRoute(
-        currentBlock,
-        nextBlock
-      )
-      updateBlockInSection(sectionIdx, currentBlockIdx, updatedSource)
-      updateBlockInSection(sectionIdx, currentBlockIdx + 1, updatedDest)
+      if (!!section.blocks) {
+        if (currentBlockIdx === section.blocks.length - 1) {
+          const lastBlock = section.blocks[currentBlockIdx]
+          const updatedLastBlock = { ...lastBlock, routeToNext: undefined }
+          updateBlockInSection(sectionIdx, currentBlockIdx, updatedLastBlock)
+        } else if (currentBlockIdx < section.blocks.length - 1) {
+          const currentBlock = section.blocks[currentBlockIdx]
+          const nextBlock = section.blocks[currentBlockIdx + 1]
+          const { updatedSource, updatedDest } = await calculateAndUpdateRoute(
+            currentBlock,
+            nextBlock
+          )
+          updateBlockInSection(sectionIdx, currentBlockIdx, updatedSource)
+          updateBlockInSection(sectionIdx, currentBlockIdx + 1, updatedDest)
+        }
+      }
     }
 
     return updatedSections
@@ -1406,35 +1446,53 @@ export default function ItineraryMakerModule() {
     }
   }
 
-  const submitItinerary = async (submissionData: object) => {
-    const validUmami = () => typeof window !== 'undefined' && window.umami
-    const isCreateAndValidUmami = () => !itineraryId && validUmami()
-
-    try {
-      const fetchCreateItinerary = async () => {
-        return await customFetch<CreateItineraryResponse>('/itineraries', {
-          method: 'POST',
-          body: customFetchBody(submissionData),
-          credentials: 'include',
-          isAuthorized: true,
-        })
-      }
-
-      const fetchUpdateItinerary = async () => {
-        return await customFetch<CreateItineraryResponse>(
-          `/itineraries/${itineraryId}`,
+  const createFetchMap = (submissionData: object) => ({
+    contingency: {
+      create: () =>
+        customFetch<ContingencyPlanResponse>(
+          `/itineraries/${itineraryId}/contingencies`,
+          {
+            method: 'POST',
+            body: customFetchBody(submissionData),
+            credentials: 'include',
+          }
+        ),
+      update: () =>
+        customFetch<ContingencyPlanResponse>(
+          `/itineraries/${itineraryId}/contingencies/${contingencyId}`,
           {
             method: 'PATCH',
             body: customFetchBody(submissionData),
             credentials: 'include',
-            isAuthorized: true,
           }
-        )
-      }
+        ),
+    },
+    main: {
+      create: () =>
+        customFetch<CreateItineraryResponse>('/itineraries', {
+          method: 'POST',
+          body: customFetchBody(submissionData),
+          credentials: 'include',
+        }),
+      update: () =>
+        customFetch<CreateItineraryResponse>(`/itineraries/${itineraryId}`, {
+          method: 'PATCH',
+          body: customFetchBody(submissionData),
+          credentials: 'include',
+        }),
+    },
+  })
 
-      const response = itineraryId
-        ? await fetchUpdateItinerary()
-        : await fetchCreateItinerary()
+  const validUmami = () => typeof window !== 'undefined' && window.umami
+  const isCreateAndValidUmami = () => !itineraryId && validUmami()
+
+  const submitItinerary = async (submissionData: object) => {
+    try {
+      const fetchMap = createFetchMap(submissionData)
+      const itineraryType = isContingency ? 'contingency' : 'main'
+      const operation = isEdit ? 'update' : 'create'
+
+      const response = await fetchMap[itineraryType][operation]()
 
       if (!response.success) {
         if (isCreateAndValidUmami()) {
@@ -1443,98 +1501,44 @@ export default function ItineraryMakerModule() {
         throw new Error('Failed to create or edit itinerary')
       }
 
-      setHasUnsavedChanges(false)
-      toast(`Itinerary ${itineraryId ? 'updated' : 'created'} successfully`)
-
-      if (isCreateAndValidUmami()) {
-        window.umami.track('create_itinerary_success')
+      if (itineraryType === 'contingency') {
+        return handleSuccessfulContingencySubmission(
+          response as ContingencyPlanResponse
+        )
+      } else {
+        return handleSuccessfulSubmission(response as CreateItineraryResponse)
       }
-
-      router.push(`/itinerary/${response.id}`)
-      return response
     } catch (error) {
       if (isCreateAndValidUmami()) {
         window.umami.track('create_itinerary_fail')
       }
-      throw error
+      throw new Error('Failed to create or edit itinerary')
     }
   }
 
-  const submitItineraryReminder = async (
-    submissionData: ItineraryReminderDto
-  ) => {
-    const validUmami = () => typeof window !== 'undefined' && window.umami
-    const isCreateAndValidUmami = () => !itineraryId && validUmami()
+  const handleSuccessfulSubmission = (response: CreateItineraryResponse) => {
+    setHasUnsavedChanges(false)
+    const action = isEdit ? 'updated' : 'created'
+    toast.success(`Contingency ${action} successfully`)
 
-    try {
-      const fetchCreateItineraryReminder = async () => {
-        return await customFetch<CreateItineraryReminderResponse>(
-          '/notification',
-          {
-            method: 'POST',
-            body: customFetchBody(submissionData),
-            credentials: 'include',
-            isAuthorized: true,
-          }
-        )
-      }
-
-      const fetchUpdateItineraryReminder = async () => {
-        return await customFetch<CreateItineraryReminderResponse>(
-          `/notification/${itineraryId}`,
-          {
-            method: 'PATCH',
-            body: customFetchBody(submissionData),
-            credentials: 'include',
-            isAuthorized: true,
-          }
-        )
-      }
-
-      const fetchDeleteItineraryReminder = async () => {
-        return await customFetch<CreateItineraryReminderResponse>(
-          `/notification/${itineraryId}`,
-          {
-            method: 'DELETE',
-            body: customFetchBody(submissionData),
-            credentials: 'include',
-            isAuthorized: true,
-          }
-        )
-      }
-
-      const response = reminderData
-        ? submissionData.reminderOption === 'NONE'
-          ? await fetchDeleteItineraryReminder()
-          : await fetchUpdateItineraryReminder()
-        : submissionData.reminderOption !== 'NONE'
-          ? await fetchCreateItineraryReminder()
-          : null
-
-      if (response && !response.success) {
-        if (isCreateAndValidUmami()) {
-          window.umami.track('create_itineraryreminder_fail')
-        }
-        throw new Error('Failed with scheduling itinerary reminder')
-      }
-
-      setHasUnsavedChanges(false)
-      if (reminderData && submissionData.reminderOption === 'NONE')
-        toast('You will no longer be reminded for this itinerary')
-      else if (reminderData && submissionData.reminderOption !== 'NONE')
-        toast('Updated reminder for this itinerary')
-      else if (!reminderData && submissionData.reminderOption !== 'NONE')
-        toast('You will be reminded for this itinerary')
-
-      if (isCreateAndValidUmami()) {
-        window.umami.track('create_itineraryreminder_success')
-      }
-    } catch (error) {
-      if (isCreateAndValidUmami()) {
-        window.umami.track('create_itineraryreminder_fail')
-      }
-      throw error
+    if (isCreateAndValidUmami()) {
+      window.umami.track('create_itinerary_success')
     }
+
+    router.push(`/itinerary/${response.id}`)
+    return response.id
+  }
+
+  const handleSuccessfulContingencySubmission = (
+    response: ContingencyPlanResponse
+  ) => {
+    setHasUnsavedChanges(false)
+    const action = isEdit ? 'updated' : 'created'
+    toast.success(`Contingency ${action} successfully`)
+    router.push(
+      `/itinerary/${itineraryId}/contingency/${response.contingency.id}`
+    )
+    return itineraryId
   }
 
   const handleSubmit = async () => {
@@ -1542,6 +1546,11 @@ export default function ItineraryMakerModule() {
       toast.error(
         'Ada kesalahan pada pengaturan waktu. Silakan periksa kembali.'
       )
+      return
+    }
+
+    if (!itineraryData.title || itineraryData.title.trim() === '') {
+      toast.error('Silakan masukkan judul itinerary')
       return
     }
 
@@ -1608,12 +1617,11 @@ export default function ItineraryMakerModule() {
       }
       // Edge case: new itinerary and create reminder
       const response = await submitItinerary(submissionData)
-      newItineraryId = response.id
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      newItineraryId = response
     } catch (error) {
       console.error('Error creating or updating itinerary:', error)
       toast.error(
-        `Failed to ${itineraryId ? 'update' : 'create'} itinerary. Please try again.`
+        `Failed to ${isEdit ? 'update' : 'create'} itinerary. Please try again.`
       )
       setIsSubmitting(false)
       return
@@ -1621,9 +1629,11 @@ export default function ItineraryMakerModule() {
 
     // Submit itinerary reminder changes
     try {
-      const submissionData = {
+      const submissionData: ItineraryReminderDto = {
         ...itineraryReminderData,
         itineraryId: newItineraryId,
+        recipient: user?.email,
+        recipientName: user?.firstName,
       }
       await submitItineraryReminder(submissionData)
     } catch (error) {
@@ -1631,6 +1641,92 @@ export default function ItineraryMakerModule() {
     } finally {
       setIsSubmitting(false)
     }
+  }
+
+  const submitItineraryReminder = async (
+    submissionData: ItineraryReminderDto
+  ) => {
+    const validUmami = () => typeof window !== 'undefined' && window.umami
+    const isCreateAndValidUmami = () => !itineraryId && validUmami()
+
+    try {
+      const fetchCreateItineraryReminder = async () => {
+        return await customFetch<CreateItineraryReminderResponse>(
+          '/notification',
+          {
+            method: 'POST',
+            body: customFetchBody(submissionData),
+            credentials: 'include',
+          }
+        )
+      }
+
+      const fetchUpdateItineraryReminder = async () => {
+        return await customFetch<CreateItineraryReminderResponse>(
+          `/notification/${itineraryId}`,
+          {
+            method: 'PATCH',
+            body: customFetchBody(submissionData),
+            credentials: 'include',
+          }
+        )
+      }
+
+      const fetchDeleteItineraryReminder = async () => {
+        return await customFetch<CreateItineraryReminderResponse>(
+          `/notification/${itineraryId}`,
+          {
+            method: 'DELETE',
+            body: customFetchBody(submissionData),
+            credentials: 'include',
+          }
+        )
+      }
+
+      const response = reminderData
+        ? submissionData.reminderOption === 'NONE'
+          ? await fetchDeleteItineraryReminder()
+          : await fetchUpdateItineraryReminder()
+        : submissionData.reminderOption !== 'NONE'
+          ? await fetchCreateItineraryReminder()
+          : null
+
+      if (response && !response.success) {
+        if (isCreateAndValidUmami()) {
+          window.umami.track('create_itineraryreminder_fail')
+        }
+        throw new Error('Failed with scheduling itinerary reminder')
+      }
+
+      setHasUnsavedChanges(false)
+      if (reminderData && submissionData.reminderOption === 'NONE')
+        toast('You will no longer be reminded for this itinerary')
+      else if (reminderData && submissionData.reminderOption !== 'NONE')
+        toast('Updated reminder for this itinerary')
+      else if (!reminderData && submissionData.reminderOption !== 'NONE')
+        toast('You will be reminded for this itinerary')
+
+      if (isCreateAndValidUmami()) {
+        window.umami.track('create_itineraryreminder_success')
+      }
+    } catch (error) {
+      if (isCreateAndValidUmami()) {
+        window.umami.track('create_itineraryreminder_fail')
+      }
+      throw error
+    }
+  }
+
+  const _getHeaderTitle = () => {
+    if (isContingency) {
+      return isEdit ? `Edit ${contingency?.title}` : 'Buat contingency plan'
+    }
+
+    if (itineraryData.title) {
+      return itineraryData.title
+    }
+
+    return ''
   }
 
   const handleGenerateFeedback = async () => {
@@ -1721,7 +1817,7 @@ export default function ItineraryMakerModule() {
     <div className="flex max-h-screen">
       <div className="container max-w-4xl mx-auto p-4 pt-24 min-h-screen max-h-screen overflow-auto">
         <ItineraryHeader
-          title={itineraryData.title}
+          title={_getHeaderTitle()}
           description={itineraryData.description}
           coverImage={itineraryData.coverImage}
           onTitleChange={handleTitleChange}
@@ -1730,22 +1826,31 @@ export default function ItineraryMakerModule() {
           onSubmit={handleSubmit}
           onGenerateFeedback={handleGenerateFeedback}
           isGenerating={isGenerating}
+          isContingency={!!contingencyId}
         />
         <div className="flex flex-wrap max-sm:justify-center items-center gap-2 mb-4">
           <TagSelector
             selectedTags={itineraryData.tags ?? []}
             onChangeAction={handleTagsChange}
             availableTags={availableTags}
+            isContingency={isContingency}
           />
-          <ReminderSelector
-            selectedReminder={itineraryReminderData.reminderOption ?? 'NONE'}
-            onChangeAction={handleReminderChange}
-            reminderOptions={reminderOptions}
-          />
+          {!isContingency && (
+            <ReminderSelector
+              selectedReminder={itineraryReminderData.reminderOption ?? 'NONE'}
+              onChangeAction={handleReminderChange}
+              reminderOptions={reminderOptions}
+            />
+          )}
+
           <CldUploadButton
             uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
             onSuccess={handleImageUpload}
-            className={cn(buttonVariants({ variant: 'outline', size: 'sm' }))}
+            className={cn(
+              buttonVariants({ variant: 'outline', size: 'sm' }),
+              isContingency &&
+                'opacity-50 cursor-not-allowed pointer-events-none'
+            )}
             options={{
               clientAllowedFormats: ['image'],
               maxFiles: 1,
@@ -1761,6 +1866,7 @@ export default function ItineraryMakerModule() {
                   variant="outline"
                   size="sm"
                   className="flex items-center gap-2"
+                  disabled={isContingency}
                 >
                   <CalendarIcon className="h-4 w-4" />
                   {dateRange.from && dateRange.to
@@ -1788,12 +1894,14 @@ export default function ItineraryMakerModule() {
                 className="flex items-center gap-1"
               >
                 {tagName}
-                <button
-                  onClick={() => removeTag(itineraryData.tags![index])}
-                  className="ml-1 rounded-full hover:bg-gray-200 p-0.5"
-                >
-                  <X className="h-3 w-3" />
-                </button>
+                {!isContingency && (
+                  <button
+                    onClick={() => removeTag(itineraryData.tags![index])}
+                    className="ml-1 rounded-full hover:bg-gray-200 p-0.5"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                )}
               </Badge>
             ))}
           </div>
@@ -1831,6 +1939,7 @@ export default function ItineraryMakerModule() {
           isInputVisible={isInputVisible}
           timeWarning={timeWarning}
           onTransportModeChange={updateTransportMode}
+          setPositionToView={setPositionToView}
         />
         <div className="flex justify-center my-8">
           <Button
@@ -1870,9 +1979,10 @@ export default function ItineraryMakerModule() {
       </div>
       <div className="w-full min-h-screen hidden md:block">
         <Maps
-          itineraryData={itineraryData.sections}
+          itineraryData={contingency?.sections ?? itineraryData.sections}
           addLocationToSection={addLocationToSection}
           isEditing
+          positionToView={positionToView}
         />
       </div>
       {isConfirmModalOpen && (

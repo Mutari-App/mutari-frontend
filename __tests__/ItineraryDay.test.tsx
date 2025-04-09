@@ -25,6 +25,7 @@ const mockSection = [
     updatedAt: '2022-04-03T10:00:00Z',
     createdAt: '2022-04-03T10:00:00Z',
     title: 'Section 1',
+    contingencyPlanId: null,
     blocks: [
       {
         id: 'block1',
@@ -103,6 +104,7 @@ const mockSection = [
     updatedAt: '2022-04-04T11:00:00Z',
     createdAt: '2022-04-04T11:00:00Z',
     title: 'Section 2',
+    contingencyPlanId: null,
     blocks: [
       {
         id: 'block2',

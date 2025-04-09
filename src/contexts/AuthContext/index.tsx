@@ -36,12 +36,20 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
   const nowDate = new Date()
   const isLaunching = nowDate > launchingDate
 
-  const [user, setUser] = useState<null | User>(userResponse.user)
+  const [user, setUser] = useState<null | User>(
+    isLaunching
+      ? (userResponse as UserResponseInterface).user
+      : (userResponse as User)
+  )
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(
-    !!userResponse.user
+    isLaunching
+      ? !!(userResponse as UserResponseInterface).user
+      : !!(userResponse as User)
   )
   const [loadingRefreshToken, setLoadingRefreshToken] = useState<boolean>(
-    userResponse.statusCode === 401
+    isLaunching
+      ? (userResponse as UserResponseInterface).statusCode === 401
+      : false
   )
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -121,7 +129,10 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
 
   const getMe = async () => {
     const refreshToken = getCookie('refreshToken')
-    if (userResponse.statusCode === 401 && !!refreshToken) {
+    if (
+      (userResponse as UserResponseInterface).statusCode === 401 &&
+      !!refreshToken
+    ) {
       try {
         setLoadingRefreshToken(true)
         const response = await customFetch<UserResponseInterface>('/auth/me')
@@ -147,8 +158,11 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
     if (isLaunching) {
       void getMe()
     } else {
+      setLoadingRefreshToken(true)
+
       const accessToken = getCookie('AT')
       setIsAuthenticated(!!accessToken)
+      setLoadingRefreshToken(false)
     }
   }, [])
 

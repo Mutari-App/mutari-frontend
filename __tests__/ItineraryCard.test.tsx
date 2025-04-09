@@ -166,6 +166,12 @@ jest.mock('@/components/ui/button', () => ({
   ),
 }))
 
+jest.mock('@/contexts/AuthContext', () => ({
+  useAuthContext: () => ({
+    user: { id: 'user1' },
+  }),
+}))
+
 // Mock data for item props
 const mockItem: ItineraryData = {
   title: 'Trip to Bali',

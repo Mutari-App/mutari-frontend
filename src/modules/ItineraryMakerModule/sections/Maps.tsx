@@ -13,7 +13,7 @@ import type {
   PlaceResult,
   Section,
 } from '../interface'
-import { customFetch } from '@/utils/customFetch'
+import { customFetch } from '@/utils/newCustomFetch'
 import { Globe, Phone } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
@@ -22,6 +22,7 @@ import { decodePolyline } from '../utils'
 type MapsProps = {
   readonly itineraryData: Readonly<Section[]>
   isEditing?: boolean
+  positionToView?: google.maps.LatLngLiteral | null
   addLocationToSection?: (
     sectionNumber: number,
     title: string,
@@ -77,10 +78,17 @@ function Maps({
   itineraryData,
   addLocationToSection,
   isEditing,
+  positionToView,
   _testSelectedPlace,
   _testSelectedPlaceDetails,
 }: MapsProps) {
   const firstLoc = itineraryData[0]?.blocks?.[0]?.location?.split(',')
+  const INDONESIA_BOUNDS = {
+    north: 8.0,
+    south: -11.0,
+    east: 141.1,
+    west: 95.0,
+  }
 
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? ''
 
@@ -89,7 +97,7 @@ function Maps({
       firstLoc
         ? { lat: parseFloat(firstLoc[0]), lng: parseFloat(firstLoc[1]) }
         : { lat: -6.3604, lng: 106.82719 },
-    [firstLoc]
+    []
   )
   const defaultSelectedPlace = { placeId: '', latLng: { lat: 0, lng: 0 } }
 
@@ -182,7 +190,7 @@ function Maps({
     if (selectedPlaceDetails) {
       const { name } = selectedPlaceDetails
       const location = `${selectedPlace.latLng.lat}, ${selectedPlace.latLng.lng}`
-      const sectionNumber = 1
+      const sectionNumber = itineraryData.length
       const title = name || 'New Place'
 
       if (addLocationToSection) {
@@ -199,6 +207,12 @@ function Maps({
     }
   }, [selectedPlace])
 
+  useEffect(() => {
+    if (positionToView && map) {
+      map.panTo(positionToView)
+    }
+  }, [positionToView, map])
+
   return (
     <div className="w-full h-full">
       {!isLoaded ? (
@@ -212,13 +226,8 @@ function Maps({
           options={{
             streetViewControl: false,
             restriction: {
-              latLngBounds: {
-                north: 8.0,
-                south: -11.0,
-                east: 141.0,
-                west: 95.0,
-              },
-              strictBounds: true,
+              latLngBounds: INDONESIA_BOUNDS,
+              strictBounds: false,
             },
           }}
           onClick={handleMapClick}
@@ -275,7 +284,7 @@ function Maps({
                   variant={'gradient'}
                   onClick={handleAddToItinerary}
                 >
-                  Add to Itinerary
+                  Tambahkan ke itinerary
                 </Button>
               </div>
 

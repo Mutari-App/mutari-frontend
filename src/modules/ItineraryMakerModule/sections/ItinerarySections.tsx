@@ -20,7 +20,7 @@ import {
   ChevronDown,
   Trash,
 } from 'lucide-react'
-import { FeedbackItem, type Block, type Section } from '../interface'
+import { type FeedbackItem, type Block, type Section } from '../interface'
 import { type TransportMode } from '@/utils/maps'
 import { ItineraryBlock } from '../module-elements/ItineraryBlock'
 
@@ -60,6 +60,9 @@ interface ItinerarySectionsProps {
     blockId: string,
     mode: TransportMode
   ) => Promise<boolean>
+  setPositionToView: React.Dispatch<
+    React.SetStateAction<google.maps.LatLngLiteral | null>
+  >
 }
 
 export const ItinerarySections: React.FC<ItinerarySectionsProps> = ({
@@ -78,6 +81,7 @@ export const ItinerarySections: React.FC<ItinerarySectionsProps> = ({
   removeBlock,
   handleDragEnd,
   onTransportModeChange,
+  setPositionToView,
 }) => {
   // Helper function to check if a block should show route information
   const shouldShowRoute = (section: Section, blockIndex: number): boolean => {
@@ -151,7 +155,11 @@ export const ItinerarySections: React.FC<ItinerarySectionsProps> = ({
           </div>
           <Droppable droppableId={`section-${section.sectionNumber}`}>
             {(provided: DroppableProvided) => (
-              <div ref={provided.innerRef} {...provided.droppableProps}>
+              <div
+                className="min-h-px"
+                ref={provided.innerRef}
+                {...provided.droppableProps}
+              >
                 {section.blocks?.map((block, blockIndex) => (
                   <ItineraryBlock
                     key={`block-${section.sectionNumber}-${blockIndex}`}
@@ -168,6 +176,7 @@ export const ItinerarySections: React.FC<ItinerarySectionsProps> = ({
                     showRoute={shouldShowRoute(section, blockIndex)}
                     routeInfo={block.routeToNext}
                     onTransportModeChange={onTransportModeChange}
+                    setPositionToView={setPositionToView}
                   />
                 ))}
                 {provided.placeholder}

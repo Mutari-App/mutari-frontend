@@ -4,10 +4,10 @@ import type { Metadata } from 'next'
 
 export function generateMetadata(): Metadata {
   return {
-    title: 'Editing Itinerary',
+    title: 'Creating Itinerary Contingency',
   }
 }
 
-export default function EditItineraryPage() {
-  return <ItineraryMakerModule isEdit={true} />
+export default function CreateItineraryContingencyPage() {
+  return <ItineraryMakerModule isContingency={true} />
 }
