@@ -182,6 +182,7 @@ export default function ItineraryMakerModule({
           router.push(`/itinerary/${itineraryId}`)
           return
         }
+
         setData(res.data)
         if (contingencyId) {
           const mapped = await fetchContingencyDetail()
@@ -1760,6 +1761,7 @@ export default function ItineraryMakerModule({
               if (block.blockType === 'LOCATION') {
                 return {
                   blockType: block.blockType,
+                  id: block.id,
                   title: block.title,
                   description: block.description,
                   startTime: block.startTime,
@@ -1769,6 +1771,7 @@ export default function ItineraryMakerModule({
               } else if (block.blockType === 'NOTE') {
                 return {
                   blockType: block.blockType,
+                  id: block.id,
                   description: block.description,
                 }
               }
@@ -1800,18 +1803,35 @@ export default function ItineraryMakerModule({
 
   const removeFeedbackForField = (
     sectionIndex: number,
-    blockIndex: number,
-    field: 'title' | 'description' | 'startTime' | 'endTime' | 'price'
+    blockId: string,
+    field: 'title' | 'description' | 'time' | 'price'
   ) => {
     setFeedbackItems((prev) =>
       prev.filter(
         (item) =>
           item.target.sectionIndex !== sectionIndex ||
-          item.target.blockIndex !== blockIndex ||
+          item.target.blockId !== blockId ||
           item.target.field !== field
       )
     )
   }
+
+  const syncFeedbackWithItinerary = () => {
+    setFeedbackItems((prev) =>
+      prev.filter((item) => {
+        const section = itineraryData.sections[item.target.sectionIndex - 1]
+        const blockExists = section?.blocks?.some(
+          (block) => block.id === item.target.blockId
+        )
+        // keep only if block still exists
+        return blockExists
+      })
+    )
+  }
+
+  useEffect(() => {
+    syncFeedbackWithItinerary()
+  }, [itineraryData])
 
   return (
     <div className="flex max-h-screen">
@@ -1962,8 +1982,7 @@ export default function ItineraryMakerModule({
                 >
                   <div className="flex-1">
                     <p className="font-semibold">
-                      Hari {item.target.sectionIndex + 1} - Blok{' '}
-                      {item.target.blockIndex + 1}
+                      Hari {item.target.sectionIndex}
                       {item.target.field && ` (${item.target.field})`}
                     </p>
                     <p>{item.suggestion}</p>
