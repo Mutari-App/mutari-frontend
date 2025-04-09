@@ -182,7 +182,6 @@ export default function ItineraryMakerModule({
           router.push(`/itinerary/${itineraryId}`)
           return
         }
-
         setData(res.data)
         if (contingencyId) {
           const mapped = await fetchContingencyDetail()
