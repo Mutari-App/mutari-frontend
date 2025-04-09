@@ -29,8 +29,8 @@ interface ItinerarySectionsProps {
   feedbackItems: FeedbackItem[]
   removeFeedbackForField: (
     sectionIndex: number,
-    blockIndex: number,
-    field: 'title' | 'description' | 'startTime' | 'endTime' | 'price'
+    blockId: string,
+    field: 'title' | 'description' | 'time' | 'price'
   ) => void
   timeWarning: {
     blockId: string
