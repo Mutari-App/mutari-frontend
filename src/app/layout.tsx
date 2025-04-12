@@ -12,6 +12,7 @@ import { Toaster } from '@/components/ui/sonner'
 import { AuthContextProvider } from '@/contexts/AuthContext'
 import useUserServer from '@/hooks/useUserServer'
 import Script from 'next/script'
+import { PostHogProvider } from '@/contexts/PostHogContext'
 
 const poppins = Poppins({
   subsets: ['latin'],
@@ -95,21 +96,23 @@ export default async function RootLayout({
       <body
         className={`${epilogue.variable} ${poppins.variable} ${raleway.variable} ${roboto.variable} ${hammersmithOne.variable} font-poppins overflow-x-hidden max-w-screen`}
       >
-        <Suspense>
-          <AuthContextProvider userResponse={userResponse}>
-            <main className="w-full bg-white min-h-[80dvh]">{children}</main>
-            <Toaster
-              toastOptions={{
-                classNames: {
-                  error: 'bg-red-400',
-                  success: 'text-green-400',
-                  warning: 'text-yellow-400',
-                  info: 'bg-blue-400',
-                },
-              }}
-            />
-          </AuthContextProvider>
-        </Suspense>
+        <PostHogProvider>
+          <Suspense>
+            <AuthContextProvider userResponse={userResponse}>
+              <main className="w-full bg-white min-h-[80dvh]">{children}</main>
+              <Toaster
+                toastOptions={{
+                  classNames: {
+                    error: 'bg-red-400',
+                    success: 'text-green-400',
+                    warning: 'text-yellow-400',
+                    info: 'bg-blue-400',
+                  },
+                }}
+              />
+            </AuthContextProvider>
+          </Suspense>
+        </PostHogProvider>
       </body>
     </html>
   )
