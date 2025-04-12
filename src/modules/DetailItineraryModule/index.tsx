@@ -29,7 +29,6 @@ export default function DetailItineraryModule() {
             credentials: 'include',
           }
         )
-        console.log(res)
 
         if (res.statusCode === 404 || res.statusCode === 403) {
           setIsNotFound(true)
