@@ -1,5 +1,5 @@
 'use client'
-import { customFetch } from '@/utils/customFetch'
+import { customFetch } from '@/utils/newCustomFetch'
 import { ItineraryHeader } from './module-elements/ItineraryHeader'
 import { ItineraryList } from './module-elements/ItineraryList'
 import { ItinerarySummary } from './module-elements/ItinerarySummary'
@@ -27,9 +27,9 @@ export default function DetailItineraryModule() {
           `/itineraries/${id}`,
           {
             credentials: 'include',
-            isAuthorized: true,
           }
         )
+        console.log(res)
 
         if (res.statusCode === 404) {
           setIsNotFound(true)
@@ -47,7 +47,6 @@ export default function DetailItineraryModule() {
           `itineraries/${id}/contingencies`,
           {
             credentials: 'include',
-            isAuthorized: true,
           }
         )
 
@@ -74,7 +73,6 @@ export default function DetailItineraryModule() {
           `itineraries/${id}/contingencies/${contingencyId}`,
           {
             credentials: 'include',
-            isAuthorized: true,
           }
         )
 

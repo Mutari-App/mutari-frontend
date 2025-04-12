@@ -172,7 +172,6 @@ function Maps({
       return
     }
     if ('placeId' in e) {
-      console.log(e.placeId)
       setSelectedPlace({
         placeId: e.placeId as string,
         latLng: { lat: e.latLng?.lat() ?? 0, lng: e.latLng?.lng() ?? 0 },
