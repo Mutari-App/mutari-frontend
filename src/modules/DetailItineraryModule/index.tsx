@@ -4,12 +4,13 @@ import { ItineraryHeader } from './module-elements/ItineraryHeader'
 import { ItineraryList } from './module-elements/ItineraryList'
 import { ItinerarySummary } from './module-elements/ItinerarySummary'
 import { useEffect, useState } from 'react'
-import { notFound, useParams, useRouter } from 'next/navigation'
+import { notFound, useParams } from 'next/navigation'
 import Maps from '../ItineraryMakerModule/sections/Maps'
 import { PlanPicker } from './module-elements/PlanPicker'
+import { Loader2 } from 'lucide-react'
 
 export default function DetailItineraryModule() {
-  const [data, setData] = useState<Itinerary>({} as Itinerary)
+  const [data, setData] = useState<Itinerary | null>(null)
   const [contingencies, setContingencies] = useState<ContingencyPlan[]>()
   const [selectedContingency, setSelectedContingency] =
     useState<ContingencyPlan>()
@@ -18,7 +19,6 @@ export default function DetailItineraryModule() {
     id: string
     contingencyId: string
   }>()
-  const router = useRouter()
 
   useEffect(() => {
     const fetchData = async () => {
@@ -29,9 +29,8 @@ export default function DetailItineraryModule() {
             credentials: 'include',
           }
         )
-        console.log(res)
 
-        if (res.statusCode === 404) {
+        if (res.statusCode === 404 || res.statusCode === 403) {
           setIsNotFound(true)
         }
 
@@ -97,7 +96,7 @@ export default function DetailItineraryModule() {
     notFound()
   }
 
-  return (
+  return data ? (
     <div className="flex max-h-screen">
       <div className="container max-w-4xl mx-auto p-4 pt-24 min-h-screen max-h-screen overflow-auto">
         <ItineraryHeader
@@ -134,6 +133,10 @@ export default function DetailItineraryModule() {
           }
         />
       </div>
+    </div>
+  ) : (
+    <div className="flex items-center justify-center h-screen">
+      <Loader2 className="animate-spin w-6 h-6 mr-2" />
     </div>
   )
 }
