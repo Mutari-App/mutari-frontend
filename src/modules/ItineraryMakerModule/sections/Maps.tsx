@@ -26,7 +26,8 @@ type MapsProps = {
   addLocationToSection?: (
     sectionNumber: number,
     title: string,
-    location: string
+    location: string,
+    price?: number
   ) => void
   _testSelectedPlace?: {
     placeId: string
@@ -191,9 +192,10 @@ function Maps({
       const location = `${selectedPlace.latLng.lat}, ${selectedPlace.latLng.lng}`
       const sectionNumber = itineraryData.length
       const title = name || 'New Place'
+      const price = selectedPlaceDetails.priceRange?.startPrice
 
       if (addLocationToSection) {
-        addLocationToSection(sectionNumber, title, location)
+        addLocationToSection(sectionNumber, title, location, price)
       }
     }
     setSelectedPlace(defaultSelectedPlace)
@@ -259,7 +261,7 @@ function Maps({
 
           {selectedPlace.placeId && selectedPlaceDetails && (
             <div className="absolute bottom-8 left-1/2 -translate-x-1/2 w-11/12 flex flex-col gap-5 bg-white max-h-[50dvh] overflow-auto rounded-2xl shadow-md p-6">
-              <div className="flex justify-between ">
+              <div className="flex flex-col xl:flex-row gap-2 xl:justify-between">
                 <div className="flex gap-2 flex-col">
                   <h3 className="font-semibold text-lg">
                     {selectedPlaceDetails.name}
@@ -268,14 +270,40 @@ function Maps({
                     {selectedPlaceDetails.vicinity}
                   </p>
                   <div className="flex gap-1 items-center text-sm">
-                    ⭐
+                    <p>⭐</p>
                     <p className="text-gray-600">
                       <span className="text-yellow-500 font-semibold">
                         {selectedPlaceDetails.rating}{' '}
                       </span>
                       ({selectedPlaceDetails.user_ratings_total})
                     </p>
+                    {selectedPlaceDetails.priceRange?.startPrice && (
+                      <p className="text-gray-600">
+                        Rp{selectedPlaceDetails.priceRange.startPrice}
+                        {selectedPlaceDetails.priceRange.endPrice
+                          ? ` - Rp${selectedPlaceDetails.priceRange.endPrice}`
+                          : '+'}
+                      </p>
+                    )}
                   </div>
+                  {selectedPlaceDetails.international_phone_number && (
+                    <div className="flex gap-2 items-center">
+                      <Phone size={16} />
+                      <p>{selectedPlaceDetails.international_phone_number}</p>
+                    </div>
+                  )}
+                  {selectedPlaceDetails.website && (
+                    <div className="flex gap-2 items-center">
+                      <Globe size={16} />
+                      <Link
+                        href={selectedPlaceDetails.website}
+                        target="_blank"
+                        className="text-sky-600 hover:text-blue-400 underline"
+                      >
+                        {selectedPlaceDetails.website}
+                      </Link>
+                    </div>
+                  )}
                 </div>
 
                 <Button
@@ -285,27 +313,6 @@ function Maps({
                 >
                   Tambahkan ke itinerary
                 </Button>
-              </div>
-
-              <div className="flex gap-2 flex-col text-sm text-gray-600">
-                {selectedPlaceDetails.international_phone_number && (
-                  <div className="flex gap-2 items-center">
-                    <Phone size={16} />
-                    <p>{selectedPlaceDetails.international_phone_number}</p>
-                  </div>
-                )}
-                {selectedPlaceDetails.website && (
-                  <div className="flex gap-2 items-center">
-                    <Globe size={16} />
-                    <Link
-                      href={selectedPlaceDetails.website}
-                      target="_blank"
-                      className="text-sky-600 hover:text-blue-400 underline"
-                    >
-                      {selectedPlaceDetails.website}
-                    </Link>
-                  </div>
-                )}
               </div>
             </div>
           )}
