@@ -138,7 +138,7 @@ function Maps({
             routes.push({
               path: decodedPath,
               options: {
-                strokeColor: SECTION_COLORS[section.sectionNumber%10].hex,
+                strokeColor: SECTION_COLORS[section.sectionNumber % 10].hex,
                 strokeWeight: 4,
                 strokeOpacity: 0.8,
               },

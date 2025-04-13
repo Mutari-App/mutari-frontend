@@ -42,6 +42,7 @@ import NotFound from 'next/error'
 import { Lightbulb } from 'lucide-react'
 import { calculateRoute, TransportMode } from '@/utils/maps'
 import Maps from './sections/Maps'
+import { APIProvider, useMap } from '@vis.gl/react-google-maps'
 
 const SAVED_ITINERARY_KEY = 'saved_itinerary_data'
 
@@ -1828,208 +1829,215 @@ export default function ItineraryMakerModule({
     )
   }
 
+  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? ''
+  const map = useMap()
+
   useEffect(() => {
     syncFeedbackWithItinerary()
   }, [itineraryData])
 
   return (
-    <div className="flex max-h-screen">
-      <div className="container max-w-4xl mx-auto p-4 pt-24 min-h-screen max-h-screen overflow-auto">
-        <ItineraryHeader
-          title={_getHeaderTitle()}
-          description={itineraryData.description}
-          coverImage={itineraryData.coverImage}
-          onTitleChange={handleTitleChange}
-          onDescChange={handleDescChange}
-          isSubmitting={isSubmitting}
-          onSubmit={handleSubmit}
-          onGenerateFeedback={handleGenerateFeedback}
-          isGenerating={isGenerating}
-          isContingency={!!contingencyId}
-        />
-        <div className="flex flex-wrap max-sm:justify-center items-center gap-2 mb-4">
-          <TagSelector
-            selectedTags={itineraryData.tags ?? []}
-            onChangeAction={handleTagsChange}
-            availableTags={availableTags}
-            isContingency={isContingency}
+    <APIProvider apiKey={apiKey}>
+      <div className="flex max-h-screen">
+        <div className="container max-w-4xl mx-auto p-4 pt-24 min-h-screen max-h-screen overflow-auto">
+          <ItineraryHeader
+            title={_getHeaderTitle()}
+            description={itineraryData.description}
+            coverImage={itineraryData.coverImage}
+            onTitleChange={handleTitleChange}
+            onDescChange={handleDescChange}
+            isSubmitting={isSubmitting}
+            onSubmit={handleSubmit}
+            onGenerateFeedback={handleGenerateFeedback}
+            isGenerating={isGenerating}
+            isContingency={!!contingencyId}
           />
-          {!isContingency && (
-            <ReminderSelector
-              selectedReminder={itineraryReminderData.reminderOption ?? 'NONE'}
-              onChangeAction={handleReminderChange}
-              reminderOptions={reminderOptions}
+          <div className="flex flex-wrap max-sm:justify-center items-center gap-2 mb-4">
+            <TagSelector
+              selectedTags={itineraryData.tags ?? []}
+              onChangeAction={handleTagsChange}
+              availableTags={availableTags}
+              isContingency={isContingency}
             />
-          )}
-
-          <CldUploadButton
-            uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
-            onSuccess={handleImageUpload}
-            className={cn(
-              buttonVariants({ variant: 'outline', size: 'sm' }),
-              isContingency &&
-                'opacity-50 cursor-not-allowed pointer-events-none'
+            {!isContingency && (
+              <ReminderSelector
+                selectedReminder={
+                  itineraryReminderData.reminderOption ?? 'NONE'
+                }
+                onChangeAction={handleReminderChange}
+                reminderOptions={reminderOptions}
+              />
             )}
-            options={{
-              clientAllowedFormats: ['image'],
-              maxFiles: 1,
-              maxFileSize: 1024 * 256, // 256 KB
-            }}
-          >
-            Ganti foto cover
-          </CldUploadButton>
-          <div className="sm:ml-auto">
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="flex items-center gap-2"
-                  disabled={isContingency}
-                >
-                  <CalendarIcon className="h-4 w-4" />
-                  {dateRange.from && dateRange.to
-                    ? `${format(dateRange.from, 'dd MMM')} - ${format(dateRange.to, 'dd MMM')}`
-                    : 'Masukkan Tanggal Perjalanan'}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="end">
-                <Calendar
-                  mode="range"
-                  selected={dateRange}
-                  onSelect={handleDateRangeChange}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
-        </div>
-        {itineraryData.tags && itineraryData.tags.length > 0 && (
-          <div className="flex flex-wrap gap-2 mb-4">
-            {getSelectedTagNames().map((tagName, index) => (
-              <Badge
-                key={`tag-${tagName}-${itineraryData.tags![index]}`}
-                variant="secondary"
-                className="flex items-center gap-1"
-              >
-                {tagName}
-                {!isContingency && (
-                  <button
-                    onClick={() => removeTag(itineraryData.tags![index])}
-                    className="ml-1 rounded-full hover:bg-gray-200 p-0.5"
+
+            <CldUploadButton
+              uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
+              onSuccess={handleImageUpload}
+              className={cn(
+                buttonVariants({ variant: 'outline', size: 'sm' }),
+                isContingency &&
+                  'opacity-50 cursor-not-allowed pointer-events-none'
+              )}
+              options={{
+                clientAllowedFormats: ['image'],
+                maxFiles: 1,
+                maxFileSize: 1024 * 256, // 256 KB
+              }}
+            >
+              Ganti foto cover
+            </CldUploadButton>
+            <div className="sm:ml-auto">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="flex items-center gap-2"
+                    disabled={isContingency}
                   >
-                    <X className="h-3 w-3" />
-                  </button>
-                )}
-              </Badge>
-            ))}
+                    <CalendarIcon className="h-4 w-4" />
+                    {dateRange.from && dateRange.to
+                      ? `${format(dateRange.from, 'dd MMM')} - ${format(dateRange.to, 'dd MMM')}`
+                      : 'Masukkan Tanggal Perjalanan'}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="end">
+                  <Calendar
+                    mode="range"
+                    selected={dateRange}
+                    onSelect={handleDateRangeChange}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
           </div>
-        )}
-        <DateRangeAlertDialog
-          open={showConfirmDialog}
-          onOpenChange={setShowConfirmDialog}
-          pendingDateRange={pendingDateRange.current}
-          currentSectionCount={itineraryData.sections.length}
-          onCancel={() => {
-            pendingDateRange.current = undefined
-            setShowConfirmDialog(false)
-          }}
-          onConfirm={() => {
-            if (pendingDateRange.current) {
-              applyDateRangeChange(pendingDateRange.current)
-              pendingDateRange.current = undefined
-            }
-            setShowConfirmDialog(false)
-          }}
-        />
-        <ItinerarySections
-          feedbackItems={feedbackItems}
-          removeFeedbackForField={removeFeedbackForField}
-          sections={itineraryData.sections}
-          updateSectionTitle={updateSectionTitle}
-          addSection={addSection}
-          removeSection={removeSection}
-          moveSection={moveSection}
-          addBlock={addBlock}
-          updateBlock={updateBlock}
-          removeBlock={removeBlock}
-          handleDragEnd={handleDragEnd}
-          toggleInput={toggleInput}
-          isInputVisible={isInputVisible}
-          timeWarning={timeWarning}
-          onTransportModeChange={updateTransportMode}
-          setPositionToView={setPositionToView}
-        />
-        <div className="flex justify-center my-8">
-          <Button
-            size="sm"
-            className="-mt-4 w-[240px] bg-gradient-to-r from-[#0073E6] to-[#004080] text-white hover:from-[#0066cc] hover:to-[#003366] rounded-lg"
-            onClick={() => addSection()}
-          >
-            <Plus className="h-4 w-4" /> Bagian
-          </Button>
-        </div>
-        {feedbackItems.length > 0 && (
-          <div className="mt-8">
-            <h3 className="font-semibold mb-4">Tips</h3>
-            <div className="flex flex-col gap-4">
-              {feedbackItems.map((item, index) => (
-                <div
-                  key={index}
-                  className="p-4 border border-[#0073E6] rounded-md shadow-md flex items-start"
-                  style={{ boxShadow: '0px 0px 10px rgba(0, 115, 230, 0.5)' }}
+          {itineraryData.tags && itineraryData.tags.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-4">
+              {getSelectedTagNames().map((tagName, index) => (
+                <Badge
+                  key={`tag-${tagName}-${itineraryData.tags![index]}`}
+                  variant="secondary"
+                  className="flex items-center gap-1"
                 >
-                  <div className="flex-1">
-                    <p className="font-semibold">
-                      Hari {item.target.sectionIndex}
-                      {item.target.field && ` (${item.target.field})`}
-                    </p>
-                    <p>{item.suggestion}</p>
-                  </div>
-                  <div className="ml-4 text-[#0073E6] drop-shadow-[0_4px_6px_rgba(0,115,230,1.5)]">
-                    <Lightbulb size={48} strokeWidth={1} />
-                  </div>
-                </div>
+                  {tagName}
+                  {!isContingency && (
+                    <button
+                      onClick={() => removeTag(itineraryData.tags![index])}
+                      className="ml-1 rounded-full hover:bg-gray-200 p-0.5"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  )}
+                </Badge>
               ))}
             </div>
+          )}
+          <DateRangeAlertDialog
+            open={showConfirmDialog}
+            onOpenChange={setShowConfirmDialog}
+            pendingDateRange={pendingDateRange.current}
+            currentSectionCount={itineraryData.sections.length}
+            onCancel={() => {
+              pendingDateRange.current = undefined
+              setShowConfirmDialog(false)
+            }}
+            onConfirm={() => {
+              if (pendingDateRange.current) {
+                applyDateRangeChange(pendingDateRange.current)
+                pendingDateRange.current = undefined
+              }
+              setShowConfirmDialog(false)
+            }}
+          />
+          <ItinerarySections
+            feedbackItems={feedbackItems}
+            removeFeedbackForField={removeFeedbackForField}
+            sections={itineraryData.sections}
+            updateSectionTitle={updateSectionTitle}
+            addSection={addSection}
+            removeSection={removeSection}
+            moveSection={moveSection}
+            addBlock={addBlock}
+            updateBlock={updateBlock}
+            removeBlock={removeBlock}
+            handleDragEnd={handleDragEnd}
+            toggleInput={toggleInput}
+            isInputVisible={isInputVisible}
+            timeWarning={timeWarning}
+            onTransportModeChange={updateTransportMode}
+            setPositionToView={setPositionToView}
+          />
+          <div className="flex justify-center my-8">
+            <Button
+              size="sm"
+              className="-mt-4 w-[240px] bg-gradient-to-r from-[#0073E6] to-[#004080] text-white hover:from-[#0066cc] hover:to-[#003366] rounded-lg"
+              onClick={() => addSection()}
+            >
+              <Plus className="h-4 w-4" /> Bagian
+            </Button>
+          </div>
+          {feedbackItems.length > 0 && (
+            <div className="mt-8">
+              <h3 className="font-semibold mb-4">Tips</h3>
+              <div className="flex flex-col gap-4">
+                {feedbackItems.map((item, index) => (
+                  <div
+                    key={index}
+                    className="p-4 border border-[#0073E6] rounded-md shadow-md flex items-start"
+                    style={{ boxShadow: '0px 0px 10px rgba(0, 115, 230, 0.5)' }}
+                  >
+                    <div className="flex-1">
+                      <p className="font-semibold">
+                        Hari {item.target.sectionIndex}
+                        {item.target.field && ` (${item.target.field})`}
+                      </p>
+                      <p>{item.suggestion}</p>
+                    </div>
+                    <div className="ml-4 text-[#0073E6] drop-shadow-[0_4px_6px_rgba(0,115,230,1.5)]">
+                      <Lightbulb size={48} strokeWidth={1} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+        <div className="w-full min-h-screen hidden md:block">
+          <Maps
+            itineraryData={contingency?.sections ?? itineraryData.sections}
+            addLocationToSection={addLocationToSection}
+            isEditing
+            positionToView={positionToView}
+          />
+        </div>
+        {isConfirmModalOpen && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center font-roboto">
+            <div className="bg-white p-8 rounded-lg shadow-lg">
+              <h2 className="text-xl font-semibold mb-4 text-center">
+                Apakah anda yakin?
+              </h2>
+              <p className="text-md mb-4">
+                Masih ada tips untuk mempercantik itinerary-mu
+              </p>
+              <div className="flex justify-center space-x-2">
+                <button
+                  className="px-8 py-2 border-2 border-[#016CD7] bg-white rounded text-[#014285]"
+                  onClick={() => setIsConfirmModalOpen(false)}
+                >
+                  Batal
+                </button>
+                <button
+                  className="px-8 py-2 bg-gradient-to-r from-[#016CD7] to-[#014285] text-white items-center rounded"
+                  disabled={isSubmitting}
+                  onClick={handleFinalSubmit}
+                >
+                  Simpan
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>
-      <div className="w-full min-h-screen hidden md:block">
-        <Maps
-          itineraryData={contingency?.sections ?? itineraryData.sections}
-          addLocationToSection={addLocationToSection}
-          isEditing
-          positionToView={positionToView}
-        />
-      </div>
-      {isConfirmModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center font-roboto">
-          <div className="bg-white p-8 rounded-lg shadow-lg">
-            <h2 className="text-xl font-semibold mb-4 text-center">
-              Apakah anda yakin?
-            </h2>
-            <p className="text-md mb-4">
-              Masih ada tips untuk mempercantik itinerary-mu
-            </p>
-            <div className="flex justify-center space-x-2">
-              <button
-                className="px-8 py-2 border-2 border-[#016CD7] bg-white rounded text-[#014285]"
-                onClick={() => setIsConfirmModalOpen(false)}
-              >
-                Batal
-              </button>
-              <button
-                className="px-8 py-2 bg-gradient-to-r from-[#016CD7] to-[#014285] text-white items-center rounded"
-                disabled={isSubmitting}
-                onClick={handleFinalSubmit}
-              >
-                Simpan
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+    </APIProvider>
   )
 }
