@@ -78,7 +78,6 @@ export default function ItineraryModule() {
       }
 
       if (res.statusCode !== 200) throw new Error(res.message)
-      console.log(res.itinerary)
       setData(res.itinerary.data)
       setMyItineraryMetadata(res.itinerary.metadata)
     } catch (err: any) {

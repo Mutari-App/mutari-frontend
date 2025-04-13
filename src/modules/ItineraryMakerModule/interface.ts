@@ -102,6 +102,10 @@ export interface PlaceResult {
   vicinity?: string
   international_phone_number?: string
   website?: string
+  priceRange?: {
+    startPrice?: number
+    endPrice?: number
+  }
 }
 
 export interface PlaceDetails {

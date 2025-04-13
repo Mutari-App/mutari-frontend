@@ -29,7 +29,8 @@ type MapsProps = {
   addLocationToSection?: (
     sectionNumber: number,
     title: string,
-    location: string
+    location: string,
+    price?: number
   ) => void
   _testSelectedPlace?: {
     placeId: string
@@ -195,9 +196,10 @@ function Maps({
       const location = `${selectedPlace.latLng.lat}, ${selectedPlace.latLng.lng}`
       const sectionNumber = itineraryData.length
       const title = name || 'New Place'
+      const price = selectedPlaceDetails.priceRange?.startPrice
 
       if (addLocationToSection) {
-        addLocationToSection(sectionNumber, title, location)
+        addLocationToSection(sectionNumber, title, location, price)
       }
     }
     setSelectedPlace(defaultSelectedPlace)

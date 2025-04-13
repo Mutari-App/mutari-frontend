@@ -975,7 +975,8 @@ export default function ItineraryMakerModule({
   const addLocationToSection = (
     sectionNumber: number,
     title: string,
-    location: string
+    location: string,
+    price?: number
   ) => {
     setItineraryData((prev) => {
       const blockId = v4()
@@ -987,6 +988,10 @@ export default function ItineraryMakerModule({
             title,
             description: '',
             location,
+            price,
+          }
+          if (price) {
+            toggleInput(blockId, 'price')
           }
           return {
             ...section,
@@ -1519,8 +1524,8 @@ export default function ItineraryMakerModule({
 
   const handleSuccessfulSubmission = (response: CreateItineraryResponse) => {
     setHasUnsavedChanges(false)
-    const action = isEdit ? 'updated' : 'created'
-    toast.success(`Contingency ${action} successfully`)
+    const action = isEdit ? 'update' : 'buat'
+    toast.success(`Itinerary berhasil di${action}`)
 
     if (isCreateAndValidUmami()) {
       window.umami.track('create_itinerary_success')
@@ -1534,8 +1539,8 @@ export default function ItineraryMakerModule({
     response: ContingencyPlanResponse
   ) => {
     setHasUnsavedChanges(false)
-    const action = isEdit ? 'updated' : 'created'
-    toast.success(`Contingency ${action} successfully`)
+    const action = isEdit ? 'update' : 'buat'
+    toast.success(`Contingency berhasil di${action}`)
     router.push(
       `/itinerary/${itineraryId}/contingency/${response.contingency.id}`
     )
