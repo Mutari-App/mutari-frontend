@@ -1,10 +1,19 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import AutocompleteInput from '@/modules/ItineraryMakerModule/module-elements/AutocompleteInput'
-import { useLoadScript } from '@react-google-maps/api'
 import usePlacesAutocomplete from 'use-places-autocomplete'
+import userEvent from '@testing-library/user-event'
 
-jest.mock('@react-google-maps/api', () => ({
-  useLoadScript: jest.fn(),
+jest.mock('@vis.gl/react-google-maps', () => ({
+  APIProvider: ({
+    children,
+    onLoad,
+  }: {
+    children: React.ReactNode
+    onLoad?: () => void
+  }) => {
+    onLoad?.() // call it manually so it's covered
+    return <div data-testid="api-provider">{children}</div>
+  },
 }))
 
 jest.mock('use-places-autocomplete', () => ({
@@ -43,35 +52,24 @@ describe('AutocompleteInput Component', () => {
   const blockId = 'test-block'
   const title = 'Initial Title'
 
+  const originalEnv = process.env
+
   beforeEach(() => {
-    ;(useLoadScript as jest.Mock).mockReturnValue({ isLoaded: true })
+    process.env = {
+      ...originalEnv,
+      NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: 'dummy-key',
+    }
   })
 
   afterEach(() => {
     jest.clearAllMocks()
   })
 
-  test('renders loading state when Google Maps API is not loaded', () => {
-    ;(useLoadScript as jest.Mock).mockReturnValueOnce({ isLoaded: false })
-    render(
-      <AutocompleteInput
-        updateBlock={updateBlock}
-        setPositionToView={mockSetPositionToView}
-        toggleInput={toggleInput}
-        blockId={blockId}
-        title={title}
-      />
-    )
-    expect(screen.getByText(/Loading/i)).toBeInTheDocument()
-  })
-
   test('renders input field when Google Maps API is loaded', () => {
-    ;(useLoadScript as jest.Mock).mockReturnValueOnce({ isLoaded: true })
     render(
       <AutocompleteInput
         updateBlock={updateBlock}
         setPositionToView={mockSetPositionToView}
-        toggleInput={toggleInput}
         blockId={blockId}
         title={title}
       />
@@ -81,7 +79,6 @@ describe('AutocompleteInput Component', () => {
 
   test('updates input value on change', async () => {
     const setValueMock = jest.fn()
-    ;(useLoadScript as jest.Mock).mockReturnValueOnce({ isLoaded: true })
     ;(usePlacesAutocomplete as jest.Mock).mockReturnValue({
       ready: true,
       value: '',
@@ -94,7 +91,6 @@ describe('AutocompleteInput Component', () => {
       <AutocompleteInput
         updateBlock={updateBlock}
         setPositionToView={mockSetPositionToView}
-        toggleInput={toggleInput}
         blockId={blockId}
         title={title}
       />
@@ -106,7 +102,6 @@ describe('AutocompleteInput Component', () => {
   })
 
   test('handles selecting a location correctly', async () => {
-    ;(useLoadScript as jest.Mock).mockReturnValueOnce({ isLoaded: true })
     ;(usePlacesAutocomplete as jest.Mock).mockReturnValue({
       ready: true,
       value: '',
@@ -128,7 +123,6 @@ describe('AutocompleteInput Component', () => {
       <AutocompleteInput
         updateBlock={updateBlock}
         setPositionToView={mockSetPositionToView}
-        toggleInput={toggleInput}
         blockId={blockId}
         title={title}
       />
@@ -158,5 +152,37 @@ describe('AutocompleteInput Component', () => {
       )
       expect(updateBlock).toHaveBeenCalledWith(blockId, 'title', 'Test Place')
     })
+  })
+
+  test('renders input and APIProvider', () => {
+    render(
+      <AutocompleteInput
+        updateBlock={updateBlock}
+        setPositionToView={mockSetPositionToView}
+        blockId={blockId}
+        title={title}
+      />
+    )
+    expect(screen.getByTestId('autocomplete-input')).toBeInTheDocument()
+    expect(screen.getByTestId('api-provider')).toBeInTheDocument()
+  })
+
+  test('env var fallback to empty string when undefined', () => {
+    const originalEnv = process.env
+    process.env = { ...originalEnv, NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: undefined }
+
+    render(
+      <AutocompleteInput
+        updateBlock={updateBlock}
+        setPositionToView={mockSetPositionToView}
+        blockId={blockId}
+        title={title}
+      />
+    )
+
+    // Komponen tetap render tanpa error
+    expect(screen.getByTestId('autocomplete-input')).toBeInTheDocument()
+
+    process.env = originalEnv
   })
 })
