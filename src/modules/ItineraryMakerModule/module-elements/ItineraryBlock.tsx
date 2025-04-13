@@ -128,7 +128,7 @@ export const ItineraryBlock: React.FC<ItineraryBlockProps> = ({
                       <div className="flex items-center mb-2 gap-2">
                         <CustomPin
                           number={blockIndex + 1}
-                          color={SECTION_COLORS[sectionNumber % 10]}
+                          color={SECTION_COLORS[sectionNumber % 10].class}
                         />
                         <AutocompleteInput
                           updateBlock={updateBlock}

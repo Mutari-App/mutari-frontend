@@ -138,7 +138,7 @@ function Maps({
             routes.push({
               path: decodedPath,
               options: {
-                strokeColor: '#4285F4',
+                strokeColor: SECTION_COLORS[section.sectionNumber%10].hex,
                 strokeWeight: 4,
                 strokeOpacity: 0.8,
               },
@@ -238,7 +238,7 @@ function Maps({
           >
             <CustomPin
               number={loc.order}
-              color={SECTION_COLORS[loc.section % 10]}
+              color={SECTION_COLORS[loc.section % 10].class}
               title={loc.title}
             />
           </AdvancedMarker>
