@@ -14,7 +14,6 @@ import Link from 'next/link'
 import { decodePolyline } from '../utils'
 import {
   AdvancedMarker,
-  APIProvider,
   Map,
   useMap,
   type MapMouseEvent,
