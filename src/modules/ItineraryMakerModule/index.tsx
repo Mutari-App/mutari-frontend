@@ -42,7 +42,7 @@ import NotFound from 'next/error'
 import { Lightbulb } from 'lucide-react'
 import { calculateRoute, TransportMode } from '@/utils/maps'
 import Maps from './sections/Maps'
-import { APIProvider, useMap } from '@vis.gl/react-google-maps'
+import { APIProvider } from '@vis.gl/react-google-maps'
 
 const SAVED_ITINERARY_KEY = 'saved_itinerary_data'
 
@@ -1835,7 +1835,6 @@ export default function ItineraryMakerModule({
   }
 
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? ''
-  const map = useMap()
 
   useEffect(() => {
     syncFeedbackWithItinerary()
