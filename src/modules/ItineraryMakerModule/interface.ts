@@ -157,3 +157,11 @@ export interface ContingencyPlanDto {
 export interface ContingencyPlanResponse extends CustomFetchBaseResponse {
   contingency: ContingencyPlanDto[]
 }
+
+export interface ILocationMarker {
+  lat: number
+  lng: number
+  section: number
+  order: number
+  title: string
+}

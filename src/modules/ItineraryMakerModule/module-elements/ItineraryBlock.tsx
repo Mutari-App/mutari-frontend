@@ -33,6 +33,8 @@ const transportModeNames = {
   [TransportMode.TWO_WHEELER]: 'Motor',
 }
 import AutocompleteInput from './AutocompleteInput'
+import CustomPin from './CustomPin'
+import { SECTION_COLORS } from '../constants'
 
 interface ItineraryBlockProps {
   block: Block
@@ -123,10 +125,13 @@ export const ItineraryBlock: React.FC<ItineraryBlockProps> = ({
                 <div className="flex-1">
                   {block.blockType === 'LOCATION' ? (
                     <>
-                      <div className="flex items-center mb-2">
+                      <div className="flex items-center mb-2 gap-2">
+                        <CustomPin
+                          number={blockIndex + 1}
+                          color={SECTION_COLORS[sectionNumber % 10].class}
+                        />
                         <AutocompleteInput
                           updateBlock={updateBlock}
-                          toggleInput={toggleInput}
                           blockId={block.id}
                           setPositionToView={setPositionToView}
                           title={block.title}

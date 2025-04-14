@@ -37,6 +37,7 @@
     "@react-google-maps/api": "^2.20.6",
     "@testing-library/user-event": "^14.6.1",
     "@types/react-places-autocomplete": "^7.2.14",
+    "@vis.gl/react-google-maps": "^1.5.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.0.0",
