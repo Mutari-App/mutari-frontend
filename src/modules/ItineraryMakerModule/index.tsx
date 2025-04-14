@@ -121,7 +121,7 @@ export default function ItineraryMakerModule({
           {
             id: v4(),
             blockType: 'LOCATION',
-            title: 'Masukkan Judul',
+            title: 'Masukkan Lokasi',
           },
         ],
       },
