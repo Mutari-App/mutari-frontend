@@ -6,7 +6,7 @@ import usePlacesAutocomplete, {
   getLatLng,
 } from 'use-places-autocomplete'
 import { type Block } from '../interface'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import useOutsideClick from '@/hooks/useOutsideClick'
 import { APIProvider } from '@vis.gl/react-google-maps'
 
@@ -70,8 +70,6 @@ function AutocompleteInput({
     updateBlock(blockId, 'title', formattedValue)
     setPositionToView({ lat, lng })
   }
-
-  // if (!isLoaded) return <div>Loading...</div>
 
   return (
     <APIProvider
