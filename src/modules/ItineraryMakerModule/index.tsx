@@ -9,7 +9,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 import { format } from 'date-fns'
-import { CalendarIcon, Plus, X, Save, Loader2 } from 'lucide-react'
+import { CalendarIcon, Plus, X, Save, Loader2, Lightbulb } from 'lucide-react'
 import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -39,7 +39,6 @@ import { cn } from '@/lib/utils'
 import { useAuthContext } from '@/contexts/AuthContext'
 import { notFound, redirect, useParams, useRouter } from 'next/navigation'
 import NotFound from 'next/error'
-import { Lightbulb } from 'lucide-react'
 import { calculateRoute, TransportMode } from '@/utils/maps'
 import Maps from './sections/Maps'
 import { APIProvider } from '@vis.gl/react-google-maps'
@@ -389,7 +388,6 @@ export default function ItineraryMakerModule({
           toast.error('Gagal mengambil tag')
         }
       } catch (error) {
-        console.error('Error fetching tags:', error)
         toast.error('Gagal mengambil tag')
       }
     }
