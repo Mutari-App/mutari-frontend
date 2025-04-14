@@ -1818,15 +1818,15 @@ export default function ItineraryMakerModule({
   const syncFeedbackWithItinerary = () => {
     setFeedbackItems((prev) =>
       prev.filter((item) => {
-        const section = itineraryData.sections[item.target.sectionIndex - 1]
-        const blockExists = section?.blocks?.some(
+        const section = itineraryData.sections[item.target.sectionIndex - 1];
+        if (!section?.blocks) return false;
+  
+        return section.blocks.some(
           (block) => block.id === item.target.blockId
-        )
-        // keep only if block still exists
-        return blockExists
+        );
       })
-    )
-  }
+    );
+  };
 
   useEffect(() => {
     syncFeedbackWithItinerary()
