@@ -1972,13 +1972,17 @@ export default function ItineraryMakerModule({
             setPositionToView={setPositionToView}
           />
           <div className="flex justify-center my-8">
-            <Button
-              size="sm"
-              className="-mt-4 w-[240px] bg-gradient-to-r from-[#0073E6] to-[#004080] text-white hover:from-[#0066cc] hover:to-[#003366] rounded-lg"
-              onClick={() => addSection()}
-            >
-              <Plus className="h-4 w-4" /> Bagian
-            </Button>
+            <div className="p-[1.5px] flex -mt-4 w-[240px] items-center bg-gradient-to-r from-[#0073E6] to-[#004080] hover:from-[#0066cc] hover:to-[#003366] rounded-lg group">
+              <Button
+                className="h-8 w-full bg-white hover:bg-transparent"
+                onClick={() => addSection()}
+              >
+                <span className="bg-gradient-to-r from-[#0073E6] to-[#004080] group-hover:text-white text-transparent bg-clip-text flex items-center">
+                  <Plus className="h-4 w-4 mr-1 text-[#0073E6] group-hover:text-white" />
+                  Bagian
+                </span>
+              </Button>
+            </div>
           </div>
           {feedbackItems.length > 0 && (
             <div className="mt-8">

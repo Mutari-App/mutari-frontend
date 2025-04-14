@@ -186,20 +186,28 @@ export const ItinerarySections: React.FC<ItinerarySectionsProps> = ({
             )}
           </Droppable>
           <div className="flex justify-center gap-4 mt-4">
-            <Button
-              size="sm"
-              onClick={() => addBlock(section.sectionNumber, 'LOCATION')}
-              className="flex w-28 items-center bg-gradient-to-r from-[#0073E6] to-[#004080] text-white hover:from-[#0066cc] hover:to-[#003366] rounded-lg"
-            >
-              <Plus className="h-4 w-4" /> Lokasi
-            </Button>
-            <Button
-              size="sm"
-              onClick={() => addBlock(section.sectionNumber, 'NOTE')}
-              className="flex w-28 items-center bg-gradient-to-r from-[#0073E6] to-[#004080] text-white hover:from-[#0066cc] hover:to-[#003366] rounded-lg"
-            >
-              <Plus className="h-4 w-4" /> Catatan
-            </Button>
+            <div className="p-[1.5px] flex w-28 items-center bg-gradient-to-r from-[#0073E6] to-[#004080] hover:from-[#0066cc] hover:to-[#003366] rounded-lg group">
+              <Button
+                onClick={() => addBlock(section.sectionNumber, 'LOCATION')}
+                className="h-8 w-full bg-white hover:bg-transparent"
+              >
+                <span className="bg-gradient-to-r from-[#0073E6] to-[#004080] group-hover:text-white text-transparent bg-clip-text flex items-center">
+                  <Plus className="h-4 w-4 mr-1 text-[#0073E6] group-hover:text-white" />
+                  Lokasi
+                </span>
+              </Button>
+            </div>
+            <div className="p-[1.5px] flex w-28 items-center bg-gradient-to-r from-[#0073E6] to-[#004080] hover:from-[#0066cc] hover:to-[#003366] rounded-lg group">
+              <Button
+                onClick={() => addBlock(section.sectionNumber, 'NOTE')}
+                className="h-8 w-full bg-white hover:bg-transparent"
+              >
+                <span className="bg-gradient-to-r from-[#0073E6] to-[#004080] group-hover:text-white text-transparent bg-clip-text flex items-center">
+                  <Plus className="h-4 w-4 mr-1 text-[#0073E6] group-hover:text-white" />
+                  Catatan
+                </span>
+              </Button>
+            </div>
           </div>
         </div>
       ))}
