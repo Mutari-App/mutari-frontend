@@ -1,7 +1,7 @@
-import React from 'react'
+import React, { useRef, useEffect } from 'react'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Wand2 } from 'lucide-react'
+import { Wand2, Edit2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import {
   type CloudinaryUploadWidgetResults,
@@ -32,6 +32,17 @@ export const ItineraryHeader: React.FC<ItineraryHeaderProps> = ({
   onGenerateFeedback,
   isContingency,
 }) => {
+  const titleInputRef = useRef<HTMLInputElement>(null)
+
+  // Handle title input focus to select all text if it's the default value
+  const handleTitleFocus = () => {
+    if (titleInputRef.current && title === 'Itinerary Tanpa Judul') {
+      setTimeout(() => {
+        titleInputRef.current?.select()
+      }, 0)
+    }
+  }
+
   return (
     <div
       className="relative w-full h-40 md:h-64 rounded-md mb-4 flex items-center justify-center overflow-hidden"
@@ -46,20 +57,46 @@ export const ItineraryHeader: React.FC<ItineraryHeaderProps> = ({
       <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
       <div className="absolute bottom-0 left-0 z-10 p-2 sm:p-4 w-full">
         <div className="flex flex-col">
-          <Input
-            className="p-0 text-lg md:text-4xl font-bold text-white bg-transparent border-none h-fit focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 disabled:opacity-100 disabled:text-white disabled:bg-transparent placeholder:text-white/60"
-            value={title}
-            onChange={onTitleChange}
-            placeholder="Enter trip title"
-            disabled={isContingency}
-          />
-          <Input
-            className="p-0 text-xs md:text-sm font-raleway text-white bg-transparent border-none h-fit focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 disabled:opacity-100 disabled:text-white disabled:bg-transparent placeholder:text-white/60"
-            value={description}
-            onChange={onDescChange}
-            placeholder="Masukkan Deskripsi Perjalanan"
-            disabled={isContingency}
-          />
+          <div className="relative group">
+            <Input
+              ref={titleInputRef}
+              className="p-0 text-lg md:text-4xl font-bold text-white bg-transparent border-none h-fit 
+                focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 
+                disabled:opacity-100 disabled:text-white disabled:bg-transparent 
+                placeholder:text-white/60"
+              value={title}
+              onChange={onTitleChange}
+              onFocus={handleTitleFocus}
+              placeholder="Masukkan Judul Perjalanan"
+              disabled={isContingency}
+              style={{ cursor: isContingency ? 'not-allowed' : 'text' }}
+            />
+            {!isContingency && (
+              <Edit2
+                size={16}
+                className="text-white opacity-0 group-hover:opacity-60 absolute right-2 top-1/2 transform -translate-y-1/2"
+              />
+            )}
+          </div>
+          <div className="relative group mt-1">
+            <Input
+              className="p-0 text-xs md:text-sm font-raleway text-white bg-transparent border-none h-fit 
+                focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 
+                disabled:opacity-100 disabled:text-white disabled:bg-transparent 
+                placeholder:text-white/60"
+              value={description}
+              onChange={onDescChange}
+              placeholder="Masukkan Deskripsi Perjalanan"
+              disabled={isContingency}
+              style={{ cursor: isContingency ? 'not-allowed' : 'text' }}
+            />
+            {!isContingency && (
+              <Edit2
+                size={12}
+                className="text-white opacity-0 group-hover:opacity-60 absolute right-2 top-1/2 transform -translate-y-1/2"
+              />
+            )}
+          </div>
         </div>
       </div>
 

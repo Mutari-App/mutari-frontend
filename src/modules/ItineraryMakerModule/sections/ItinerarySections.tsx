@@ -19,6 +19,7 @@ import {
   ChevronUp,
   ChevronDown,
   Trash,
+  Edit2,
 } from 'lucide-react'
 import { type FeedbackItem, type Block, type Section } from '../interface'
 import { type TransportMode } from '@/utils/maps'
@@ -107,14 +108,24 @@ export const ItinerarySections: React.FC<ItinerarySectionsProps> = ({
     <DragDropContext onDragEnd={handleDragEnd}>
       {sections.map((section) => (
         <div key={section.sectionNumber} className="mb-8">
-          <div className="flex items-center justify-between mb-2 gap-4">
-            <Input
-              className="md:text-2xl font-semibold border-none p-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
-              value={section.title}
-              onChange={(e) =>
-                updateSectionTitle(section.sectionNumber, e.target.value)
-              }
-            />
+          <div className="flex items-center justify-between mb-2 gap-4 group">
+            <div className="relative flex-grow">
+              <Input
+                className="md:text-2xl font-semibold border-none p-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                value={section.title}
+                onChange={(e) =>
+                  updateSectionTitle(section.sectionNumber, e.target.value)
+                }
+                onFocus={(e) => {
+                  e.target.select()
+                }}
+                style={{ cursor: 'text' }}
+              />
+              <Edit2
+                size={18}
+                className="text-gray-400 absolute right-2 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+              />
+            </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm">
