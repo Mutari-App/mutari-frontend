@@ -34,8 +34,6 @@ import { ItinerarySections } from './sections/ItinerarySections'
 import { DateRangeAlertDialog } from './module-elements/DateRangeAlertDialog'
 import { TagSelector } from './module-elements/TagSelector'
 import { ReminderSelector } from './module-elements/ReminderSelector'
-import { CldUploadButton } from 'next-cloudinary'
-import { cn } from '@/lib/utils'
 import { useAuthContext } from '@/contexts/AuthContext'
 import { notFound, redirect, useParams, useRouter } from 'next/navigation'
 import NotFound from 'next/error'
@@ -1859,6 +1857,7 @@ export default function ItineraryMakerModule({
             coverImage={itineraryData.coverImage}
             onTitleChange={handleTitleChange}
             onDescChange={handleDescChange}
+            onCoverImageChange={handleImageUpload}
             isSubmitting={isSubmitting}
             onGenerateFeedback={handleGenerateFeedback}
             isGenerating={isGenerating}
@@ -1881,22 +1880,6 @@ export default function ItineraryMakerModule({
               />
             )}
 
-            <CldUploadButton
-              uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
-              onSuccess={handleImageUpload}
-              className={cn(
-                buttonVariants({ variant: 'outline', size: 'sm' }),
-                isContingency &&
-                  'opacity-50 cursor-not-allowed pointer-events-none'
-              )}
-              options={{
-                clientAllowedFormats: ['image'],
-                maxFiles: 1,
-                maxFileSize: 1024 * 256, // 256 KB
-              }}
-            >
-              Ganti foto cover
-            </CldUploadButton>
             <div className="sm:ml-auto">
               <Popover>
                 <PopoverTrigger asChild>

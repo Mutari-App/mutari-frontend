@@ -1,8 +1,12 @@
 import React from 'react'
-import { Button } from '@/components/ui/button'
+import { Button, buttonVariants } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Wand2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import {
+  type CloudinaryUploadWidgetResults,
+  CldUploadButton,
+} from 'next-cloudinary'
 
 interface ItineraryHeaderProps {
   title: string
@@ -10,6 +14,7 @@ interface ItineraryHeaderProps {
   coverImage?: string
   onTitleChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   onDescChange: (e: React.ChangeEvent<HTMLInputElement>) => void
+  onCoverImageChange: (result: CloudinaryUploadWidgetResults) => void
   isSubmitting: boolean
   isGenerating: boolean
   onGenerateFeedback: () => void
@@ -22,7 +27,7 @@ export const ItineraryHeader: React.FC<ItineraryHeaderProps> = ({
   coverImage,
   onTitleChange,
   onDescChange,
-  isSubmitting,
+  onCoverImageChange,
   isGenerating,
   onGenerateFeedback,
   isContingency,
@@ -82,6 +87,22 @@ export const ItineraryHeader: React.FC<ItineraryHeaderProps> = ({
           </span>
         </Button>
       )}
+      <CldUploadButton
+        uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
+        onSuccess={onCoverImageChange}
+        className={cn(
+          buttonVariants({ variant: 'ghost', size: 'sm' }),
+          isContingency && 'opacity-50 cursor-not-allowed pointer-events-none',
+          'absolute top-2 right-2 sm:top-4 sm:right-4 z-10 text-white bg-[#1C1C1C99]'
+        )}
+        options={{
+          clientAllowedFormats: ['image'],
+          maxFiles: 1,
+          maxFileSize: 1024 * 256, // 256 KB
+        }}
+      >
+        Ganti foto cover
+      </CldUploadButton>
     </div>
   )
 }
