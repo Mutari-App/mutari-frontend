@@ -9,7 +9,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 import { format } from 'date-fns'
-import { CalendarIcon, Plus, X } from 'lucide-react'
+import { CalendarIcon, Plus, X, Save, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -1844,6 +1844,17 @@ export default function ItineraryMakerModule({
     <APIProvider apiKey={apiKey}>
       <div className="flex max-h-screen">
         <div className="container max-w-4xl mx-auto p-4 pt-24 min-h-screen max-h-screen overflow-auto">
+          <button
+            onClick={handleSubmit}
+            disabled={isSubmitting}
+            className="flex items-center justify-center bg-gradient-to-r from-[#0073E6] to-[#004080] hover:to-[#003366] rounded-full w-12 h-12 md:w-14 md:h-14 fixed right-6 md:right-[51.5%] bottom-6 z-10 text-lg"
+          >
+            {isSubmitting ? (
+              <Loader2 className="w-6 h-6 text-white animate-spin" />
+            ) : (
+              <Save className="w-6 h-6 text-white" />
+            )}
+          </button>
           <ItineraryHeader
             title={_getHeaderTitle()}
             description={itineraryData.description}
@@ -1851,7 +1862,6 @@ export default function ItineraryMakerModule({
             onTitleChange={handleTitleChange}
             onDescChange={handleDescChange}
             isSubmitting={isSubmitting}
-            onSubmit={handleSubmit}
             onGenerateFeedback={handleGenerateFeedback}
             isGenerating={isGenerating}
             isContingency={!!contingencyId}

@@ -13,7 +13,6 @@ interface ItineraryHeaderProps {
   isSubmitting: boolean
   isGenerating: boolean
   onGenerateFeedback: () => void
-  onSubmit: () => void
   isContingency: boolean
 }
 
@@ -26,7 +25,6 @@ export const ItineraryHeader: React.FC<ItineraryHeaderProps> = ({
   isSubmitting,
   isGenerating,
   onGenerateFeedback,
-  onSubmit,
   isContingency,
 }) => {
   return (
@@ -84,15 +82,6 @@ export const ItineraryHeader: React.FC<ItineraryHeaderProps> = ({
           </span>
         </Button>
       )}
-
-      <Button
-        size="sm"
-        className="absolute top-2 right-2 sm:top-4 sm:right-4 z-10 bg-gradient-to-r from-[#0073E6] to-[#004080] text-white hover:from-[#0066cc] hover:to-[#003366]"
-        onClick={onSubmit}
-        disabled={isSubmitting}
-      >
-        {isSubmitting ? 'Menyimpan...' : 'Simpan'}
-      </Button>
     </div>
   )
 }
