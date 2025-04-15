@@ -31,7 +31,7 @@ export const ReminderSelector: React.FC<ReminderSelectorProps> = ({
           <Button
             variant="outline"
             size="sm"
-            className="h-8 bg-white hover:bg-transparent border-none"
+            className="h-8 bg-white group-hover:bg-transparent border-none"
           >
             <span className="bg-gradient-to-r from-[#0073E6] to-[#004080] group-hover:text-white text-transparent bg-clip-text flex items-center">
               <BellIcon className="h-4 w-4 text-[#0073E6] group-hover:text-white" />

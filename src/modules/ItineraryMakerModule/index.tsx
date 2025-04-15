@@ -1879,7 +1879,7 @@ export default function ItineraryMakerModule({
                   <Button
                     variant="outline"
                     size="sm"
-                    className="h-8 w-full bg-white hover:bg-transparent border-none"
+                    className="h-8 w-full bg-white group-hover:bg-transparent border-none"
                     disabled={isContingency}
                   >
                     <span className="bg-gradient-to-r from-[#0073E6] to-[#004080] group-hover:text-white text-transparent bg-clip-text flex items-center">
@@ -2074,7 +2074,7 @@ export default function ItineraryMakerModule({
           <div className="flex justify-center my-8">
             <div className="p-[1.5px] flex -mt-4 w-[240px] items-center bg-gradient-to-r from-[#0073E6] to-[#004080] hover:from-[#0066cc] hover:to-[#003366] rounded-lg group">
               <Button
-                className="h-8 w-full bg-white hover:bg-transparent"
+                className="h-8 w-full bg-white group-hover:bg-transparent"
                 onClick={() => addSection()}
               >
                 <span className="bg-gradient-to-r from-[#0073E6] to-[#004080] group-hover:text-white text-transparent bg-clip-text flex items-center">
