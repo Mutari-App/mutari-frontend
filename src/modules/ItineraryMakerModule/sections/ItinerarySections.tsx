@@ -23,8 +23,6 @@ import {
 import { type FeedbackItem, type Block, type Section } from '../interface'
 import { type TransportMode } from '@/utils/maps'
 import { ItineraryBlock } from '../module-elements/ItineraryBlock'
-import { SECTION_COLORS } from '../constants'
-import CustomPin from '../module-elements/CustomPin'
 
 interface ItinerarySectionsProps {
   sections: Section[]
