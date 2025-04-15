@@ -93,7 +93,7 @@ function AutocompleteInput({
           <Input
             ref={inputRef}
             type="text"
-            className="text-sm sm:text-base md:text-lg font-medium border-none p-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
+            className="text-sm sm:text-base lg:text-lg font-medium border-none p-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
             placeholder="Search Location..."
             value={value}
             onChange={(e) => {

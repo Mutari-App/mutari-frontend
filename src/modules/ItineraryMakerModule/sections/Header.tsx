@@ -45,7 +45,7 @@ export const ItineraryHeader: React.FC<ItineraryHeaderProps> = ({
 
   return (
     <div
-      className="relative w-full h-40 md:h-64 rounded-md mb-4 flex items-center justify-center overflow-hidden"
+      className="relative w-full h-40 lg:h-64 rounded-md mb-4 flex items-center justify-center overflow-hidden"
       style={{
         backgroundImage: coverImage
           ? `url(${coverImage})`
@@ -60,7 +60,7 @@ export const ItineraryHeader: React.FC<ItineraryHeaderProps> = ({
           <div className="relative group">
             <Input
               ref={titleInputRef}
-              className="p-0 text-lg md:text-4xl font-bold text-white bg-transparent border-none h-fit 
+              className="p-0 text-lg md:text-lg lg:text-4xl font-bold text-white bg-transparent border-none h-fit 
                 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 
                 disabled:opacity-100 disabled:text-white disabled:bg-transparent 
                 placeholder:text-white/60"
@@ -80,7 +80,7 @@ export const ItineraryHeader: React.FC<ItineraryHeaderProps> = ({
           </div>
           <div className="relative group mt-1">
             <Input
-              className="p-0 text-xs md:text-sm font-raleway text-white bg-transparent border-none h-fit 
+              className="p-0 text-xs md:text-xs lg:text-sm font-raleway text-white bg-transparent border-none h-fit 
                 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 
                 disabled:opacity-100 disabled:text-white disabled:bg-transparent 
                 placeholder:text-white/60"

@@ -108,10 +108,10 @@ export const ItinerarySections: React.FC<ItinerarySectionsProps> = ({
     <DragDropContext onDragEnd={handleDragEnd}>
       {sections.map((section) => (
         <div key={section.sectionNumber} className="mb-8">
-          <div className="flex items-center justify-between mb-2 gap-4 group">
-            <div className="relative flex-grow">
+          <div className="flex items-center justify-between mb-2 gap-4">
+            <div className="relative flex-grow group">
               <Input
-                className="md:text-2xl font-semibold border-none p-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                className="lg:text-2xl font-semibold border-none p-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
                 value={section.title}
                 onChange={(e) =>
                   updateSectionTitle(section.sectionNumber, e.target.value)

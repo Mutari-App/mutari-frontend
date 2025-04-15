@@ -1854,7 +1854,7 @@ export default function ItineraryMakerModule({
             isGenerating={isGenerating}
             isContingency={!!contingencyId}
           />
-          <div className="flex flex-wrap max-sm:justify-center items-center gap-2 mb-4">
+          <div className="flex flex-wrap items-center gap-2 mb-4">
             <Popover>
               <PopoverTrigger asChild>
                 <div className="p-[1.5px] flex items-center bg-gradient-to-r from-[#0073E6] to-[#004080] hover:from-[#0066cc] hover:to-[#003366] rounded-lg group">
@@ -1865,10 +1865,16 @@ export default function ItineraryMakerModule({
                     disabled={isContingency}
                   >
                     <span className="bg-gradient-to-r from-[#0073E6] to-[#004080] group-hover:text-white text-transparent bg-clip-text flex items-center">
-                      <CalendarIcon className="h-4 w-4 mr-1 text-[#0073E6] group-hover:text-white" />
-                      {dateRange.from && dateRange.to
-                        ? `${format(dateRange.from, 'dd MMM')} - ${format(dateRange.to, 'dd MMM')}`
-                        : 'Masukkan Tanggal Perjalanan'}
+                      <CalendarIcon className="h-4 w-4 sm:mr-1 text-[#0073E6] group-hover:text-white" />
+                      {dateRange.from && dateRange.to ? (
+                        `${format(dateRange.from, 'dd MMM')} - ${format(dateRange.to, 'dd MMM')}`
+                      ) : (
+                        <>
+                          <span className="hidden min-[500px]:inline md:hidden min-[1034px]:inline">
+                            Masukkan Tanggal Perjalanan
+                          </span>
+                        </>
+                      )}
                     </span>
                   </Button>
                 </div>
@@ -1895,7 +1901,7 @@ export default function ItineraryMakerModule({
               <Button
                 size="sm"
                 className={cn(
-                  'group relative overflow-hidden rounded-md px-4 py-1 sm:ml-auto text-sm font-medium text-white',
+                  'group relative overflow-hidden rounded-md px-4 py-1 ml-auto text-sm font-medium text-white',
                   'focus:outline-none focus:ring-2 focus:ring-offset-2',
                   'disabled:opacity-70 disabled:cursor-not-allowed'
                 )}

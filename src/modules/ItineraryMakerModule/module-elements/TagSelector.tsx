@@ -79,7 +79,7 @@ export const TagSelector: React.FC<TagSelectorProps> = ({
   }, [])
 
   return (
-    <div className="flex flex-col sm:flex-row gap-2 sm:mb-3 sm:items-center">
+    <div className="flex flex-col sm:flex-row md:flex-col lg:flex-row gap-2 mb-3 sm:items-center md:items-start lg:items-center">
       <div className="relative">
         <div className="relative w-44 lg:w-48 bg-[#E5F1FF] rounded-md">
           <Input
