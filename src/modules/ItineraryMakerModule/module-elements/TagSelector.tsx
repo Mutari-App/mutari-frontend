@@ -41,9 +41,18 @@ export const TagSelector: React.FC<TagSelectorProps> = ({
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
-        <Button variant="outline" size="sm" disabled={isContingency}>
-          Tambahkan tag
-        </Button>
+        <div className="h-fit p-[1.5px] flex items-center bg-gradient-to-r from-[#0073E6] to-[#004080] hover:from-[#0066cc] hover:to-[#003366] rounded-lg group">
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-8 w-full bg-white hover:bg-transparent border-none"
+            disabled={isContingency}
+          >
+            <span className="bg-gradient-to-r from-[#0073E6] to-[#004080] group-hover:text-white text-transparent bg-clip-text flex items-center">
+              Tambahkan Tag
+            </span>
+          </Button>
+        </div>
       </PopoverTrigger>
       <PopoverContent className="w-64 p-3" align="start">
         <div className="flex flex-col gap-3">
@@ -54,7 +63,6 @@ export const TagSelector: React.FC<TagSelectorProps> = ({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
-
           <div className="max-h-60 overflow-y-auto space-y-2">
             {filteredTags.length === 0 ? (
               <div className="text-center py-2 text-sm text-gray-500">
@@ -78,7 +86,6 @@ export const TagSelector: React.FC<TagSelectorProps> = ({
               ))
             )}
           </div>
-
           <div className="pt-2 flex justify-end">
             <Button
               size="sm"

@@ -9,7 +9,15 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 import { format } from 'date-fns'
-import { CalendarIcon, Plus, X, Save, Loader2, Lightbulb } from 'lucide-react'
+import {
+  CalendarIcon,
+  Plus,
+  X,
+  Save,
+  Loader2,
+  Lightbulb,
+  Wand2,
+} from 'lucide-react'
 import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -40,6 +48,7 @@ import NotFound from 'next/error'
 import { calculateRoute, TransportMode } from '@/utils/maps'
 import Maps from './sections/Maps'
 import { APIProvider } from '@vis.gl/react-google-maps'
+import { cn } from '@/lib/utils'
 
 const SAVED_ITINERARY_KEY = 'saved_itinerary_data'
 
@@ -1864,12 +1873,33 @@ export default function ItineraryMakerModule({
             isContingency={!!contingencyId}
           />
           <div className="flex flex-wrap max-sm:justify-center items-center gap-2 mb-4">
-            <TagSelector
-              selectedTags={itineraryData.tags ?? []}
-              onChangeAction={handleTagsChange}
-              availableTags={availableTags}
-              isContingency={isContingency}
-            />
+            <Popover>
+              <PopoverTrigger asChild>
+                <div className="p-[1.5px] flex items-center bg-gradient-to-r from-[#0073E6] to-[#004080] hover:from-[#0066cc] hover:to-[#003366] rounded-lg group">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 w-full bg-white hover:bg-transparent border-none"
+                    disabled={isContingency}
+                  >
+                    <span className="bg-gradient-to-r from-[#0073E6] to-[#004080] group-hover:text-white text-transparent bg-clip-text flex items-center">
+                      <CalendarIcon className="h-4 w-4 mr-1 text-[#0073E6] group-hover:text-white" />
+                      {dateRange.from && dateRange.to
+                        ? `${format(dateRange.from, 'dd MMM')} - ${format(dateRange.to, 'dd MMM')}`
+                        : 'Masukkan Tanggal Perjalanan'}
+                    </span>
+                  </Button>
+                </div>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="range"
+                  selected={dateRange}
+                  onSelect={handleDateRangeChange}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
             {!isContingency && (
               <ReminderSelector
                 selectedReminder={
@@ -1879,54 +1909,133 @@ export default function ItineraryMakerModule({
                 reminderOptions={reminderOptions}
               />
             )}
+            {!isContingency && (
+              <Button
+                size="sm"
+                className={cn(
+                  'group relative overflow-hidden rounded-md px-4 py-1 sm:ml-auto text-sm font-medium text-white',
+                  'focus:outline-none focus:ring-2 focus:ring-offset-2',
+                  'disabled:opacity-70 disabled:cursor-not-allowed'
+                )}
+                onClick={handleGenerateFeedback}
+                disabled={isGenerating}
+              >
+                {/* Base gradient layer */}
+                <span className="absolute inset-0 bg-gradient-to-r from-[#0073E6] to-[#80004B] transition-opacity duration-300 ease-in-out" />
 
-            <div className="sm:ml-auto">
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="flex items-center gap-2"
-                    disabled={isContingency}
-                  >
-                    <CalendarIcon className="h-4 w-4" />
-                    {dateRange.from && dateRange.to
-                      ? `${format(dateRange.from, 'dd MMM')} - ${format(dateRange.to, 'dd MMM')}`
-                      : 'Masukkan Tanggal Perjalanan'}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="end">
-                  <Calendar
-                    mode="range"
-                    selected={dateRange}
-                    onSelect={handleDateRangeChange}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
+                {/* Hover gradient layer */}
+                <span className="absolute inset-0 bg-gradient-to-r from-[#80004B] to-[#0073E6] opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out" />
+
+                <span className="relative flex items-center gap-1.5">
+                  <Wand2 size={16} />
+                  {isGenerating ? 'Memproses...' : 'Buat Saran AI'}
+                </span>
+              </Button>
+            )}
           </div>
-          {itineraryData.tags && itineraryData.tags.length > 0 && (
-            <div className="flex flex-wrap gap-2 mb-4">
-              {getSelectedTagNames().map((tagName, index) => (
-                <Badge
-                  key={`tag-${tagName}-${itineraryData.tags![index]}`}
-                  variant="secondary"
-                  className="flex items-center gap-1"
-                >
-                  {tagName}
-                  {!isContingency && (
-                    <button
-                      onClick={() => removeTag(itineraryData.tags![index])}
-                      className="ml-1 rounded-full hover:bg-gray-200 p-0.5"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  )}
-                </Badge>
-              ))}
-            </div>
-          )}
+          <div className="flex gap-2 mb-3">
+            <TagSelector
+              selectedTags={itineraryData.tags ?? []}
+              onChangeAction={handleTagsChange}
+              availableTags={availableTags}
+              isContingency={isContingency}
+            />
+            {itineraryData.tags && itineraryData.tags.length > 0 && (
+              <div className="relative w-full overflow-auto">
+                <div className="overflow-fade-container">
+                  <div id="fadeLeft" className="fade-left"></div>
+                  <div id="fadeRight" className="fade-right"></div>
+                  <div
+                    className="flex gap-2 mb-4 overflow-auto w-full content-container"
+                    id="tagContainer"
+                    onScroll={(e) => {
+                      const container = e.currentTarget
+                      const isScrollable =
+                        container.scrollWidth > container.clientWidth
+                      const scrolledToStart = container.scrollLeft <= 5
+                      const scrolledToEnd =
+                        container.scrollLeft + container.clientWidth >=
+                        container.scrollWidth - 5
+
+                      const parent = container.parentElement
+
+                      // Toggle classes based on overflow and scroll position
+                      if (isScrollable && parent) {
+                        parent.classList.add('has-overflow')
+
+                        if (!scrolledToStart) {
+                          parent.classList.add('scrolled-left')
+                        } else {
+                          parent.classList.remove('scrolled-left')
+                        }
+
+                        if (scrolledToEnd) {
+                          parent.classList.add('scrolled-right')
+                        } else {
+                          parent.classList.remove('scrolled-right')
+                        }
+                      } else if (parent) {
+                        parent.classList.remove(
+                          'has-overflow',
+                          'scrolled-left',
+                          'scrolled-right'
+                        )
+                      }
+                    }}
+                    ref={(el) => {
+                      if (el) {
+                        // Initial check on mount
+                        const isScrollable = el.scrollWidth > el.clientWidth
+                        if (isScrollable && el.parentElement) {
+                          el.parentElement.classList.add('has-overflow')
+                        } else if (el.parentElement) {
+                          el.parentElement.classList.remove(
+                            'has-overflow',
+                            'scrolled-left',
+                            'scrolled-right'
+                          )
+                        }
+
+                        // Re-check on window resize
+                        window.addEventListener('resize', () => {
+                          const isScrollable = el.scrollWidth > el.clientWidth
+                          if (isScrollable && el.parentElement) {
+                            el.parentElement.classList.add('has-overflow')
+                          } else if (el.parentElement) {
+                            el.parentElement.classList.remove(
+                              'has-overflow',
+                              'scrolled-left',
+                              'scrolled-right'
+                            )
+                          }
+                        })
+                      }
+                    }}
+                  >
+                    {getSelectedTagNames().map((tagName, index) => (
+                      <Badge
+                        key={`tag-${tagName}-${itineraryData.tags![index]}`}
+                        variant="secondary"
+                        className="flex items-center gap-1 bg-blue-100 text-[#0073E6] rounded-full px-2 py-1"
+                      >
+                        {tagName}
+                        {!isContingency && (
+                          <button
+                            onClick={() =>
+                              removeTag(itineraryData.tags![index])
+                            }
+                            className="ml-1 rounded-full hover:bg-blue-50 p-0.5"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        )}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
           <DateRangeAlertDialog
             open={showConfirmDialog}
             onOpenChange={setShowConfirmDialog}
