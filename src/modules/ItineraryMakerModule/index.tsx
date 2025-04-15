@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useRef, useEffect } from 'react'
-import { Button, buttonVariants } from '@/components/ui/button'
+import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
 import {
   Popover,
@@ -12,14 +12,12 @@ import { format } from 'date-fns'
 import {
   CalendarIcon,
   Plus,
-  X,
   Save,
   Loader2,
   Lightbulb,
   Wand2,
 } from 'lucide-react'
 import { toast } from 'sonner'
-import { Badge } from '@/components/ui/badge'
 import {
   type CreateItineraryDto,
   type Section,
@@ -733,22 +731,6 @@ export default function ItineraryMakerModule({
       ...prev,
       reminderOption,
     }))
-  }
-
-  const removeTag = (tagId: string) => {
-    setItineraryData((prev) => ({
-      ...prev,
-      tags: prev.tags?.filter((id) => id !== tagId) ?? [],
-    }))
-  }
-
-  const getSelectedTagNames = () => {
-    return (itineraryData.tags ?? [])
-      .map((tagId) => {
-        const tag = availableTags.find((t) => t.id === tagId)
-        return tag ? tag.name : ''
-      })
-      .filter(Boolean)
   }
 
   type InputType = 'time' | 'price' | 'location'
@@ -1933,109 +1915,13 @@ export default function ItineraryMakerModule({
               </Button>
             )}
           </div>
-          <div className="flex gap-2 mb-3">
-            <TagSelector
-              selectedTags={itineraryData.tags ?? []}
-              onChangeAction={handleTagsChange}
-              availableTags={availableTags}
-              isContingency={isContingency}
-            />
-            {itineraryData.tags && itineraryData.tags.length > 0 && (
-              <div className="relative w-full overflow-auto">
-                <div className="overflow-fade-container">
-                  <div id="fadeLeft" className="fade-left"></div>
-                  <div id="fadeRight" className="fade-right"></div>
-                  <div
-                    className="flex gap-2 mb-4 overflow-auto w-full content-container"
-                    id="tagContainer"
-                    onScroll={(e) => {
-                      const container = e.currentTarget
-                      const isScrollable =
-                        container.scrollWidth > container.clientWidth
-                      const scrolledToStart = container.scrollLeft <= 5
-                      const scrolledToEnd =
-                        container.scrollLeft + container.clientWidth >=
-                        container.scrollWidth - 5
-
-                      const parent = container.parentElement
-
-                      // Toggle classes based on overflow and scroll position
-                      if (isScrollable && parent) {
-                        parent.classList.add('has-overflow')
-
-                        if (!scrolledToStart) {
-                          parent.classList.add('scrolled-left')
-                        } else {
-                          parent.classList.remove('scrolled-left')
-                        }
-
-                        if (scrolledToEnd) {
-                          parent.classList.add('scrolled-right')
-                        } else {
-                          parent.classList.remove('scrolled-right')
-                        }
-                      } else if (parent) {
-                        parent.classList.remove(
-                          'has-overflow',
-                          'scrolled-left',
-                          'scrolled-right'
-                        )
-                      }
-                    }}
-                    ref={(el) => {
-                      if (el) {
-                        // Initial check on mount
-                        const isScrollable = el.scrollWidth > el.clientWidth
-                        if (isScrollable && el.parentElement) {
-                          el.parentElement.classList.add('has-overflow')
-                        } else if (el.parentElement) {
-                          el.parentElement.classList.remove(
-                            'has-overflow',
-                            'scrolled-left',
-                            'scrolled-right'
-                          )
-                        }
-
-                        // Re-check on window resize
-                        window.addEventListener('resize', () => {
-                          const isScrollable = el.scrollWidth > el.clientWidth
-                          if (isScrollable && el.parentElement) {
-                            el.parentElement.classList.add('has-overflow')
-                          } else if (el.parentElement) {
-                            el.parentElement.classList.remove(
-                              'has-overflow',
-                              'scrolled-left',
-                              'scrolled-right'
-                            )
-                          }
-                        })
-                      }
-                    }}
-                  >
-                    {getSelectedTagNames().map((tagName, index) => (
-                      <Badge
-                        key={`tag-${tagName}-${itineraryData.tags![index]}`}
-                        variant="secondary"
-                        className="flex items-center gap-1 bg-blue-100 text-[#0073E6] rounded-full px-2 py-1"
-                      >
-                        {tagName}
-                        {!isContingency && (
-                          <button
-                            onClick={() =>
-                              removeTag(itineraryData.tags![index])
-                            }
-                            className="ml-1 rounded-full hover:bg-blue-50 p-0.5"
-                          >
-                            <X className="h-3 w-3" />
-                          </button>
-                        )}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
+          <TagSelector
+            selectedTags={itineraryData.tags ?? []}
+            onChangeAction={handleTagsChange}
+            availableTags={availableTags}
+            isContingency={isContingency}
+            setItineraryDataAction={setItineraryData}
+          />
           <DateRangeAlertDialog
             open={showConfirmDialog}
             onOpenChange={setShowConfirmDialog}
