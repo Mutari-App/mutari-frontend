@@ -4,11 +4,11 @@ function CustomPin({
   number,
   color,
   title,
-}: {
+}: Readonly<{
   number?: number
   color?: string
   title?: string
-}) {
+}>) {
   return (
     <div
       className={`w-6 h-6 p-2 -rotate-45 text-xs text-white font-bold rounded-full rounded-bl-none border-2 

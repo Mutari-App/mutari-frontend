@@ -18,8 +18,8 @@ import {
   useMap,
   type MapMouseEvent,
 } from '@vis.gl/react-google-maps'
-import { SECTION_COLORS } from '../constants'
 import CustomPin from '../module-elements/CustomPin'
+import { SECTION_COLORS } from '../constants'
 
 type MapsProps = {
   readonly itineraryData: Readonly<Section[]>
