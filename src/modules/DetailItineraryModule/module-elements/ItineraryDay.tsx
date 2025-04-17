@@ -1,12 +1,15 @@
 import { cn } from '@/lib/utils'
 import { Clock, Tag } from 'lucide-react'
 import { RouteInfo } from './RouteInfo'
+import { SECTION_COLORS } from '@/modules/ItineraryMakerModule/constants'
 
 export const ItineraryDay = ({ section }: { section: Section }) => {
   return (
     <div className="relative p-4 bg-white mb-2">
       <div className="absolute -left-1 top-5 bottom-8 w-0.5 bg-[#94A3B8]"></div>
-      <div className="absolute -left-5 top-5 bg-[#0073E6] text-white font-bold w-8 h-12 flex items-center justify-center">
+      <div
+        className={`absolute -left-5 top-5 ${SECTION_COLORS[section.sectionNumber % 10].class} text-white font-bold w-8 h-12 flex items-center justify-center`}
+      >
         {section.sectionNumber}
       </div>
       <h2 className="md:text-2xl mt-3 font-semibold ml-2">{section.title}</h2>

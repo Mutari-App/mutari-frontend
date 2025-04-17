@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useRef, useEffect } from 'react'
-import { Button, buttonVariants } from '@/components/ui/button'
+import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
 import {
   Popover,
@@ -9,9 +9,15 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 import { format } from 'date-fns'
-import { CalendarIcon, Plus, X } from 'lucide-react'
+import {
+  CalendarIcon,
+  Plus,
+  Save,
+  Loader2,
+  Lightbulb,
+  Wand2,
+} from 'lucide-react'
 import { toast } from 'sonner'
-import { Badge } from '@/components/ui/badge'
 import {
   type CreateItineraryDto,
   type Section,
@@ -19,13 +25,13 @@ import {
   type CreateItineraryResponse,
   type Tag,
   type ItineraryReminderDto,
-  CreateItineraryReminderResponse,
-  FeedbackItem,
+  type CreateItineraryReminderResponse,
+  type FeedbackItem,
   type Route,
   type ReminderOption,
-  ItineraryMakerModuleProps,
+  type ItineraryMakerModuleProps,
 } from './interface'
-import { customFetch, customFetchBody } from '@/utils/customFetch'
+import { customFetch, customFetchBody } from '@/utils/newCustomFetch'
 import { type DropResult } from '@hello-pangea/dnd'
 import { type DateRange } from 'react-day-picker'
 import { v4 } from 'uuid'
@@ -34,14 +40,13 @@ import { ItinerarySections } from './sections/ItinerarySections'
 import { DateRangeAlertDialog } from './module-elements/DateRangeAlertDialog'
 import { TagSelector } from './module-elements/TagSelector'
 import { ReminderSelector } from './module-elements/ReminderSelector'
-import { CldUploadButton } from 'next-cloudinary'
-import { cn } from '@/lib/utils'
 import { useAuthContext } from '@/contexts/AuthContext'
 import { notFound, redirect, useParams, useRouter } from 'next/navigation'
 import NotFound from 'next/error'
-import { Lightbulb } from 'lucide-react'
 import { calculateRoute, TransportMode } from '@/utils/maps'
 import Maps from './sections/Maps'
+import { APIProvider } from '@vis.gl/react-google-maps'
+import { cn } from '@/lib/utils'
 
 const SAVED_ITINERARY_KEY = 'saved_itinerary_data'
 
@@ -123,7 +128,7 @@ export default function ItineraryMakerModule({
           {
             id: v4(),
             blockType: 'LOCATION',
-            title: 'Masukkan Judul',
+            title: 'Masukkan Lokasi',
           },
         ],
       },
@@ -173,7 +178,6 @@ export default function ItineraryMakerModule({
           {
             method: 'GET',
             credentials: 'include',
-            isAuthorized: true,
           }
         )
 
@@ -199,7 +203,6 @@ export default function ItineraryMakerModule({
           {
             method: 'GET',
             credentials: 'include',
-            isAuthorized: true,
           }
         )
 
@@ -215,7 +218,6 @@ export default function ItineraryMakerModule({
           `itineraries/${itineraryId}/contingencies/${contingencyId}`,
           {
             credentials: 'include',
-            isAuthorized: true,
           }
         )
 
@@ -341,7 +343,6 @@ export default function ItineraryMakerModule({
         startDate: reminderData.startDate,
       }))
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reminderData])
 
   // Load saved itinerary data from local storage
@@ -392,7 +393,6 @@ export default function ItineraryMakerModule({
           toast.error('Gagal mengambil tag')
         }
       } catch (error) {
-        console.error('Error fetching tags:', error)
         toast.error('Gagal mengambil tag')
       }
     }
@@ -733,22 +733,6 @@ export default function ItineraryMakerModule({
     }))
   }
 
-  const removeTag = (tagId: string) => {
-    setItineraryData((prev) => ({
-      ...prev,
-      tags: prev.tags?.filter((id) => id !== tagId) ?? [],
-    }))
-  }
-
-  const getSelectedTagNames = () => {
-    return (itineraryData.tags ?? [])
-      .map((tagId) => {
-        const tag = availableTags.find((t) => t.id === tagId)
-        return tag ? tag.name : ''
-      })
-      .filter(Boolean)
-  }
-
   type InputType = 'time' | 'price' | 'location'
 
   const toggleInput = (blockId: string, inputType: InputType) => {
@@ -978,7 +962,8 @@ export default function ItineraryMakerModule({
   const addLocationToSection = (
     sectionNumber: number,
     title: string,
-    location: string
+    location: string,
+    price?: number
   ) => {
     setItineraryData((prev) => {
       const blockId = v4()
@@ -990,6 +975,10 @@ export default function ItineraryMakerModule({
             title,
             description: '',
             location,
+            price,
+          }
+          if (price) {
+            toggleInput(blockId, 'price')
           }
           return {
             ...section,
@@ -1459,7 +1448,6 @@ export default function ItineraryMakerModule({
             method: 'POST',
             body: customFetchBody(submissionData),
             credentials: 'include',
-            isAuthorized: true,
           }
         ),
       update: () =>
@@ -1469,7 +1457,6 @@ export default function ItineraryMakerModule({
             method: 'PATCH',
             body: customFetchBody(submissionData),
             credentials: 'include',
-            isAuthorized: true,
           }
         ),
     },
@@ -1479,14 +1466,12 @@ export default function ItineraryMakerModule({
           method: 'POST',
           body: customFetchBody(submissionData),
           credentials: 'include',
-          isAuthorized: true,
         }),
       update: () =>
         customFetch<CreateItineraryResponse>(`/itineraries/${itineraryId}`, {
           method: 'PATCH',
           body: customFetchBody(submissionData),
           credentials: 'include',
-          isAuthorized: true,
         }),
     },
   })
@@ -1526,8 +1511,8 @@ export default function ItineraryMakerModule({
 
   const handleSuccessfulSubmission = (response: CreateItineraryResponse) => {
     setHasUnsavedChanges(false)
-    const action = isEdit ? 'updated' : 'created'
-    toast.success(`Contingency ${action} successfully`)
+    const action = isEdit ? 'update' : 'buat'
+    toast.success(`Itinerary berhasil di${action}`)
 
     if (isCreateAndValidUmami()) {
       window.umami.track('create_itinerary_success')
@@ -1541,8 +1526,8 @@ export default function ItineraryMakerModule({
     response: ContingencyPlanResponse
   ) => {
     setHasUnsavedChanges(false)
-    const action = isEdit ? 'updated' : 'created'
-    toast.success(`Contingency ${action} successfully`)
+    const action = isEdit ? 'update' : 'buat'
+    toast.success(`Contingency berhasil di${action}`)
     router.push(
       `/itinerary/${itineraryId}/contingency/${response.contingency.id}`
     )
@@ -1554,6 +1539,11 @@ export default function ItineraryMakerModule({
       toast.error(
         'Ada kesalahan pada pengaturan waktu. Silakan periksa kembali.'
       )
+      return
+    }
+
+    if (!itineraryData.title || itineraryData.title.trim() === '') {
+      toast.error('Silakan masukkan judul itinerary')
       return
     }
 
@@ -1621,7 +1611,6 @@ export default function ItineraryMakerModule({
       // Edge case: new itinerary and create reminder
       const response = await submitItinerary(submissionData)
       newItineraryId = response
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       console.error('Error creating or updating itinerary:', error)
       toast.error(
@@ -1661,7 +1650,6 @@ export default function ItineraryMakerModule({
             method: 'POST',
             body: customFetchBody(submissionData),
             credentials: 'include',
-            isAuthorized: true,
           }
         )
       }
@@ -1673,7 +1661,6 @@ export default function ItineraryMakerModule({
             method: 'PATCH',
             body: customFetchBody(submissionData),
             credentials: 'include',
-            isAuthorized: true,
           }
         )
       }
@@ -1685,7 +1672,6 @@ export default function ItineraryMakerModule({
             method: 'DELETE',
             body: customFetchBody(submissionData),
             credentials: 'include',
-            isAuthorized: true,
           }
         )
       }
@@ -1733,7 +1719,7 @@ export default function ItineraryMakerModule({
       return itineraryData.title
     }
 
-    return 'Buat Itinerary'
+    return ''
   }
 
   const handleGenerateFeedback = async () => {
@@ -1767,6 +1753,7 @@ export default function ItineraryMakerModule({
               if (block.blockType === 'LOCATION') {
                 return {
                   blockType: block.blockType,
+                  id: block.id,
                   title: block.title,
                   description: block.description,
                   startTime: block.startTime,
@@ -1776,6 +1763,7 @@ export default function ItineraryMakerModule({
               } else if (block.blockType === 'NOTE') {
                 return {
                   blockType: block.blockType,
+                  id: block.id,
                   description: block.description,
                 }
               }
@@ -1807,81 +1795,91 @@ export default function ItineraryMakerModule({
 
   const removeFeedbackForField = (
     sectionIndex: number,
-    blockIndex: number,
-    field: 'title' | 'description' | 'startTime' | 'endTime' | 'price'
+    blockId: string,
+    field: 'title' | 'description' | 'time' | 'price'
   ) => {
     setFeedbackItems((prev) =>
       prev.filter(
         (item) =>
           item.target.sectionIndex !== sectionIndex ||
-          item.target.blockIndex !== blockIndex ||
+          item.target.blockId !== blockId ||
           item.target.field !== field
       )
     )
   }
 
-  return (
-    <div className="flex max-h-screen">
-      <div className="container max-w-4xl mx-auto p-4 pt-24 min-h-screen max-h-screen overflow-auto">
-        <ItineraryHeader
-          title={_getHeaderTitle()}
-          description={itineraryData.description}
-          coverImage={itineraryData.coverImage}
-          onTitleChange={handleTitleChange}
-          onDescChange={handleDescChange}
-          isSubmitting={isSubmitting}
-          onSubmit={handleSubmit}
-          onGenerateFeedback={handleGenerateFeedback}
-          isGenerating={isGenerating}
-          isContingency={!!contingencyId}
-        />
-        <div className="flex flex-wrap max-sm:justify-center items-center gap-2 mb-4">
-          <TagSelector
-            selectedTags={itineraryData.tags ?? []}
-            onChangeAction={handleTagsChange}
-            availableTags={availableTags}
-            isContingency={isContingency}
-          />
-          {!isContingency && (
-            <ReminderSelector
-              selectedReminder={itineraryReminderData.reminderOption ?? 'NONE'}
-              onChangeAction={handleReminderChange}
-              reminderOptions={reminderOptions}
-            />
-          )}
+  const syncFeedbackWithItinerary = () => {
+    setFeedbackItems((prev) =>
+      prev.filter((item) => {
+        const section = itineraryData.sections[item.target.sectionIndex - 1]
+        const blockExists = section?.blocks?.some(
+          (block) => block.id === item.target.blockId
+        )
+        // keep only if block still exists
+        return blockExists
+      })
+    )
+  }
 
-          <CldUploadButton
-            uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
-            onSuccess={handleImageUpload}
-            className={cn(
-              buttonVariants({ variant: 'outline', size: 'sm' }),
-              isContingency &&
-                'opacity-50 cursor-not-allowed pointer-events-none'
-            )}
-            options={{
-              clientAllowedFormats: ['image'],
-              maxFiles: 1,
-              maxFileSize: 1024 * 256, // 256 KB
-            }}
+  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? ''
+
+  useEffect(() => {
+    syncFeedbackWithItinerary()
+  }, [itineraryData])
+
+  return (
+    <APIProvider apiKey={apiKey}>
+      <div className="flex max-h-screen">
+        <div className="container max-w-4xl mx-auto p-4 pt-24 min-h-screen max-h-screen overflow-auto">
+          <button
+            onClick={handleSubmit}
+            disabled={isSubmitting}
+            className="flex items-center justify-center bg-gradient-to-r from-[#0073E6] to-[#004080] hover:to-[#003366] rounded-full w-12 h-12 md:w-14 md:h-14 fixed right-6 md:right-[51.5%] bottom-6 z-10 text-lg"
           >
-            Ganti foto cover
-          </CldUploadButton>
-          <div className="sm:ml-auto">
+            {isSubmitting ? (
+              <Loader2 className="w-6 h-6 text-white animate-spin" />
+            ) : (
+              <Save className="w-6 h-6 text-white" />
+            )}
+          </button>
+          <ItineraryHeader
+            title={_getHeaderTitle()}
+            description={itineraryData.description}
+            coverImage={itineraryData.coverImage}
+            onTitleChange={handleTitleChange}
+            onDescChange={handleDescChange}
+            onCoverImageChange={handleImageUpload}
+            isSubmitting={isSubmitting}
+            onGenerateFeedback={handleGenerateFeedback}
+            isGenerating={isGenerating}
+            isContingency={!!contingencyId}
+          />
+          <div className="flex flex-wrap items-center gap-2 mb-4">
             <Popover>
               <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="flex items-center gap-2"
-                  disabled={isContingency}
-                >
-                  <CalendarIcon className="h-4 w-4" />
-                  {dateRange.from && dateRange.to
-                    ? `${format(dateRange.from, 'dd MMM')} - ${format(dateRange.to, 'dd MMM')}`
-                    : 'Masukkan Tanggal Perjalanan'}
-                </Button>
+                <div className="p-[1.5px] flex items-center bg-gradient-to-r from-[#0073E6] to-[#004080] hover:from-[#0066cc] hover:to-[#003366] rounded-lg group">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 w-full bg-white group-hover:bg-transparent border-none"
+                    disabled={isContingency}
+                  >
+                    <span className="bg-gradient-to-r from-[#0073E6] to-[#004080] group-hover:text-white text-transparent bg-clip-text flex items-center">
+                      <CalendarIcon className="h-4 w-4 sm:mr-1 text-[#0073E6] group-hover:text-white" />
+                      {dateRange.from && dateRange.to ? (
+                        `${format(dateRange.from, 'dd MMM')} - ${format(dateRange.to, 'dd MMM')}`
+                      ) : (
+                        <>
+                          <span className="hidden min-[500px]:inline md:hidden min-[1034px]:inline">
+                            Masukkan Tanggal Perjalanan
+                          </span>
+                        </>
+                      )}
+                    </span>
+                  </Button>
+                </div>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="end">
+              <PopoverContent className="w-auto p-0" align="start">
                 <Calendar
                   mode="range"
                   selected={dateRange}
@@ -1890,135 +1888,156 @@ export default function ItineraryMakerModule({
                 />
               </PopoverContent>
             </Popover>
-          </div>
-        </div>
-        {itineraryData.tags && itineraryData.tags.length > 0 && (
-          <div className="flex flex-wrap gap-2 mb-4">
-            {getSelectedTagNames().map((tagName, index) => (
-              <Badge
-                key={`tag-${tagName}-${itineraryData.tags![index]}`}
-                variant="secondary"
-                className="flex items-center gap-1"
-              >
-                {tagName}
-                {!isContingency && (
-                  <button
-                    onClick={() => removeTag(itineraryData.tags![index])}
-                    className="ml-1 rounded-full hover:bg-gray-200 p-0.5"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
+            {!isContingency && (
+              <ReminderSelector
+                selectedReminder={
+                  itineraryReminderData.reminderOption ?? 'NONE'
+                }
+                onChangeAction={handleReminderChange}
+                reminderOptions={reminderOptions}
+              />
+            )}
+            {!isContingency && (
+              <Button
+                size="sm"
+                className={cn(
+                  'group relative overflow-hidden rounded-md px-4 py-1 ml-auto text-sm font-medium text-white',
+                  'focus:outline-none focus:ring-2 focus:ring-offset-2',
+                  'disabled:opacity-70 disabled:cursor-not-allowed'
                 )}
-              </Badge>
-            ))}
+                onClick={handleGenerateFeedback}
+                disabled={isGenerating}
+              >
+                {/* Base gradient layer */}
+                <span className="absolute inset-0 bg-gradient-to-r from-[#0073E6] to-[#80004B] transition-opacity duration-300 ease-in-out" />
+
+                {/* Hover gradient layer */}
+                <span className="absolute inset-0 bg-gradient-to-r from-[#80004B] to-[#0073E6] opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out" />
+
+                <span className="relative flex items-center gap-1.5">
+                  <Wand2 size={16} />
+                  {isGenerating ? 'Memproses...' : 'Buat Saran AI'}
+                </span>
+              </Button>
+            )}
           </div>
-        )}
-        <DateRangeAlertDialog
-          open={showConfirmDialog}
-          onOpenChange={setShowConfirmDialog}
-          pendingDateRange={pendingDateRange.current}
-          currentSectionCount={itineraryData.sections.length}
-          onCancel={() => {
-            pendingDateRange.current = undefined
-            setShowConfirmDialog(false)
-          }}
-          onConfirm={() => {
-            if (pendingDateRange.current) {
-              applyDateRangeChange(pendingDateRange.current)
+          <TagSelector
+            selectedTags={itineraryData.tags ?? []}
+            onChangeAction={handleTagsChange}
+            availableTags={availableTags}
+            isContingency={isContingency}
+            setItineraryDataAction={setItineraryData}
+          />
+          <DateRangeAlertDialog
+            open={showConfirmDialog}
+            onOpenChange={setShowConfirmDialog}
+            pendingDateRange={pendingDateRange.current}
+            currentSectionCount={itineraryData.sections.length}
+            onCancel={() => {
               pendingDateRange.current = undefined
-            }
-            setShowConfirmDialog(false)
-          }}
-        />
-        <ItinerarySections
-          feedbackItems={feedbackItems}
-          removeFeedbackForField={removeFeedbackForField}
-          sections={itineraryData.sections}
-          updateSectionTitle={updateSectionTitle}
-          addSection={addSection}
-          removeSection={removeSection}
-          moveSection={moveSection}
-          addBlock={addBlock}
-          updateBlock={updateBlock}
-          removeBlock={removeBlock}
-          handleDragEnd={handleDragEnd}
-          toggleInput={toggleInput}
-          isInputVisible={isInputVisible}
-          timeWarning={timeWarning}
-          onTransportModeChange={updateTransportMode}
-          setPositionToView={setPositionToView}
-        />
-        <div className="flex justify-center my-8">
-          <Button
-            size="sm"
-            className="-mt-4 w-[240px] bg-gradient-to-r from-[#0073E6] to-[#004080] text-white hover:from-[#0066cc] hover:to-[#003366] rounded-lg"
-            onClick={() => addSection()}
-          >
-            <Plus className="h-4 w-4" /> Bagian
-          </Button>
+              setShowConfirmDialog(false)
+            }}
+            onConfirm={() => {
+              if (pendingDateRange.current) {
+                applyDateRangeChange(pendingDateRange.current)
+                pendingDateRange.current = undefined
+              }
+              setShowConfirmDialog(false)
+            }}
+          />
+          <ItinerarySections
+            feedbackItems={feedbackItems}
+            removeFeedbackForField={removeFeedbackForField}
+            sections={itineraryData.sections}
+            updateSectionTitle={updateSectionTitle}
+            addSection={addSection}
+            removeSection={removeSection}
+            moveSection={moveSection}
+            addBlock={addBlock}
+            updateBlock={updateBlock}
+            removeBlock={removeBlock}
+            handleDragEnd={handleDragEnd}
+            toggleInput={toggleInput}
+            isInputVisible={isInputVisible}
+            timeWarning={timeWarning}
+            onTransportModeChange={updateTransportMode}
+            setPositionToView={setPositionToView}
+          />
+          <div className="flex justify-center my-8">
+            <div className="p-[1.5px] flex -mt-4 w-[240px] items-center bg-gradient-to-r from-[#0073E6] to-[#004080] hover:from-[#0066cc] hover:to-[#003366] rounded-lg group">
+              <Button
+                className="h-8 w-full bg-white group-hover:bg-transparent"
+                onClick={() => addSection()}
+              >
+                <span className="bg-gradient-to-r from-[#0073E6] to-[#004080] group-hover:text-white text-transparent bg-clip-text flex items-center">
+                  <Plus className="h-4 w-4 mr-1 text-[#0073E6] group-hover:text-white" />
+                  Bagian
+                </span>
+              </Button>
+            </div>
+          </div>
+          {feedbackItems.length > 0 && (
+            <div className="mt-8">
+              <h3 className="font-semibold mb-4">Tips</h3>
+              <div className="flex flex-col gap-4">
+                {feedbackItems.map((item, index) => (
+                  <div
+                    key={index}
+                    className="p-4 border border-[#0073E6] rounded-md shadow-md flex items-start"
+                    style={{ boxShadow: '0px 0px 10px rgba(0, 115, 230, 0.5)' }}
+                  >
+                    <div className="flex-1">
+                      <p className="font-semibold">
+                        Hari {item.target.sectionIndex}
+                        {item.target.field && ` (${item.target.field})`}
+                      </p>
+                      <p>{item.suggestion}</p>
+                    </div>
+                    <div className="ml-4 text-[#0073E6] drop-shadow-[0_4px_6px_rgba(0,115,230,1.5)]">
+                      <Lightbulb size={48} strokeWidth={1} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
-        {feedbackItems.length > 0 && (
-          <div className="mt-8">
-            <h3 className="font-semibold mb-4">Tips</h3>
-            <div className="flex flex-col gap-4">
-              {feedbackItems.map((item, index) => (
-                <div
-                  key={index}
-                  className="p-4 border border-[#0073E6] rounded-md shadow-md flex items-start"
-                  style={{ boxShadow: '0px 0px 10px rgba(0, 115, 230, 0.5)' }}
+        <div className="w-full min-h-screen hidden md:block">
+          <Maps
+            itineraryData={contingency?.sections ?? itineraryData.sections}
+            addLocationToSection={addLocationToSection}
+            isEditing
+            positionToView={positionToView}
+          />
+        </div>
+        {isConfirmModalOpen && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center font-roboto">
+            <div className="bg-white p-8 rounded-lg shadow-lg">
+              <h2 className="text-xl font-semibold mb-4 text-center">
+                Apakah anda yakin?
+              </h2>
+              <p className="text-md mb-4">
+                Masih ada tips untuk mempercantik itinerary-mu
+              </p>
+              <div className="flex justify-center space-x-2">
+                <button
+                  className="px-8 py-2 border-2 border-[#016CD7] bg-white rounded text-[#014285]"
+                  onClick={() => setIsConfirmModalOpen(false)}
                 >
-                  <div className="flex-1">
-                    <p className="font-semibold">
-                      Hari {item.target.sectionIndex + 1} - Blok{' '}
-                      {item.target.blockIndex + 1}
-                      {item.target.field && ` (${item.target.field})`}
-                    </p>
-                    <p>{item.suggestion}</p>
-                  </div>
-                  <div className="ml-4 text-[#0073E6] drop-shadow-[0_4px_6px_rgba(0,115,230,1.5)]">
-                    <Lightbulb size={48} strokeWidth={1} />
-                  </div>
-                </div>
-              ))}
+                  Batal
+                </button>
+                <button
+                  className="px-8 py-2 bg-gradient-to-r from-[#016CD7] to-[#014285] text-white items-center rounded"
+                  disabled={isSubmitting}
+                  onClick={handleFinalSubmit}
+                >
+                  Simpan
+                </button>
+              </div>
             </div>
           </div>
         )}
       </div>
-      <div className="w-full min-h-screen hidden md:block">
-        <Maps
-          itineraryData={itineraryData.sections}
-          addLocationToSection={addLocationToSection}
-          isEditing
-          positionToView={positionToView}
-        />
-      </div>
-      {isConfirmModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center font-roboto">
-          <div className="bg-white p-8 rounded-lg shadow-lg">
-            <h2 className="text-xl font-semibold mb-4 text-center">
-              Apakah anda yakin?
-            </h2>
-            <p className="text-md mb-4">
-              Masih ada tips untuk mempercantik itinerary-mu
-            </p>
-            <div className="flex justify-center space-x-2">
-              <button
-                className="px-8 py-2 border-2 border-[#016CD7] bg-white rounded text-[#014285]"
-                onClick={() => setIsConfirmModalOpen(false)}
-              >
-                Batal
-              </button>
-              <button
-                className="px-8 py-2 bg-gradient-to-r from-[#016CD7] to-[#014285] text-white items-center rounded"
-                disabled={isSubmitting}
-                onClick={handleFinalSubmit}
-              >
-                Simpan
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+    </APIProvider>
   )
 }

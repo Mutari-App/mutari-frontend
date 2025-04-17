@@ -21,6 +21,18 @@ jest.mock('@/utils/getImage', () => ({
   getImage: jest.fn(() => '/default-image.jpg'),
 }))
 
+// Mock next/link
+jest.mock('next/link', () => ({
+  __esModule: true,
+  default: ({
+    href,
+    children,
+  }: {
+    href: string
+    children: React.ReactNode
+  }) => <a href={href}>{children}</a>,
+}))
+
 const mockData = {
   id: 'itinerary-123',
   userId: 'USR-123',
@@ -65,16 +77,9 @@ describe('ItineraryHeader Component', () => {
     expect(screen.queryByText('Edit')).not.toBeInTheDocument()
   })
 
-  it('navigates to edit page when edit button is clicked', async () => {
-    // Mock the location.href property
-    Object.defineProperty(window, 'location', {
-      value: { href: '' },
-      writable: true,
-    })
-
+  it('has the correct edit page link', () => {
     render(<ItineraryHeader data={mockData} />)
-    await userEvent.click(screen.getByText('Edit'))
-
-    expect(window.location.href).toBe(`${mockData.id}/edit`)
+    const linkElement = screen.getByRole('link', { name: /Edit/i })
+    expect(linkElement).toHaveAttribute('href', `${mockData.id}/edit`)
   })
 })

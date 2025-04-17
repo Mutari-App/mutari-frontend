@@ -1,26 +1,89 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import Maps from '@/modules/ItineraryMakerModule/sections/Maps'
-import { GoogleMap, Marker, useLoadScript } from '@react-google-maps/api'
 import type { CreateItineraryDto } from '@/modules/ItineraryMakerModule/interface'
-
-const googleMapMock = jest.fn(({ children, ...props }) => (
-  <div data-testid="google-map">{children}</div>
-))
 
 jest.mock('lucide-react', () => ({
   Globe: () => <span data-testid="globe-icon">Globe Icon Mock</span>,
   Phone: () => <span data-testid="phone-icon">Phone Icon Mock</span>,
 }))
 
-jest.mock('@react-google-maps/api', () => ({
-  GoogleMap: jest.fn(({ children, ...props }) => (
-    <div data-testid="google-map">{children}</div>
-  )),
-  Marker: jest.fn(() => <div data-testid="map-marker">Marker</div>),
-  useLoadScript: jest.fn(() => ({ isLoaded: true })),
+jest.mock('@vis.gl/react-google-maps', () => ({
+  APIProvider: ({ children }: { children: React.ReactNode }) => children,
+
+  Map: ({
+    children,
+    id,
+    onClick,
+  }: {
+    children: React.ReactNode
+    id?: string
+    defaultCenter?: { lat: number; lng: number }
+    defaultZoom?: number
+    streetViewControl?: boolean
+    onClick?: (event: any) => void
+    mapId?: string
+    restriction?: any
+  }) => (
+    <div
+      data-testid="mock-map"
+      id={id}
+      onClick={(e) => {
+        // Create a proper mock event structure that matches MapMouseEvent
+        if (onClick) {
+          onClick({
+            detail: {
+              placeId: 'mock-place-id',
+              latLng: { lat: -6.2, lng: 106.8 },
+            },
+            map: {
+              panTo: jest.fn(),
+              setZoom: jest.fn(),
+            },
+            stop: jest.fn(), // Add the stop method
+          })
+        }
+      }}
+      className="mock-map"
+    >
+      {children}
+    </div>
+  ),
+
+  AdvancedMarker: ({
+    children,
+    position,
+    onClick,
+  }: {
+    children?: React.ReactNode
+    position?: google.maps.LatLngLiteral | google.maps.LatLng | null | undefined
+    onClick?: () => void
+    'data-testid'?: string
+  }) => (
+    <div
+      data-testid="map-marker"
+      className="mock-marker"
+      onClick={onClick}
+      data-lat={position?.lat}
+      data-lng={position?.lng}
+    >
+      {children}
+    </div>
+  ),
+
+  useMap: () => {
+    // Return a mock map object that can be used by your components
+    const mockMap = {
+      panTo: jest.fn(),
+      setZoom: jest.fn(),
+      // Add other map methods you might use
+    }
+
+    return { map: mockMap }
+  },
 }))
 
 describe('Maps Component', () => {
+  const mockApiKey = 'MOCK-API-KEY'
   const mockItineraryData: CreateItineraryDto = {
     title: 'Trip to Jakarta',
     description: 'Exploring the city',
@@ -101,30 +164,15 @@ describe('Maps Component', () => {
     ],
   }
 
-  test('renders loading state when map is not loaded', () => {
-    ;(useLoadScript as jest.Mock).mockReturnValueOnce({ isLoaded: false })
-    render(<Maps itineraryData={mockItineraryData.sections} />)
-    expect(screen.getByText(/loading.../i)).toBeInTheDocument()
-  })
-
   test('renders Google Map when loaded', () => {
     render(<Maps itineraryData={mockItineraryData.sections} />)
-    expect(screen.getByTestId('google-map')).toBeInTheDocument()
+    expect(screen.getByTestId('mock-map')).toBeInTheDocument()
   })
 
   test('renders correct number of markers', () => {
     render(<Maps itineraryData={mockItineraryData.sections} />)
     const markers = screen.getAllByTestId('map-marker')
     expect(markers.length).toBe(3)
-  })
-
-  test('uses default API key when environment variable is missing', () => {
-    delete process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
-    ;(useLoadScript as jest.Mock).mockReturnValueOnce({ isLoaded: false })
-    render(<Maps itineraryData={mockItineraryData.sections} />)
-
-    expect(process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY).toBeUndefined()
-    expect(screen.getByText('Loading...')).toBeInTheDocument()
   })
 
   test('handles blocks without locations', () => {
@@ -162,7 +210,7 @@ describe('Maps Component', () => {
     )
 
     // Simulate selecting a place
-    fireEvent.click(screen.getByText('Add to Itinerary'))
+    fireEvent.click(screen.getByText('Tambahkan ke itinerary'))
 
     await waitFor(() => {
       expect(addLocationToSectionMock).toHaveBeenCalled()

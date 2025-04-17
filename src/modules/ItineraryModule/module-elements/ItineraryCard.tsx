@@ -7,7 +7,7 @@ import type React from 'react'
 import { useRef, useState, type KeyboardEvent } from 'react'
 import type { ItineraryData } from './types'
 import useOutsideClick from '@/hooks/useOutsideClick'
-import { customFetch } from '@/utils/customFetch'
+import { customFetch } from '@/utils/newCustomFetch'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import {
@@ -149,7 +149,6 @@ function ItineraryCard({
         `/itineraries/${item.id}/mark-as-complete/`,
         {
           method: 'PATCH',
-          isAuthorized: true,
         }
       )
 
@@ -165,7 +164,6 @@ function ItineraryCard({
     try {
       const response = await customFetch(`/itineraries/${item.id}/`, {
         method: 'DELETE',
-        isAuthorized: true,
       })
 
       if (response.statusCode !== 200) throw new Error(response.message)

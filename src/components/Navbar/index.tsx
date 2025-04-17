@@ -50,7 +50,6 @@ export const Navbar: React.FC = () => {
       window.removeEventListener('scroll', handleScroll)
     }
   }, [])
-  console.log({ isAuthenticated })
 
   const handleLogout = async () => {
     try {
