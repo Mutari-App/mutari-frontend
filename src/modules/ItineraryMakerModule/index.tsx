@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useRef, useEffect } from 'react'
-import { Button, buttonVariants } from '@/components/ui/button'
+import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
 import {
   Popover,
@@ -9,9 +9,15 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 import { format } from 'date-fns'
-import { CalendarIcon, Plus, X } from 'lucide-react'
+import {
+  CalendarIcon,
+  Plus,
+  Save,
+  Loader2,
+  Lightbulb,
+  Wand2,
+} from 'lucide-react'
 import { toast } from 'sonner'
-import { Badge } from '@/components/ui/badge'
 import {
   type CreateItineraryDto,
   type Section,
@@ -34,15 +40,13 @@ import { ItinerarySections } from './sections/ItinerarySections'
 import { DateRangeAlertDialog } from './module-elements/DateRangeAlertDialog'
 import { TagSelector } from './module-elements/TagSelector'
 import { ReminderSelector } from './module-elements/ReminderSelector'
-import { CldUploadButton } from 'next-cloudinary'
-import { cn } from '@/lib/utils'
 import { useAuthContext } from '@/contexts/AuthContext'
 import { notFound, redirect, useParams, useRouter } from 'next/navigation'
 import NotFound from 'next/error'
-import { Lightbulb } from 'lucide-react'
 import { calculateRoute, TransportMode } from '@/utils/maps'
 import Maps from './sections/Maps'
 import { APIProvider } from '@vis.gl/react-google-maps'
+import { cn } from '@/lib/utils'
 
 const SAVED_ITINERARY_KEY = 'saved_itinerary_data'
 
@@ -124,7 +128,7 @@ export default function ItineraryMakerModule({
           {
             id: v4(),
             blockType: 'LOCATION',
-            title: 'Masukkan Judul',
+            title: 'Masukkan Lokasi',
           },
         ],
       },
@@ -389,7 +393,6 @@ export default function ItineraryMakerModule({
           toast.error('Gagal mengambil tag')
         }
       } catch (error) {
-        console.error('Error fetching tags:', error)
         toast.error('Gagal mengambil tag')
       }
     }
@@ -728,22 +731,6 @@ export default function ItineraryMakerModule({
       ...prev,
       reminderOption,
     }))
-  }
-
-  const removeTag = (tagId: string) => {
-    setItineraryData((prev) => ({
-      ...prev,
-      tags: prev.tags?.filter((id) => id !== tagId) ?? [],
-    }))
-  }
-
-  const getSelectedTagNames = () => {
-    return (itineraryData.tags ?? [])
-      .map((tagId) => {
-        const tag = availableTags.find((t) => t.id === tagId)
-        return tag ? tag.name : ''
-      })
-      .filter(Boolean)
   }
 
   type InputType = 'time' | 'price' | 'location'
@@ -1844,25 +1831,63 @@ export default function ItineraryMakerModule({
     <APIProvider apiKey={apiKey}>
       <div className="flex max-h-screen">
         <div className="container max-w-4xl mx-auto p-4 pt-24 min-h-screen max-h-screen overflow-auto">
+          <button
+            onClick={handleSubmit}
+            disabled={isSubmitting}
+            className="flex items-center justify-center bg-gradient-to-r from-[#0073E6] to-[#004080] hover:to-[#003366] rounded-full w-12 h-12 md:w-14 md:h-14 fixed right-6 md:right-[51.5%] bottom-6 z-10 text-lg"
+          >
+            {isSubmitting ? (
+              <Loader2 className="w-6 h-6 text-white animate-spin" />
+            ) : (
+              <Save className="w-6 h-6 text-white" />
+            )}
+          </button>
           <ItineraryHeader
             title={_getHeaderTitle()}
             description={itineraryData.description}
             coverImage={itineraryData.coverImage}
             onTitleChange={handleTitleChange}
             onDescChange={handleDescChange}
+            onCoverImageChange={handleImageUpload}
             isSubmitting={isSubmitting}
-            onSubmit={handleSubmit}
             onGenerateFeedback={handleGenerateFeedback}
             isGenerating={isGenerating}
             isContingency={!!contingencyId}
           />
-          <div className="flex flex-wrap max-sm:justify-center items-center gap-2 mb-4">
-            <TagSelector
-              selectedTags={itineraryData.tags ?? []}
-              onChangeAction={handleTagsChange}
-              availableTags={availableTags}
-              isContingency={isContingency}
-            />
+          <div className="flex flex-wrap items-center gap-2 mb-4">
+            <Popover>
+              <PopoverTrigger asChild>
+                <div className="p-[1.5px] flex items-center bg-gradient-to-r from-[#0073E6] to-[#004080] hover:from-[#0066cc] hover:to-[#003366] rounded-lg group">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-8 w-full bg-white group-hover:bg-transparent border-none"
+                    disabled={isContingency}
+                  >
+                    <span className="bg-gradient-to-r from-[#0073E6] to-[#004080] group-hover:text-white text-transparent bg-clip-text flex items-center">
+                      <CalendarIcon className="h-4 w-4 sm:mr-1 text-[#0073E6] group-hover:text-white" />
+                      {dateRange.from && dateRange.to ? (
+                        `${format(dateRange.from, 'dd MMM')} - ${format(dateRange.to, 'dd MMM')}`
+                      ) : (
+                        <>
+                          <span className="hidden min-[500px]:inline md:hidden min-[1034px]:inline">
+                            Masukkan Tanggal Perjalanan
+                          </span>
+                        </>
+                      )}
+                    </span>
+                  </Button>
+                </div>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="range"
+                  selected={dateRange}
+                  onSelect={handleDateRangeChange}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
             {!isContingency && (
               <ReminderSelector
                 selectedReminder={
@@ -1872,70 +1897,37 @@ export default function ItineraryMakerModule({
                 reminderOptions={reminderOptions}
               />
             )}
+            {!isContingency && (
+              <Button
+                size="sm"
+                className={cn(
+                  'group relative overflow-hidden rounded-md px-4 py-1 ml-auto text-sm font-medium text-white',
+                  'focus:outline-none focus:ring-2 focus:ring-offset-2',
+                  'disabled:opacity-70 disabled:cursor-not-allowed'
+                )}
+                onClick={handleGenerateFeedback}
+                disabled={isGenerating}
+              >
+                {/* Base gradient layer */}
+                <span className="absolute inset-0 bg-gradient-to-r from-[#0073E6] to-[#80004B] transition-opacity duration-300 ease-in-out" />
 
-            <CldUploadButton
-              uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
-              onSuccess={handleImageUpload}
-              className={cn(
-                buttonVariants({ variant: 'outline', size: 'sm' }),
-                isContingency &&
-                  'opacity-50 cursor-not-allowed pointer-events-none'
-              )}
-              options={{
-                clientAllowedFormats: ['image'],
-                maxFiles: 1,
-                maxFileSize: 1024 * 256, // 256 KB
-              }}
-            >
-              Ganti foto cover
-            </CldUploadButton>
-            <div className="sm:ml-auto">
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="flex items-center gap-2"
-                    disabled={isContingency}
-                  >
-                    <CalendarIcon className="h-4 w-4" />
-                    {dateRange.from && dateRange.to
-                      ? `${format(dateRange.from, 'dd MMM')} - ${format(dateRange.to, 'dd MMM')}`
-                      : 'Masukkan Tanggal Perjalanan'}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="end">
-                  <Calendar
-                    mode="range"
-                    selected={dateRange}
-                    onSelect={handleDateRangeChange}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
+                {/* Hover gradient layer */}
+                <span className="absolute inset-0 bg-gradient-to-r from-[#80004B] to-[#0073E6] opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out" />
+
+                <span className="relative flex items-center gap-1.5">
+                  <Wand2 size={16} />
+                  {isGenerating ? 'Memproses...' : 'Buat Saran AI'}
+                </span>
+              </Button>
+            )}
           </div>
-          {itineraryData.tags && itineraryData.tags.length > 0 && (
-            <div className="flex flex-wrap gap-2 mb-4">
-              {getSelectedTagNames().map((tagName, index) => (
-                <Badge
-                  key={`tag-${tagName}-${itineraryData.tags![index]}`}
-                  variant="secondary"
-                  className="flex items-center gap-1"
-                >
-                  {tagName}
-                  {!isContingency && (
-                    <button
-                      onClick={() => removeTag(itineraryData.tags![index])}
-                      className="ml-1 rounded-full hover:bg-gray-200 p-0.5"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  )}
-                </Badge>
-              ))}
-            </div>
-          )}
+          <TagSelector
+            selectedTags={itineraryData.tags ?? []}
+            onChangeAction={handleTagsChange}
+            availableTags={availableTags}
+            isContingency={isContingency}
+            setItineraryDataAction={setItineraryData}
+          />
           <DateRangeAlertDialog
             open={showConfirmDialog}
             onOpenChange={setShowConfirmDialog}
@@ -1972,13 +1964,17 @@ export default function ItineraryMakerModule({
             setPositionToView={setPositionToView}
           />
           <div className="flex justify-center my-8">
-            <Button
-              size="sm"
-              className="-mt-4 w-[240px] bg-gradient-to-r from-[#0073E6] to-[#004080] text-white hover:from-[#0066cc] hover:to-[#003366] rounded-lg"
-              onClick={() => addSection()}
-            >
-              <Plus className="h-4 w-4" /> Bagian
-            </Button>
+            <div className="p-[1.5px] flex -mt-4 w-[240px] items-center bg-gradient-to-r from-[#0073E6] to-[#004080] hover:from-[#0066cc] hover:to-[#003366] rounded-lg group">
+              <Button
+                className="h-8 w-full bg-white group-hover:bg-transparent"
+                onClick={() => addSection()}
+              >
+                <span className="bg-gradient-to-r from-[#0073E6] to-[#004080] group-hover:text-white text-transparent bg-clip-text flex items-center">
+                  <Plus className="h-4 w-4 mr-1 text-[#0073E6] group-hover:text-white" />
+                  Bagian
+                </span>
+              </Button>
+            </div>
           </div>
           {feedbackItems.length > 0 && (
             <div className="mt-8">

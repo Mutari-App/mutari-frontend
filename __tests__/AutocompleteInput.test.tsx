@@ -1,7 +1,6 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import AutocompleteInput from '@/modules/ItineraryMakerModule/module-elements/AutocompleteInput'
 import usePlacesAutocomplete from 'use-places-autocomplete'
-import userEvent from '@testing-library/user-event'
 
 jest.mock('@vis.gl/react-google-maps', () => ({
   APIProvider: ({
@@ -45,9 +44,12 @@ jest.mock('use-places-autocomplete', () => ({
   }),
 }))
 
+jest.mock('lucide-react', () => ({
+  Edit2: () => 'Edit2',
+}))
+
 describe('AutocompleteInput Component', () => {
   const updateBlock = jest.fn()
-  const toggleInput = jest.fn()
   const mockSetPositionToView = jest.fn()
   const blockId = 'test-block'
   const title = 'Initial Title'
