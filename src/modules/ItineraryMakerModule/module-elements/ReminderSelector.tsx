@@ -46,7 +46,12 @@ export const ReminderSelector: React.FC<ReminderSelectorProps> = ({
               {reminderOptions.map((option) => (
                 <label
                   key={option.value}
-                  className="flex items-center gap-2 cursor-pointer"
+                  className={`flex items-center gap-2 ${
+                    !option.available
+                      ? 'text-gray-500 cursor-not-allowed'
+                      : 'cursor-pointer'
+                  }`}
+                  aria-disabled={!option.available}
                 >
                   <RadioGroupItem
                     value={option.value}
