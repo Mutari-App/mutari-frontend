@@ -12,8 +12,11 @@ import type {
   ItineraryData,
   ItineraryResponse,
   metadataType,
+  TrendingItinerariesResponse,
+  TrendingItineraryData,
 } from './module-elements/types'
 import { toast } from 'sonner'
+import TrendingItineraryList from './sections/TrendingItineraryList'
 
 export default function ItineraryModule() {
   const searchParams = useSearchParams()
@@ -45,6 +48,7 @@ export default function ItineraryModule() {
   const [data, setData] = useState<ItineraryData[]>([])
   const [sharedData, setSharedData] = useState<ItineraryData[]>([])
   const [completedData, setCompletedData] = useState<ItineraryData[]>([])
+  const [trendingData, setTrendingData] = useState<TrendingItineraryData[]>([])
 
   const refreshAll = async () => {
     await fetchMyItinerary()
@@ -131,6 +135,18 @@ export default function ItineraryModule() {
     }
   }
 
+  const fetchTrendingItineraries = async () => {
+    try {
+      const res = await customFetch<TrendingItinerariesResponse>(
+        `/itineraries/trending`
+      )
+      if (res.statusCode !== 200) throw new Error(res.message)
+      setTrendingData(res.itineraries)
+    } catch (err: any) {
+      if (err instanceof Error) toast.error(`${err.message}`)
+    }
+  }
+
   useEffect(() => {
     fetchMyItinerary().catch((err) => console.log(err))
   }, [myItineraryPage])
@@ -142,6 +158,10 @@ export default function ItineraryModule() {
   useEffect(() => {
     fetchMyCompletedItinerary().catch((err) => console.log(err))
   }, [completedItineraryPage])
+
+  useEffect(() => {
+    fetchTrendingItineraries().catch((err) => console.log(err))
+  }, [])
 
   return (
     <div className="flex flex-col items-center gap-7 pt-28">
@@ -189,6 +209,13 @@ export default function ItineraryModule() {
             refresh={refreshAll}
             searchQueryParams="completedItineraryPage"
           />
+        </div>
+
+        <div className="flex flex-col justify-start gap-7 w-full">
+          <h2 className="font-semibold text-2xl md:text-left md:text-[36px] sel">
+            Eksplorasi
+          </h2>
+          <TrendingItineraryList data={trendingData} />
         </div>
       </div>
       <div className="text-center text-sm">

@@ -23,6 +23,10 @@ export interface CompletedItineraryResponse extends CustomFetchBaseResponse {
   itinerary: ItineraryData[]
 }
 
+export interface TrendingItinerariesResponse extends CustomFetchBaseResponse {
+  itineraries: TrendingItineraryData[]
+}
+
 export interface ItineraryData {
   id: string
   userId: string
@@ -48,4 +52,13 @@ export interface ItineraryData {
     photoProfile: string
     email: string
   }[]
+}
+
+export interface TrendingItineraryData extends ItineraryData {
+  user: {
+    id: string
+    firstName: string
+    lastName: string
+    photoProfile: string
+  }
 }
