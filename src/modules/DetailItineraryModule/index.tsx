@@ -1,15 +1,17 @@
 'use client'
-import { customFetch } from '@/utils/customFetch'
+import { customFetch } from '@/utils/newCustomFetch'
 import { ItineraryHeader } from './module-elements/ItineraryHeader'
 import { ItineraryList } from './module-elements/ItineraryList'
 import { ItinerarySummary } from './module-elements/ItinerarySummary'
 import { useEffect, useState } from 'react'
-import { notFound, useParams, useRouter } from 'next/navigation'
+import { notFound, useParams } from 'next/navigation'
 import Maps from '../ItineraryMakerModule/sections/Maps'
 import { PlanPicker } from './module-elements/PlanPicker'
+import { APIProvider } from '@vis.gl/react-google-maps'
+import { Loader2 } from 'lucide-react'
 
 export default function DetailItineraryModule() {
-  const [data, setData] = useState<Itinerary>({} as Itinerary)
+  const [data, setData] = useState<Itinerary | null>(null)
   const [contingencies, setContingencies] = useState<ContingencyPlan[]>()
   const [selectedContingency, setSelectedContingency] =
     useState<ContingencyPlan>()
@@ -18,7 +20,6 @@ export default function DetailItineraryModule() {
     id: string
     contingencyId: string
   }>()
-  const router = useRouter()
 
   useEffect(() => {
     const fetchData = async () => {
@@ -27,11 +28,10 @@ export default function DetailItineraryModule() {
           `/itineraries/${id}`,
           {
             credentials: 'include',
-            isAuthorized: true,
           }
         )
 
-        if (res.statusCode === 404) {
+        if (res.statusCode === 404 || res.statusCode === 403) {
           setIsNotFound(true)
         }
 
@@ -47,7 +47,6 @@ export default function DetailItineraryModule() {
           `itineraries/${id}/contingencies`,
           {
             credentials: 'include',
-            isAuthorized: true,
           }
         )
 
@@ -74,7 +73,6 @@ export default function DetailItineraryModule() {
           `itineraries/${id}/contingencies/${contingencyId}`,
           {
             credentials: 'include',
-            isAuthorized: true,
           }
         )
 
@@ -98,44 +96,51 @@ export default function DetailItineraryModule() {
   if (isNotFound) {
     notFound()
   }
+  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? ''
 
-  return (
-    <div className="flex max-h-screen">
-      <div className="container max-w-4xl mx-auto p-4 pt-24 min-h-screen max-h-screen overflow-auto">
-        <ItineraryHeader
-          data={
-            selectedContingency
-              ? {
-                  ...data,
-                  title: `(${selectedContingency.title}) ${data.title}`,
-                }
-              : data
-          }
-          contingencyId={contingencyId}
-        />
-        <ItinerarySummary startDate={data.startDate} endDate={data.endDate} />
-        <ItineraryList
-          section={
-            selectedContingency
-              ? selectedContingency.sections || []
-              : data.sections || []
-          }
-        />
-        <PlanPicker
-          itineraryId={id}
-          contingencies={contingencies || []}
-          selectedPlan={selectedContingency ?? data}
-        />
+  return data ? (
+    <APIProvider apiKey={apiKey}>
+      <div className="flex max-h-screen">
+        <div className="container max-w-4xl mx-auto p-4 pt-24 min-h-screen max-h-screen overflow-auto">
+          <ItineraryHeader
+            data={
+              selectedContingency
+                ? {
+                    ...data,
+                    title: `(${selectedContingency.title}) ${data.title}`,
+                  }
+                : data
+            }
+            contingencyId={contingencyId}
+          />
+          <ItinerarySummary startDate={data.startDate} endDate={data.endDate} />
+          <ItineraryList
+            section={
+              selectedContingency
+                ? selectedContingency.sections || []
+                : data.sections || []
+            }
+          />
+          <PlanPicker
+            itineraryId={id}
+            contingencies={contingencies || []}
+            selectedPlan={selectedContingency ?? data}
+          />
+        </div>
+        <div className="w-full min-h-screen hidden md:block">
+          <Maps
+            itineraryData={
+              selectedContingency
+                ? selectedContingency.sections || []
+                : (data.sections ?? [])
+            }
+          />
+        </div>
       </div>
-      <div className="w-full min-h-screen hidden md:block">
-        <Maps
-          itineraryData={
-            selectedContingency
-              ? selectedContingency.sections || []
-              : (data.sections ?? [])
-          }
-        />
-      </div>
+    </APIProvider>
+  ) : (
+    <div className="flex items-center justify-center h-screen">
+      <Loader2 className="animate-spin w-6 h-6 mr-2" />
     </div>
   )
 }

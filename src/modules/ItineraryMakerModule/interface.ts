@@ -102,6 +102,10 @@ export interface PlaceResult {
   vicinity?: string
   international_phone_number?: string
   website?: string
+  priceRange?: {
+    startPrice?: number
+    endPrice?: number
+  }
 }
 
 export interface PlaceDetails {
@@ -152,4 +156,12 @@ export interface ContingencyPlanDto {
 
 export interface ContingencyPlanResponse extends CustomFetchBaseResponse {
   contingency: ContingencyPlanDto[]
+}
+
+export interface ILocationMarker {
+  lat: number
+  lng: number
+  section: number
+  order: number
+  title: string
 }

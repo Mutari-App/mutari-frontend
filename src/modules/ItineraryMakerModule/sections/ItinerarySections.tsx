@@ -19,6 +19,7 @@ import {
   ChevronUp,
   ChevronDown,
   Trash,
+  Edit2,
 } from 'lucide-react'
 import { type FeedbackItem, type Block, type Section } from '../interface'
 import { type TransportMode } from '@/utils/maps'
@@ -106,13 +107,23 @@ export const ItinerarySections: React.FC<ItinerarySectionsProps> = ({
       {sections.map((section) => (
         <div key={section.sectionNumber} className="mb-8">
           <div className="flex items-center justify-between mb-2 gap-4">
-            <Input
-              className="md:text-2xl font-semibold border-none p-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
-              value={section.title}
-              onChange={(e) =>
-                updateSectionTitle(section.sectionNumber, e.target.value)
-              }
-            />
+            <div className="relative flex-grow group">
+              <Input
+                className="lg:text-2xl font-semibold border-none p-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                value={section.title}
+                onChange={(e) =>
+                  updateSectionTitle(section.sectionNumber, e.target.value)
+                }
+                onFocus={(e) => {
+                  e.target.select()
+                }}
+                style={{ cursor: 'text' }}
+              />
+              <Edit2
+                size={18}
+                className="text-gray-400 absolute right-2 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+              />
+            </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm">
@@ -184,20 +195,28 @@ export const ItinerarySections: React.FC<ItinerarySectionsProps> = ({
             )}
           </Droppable>
           <div className="flex justify-center gap-4 mt-4">
-            <Button
-              size="sm"
-              onClick={() => addBlock(section.sectionNumber, 'LOCATION')}
-              className="flex w-28 items-center bg-gradient-to-r from-[#0073E6] to-[#004080] text-white hover:from-[#0066cc] hover:to-[#003366] rounded-lg"
-            >
-              <Plus className="h-4 w-4" /> Lokasi
-            </Button>
-            <Button
-              size="sm"
-              onClick={() => addBlock(section.sectionNumber, 'NOTE')}
-              className="flex w-28 items-center bg-gradient-to-r from-[#0073E6] to-[#004080] text-white hover:from-[#0066cc] hover:to-[#003366] rounded-lg"
-            >
-              <Plus className="h-4 w-4" /> Catatan
-            </Button>
+            <div className="p-[1.5px] flex w-28 items-center bg-gradient-to-r from-[#0073E6] to-[#004080] hover:from-[#0066cc] hover:to-[#003366] rounded-lg group">
+              <Button
+                onClick={() => addBlock(section.sectionNumber, 'LOCATION')}
+                className="h-8 w-full bg-white group-hover:bg-transparent"
+              >
+                <span className="bg-gradient-to-r from-[#0073E6] to-[#004080] group-hover:text-white text-transparent bg-clip-text flex items-center">
+                  <Plus className="h-4 w-4 mr-1 text-[#0073E6] group-hover:text-white" />
+                  Lokasi
+                </span>
+              </Button>
+            </div>
+            <div className="p-[1.5px] flex w-28 items-center bg-gradient-to-r from-[#0073E6] to-[#004080] hover:from-[#0066cc] hover:to-[#003366] rounded-lg group">
+              <Button
+                onClick={() => addBlock(section.sectionNumber, 'NOTE')}
+                className="h-8 w-full bg-white group-hover:bg-transparent"
+              >
+                <span className="bg-gradient-to-r from-[#0073E6] to-[#004080] group-hover:text-white text-transparent bg-clip-text flex items-center">
+                  <Plus className="h-4 w-4 mr-1 text-[#0073E6] group-hover:text-white" />
+                  Catatan
+                </span>
+              </Button>
+            </div>
           </div>
         </div>
       ))}
