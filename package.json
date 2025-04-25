@@ -15,7 +15,8 @@
     "prepare": "husky",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:cov": "jest --coverage"
+    "test:cov": "jest --coverage",
+    "infisical:dev": "infisical run -- pnpm run dev"
   },
   "dependencies": {
     "@hello-pangea/dnd": "^18.0.1",
