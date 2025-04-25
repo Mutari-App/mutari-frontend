@@ -1,10 +1,10 @@
-import { render, fireEvent, screen, waitFor } from '@testing-library/react';
-import { SettingsItineraryModal } from '@/modules/ItineraryMakerModule/module-elements/settingsModal';  // Adjust path if needed
+import { render, fireEvent, screen, waitFor } from '@testing-library/react'
+import { SettingsItineraryModal } from '@/modules/ItineraryMakerModule/module-elements/settingsModal' // Adjust path if needed
 
 jest.mock('lucide-react', () => ({
-    X: 'X',
-    Clipboard: 'Clipboard',
-    Trash: 'Trash',
+  X: 'X',
+  Clipboard: 'Clipboard',
+  Trash: 'Trash',
 }))
 
 describe('SettingsItineraryModal', () => {
@@ -43,12 +43,27 @@ describe('SettingsItineraryModal', () => {
     fireEvent.change(screen.getByPlaceholderText('Masukkan Judul Perjalanan'), {
       target: { value: 'Updated Title' },
     })
-    fireEvent.change(screen.getByPlaceholderText('Masukkan Deskripsi Perjalanan'), {
-      target: { value: 'Updated Description' },
-    })
+    fireEvent.change(
+      screen.getByPlaceholderText('Masukkan Deskripsi Perjalanan'),
+      {
+        target: { value: 'Updated Description' },
+      }
+    )
 
-    expect((screen.getByPlaceholderText('Masukkan Judul Perjalanan') as HTMLInputElement).value).toBe('Updated Title')
-    expect((screen.getByPlaceholderText('Masukkan Deskripsi Perjalanan') as HTMLInputElement).value).toBe('Updated Description')
+    expect(
+      (
+        screen.getByPlaceholderText(
+          'Masukkan Judul Perjalanan'
+        ) as HTMLInputElement
+      ).value
+    ).toBe('Updated Title')
+    expect(
+      (
+        screen.getByPlaceholderText(
+          'Masukkan Deskripsi Perjalanan'
+        ) as HTMLInputElement
+      ).value
+    ).toBe('Updated Description')
   })
 
   test('calls onSave with correct data when save button is clicked', async () => {
@@ -57,9 +72,12 @@ describe('SettingsItineraryModal', () => {
     fireEvent.change(screen.getByPlaceholderText('Masukkan Judul Perjalanan'), {
       target: { value: 'Updated Title' },
     })
-    fireEvent.change(screen.getByPlaceholderText('Masukkan Deskripsi Perjalanan'), {
-      target: { value: 'Updated Description' },
-    })
+    fireEvent.change(
+      screen.getByPlaceholderText('Masukkan Deskripsi Perjalanan'),
+      {
+        target: { value: 'Updated Description' },
+      }
+    )
 
     fireEvent.click(screen.getByRole('button', { name: /simpan/i }))
 
@@ -74,8 +92,8 @@ describe('SettingsItineraryModal', () => {
   })
 
   test('disables save button when isContingency is true', () => {
-    render(<SettingsItineraryModal {...defaultProps} isContingency={true} />);
+    render(<SettingsItineraryModal {...defaultProps} isContingency={true} />)
 
-    expect(screen.getByRole('button', { name: /simpan/i })).toBeDisabled();
+    expect(screen.getByRole('button', { name: /simpan/i })).toBeDisabled()
   })
 })
