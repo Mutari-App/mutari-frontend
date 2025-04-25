@@ -157,32 +157,6 @@ export const ItineraryHeader: React.FC<ItineraryHeaderProps> = ({
             'bg-white text-black rounded-xl shadow',
             isContingency && 'opacity-50 cursor-not-allowed pointer-events-none'
           )}
-          disabled={isContingency}
-        >
-          <UserRoundPlus className="w-6 h-6 text-[#004080]" />
-        </Button>
-
-        <Button
-          type="button"
-          size="icon"
-          variant="ghost"
-          className={cn(
-            'bg-white text-black rounded-xl shadow',
-            isContingency && 'opacity-50 cursor-not-allowed pointer-events-none'
-          )}
-          disabled={isContingency}
-        >
-          <Share2 className="w-6 h-6 text-[#004080]" />
-        </Button>
-
-        <Button
-          type="button"
-          size="icon"
-          variant="ghost"
-          className={cn(
-            'bg-white text-black rounded-xl shadow',
-            isContingency && 'opacity-50 cursor-not-allowed pointer-events-none'
-          )}
           onClick={() => setIsSettingsModalOpen(true)}
           disabled={isContingency}
         >
