@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import ItineraryCard from '../module-elements/ItineraryCard'
+import { LikedItineraryCard } from '../module-elements/ItineraryCard'
 import { customFetch } from '@/utils/newCustomFetch'
 import {
   GetItineraryLikesProps,
@@ -53,7 +53,7 @@ export const LikedItinerariesSection: React.FC<ProfileModuleProps> = ({
       return (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-6 w-full">
           {itineraries.map((itinerary) => (
-            <ItineraryCard key={itinerary.id} itinerary={itinerary} />
+            <LikedItineraryCard key={itinerary.id} itinerary={itinerary} />
           ))}
         </div>
       )

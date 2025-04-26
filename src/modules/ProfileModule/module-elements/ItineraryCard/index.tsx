@@ -3,6 +3,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Card, CardContent, CardFooter } from '@/components/ui/card'
 import { type ItineraryProps } from '../../interface'
+import { Heart } from 'lucide-react'
 
 interface ItineraryCardProps {
   itinerary: ItineraryProps
@@ -50,6 +51,11 @@ export const LikedItineraryCard: React.FC<ItineraryCardProps> = ({
                 return `${formatDate(itinerary.startDate)} - ${formatDate(itinerary.endDate)} • ${itinerary.totalDestinations} Destinasi`
               })()}
             </span>
+          </div>
+
+          <div className="flex items-center gap-1 text-[10px] pl-1 sm:text-sm">
+            <Heart className="h-4 w-4" />
+            <span>{itinerary.totalLikes}</span>
           </div>
         </CardFooter>
       </Card>
