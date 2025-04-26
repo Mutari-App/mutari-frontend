@@ -41,7 +41,7 @@ export const ProfileHeader: React.FC<ProfileProps> = ({
         {/* <span>@{username}</span> */}
         <div className="flex gap-1">
           <MutariPoint />
-          <span>{loyaltyPoints}</span>
+          <span className="font-semibold">{loyaltyPoints}</span>
         </div>
         <div className="flex gap-7">
           <div className="flex flex-col items-center">
