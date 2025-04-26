@@ -9,9 +9,9 @@ interface GetProfileResponse {
 export default async function ProfilePage({
   params,
 }: Readonly<{
-  params: { id: string }
+  params: Promise<{ id: string }>
 }>) {
-  const id = params.id
+  const { id } = await params
   try {
     const response = await customFetch<GetProfileResponse>(`/profile/${id}`)
     console.log(response)
