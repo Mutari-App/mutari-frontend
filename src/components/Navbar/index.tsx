@@ -12,14 +12,13 @@ import Image from 'next/image'
 import { getImage } from '@/utils/getImage'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { customFetch } from '@/utils/customFetch'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { LogOut } from 'lucide-react'
+import { LogOut, User } from 'lucide-react'
 import { Button } from '../ui/button'
 import { useAuthContext } from '@/contexts/AuthContext'
 import { toast } from 'sonner'
@@ -30,7 +29,7 @@ export const Navbar: React.FC = () => {
   )
   const nowDate = new Date()
   const isLaunching = nowDate > launchingDate
-  const { isAuthenticated, logout } = useAuthContext()
+  const { isAuthenticated, logout, user } = useAuthContext()
   const pathname = usePathname() // Get current route path
   const router = useRouter()
 
@@ -109,7 +108,7 @@ export const Navbar: React.FC = () => {
         </div>
 
         {isLaunching &&
-          (isAuthenticated ? (
+          (isAuthenticated && !!user ? (
             <DropdownMenu>
               <DropdownMenuTrigger className="focus:outline-none ">
                 <div className="rounded-full overflow-hidden hover:opacity-80 transition-opacity">
@@ -126,6 +125,15 @@ export const Navbar: React.FC = () => {
                 align="end"
                 className="w-48 p-2 relative z-[102]"
               >
+                <DropdownMenuItem>
+                  <Link
+                    href={`/profile/${user.id}`}
+                    className=" w-full cursor-pointer flex items-center gap-2 text-slate-600 hover:text-slate-700 focus:text-slate-700"
+                  >
+                    <User className="h-4 w-4" />
+                    <span>Profile</span>
+                  </Link>
+                </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={handleLogout}
                   className="cursor-pointer flex items-center gap-2 text-red-500 hover:text-red-700 focus:text-red-700"
