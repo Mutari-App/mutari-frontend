@@ -5,7 +5,7 @@ import { MoreHorizontal, X } from 'lucide-react'
 import Image from 'next/image'
 import type React from 'react'
 import { useRef, useState, type KeyboardEvent } from 'react'
-import type { ItineraryData } from './types'
+import type { DuplicateItineraryResponse, ItineraryData } from './types'
 import useOutsideClick from '@/hooks/useOutsideClick'
 import { customFetch } from '@/utils/newCustomFetch'
 import { toast } from 'sonner'
@@ -200,6 +200,23 @@ function ItineraryCard({
     }
   }
 
+  const duplicateItinerary = async () => {
+    try {
+      const response = await customFetch<DuplicateItineraryResponse>(
+        `/itineraries/${item.id}/duplicate`,
+        {
+          method: 'POST',
+        }
+      )
+
+      if (response.statusCode !== 201) throw new Error(response.message)
+      else router.push(`/itinerary/${response.duplicatedItinerary.id}/edit`)
+      toast.success('Itinerary duplicated successfully!')
+    } catch (err) {
+      if (err instanceof Error) toast.error(`${err.message}`)
+    }
+  }
+
   return (
     <div
       onClick={() => router.push(`/itinerary/${item.id}`)}
@@ -248,6 +265,9 @@ function ItineraryCard({
                 Mark as Completed
               </DropdownMenuItem>
             )}
+            <DropdownMenuItem onClick={duplicateItinerary}>
+              Duplicate & Edit
+            </DropdownMenuItem>
             <DropdownMenuItem
               onClick={openDeleteConfirmation}
               className="text-red-500 focus:text-red-500"
