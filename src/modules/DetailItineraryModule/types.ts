@@ -82,6 +82,12 @@ interface Itinerary {
     photoProfile: string
     email: string
   }[]
+  user: {
+    id: string
+    firstName: string
+    lastName: string
+    photoProfile: string | null
+  }
 }
 
 interface ItineraryDetailResponse {
