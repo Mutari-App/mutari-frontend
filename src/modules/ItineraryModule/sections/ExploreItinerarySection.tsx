@@ -8,6 +8,7 @@ import {
   type SearchItinerariesResponse,
 } from '@/modules/ItinerarySearchResultsModule/interface'
 import { Button } from '@/components/ui/button'
+import { v4 } from 'uuid'
 
 const ExploreItinerarySection = () => {
   const router = useRouter()
@@ -59,7 +60,7 @@ const ExploreItinerarySection = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
           {Array.from({ length: 8 }).map((_, index) => (
             <div
-              key={index}
+              key={`${index}-${v4()}`}
               className="h-64 sm:h-72 rounded-md bg-slate-100 animate-pulse"
             />
           ))}

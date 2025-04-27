@@ -1,6 +1,7 @@
 import React from 'react'
 import { Card, CardContent, CardFooter } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
+import { v4 } from 'uuid'
 
 interface LoadingSkeletonProps {
   count?: number
@@ -10,7 +11,7 @@ const LoadingSkeleton: React.FC<LoadingSkeletonProps> = ({ count = 6 }) => {
   return (
     <>
       {Array.from({ length: count }).map((_, index) => (
-        <Card key={index} className="h-full overflow-hidden">
+        <Card key={`${index}-${v4()}`} className="h-full overflow-hidden">
           <Skeleton className="h-36 w-full" />
           <CardContent className="p-4">
             <Skeleton className="mb-2 h-6 w-3/4" />

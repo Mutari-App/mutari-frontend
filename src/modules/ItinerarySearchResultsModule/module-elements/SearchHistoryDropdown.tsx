@@ -41,7 +41,7 @@ const SearchHistoryDropdown: React.FC<SearchHistoryDropdownProps> = ({
           </div>
           <ul>
             {searchHistory.map((item, index) => (
-              <li key={`history-${index}`} className="group">
+              <li key={`history-${item}-${index}`} className="group">
                 <div className="flex items-center justify-between p-2 hover:bg-gray-100 rounded cursor-pointer">
                   <div
                     className="flex items-center gap-2 flex-1 min-w-0"
@@ -78,7 +78,7 @@ const SearchHistoryDropdown: React.FC<SearchHistoryDropdownProps> = ({
           </h3>
           <ul>
             {suggestions.map((item, index) => (
-              <li key={`suggestion-${index}`}>
+              <li key={`suggestion-${item}-${index}`} className="group">
                 <div
                   className="flex items-center gap-2 p-2 hover:bg-gray-100 rounded cursor-pointer"
                   onClick={() => onSelectItem(item)}
