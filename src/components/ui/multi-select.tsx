@@ -78,7 +78,7 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
               <>
                 {selectedLabels.slice(0, maxDisplay).map((label, i) => (
                   <Badge
-                    key={i}
+                    key={`${label}-${i}`}
                     variant="secondary"
                     className="flex items-center gap-1 px-2 py-1"
                   >
