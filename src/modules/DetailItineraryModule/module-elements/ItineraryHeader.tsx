@@ -176,9 +176,14 @@ export const ItineraryHeader = ({
                 {data.description}
               </p>
               {user?.id !== data.userId && (
-                <p className="text-[10px] md:text-xs font-raleway text-white/80 italic">
-                  {data.user.firstName} {data.user.lastName}
-                </p>
+                <div>
+                  <p className="text-[14px] md:text-s font-raleway text-white/80 italic">
+                    {data.user.firstName} {data.user.lastName}
+                  </p>
+                  <p className="text-[10px] md:text-xs font-raleway text-white/80 italic">
+                    {data._count.likes} orang menyukai itinerary ini
+                  </p>
+                </div>
               )}
             </div>
           )}
@@ -238,15 +243,14 @@ export const ItineraryHeader = ({
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle className="text-2xl text-center w-full font-semibold">
-              Share Itinerary Ini
-              Share Itinerary Ini
+              Share Itinerary Ini Share Itinerary Ini
             </DialogTitle>
           </DialogHeader>
           <div className="text-sm text-center text-gray-600">
             Copy dan kirim link dibawah ini. Orang yang mempunyai link dapat
-            melihat, tetapi tidak bisa edit maupun duplikat
-            Copy dan kirim link dibawah ini. Orang yang mempunyai link dapat
-            melihat, tetapi tidak bisa edit maupun duplikat
+            melihat, tetapi tidak bisa edit maupun duplikat Copy dan kirim link
+            dibawah ini. Orang yang mempunyai link dapat melihat, tetapi tidak
+            bisa edit maupun duplikat
           </div>
           <div className="flex items-center gap-2 mt-4 bg-gray-100 rounded-md p-2">
             <span className="text-sm text-gray-800 truncate w-[300px]">

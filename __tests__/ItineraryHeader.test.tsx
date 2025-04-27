@@ -81,6 +81,9 @@ const mockData = {
       email: 'hobahoba@gmail.com',
     },
   ],
+  _count: {
+    likes: 42,
+  },
 }
 
 describe('ItineraryHeader Component', () => {

@@ -88,6 +88,9 @@ interface Itinerary {
     lastName: string
     photoProfile: string | null
   }
+  _count: {
+    likes: number
+  }
 }
 
 interface ItineraryDetailResponse {
