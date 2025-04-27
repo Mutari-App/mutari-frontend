@@ -87,7 +87,7 @@ const ItineraryListSection: React.FC<ItineraryListSectionProps> = ({
     <div className="container mx-auto px-4 py-4 sm:py-6 flex flex-col min-h-[calc(100vh-160px)] sm:min-h-[calc(100vh-180px)] md:min-h-[calc(100vh-200px)] lg:min-h-[calc(100vh-230px)]">
       {searchQuery && (
         <div className="mb-4 sm:mb-6 text-sm text-gray-600">
-          {totalResults} hasil untuk &quot;{searchQuery}&quot;
+          {totalResults.toLocaleString()} hasil untuk &quot;{searchQuery}&quot;
         </div>
       )}
 
