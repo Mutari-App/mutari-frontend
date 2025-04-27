@@ -239,9 +239,12 @@ export const ItineraryHeader = ({
           <DialogHeader>
             <DialogTitle className="text-2xl text-center w-full font-semibold">
               Share Itinerary Ini
+              Share Itinerary Ini
             </DialogTitle>
           </DialogHeader>
           <div className="text-sm text-center text-gray-600">
+            Copy dan kirim link dibawah ini. Orang yang mempunyai link dapat
+            melihat, tetapi tidak bisa edit maupun duplikat
             Copy dan kirim link dibawah ini. Orang yang mempunyai link dapat
             melihat, tetapi tidak bisa edit maupun duplikat
           </div>
@@ -249,10 +252,13 @@ export const ItineraryHeader = ({
             <span className="text-sm text-gray-800 truncate w-[300px]">
               {shareLink}
             </span>
+            <span className="text-sm text-gray-800 truncate w-[300px]">
+              {shareLink}
+            </span>
             <Button
               className="px-4 py-2 bg-gradient-to-r from-[#016CD7] to-[#014285] text-white items-center rounded"
               onClick={() => {
-                navigator.clipboard
+                void navigator.clipboard
                   .writeText(shareLink)
                   .then(() => {
                     toast.message('Link berhasil disalin')
