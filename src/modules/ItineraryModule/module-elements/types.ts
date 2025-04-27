@@ -1,3 +1,4 @@
+import { User } from '@/contexts/AuthContext/interface'
 import type { CustomFetchBaseResponse } from '@/utils/customFetch/interface'
 
 export type metadataType = {
@@ -48,4 +49,6 @@ export interface ItineraryData {
     photoProfile: string
     email: string
   }[]
+  user?: { firstName: string; photoProfile: string }
+  likes?: number
 }

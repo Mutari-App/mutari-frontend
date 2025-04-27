@@ -93,6 +93,19 @@ export default function DetailItineraryModule() {
     void fetchContingencyDetail()
   }, [contingencyId])
 
+  useEffect(() => {
+    const viewItinerary = async () => {
+      try {
+        await customFetch(`itineraries/views/${id}`, {
+          method: 'POST',
+        })
+      } catch (err: any) {
+        console.error('Error viewing itinerary:', err)
+      }
+    }
+    void viewItinerary()
+  }, [id])
+
   if (isNotFound) {
     notFound()
   }

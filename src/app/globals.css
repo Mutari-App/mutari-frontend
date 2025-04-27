@@ -229,3 +229,19 @@ header .call-to-action {
 .scrolled-right .fade-right {
   opacity: 0;
 }
+
+@keyframes pop {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.25);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.pop-animation {
+  animation: pop 0.3s ease;
+}
