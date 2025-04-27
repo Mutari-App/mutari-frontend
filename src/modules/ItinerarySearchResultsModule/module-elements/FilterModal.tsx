@@ -246,16 +246,26 @@ const FilterModal: React.FC<FilterModalProps> = ({
 
               {showTagDropdown && filteredTags.length > 0 && (
                 <div className="absolute z-10 w-full mt-1 bg-white rounded-md shadow-lg max-h-48 overflow-auto border">
-                  <ul className="py-1">
+                  <ul
+                    className="py-1"
+                    role="listbox"
+                    aria-label="Available tags"
+                  >
                     {filteredTags.map((tag) => (
-                      <li
-                        key={tag.id}
-                        className="px-3 py-1.5 hover:bg-gray-100 cursor-pointer text-sm"
-                        onClick={() => {
-                          addTag(tag.id)
-                        }}
-                      >
-                        {tag.name}
+                      <li key={tag.id} role="option" aria-selected="false">
+                        <button
+                          type="button"
+                          className="w-full text-left px-3 py-1.5 hover:bg-gray-100 cursor-pointer text-sm"
+                          onClick={() => addTag(tag.id)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault()
+                              addTag(tag.id)
+                            }
+                          }}
+                        >
+                          {tag.name}
+                        </button>
                       </li>
                     ))}
                   </ul>
