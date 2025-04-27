@@ -27,6 +27,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
 import { ItineraryData } from './types'
 import { useAuthContext } from '@/contexts/AuthContext'
+import { DuplicateItineraryResponse } from '@/modules/ItineraryModule/module-elements/types'
 
 function ItineraryCard({
   shared = false,
@@ -202,9 +203,12 @@ function ItineraryCard({
 
   const duplicateItinerary = async () => {
     try {
-      const response = await customFetch(`/itineraries/${item.id}/duplicate`, {
-        method: 'POST',
-      })
+      const response = await customFetch<DuplicateItineraryResponse>(
+        `/itineraries/${item.id}/duplicate`,
+        {
+          method: 'POST',
+        }
+      )
 
       if (response.statusCode !== 201) throw new Error(response.message)
       toast.success('Itinerary duplicated successfully!')
