@@ -42,10 +42,16 @@ const SearchHistoryDropdown: React.FC<SearchHistoryDropdownProps> = ({
           <ul>
             {searchHistory.map((item, index) => (
               <li key={`history-${item}-${index}`} className="group">
-                <div className="flex items-center justify-between p-2 hover:bg-gray-100 rounded cursor-pointer">
-                  <div
-                    className="flex items-center gap-2 flex-1 min-w-0"
+                <div className="flex items-center justify-between p-2 rounded">
+                  <button
+                    className="flex items-center gap-2 flex-1 min-w-0 text-left hover:bg-gray-100 w-full p-1 rounded"
                     onClick={() => onSelectItem(item)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault()
+                        onSelectItem(item)
+                      }
+                    }}
                   >
                     <Clock className="h-3 w-3 text-gray-500 flex-shrink-0" />
                     <span
@@ -54,13 +60,14 @@ const SearchHistoryDropdown: React.FC<SearchHistoryDropdownProps> = ({
                     >
                       {item}
                     </span>
-                  </div>
+                  </button>
                   <button
                     onClick={(e) => {
                       e.stopPropagation()
                       onClearHistoryItem(item)
                     }}
-                    className="text-gray-400 hover:text-gray-600 opacity-0 group-hover:opacity-100 flex-shrink-0 ml-2"
+                    className="text-gray-400 hover:text-gray-600 opacity-0 group-hover:opacity-100 focus:opacity-100 flex-shrink-0 ml-2 p-1"
+                    aria-label={`Remove ${item} from search history`}
                   >
                     <X className="h-3.5 w-3.5" />
                   </button>
@@ -79,15 +86,21 @@ const SearchHistoryDropdown: React.FC<SearchHistoryDropdownProps> = ({
           <ul>
             {suggestions.map((item, index) => (
               <li key={`suggestion-${item}-${index}`} className="group">
-                <div
-                  className="flex items-center gap-2 p-2 hover:bg-gray-100 rounded cursor-pointer"
+                <button
+                  className="flex items-center gap-2 p-2 hover:bg-gray-100 rounded cursor-pointer w-full text-left"
                   onClick={() => onSelectItem(item)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      onSelectItem(item)
+                    }
+                  }}
                 >
                   <Search className="h-3 w-3 text-gray-500 flex-shrink-0" />
                   <span className="text-sm text-gray-700 truncate" title={item}>
                     {item}
                   </span>
-                </div>
+                </button>
               </li>
             ))}
           </ul>
