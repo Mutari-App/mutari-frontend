@@ -35,7 +35,7 @@ function RecentlyViewed() {
     void fetchRecentlyViewed()
   }, [])
   return (
-    <div className="flex flex-col justify-start gap-7 w-4/5">
+    <section className="flex flex-col justify-start gap-7 w-4/5">
       <h2 className="font-semibold text-2xl md:text-left md:text-[36px] sel">
         Baru Dilihat
       </h2>
@@ -52,7 +52,7 @@ function RecentlyViewed() {
           </div>
         )}
       </div>
-    </div>
+    </section>
   )
 }
 
