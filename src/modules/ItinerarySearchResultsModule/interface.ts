@@ -18,15 +18,13 @@ export interface ItineraryTag {
 
 export interface ItinerarySearchResult {
   id: string
+  createdAt: string
   title: string
   description?: string | null
   coverImage?: string | null
-  startDate: string
-  endDate: string
-  createdAt: string
   user: UserInfo
   tags: ItineraryTag[]
-  locationCount: number
+  daysCount: number
   likes: number
 }
 
@@ -37,16 +35,14 @@ export interface SearchMetadata {
 }
 
 export interface SearchItinerariesResponse extends CustomFetchBaseResponse {
-  data: {
-    data: ItinerarySearchResult[]
-    metadata: SearchMetadata
-  }
+  data: ItinerarySearchResult[]
+  metadata: SearchMetadata
 }
 
 export interface ItineraryFilters {
   tags: string
-  startDate: string
-  endDate: string
-  sortBy: 'startDate' | 'endDate' | 'createdAt' | 'likes' | 'locationCount'
-  order: 'asc' | 'desc'
+  minDaysCount?: string
+  maxDaysCount?: string
+  sortBy: '' | 'createdAt' | 'likes' | 'daysCount'
+  order: '' | 'asc' | 'desc'
 }
