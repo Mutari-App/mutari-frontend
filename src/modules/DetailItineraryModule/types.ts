@@ -68,6 +68,29 @@ interface Itinerary {
   isPublished: boolean
   isCompleted: boolean
   sections: Section[]
+  pendingInvites: {
+    createdAt: string // ISO string format (e.g., "2025-03-31T09:07:34.592Z")
+    email: string
+    id: string
+    itineraryId: string
+    updatedAt: string
+  }[]
+  invitedUsers: {
+    id: string
+    firstName: string
+    lastName: string
+    photoProfile: string
+    email: string
+  }[]
+  user: {
+    id: string
+    firstName: string
+    lastName: string
+    photoProfile: string | null
+  }
+  _count: {
+    likes: number
+  }
 }
 
 interface ItineraryDetailResponse {

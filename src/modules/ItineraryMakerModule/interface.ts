@@ -30,6 +30,7 @@ export interface Section {
 }
 
 export interface CreateItineraryDto {
+  isPublished: boolean
   title: string
   description?: string
   coverImage?: string

@@ -16,6 +16,7 @@ import type {
   TrendingItineraryData,
 } from './module-elements/types'
 import { toast } from 'sonner'
+import ExploreItinerarySection from './sections/ExploreItinerarySection'
 import TrendingItineraryList from './sections/TrendingItineraryList'
 
 export default function ItineraryModule() {
@@ -232,6 +233,7 @@ export default function ItineraryModule() {
         height={720}
         className="w-screen"
       />
+      <ExploreItinerarySection />
     </div>
   )
 }
