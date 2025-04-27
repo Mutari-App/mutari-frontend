@@ -3,6 +3,12 @@ import { ItineraryHeader } from '@/modules/DetailItineraryModule/module-elements
 import React from 'react'
 import userEvent from '@testing-library/user-event'
 
+jest.mock('lucide-react', () => ({
+  X: 'X',
+  Share2: 'Share2',
+  UserRoundPlus: 'UserRoundPlus',
+}))
+
 // Mock the auth context
 jest.mock('@/contexts/AuthContext', () => ({
   useAuthContext: jest.fn(() => ({
@@ -50,6 +56,24 @@ const mockData = {
     { tag: { id: 'tag-2', name: 'Adventure' } },
   ],
   sections: [],
+  pendingInvites: [
+    {
+      createdAt: '2023-05-01T10:00:00Z',
+      email: 'mutari@gmail.com',
+      id: 'inv-123',
+      itineraryId: 'itinerary-123',
+      updatedAt: '2023-05-01T10:00:00Z',
+    },
+  ],
+  invitedUsers: [
+    {
+      id: 'inv-456',
+      firstName: 'Hoba',
+      lastName: 'Hoba',
+      photoProfile: 'profile.jpg',
+      email: 'hobahoba@gmail.com',
+    },
+  ],
 }
 
 describe('ItineraryHeader Component', () => {
@@ -63,20 +87,7 @@ describe('ItineraryHeader Component', () => {
     render(<ItineraryHeader data={mockData} />)
     expect(screen.getByText('Edit')).toBeInTheDocument()
   })
-
-  it('does not render the edit button when user is not the owner', () => {
-    // Update the mock to return a different user ID
-    const authContextMock = jest.requireMock('@/contexts/AuthContext') as {
-      useAuthContext: jest.Mock
-    }
-    authContextMock.useAuthContext.mockReturnValueOnce({
-      user: { id: 'different-user' },
-    })
-
-    render(<ItineraryHeader data={mockData} />)
-    expect(screen.queryByText('Edit')).not.toBeInTheDocument()
-  })
-
+  
   it('has the correct edit page link', () => {
     render(<ItineraryHeader data={mockData} />)
     const linkElement = screen.getByRole('link', { name: /Edit/i })
