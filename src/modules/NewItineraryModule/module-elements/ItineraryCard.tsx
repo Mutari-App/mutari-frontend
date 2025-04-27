@@ -211,6 +211,7 @@ function ItineraryCard({
       )
 
       if (response.statusCode !== 201) throw new Error(response.message)
+      else router.push(`/itinerary/${response.duplicatedItinerary.id}/edit`)
       toast.success('Itinerary duplicated successfully!')
     } catch (err) {
       if (err instanceof Error) toast.error(`${err.message}`)
