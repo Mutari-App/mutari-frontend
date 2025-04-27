@@ -25,121 +25,121 @@ export const ItineraryHeader = ({
   const { user } = useAuthContext()
   const [showModal, setShowModal] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const [shareLink, setShareLink] = useState("")
+  const [shareLink, setShareLink] = useState('')
   const [showInviteDialog, setShowInviteDialog] = useState(false)
   const [emailInput, setEmailInput] = useState('')
   const [emails, setEmails] = useState<string[]>([])
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
-      if (typeof window !== "undefined") {
-        setShareLink(window.location.href)
-      }
+    if (typeof window !== 'undefined') {
+      setShareLink(window.location.href)
+    }
   }, [])
 
   const openInviteDialog = (e: React.MouseEvent<HTMLButtonElement>) => {
-      e.stopPropagation()
-      setShowInviteDialog(true)
+    e.stopPropagation()
+    setShowInviteDialog(true)
+  }
+
+  const isValidEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    return emailRegex.test(email)
+  }
+
+  const handleEmailInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    setEmailInput(value)
+
+    // If the user enters a space, add the email to the list
+    if (value.endsWith(' ')) {
+      addEmail(value.trim())
     }
-  
-    const isValidEmail = (email: string) => {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-      return emailRegex.test(email)
-    }
-  
-    const handleEmailInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const value = e.target.value
-      setEmailInput(value)
-  
-      // If the user enters a space, add the email to the list
-      if (value.endsWith(' ')) {
-        addEmail(value.trim())
-      }
-    }
-  
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === 'Enter' && emailInput.trim()) {
-        e.preventDefault()
-        addEmail(emailInput.trim())
-      } else if (
-        e.key === 'Backspace' &&
-        emailInput === '' &&
-        emails.length > 0
-      ) {
-        // Remove the last email when backspace is pressed on empty input
-        const newEmails = [...emails]
-        newEmails.pop()
-        setEmails(newEmails)
-      }
-    }
-  
-    const addEmail = (email: string) => {
-      if (email && isValidEmail(email) && !emails.includes(email)) {
-        setEmails([...emails, email])
-        setEmailInput('')
-      } else if (email && !isValidEmail(email)) {
-        setEmailInput('')
-        toast.error('Email tidak valid')
-      }
-    }
-  
-    const removeEmail = (emailToRemove: string) => {
-      setEmails(emails.filter((email) => email !== emailToRemove))
-    }
-  
-    const handleInvite = async (e: React.FormEvent) => {
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && emailInput.trim()) {
       e.preventDefault()
-  
-      // Add the current input if it's not empty and valid
-      let updatedEmails = emails
-      if (emailInput.trim() && isValidEmail(emailInput.trim())) {
-        updatedEmails = [...emails, emailInput.trim()]
-        setEmails(updatedEmails)
-        setEmailInput('')
-      }
-  
-      if (updatedEmails.length === 0) {
-        toast.error('Email tidak boleh kosong')
-        return
-      }
-  
-      try {
-        const response = await customFetch(`/itineraries/${data.id}/invite/`, {
-          method: 'POST',
-          body: JSON.stringify({ emails: updatedEmails }),
-        })
-  
-        if (response.statusCode !== 200) throw new Error(response.message)
-        toast.success('Undangan berhasil dikirim!')
-        setEmails([])
-        setEmailInput('')
-      } catch (err) {
-        if (err instanceof Error) toast.error(`${err.message}`)
-      }
+      addEmail(emailInput.trim())
+    } else if (
+      e.key === 'Backspace' &&
+      emailInput === '' &&
+      emails.length > 0
+    ) {
+      // Remove the last email when backspace is pressed on empty input
+      const newEmails = [...emails]
+      newEmails.pop()
+      setEmails(newEmails)
+    }
+  }
+
+  const addEmail = (email: string) => {
+    if (email && isValidEmail(email) && !emails.includes(email)) {
+      setEmails([...emails, email])
+      setEmailInput('')
+    } else if (email && !isValidEmail(email)) {
+      setEmailInput('')
+      toast.error('Email tidak valid')
+    }
+  }
+
+  const removeEmail = (emailToRemove: string) => {
+    setEmails(emails.filter((email) => email !== emailToRemove))
+  }
+
+  const handleInvite = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    // Add the current input if it's not empty and valid
+    let updatedEmails = emails
+    if (emailInput.trim() && isValidEmail(emailInput.trim())) {
+      updatedEmails = [...emails, emailInput.trim()]
+      setEmails(updatedEmails)
+      setEmailInput('')
     }
 
-    const removeUser = async (userId: string) => {
-        try {
-          setIsLoading(true)
-          const response = await customFetch(
-            `/itineraries/${data.id}/${userId}/remove`,
-            {
-              method: 'DELETE',
-            }
-          )
-    
-          if (response.statusCode === 404) {
-            throw new Error('Pengguna tidak ditemukan')
-          }
-    
-          if (response.statusCode !== 200) throw new Error(response.message)
-          toast.success('User berhasil dihapus!')
-        } catch (err) {
-          if (err instanceof Error) toast.error(`${err.message}`)
-        } finally {
-          setIsLoading(false)
+    if (updatedEmails.length === 0) {
+      toast.error('Email tidak boleh kosong')
+      return
+    }
+
+    try {
+      const response = await customFetch(`/itineraries/${data.id}/invite/`, {
+        method: 'POST',
+        body: JSON.stringify({ emails: updatedEmails }),
+      })
+
+      if (response.statusCode !== 200) throw new Error(response.message)
+      toast.success('Undangan berhasil dikirim!')
+      setEmails([])
+      setEmailInput('')
+    } catch (err) {
+      if (err instanceof Error) toast.error(`${err.message}`)
+    }
+  }
+
+  const removeUser = async (userId: string) => {
+    try {
+      setIsLoading(true)
+      const response = await customFetch(
+        `/itineraries/${data.id}/${userId}/remove`,
+        {
+          method: 'DELETE',
         }
+      )
+
+      if (response.statusCode === 404) {
+        throw new Error('Pengguna tidak ditemukan')
       }
+
+      if (response.statusCode !== 200) throw new Error(response.message)
+      toast.success('User berhasil dihapus!')
+    } catch (err) {
+      if (err instanceof Error) toast.error(`${err.message}`)
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   return (
     <div
@@ -159,77 +159,108 @@ export const ItineraryHeader = ({
             {data.title}
           </h1>
           {data.description && (
-            <p className="text-xs md:text-sm font-raleway text-white max-h-16 overflow-y-auto">
-              <style jsx>{`
-                p::-webkit-scrollbar {
-                  width: 4px;
-                }
-                p::-webkit-scrollbar-track {
-                  background: transparent;
-                }
-                p::-webkit-scrollbar-thumb {
-                  background-color: rgba(255, 255, 255, 0.3);
-                  border-radius: 20px;
-                }
-              `}</style>
-              {data.description}
-            </p>
+            <div className="flex flex-col gap-2">
+              <p className="text-xs md:text-sm font-raleway text-white max-h-16 overflow-y-auto">
+                <style jsx>{`
+                  p::-webkit-scrollbar {
+                    width: 4px;
+                  }
+                  p::-webkit-scrollbar-track {
+                    background: transparent;
+                  }
+                  p::-webkit-scrollbar-thumb {
+                    background-color: rgba(255, 255, 255, 0.3);
+                    border-radius: 20px;
+                  }
+                `}</style>
+                {data.description}
+              </p>
+              {user?.id !== data.userId && (
+                <p className="text-[10px] md:text-xs font-raleway text-white/80 italic">
+                  {data.user.firstName} {data.user.lastName}
+                </p>
+              )}
+            </div>
           )}
         </div>
       </div>
-      <div className="absolute top-2 right-2 sm:top-4 sm:right-4 z-10 flex gap-2">
-        <Button
-          type="button"
-          size="icon"
-          variant="ghost"
-          className='bg-white text-black rounded-xl shadow'
-          onClick={openInviteDialog}
-        >
-          <UserRoundPlus className="w-6 h-6 text-[#004080]" />
-        </Button>
-
-        <Button
-          type="button"
-          size="icon"
-          variant="ghost"
-          className='bg-white text-black rounded-xl shadow'
-          onClick={() => setShowModal(true)}
-        >
-          <Share2 className="w-6 h-6 text-[#004080]" />
-        </Button>
-        {user?.id === data.userId && (
-          <Link
-            href={contingencyId ? `${contingencyId}/edit` : `${data.id}/edit`}
+      {user?.id === data.userId && (
+        <div className="absolute top-2 right-2 sm:top-4 sm:right-4 z-10 flex gap-2">
+          <Button
+            type="button"
+            size="icon"
+            variant="ghost"
+            className="bg-white text-black rounded-xl shadow"
+            onClick={openInviteDialog}
           >
-            <Button
-              size="sm"
-              type="button"
-              variant="ghost"
-              className="bg-white text-[#004080] rounded-xl shadow"
+            <UserRoundPlus className="w-6 h-6 text-[#004080]" />
+          </Button>
+
+          <Button
+            type="button"
+            size="icon"
+            variant="ghost"
+            className="bg-white text-black rounded-xl shadow"
+            onClick={() => setShowModal(true)}
+          >
+            <Share2 className="w-6 h-6 text-[#004080]" />
+          </Button>
+          {user?.id === data.userId && (
+            <Link
+              href={contingencyId ? `${contingencyId}/edit` : `${data.id}/edit`}
             >
-              Edit
-            </Button>
-          </Link>
-        )}
-      </div>
-    
-    <Dialog open={showModal} onOpenChange={setShowModal}>
+              <Button
+                size="sm"
+                type="button"
+                variant="ghost"
+                className="bg-white text-[#004080] rounded-xl shadow"
+              >
+                Edit
+              </Button>
+            </Link>
+          )}
+        </div>
+      )}
+      {user?.id !== data.userId && (
+        <div className="absolute top-2 right-2 sm:top-4 sm:right-4 z-10 flex">
+          <Button
+            size="sm"
+            type="button"
+            variant="ghost"
+            className="bg-white text-[#004080] rounded-xl shadow"
+          >
+            Duplikasi dan Edit
+          </Button>
+        </div>
+      )}
+
+      <Dialog open={showModal} onOpenChange={setShowModal}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle className="text-2xl text-center w-full font-semibold">
-                Share Itinerary Ini
+              Share Itinerary Ini
             </DialogTitle>
           </DialogHeader>
           <div className="text-sm text-center text-gray-600">
-            Copy dan kirim link dibawah ini. Orang yang mempunyai link dapat melihat, tetapi tidak bisa edit maupun duplikat
+            Copy dan kirim link dibawah ini. Orang yang mempunyai link dapat
+            melihat, tetapi tidak bisa edit maupun duplikat
           </div>
           <div className="flex items-center gap-2 mt-4 bg-gray-100 rounded-md p-2">
-            <span className="text-sm text-gray-800 truncate w-[300px]">{shareLink}</span>
+            <span className="text-sm text-gray-800 truncate w-[300px]">
+              {shareLink}
+            </span>
             <Button
               className="px-4 py-2 bg-gradient-to-r from-[#016CD7] to-[#014285] text-white items-center rounded"
               onClick={() => {
-                navigator.clipboard.writeText(shareLink)
-                toast.message('Link berhasil disalin')
+                navigator.clipboard
+                  .writeText(shareLink)
+                  .then(() => {
+                    toast.message('Link berhasil disalin')
+                  })
+                  .catch((error) => {
+                    toast.error('Gagal menyalin link')
+                    console.error('Clipboard error:', error)
+                  })
               }}
             >
               Salin
@@ -238,8 +269,8 @@ export const ItineraryHeader = ({
         </DialogContent>
       </Dialog>
 
-    {/* Invite Dialog */}
-    <Dialog open={showInviteDialog} onOpenChange={setShowInviteDialog}>
+      {/* Invite Dialog */}
+      <Dialog open={showInviteDialog} onOpenChange={setShowInviteDialog}>
         <DialogContent
           className="font-roboto cursor-default p-6 pb-10 max-w-md"
           onClick={(e) => e.stopPropagation()}
