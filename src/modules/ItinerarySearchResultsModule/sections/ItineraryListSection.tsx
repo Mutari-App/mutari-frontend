@@ -112,7 +112,7 @@ const ItineraryListSection: React.FC<ItineraryListSectionProps> = ({
               </PaginationItem>
               <div className="hidden min-[480px]:flex">
                 {visiblePages.map((page, index) => (
-                  <PaginationItem key={index}>
+                  <PaginationItem key={`page-${page}-${index}`}>
                     {page === 'ellipsis' ? (
                       <PaginationEllipsis />
                     ) : (
