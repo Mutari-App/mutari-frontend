@@ -1,10 +1,55 @@
 import { render, fireEvent, screen, waitFor } from '@testing-library/react'
-import { SettingsItineraryModal } from '@/modules/ItineraryMakerModule/module-elements/settingsModal' // Adjust path if needed
+import { SettingsItineraryModal } from '@/modules/ItineraryMakerModule/module-elements/settingsModal'
 
 jest.mock('lucide-react', () => ({
   X: 'X',
   Clipboard: 'Clipboard',
   Trash: 'Trash',
+}))
+
+jest.mock('next-cloudinary', () => ({
+  __esModule: true,
+  CldUploadWidget: ({
+    onUpload,
+  }: {
+    onUpload?: (result: { info: { secure_url: string } }) => void
+  }) => (
+    <button
+      data-testid="mock-upload-widget"
+      onClick={() =>
+        onUpload?.({ info: { secure_url: 'https://example.com/image.jpg' } })
+      }
+    >
+      Upload Widget
+    </button>
+  ),
+  CldUploadButton: ({
+    onUpload,
+    ...props
+  }: {
+    onUpload?: (result: { info: { secure_url: string } }) => void
+  }) => (
+    <button
+      data-testid="mock-upload-button"
+      onClick={() =>
+        onUpload?.({ info: { secure_url: 'https://example.com/image.jpg' } })
+      }
+      {...props}
+    >
+      Upload Button
+    </button>
+  ),
+  CldImage: (props: React.ImgHTMLAttributes<HTMLImageElement>) => (
+    <img {...props} alt="mocked-image" />
+  ),
+}))
+
+jest.mock('@/components/ui/button', () => ({
+  buttonVariants: jest.fn(() => 'mocked-button-variants'),
+}))
+
+jest.mock('@/lib/utils', () => ({
+  cn: (...args: any[]) => args.join(' '),
 }))
 
 describe('SettingsItineraryModal', () => {
