@@ -21,25 +21,27 @@ export default function DetailItineraryModule() {
     contingencyId: string
   }>()
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await customFetch<ItineraryDetailResponse>(
-          `/itineraries/${id}`,
-          {
-            credentials: 'include',
-          }
-        )
-
-        if (res.statusCode === 404 || res.statusCode === 403) {
-          setIsNotFound(true)
+  const fetchData = async () => {
+    try {
+      const res = await customFetch<ItineraryDetailResponse>(
+        `/itineraries/${id}`,
+        {
+          credentials: 'include',
         }
+      )
+      console.log('res: ', res)
 
-        setData(res.data)
-      } catch (err: any) {
+      if (res.statusCode === 404 || res.statusCode === 403) {
         setIsNotFound(true)
       }
+
+      setData(res.data)
+    } catch (err: any) {
+      setIsNotFound(true)
     }
+  }
+
+  useEffect(() => {
     void fetchData()
     const fetchContingencies = async () => {
       try {
@@ -125,6 +127,7 @@ export default function DetailItineraryModule() {
                 : data
             }
             contingencyId={contingencyId}
+            refresh={fetchData}
           />
           <ItinerarySummary startDate={data.startDate} endDate={data.endDate} />
           <ItineraryList

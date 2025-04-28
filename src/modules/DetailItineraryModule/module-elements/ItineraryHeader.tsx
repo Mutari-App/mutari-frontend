@@ -1,9 +1,8 @@
 import { Button } from '@/components/ui/button'
 import { useAuthContext } from '@/contexts/AuthContext'
-import { UserRoundPlus, Share2, X } from 'lucide-react'
+import { Share2, X } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
-import Image from 'next/image'
 import {
   Dialog,
   DialogContent,
@@ -15,13 +14,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { customFetch } from '@/utils/newCustomFetch'
 import { toast } from 'sonner'
 import { DuplicateItineraryResponse } from '@/modules/ItineraryModule/module-elements/types'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
 export const ItineraryHeader = ({
   data,
   contingencyId,
+  refresh,
 }: {
   data: Itinerary
   contingencyId?: string
+  refresh: () => Promise<void>
 }) => {
   const { user } = useAuthContext()
   const [showModal, setShowModal] = useState(false)
@@ -114,6 +116,7 @@ export const ItineraryHeader = ({
       toast.success('Undangan berhasil dikirim!')
       setEmails([])
       setEmailInput('')
+      await refresh()
     } catch (err) {
       if (err instanceof Error) toast.error(`${err.message}`)
     }
@@ -135,6 +138,7 @@ export const ItineraryHeader = ({
 
       if (response.statusCode !== 200) throw new Error(response.message)
       toast.success('User berhasil dihapus!')
+      await refresh()
     } catch (err) {
       if (err instanceof Error) toast.error(`${err.message}`)
     } finally {
@@ -160,6 +164,87 @@ export const ItineraryHeader = ({
     } finally {
       setIsLoading(false)
     }
+  }
+
+  const renderAcceptedUsers = () => {
+    if (isLoading) {
+      return <div className="text-center py-4">Memuat...</div>
+    }
+
+    if (data.invitedUsers?.length > 0) {
+      return (
+        <div className="space-y-2 max-h-48 overflow-y-auto">
+          {data.invitedUsers?.map((user) => (
+            <div
+              key={user.id}
+              className="flex items-center justify-between p-2 bg-gray-50 rounded-md"
+            >
+              <div className="flex items-center gap-2">
+                <div className="relative rounded-full overflow-hidden aspect-square w-10  ">
+                  <Avatar>
+                    <AvatarImage
+                      src={user.photoProfile}
+                      alt={`${user.firstName} ${user.lastName}`}
+                    />
+                    <AvatarFallback>
+                      {user.firstName.charAt(0)}
+                      {user.lastName?.charAt(0)}
+                    </AvatarFallback>
+                  </Avatar>
+                </div>
+                <div className="flex flex-col">
+                  <span className="font-medium">
+                    {user.firstName} {user.lastName}
+                  </span>
+                  <span className="text-gray-400 text-sm">{user.email}</span>
+                </div>
+              </div>
+              <button onClick={() => removeUser(user.id)}>
+                <X />
+              </button>
+            </div>
+          ))}
+        </div>
+      )
+    }
+
+    return (
+      <div className="text-center py-4 text-gray-500">
+        Belum ada akun yang terdaftar
+      </div>
+    )
+  }
+
+  const renderPendingInvites = () => {
+    if (isLoading) {
+      return <div className="text-center py-4">Memuat...</div>
+    }
+
+    if (data.pendingInvites?.length > 0) {
+      return (
+        <div className="space-y-2 max-h-48 overflow-y-auto">
+          {data.pendingInvites.map((user) => (
+            <div
+              key={user.id}
+              className="flex items-center justify-between p-2 bg-gray-50 rounded-md"
+            >
+              <div className="flex items-center gap-2">
+                <Avatar>
+                  <AvatarFallback>{user.email[0].toUpperCase()}</AvatarFallback>
+                </Avatar>
+                <span>{user.email}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      )
+    }
+
+    return (
+      <div className="text-center py-4 text-gray-500">
+        Tidak ada undangan yang tertunda
+      </div>
+    )
   }
 
   return (
@@ -214,20 +299,10 @@ export const ItineraryHeader = ({
         <div className="absolute top-2 right-2 sm:top-4 sm:right-4 z-10 flex gap-2">
           <Button
             type="button"
-            size="icon"
+            size="sm"
             variant="ghost"
             className="bg-white text-black rounded-xl shadow"
             onClick={openInviteDialog}
-          >
-            <UserRoundPlus className="w-6 h-6 text-[#004080]" />
-          </Button>
-
-          <Button
-            type="button"
-            size="icon"
-            variant="ghost"
-            className="bg-white text-black rounded-xl shadow"
-            onClick={() => setShowModal(true)}
           >
             <Share2 className="w-6 h-6 text-[#004080]" />
           </Button>
@@ -261,184 +336,121 @@ export const ItineraryHeader = ({
         </div>
       )}
 
-      <Dialog open={showModal} onOpenChange={setShowModal}>
-        <DialogContent className="sm:max-w-[425px]">
+      <Dialog
+        open={showModal || showInviteDialog}
+        onOpenChange={(open) => {
+          setShowModal(open)
+          setShowInviteDialog(open)
+        }}
+      >
+        <DialogContent className="font-roboto cursor-default p-6 pb-10 max-w-md">
           <DialogHeader>
             <DialogTitle className="text-2xl text-center w-full font-semibold">
-              Share Itinerary Ini Share Itinerary Ini
+              Bagikan Itinerary
             </DialogTitle>
           </DialogHeader>
-          <div className="text-sm text-center text-gray-600">
-            Copy dan kirim link dibawah ini. Orang yang mempunyai link dapat
-            melihat, tetapi tidak bisa edit maupun duplikat Copy dan kirim link
-            dibawah ini. Orang yang mempunyai link dapat melihat, tetapi tidak
-            bisa edit maupun duplikat
-          </div>
-          <div className="flex items-center gap-2 mt-4 bg-gray-100 rounded-md p-2">
-            <span className="text-sm text-gray-800 truncate w-[300px]">
-              {shareLink}
-            </span>
-            <span className="text-sm text-gray-800 truncate w-[300px]">
-              {shareLink}
-            </span>
-            <Button
-              className="px-4 py-2 bg-gradient-to-r from-[#016CD7] to-[#014285] text-white items-center rounded"
-              onClick={() => {
-                void navigator.clipboard
-                  .writeText(shareLink)
-                  .then(() => {
-                    toast.message('Link berhasil disalin')
-                  })
-                  .catch((error) => {
-                    toast.error('Gagal menyalin link')
-                    console.error('Clipboard error:', error)
-                  })
-              }}
-            >
-              Salin
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
 
-      {/* Invite Dialog */}
-      <Dialog open={showInviteDialog} onOpenChange={setShowInviteDialog}>
-        <DialogContent
-          className="font-roboto cursor-default p-6 pb-10 max-w-md"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className="flex justify-between items-center">
-            <DialogTitle className="text-2xl text-center w-full font-semibold">
-              Masukkan email
-            </DialogTitle>
-          </div>
-          <DialogDescription className="text-gray-500 text-center max-w-xs mx-auto">
-            Invite orang yang ingin kamu undang untuk melihat itinerary-mu!
-          </DialogDescription>
-
-          <form onSubmit={handleInvite} className="mb-6 flex w-full gap-2">
-            <div className="flex flex-wrap items-center gap-2 p-2 w-full border rounded-md mb-2 min-h-10">
-              {emails.map((email, index) => (
-                <div
-                  key={index}
-                  className="flex items-center gap-1 bg-blue-100 text-blue-800 px-2 py-1 rounded-md text-sm"
-                >
-                  <span>{email}</span>
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      removeEmail(email)
-                    }}
-                    className="text-blue-800 hover:text-blue-900"
-                  >
-                    <X size={14} />
-                  </button>
-                </div>
-              ))}
-              <input
-                ref={inputRef}
-                type="text"
-                placeholder={
-                  emails.length > 0 ? '' : 'Email (pisahkan dengan spasi)'
-                }
-                value={emailInput}
-                onChange={handleEmailInputChange}
-                onKeyDown={handleKeyDown}
-                onClick={(e) => e.stopPropagation()}
-                className="w-full outline-none border-none min-w-[120px]"
-              />
-            </div>
-            <div className="flex justify-end">
-              <Button
-                className="px-4 py-2 bg-gradient-to-r from-[#016CD7] to-[#014285] text-white items-center rounded"
-                type="submit"
-              >
-                Kirim
-              </Button>
-            </div>
-          </form>
-
-          {/* Tabs for invited users */}
-          <Tabs defaultValue="accepted" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="accepted">
-                Akun Terdaftar ({data.invitedUsers?.length})
-              </TabsTrigger>
-              <TabsTrigger value="pending">
-                Pending ({data.pendingInvites?.length})
-              </TabsTrigger>
+          <Tabs defaultValue="share" className="w-full">
+            <TabsList className="grid w-full grid-cols-2 mb-4">
+              <TabsTrigger value="share">Share Link</TabsTrigger>
+              <TabsTrigger value="invite">Undang via Email</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="accepted" className="mt-4">
-              {isLoading ? (
-                <div className="text-center py-4">Memuat...</div>
-              ) : data.invitedUsers?.length > 0 ? (
-                <div className="space-y-2 max-h-48 overflow-y-auto">
-                  {data.invitedUsers?.map((user) => (
+            <TabsContent value="share">
+              <div className="text-sm text-center text-gray-600 mb-4">
+                Copy dan kirim link dibawah ini. Orang yang mempunyai link dapat
+                melihat, tetapi tidak bisa edit maupun duplikat
+              </div>
+              <div className="flex items-center gap-2 bg-gray-100 rounded-md p-2">
+                <span className="text-sm text-gray-800 truncate w-[300px]">
+                  {shareLink}
+                </span>
+                <Button
+                  className="px-4 py-2 bg-gradient-to-r from-[#016CD7] to-[#014285] text-white items-center rounded"
+                  onClick={() => {
+                    void navigator.clipboard
+                      .writeText(shareLink)
+                      .then(() => {
+                        toast.message('Link berhasil disalin')
+                      })
+                      .catch((error) => {
+                        toast.error('Gagal menyalin link')
+                        console.error('Clipboard error:', error)
+                      })
+                  }}
+                >
+                  Salin
+                </Button>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="invite">
+              <DialogDescription className="text-gray-500 text-center max-w-xs mx-auto mb-4">
+                Invite orang yang ingin kamu undang untuk melihat itinerary-mu!
+              </DialogDescription>
+
+              <form onSubmit={handleInvite} className="mb-6 flex w-full gap-2">
+                <div className="flex flex-wrap items-center gap-2 p-2 w-full border rounded-md mb-2 min-h-10">
+                  {emails.map((email, index) => (
                     <div
-                      key={user.id}
-                      className="flex items-center justify-between p-2 bg-gray-50 rounded-md"
+                      key={index}
+                      className="flex items-center gap-1 bg-blue-100 text-blue-800 px-2 py-1 rounded-md text-sm"
                     >
-                      <div className="flex items-center gap-2">
-                        <div className="relative rounded-full overflow-hidden aspect-square w-10  ">
-                          <Image
-                            src={
-                              user.photoProfile ||
-                              '/images/profile-placeholder.png'
-                            }
-                            alt={`${user.firstName} ${user.lastName}`}
-                            width={40}
-                            height={40}
-                            className="object-cover"
-                          />
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="font-medium">
-                            {user.firstName} {user.lastName}
-                          </span>
-                          <span className="text-gray-400 text-sm">
-                            {user.email}
-                          </span>
-                        </div>
-                      </div>
-                      <button onClick={() => removeUser(user.id)}>
-                        <X />
+                      <span>{email}</span>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          removeEmail(email)
+                        }}
+                        className="text-blue-800 hover:text-blue-900"
+                      >
+                        <X size={14} />
                       </button>
                     </div>
                   ))}
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    placeholder={
+                      emails.length > 0 ? '' : 'Email (pisahkan dengan spasi)'
+                    }
+                    value={emailInput}
+                    onChange={handleEmailInputChange}
+                    onKeyDown={handleKeyDown}
+                    onClick={(e) => e.stopPropagation()}
+                    className="w-full outline-none border-none min-w-[120px]"
+                  />
                 </div>
-              ) : (
-                <div className="text-center py-4 text-gray-500">
-                  Belum ada akun yang terdaftar
+                <div className="flex justify-end">
+                  <Button
+                    className="px-4 py-2 bg-gradient-to-r from-[#016CD7] to-[#014285] text-white items-center rounded"
+                    type="submit"
+                  >
+                    Kirim
+                  </Button>
                 </div>
-              )}
-            </TabsContent>
+              </form>
 
-            <TabsContent value="pending" className="mt-4">
-              {isLoading ? (
-                <div className="text-center py-4">Memuat...</div>
-              ) : data.pendingInvites?.length > 0 ? (
-                <div className="space-y-2 max-h-48 overflow-y-auto">
-                  {data.pendingInvites.map((user) => (
-                    <div
-                      key={user.id}
-                      className="flex items-center justify-between p-2 bg-gray-50 rounded-md"
-                    >
-                      <div className="flex items-center gap-2">
-                        <div className="rounded-full aspect-square w-10 bg-gray-400 text-white text-2xl text-center leading-10">
-                          {user.email[0].toUpperCase()}
-                        </div>
-                        <span>{user.email}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-4 text-gray-500">
-                  Tidak ada undangan yang tertunda
-                </div>
-              )}
+              {/* Tabs for invited users */}
+              <Tabs defaultValue="accepted" className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="accepted">
+                    Akun Terdaftar ({data.invitedUsers?.length})
+                  </TabsTrigger>
+                  <TabsTrigger value="pending">
+                    Pending ({data.pendingInvites?.length})
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="accepted" className="mt-4">
+                  {renderAcceptedUsers()}
+                </TabsContent>
+
+                <TabsContent value="pending" className="mt-4">
+                  {renderPendingInvites()}
+                </TabsContent>
+              </Tabs>
             </TabsContent>
           </Tabs>
         </DialogContent>

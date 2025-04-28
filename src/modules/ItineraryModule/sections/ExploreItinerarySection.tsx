@@ -55,6 +55,7 @@ const ExploreItinerarySection = () => {
         onSearch={handleSearch}
         className="max-w-7xl border border-[#0073E6] rounded-full"
         searchHistoryDropdownPadding="md:p-2"
+        variant="iconLeft"
       />
       {isLoading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
