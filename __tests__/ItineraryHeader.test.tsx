@@ -88,18 +88,39 @@ const mockData = {
 
 describe('ItineraryHeader Component', () => {
   it('renders title and description correctly', () => {
-    render(<ItineraryHeader data={mockData} />)
+    render(
+      <ItineraryHeader
+        data={mockData}
+        refresh={function (): Promise<void> {
+          throw new Error('Function not implemented.')
+        }}
+      />
+    )
     expect(screen.getByText('Trip to Bali')).toBeInTheDocument()
     expect(screen.getByText('A fun trip to Bali!')).toBeInTheDocument()
   })
 
   it('renders the edit button when user is the owner', () => {
-    render(<ItineraryHeader data={mockData} />)
+    render(
+      <ItineraryHeader
+        data={mockData}
+        refresh={function (): Promise<void> {
+          throw new Error('Function not implemented.')
+        }}
+      />
+    )
     expect(screen.getByText('Edit')).toBeInTheDocument()
   })
 
   it('has the correct edit page link', () => {
-    render(<ItineraryHeader data={mockData} />)
+    render(
+      <ItineraryHeader
+        data={mockData}
+        refresh={function (): Promise<void> {
+          throw new Error('Function not implemented.')
+        }}
+      />
+    )
     const linkElement = screen.getByRole('link', { name: /Edit/i })
     expect(linkElement).toHaveAttribute('href', `${mockData.id}/edit`)
   })
