@@ -114,6 +114,7 @@ export default function ItineraryMakerModule({
   const [contingency, setContingency] = useState<ContingencyPlan | null>(null)
 
   const initialItineraryData = useRef<CreateItineraryDto>({
+    isPublished: false,
     title: 'Itinerary Tanpa Judul',
     description: '',
     coverImage: '',
@@ -916,7 +917,9 @@ export default function ItineraryMakerModule({
     )
   }
 
-  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleTitleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     setItineraryData((prev) => ({
       ...prev,
       title: e.target.value,
@@ -928,7 +931,9 @@ export default function ItineraryMakerModule({
     }))
   }
 
-  const handleDescChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleDescChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     setItineraryData((prev) => ({
       ...prev,
       description: e.target.value,
@@ -1812,11 +1817,9 @@ export default function ItineraryMakerModule({
     setFeedbackItems((prev) =>
       prev.filter((item) => {
         const section = itineraryData.sections[item.target.sectionIndex - 1]
-        const blockExists = section?.blocks?.some(
-          (block) => block.id === item.target.blockId
-        )
-        // keep only if block still exists
-        return blockExists
+        if (!section?.blocks) return false
+
+        return section.blocks.some((block) => block.id === item.target.blockId)
       })
     )
   }
@@ -1843,6 +1846,8 @@ export default function ItineraryMakerModule({
             )}
           </button>
           <ItineraryHeader
+            isPublished={itineraryData.isPublished}
+            itineraryId={itineraryId}
             title={_getHeaderTitle()}
             description={itineraryData.description}
             coverImage={itineraryData.coverImage}

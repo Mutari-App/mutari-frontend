@@ -1,38 +1,49 @@
-import React, { useRef, useEffect } from 'react'
+import React, { useRef, useEffect, useState } from 'react'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Wand2, Edit2 } from 'lucide-react'
+import { UserRoundPlus, Edit2, Settings, Share2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import {
-  type CloudinaryUploadWidgetResults,
-  CldUploadButton,
-} from 'next-cloudinary'
+import { type CloudinaryUploadWidgetResults } from 'next-cloudinary'
+import { SettingsItineraryModal } from '../module-elements/settingsModal'
+import { customFetch, customFetchBody } from '@/utils/newCustomFetch'
+import { CreateItineraryResponse } from '../interface'
 
 interface ItineraryHeaderProps {
+  itineraryId: string
   title: string
   description?: string
   coverImage?: string
-  onTitleChange: (e: React.ChangeEvent<HTMLInputElement>) => void
-  onDescChange: (e: React.ChangeEvent<HTMLInputElement>) => void
+  onTitleChange: (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => void
+  onDescChange: (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => void
   onCoverImageChange: (result: CloudinaryUploadWidgetResults) => void
   isSubmitting: boolean
   isGenerating: boolean
   onGenerateFeedback: () => void
+  isPublished: boolean
   isContingency: boolean
 }
 
 export const ItineraryHeader: React.FC<ItineraryHeaderProps> = ({
+  itineraryId,
   title,
   description,
   coverImage,
   onTitleChange,
   onDescChange,
   onCoverImageChange,
-  isGenerating,
-  onGenerateFeedback,
+  isPublished,
   isContingency,
 }) => {
   const titleInputRef = useRef<HTMLInputElement>(null)
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false)
+  const [localTitle, setLocalTitle] = useState(title)
+  const [localDesc, setLocalDesc] = useState(description ?? '')
+  const [localCoverImage, setLocalCoverImage] = useState(coverImage)
+  const [visibility, setVisibility] = useState<'public' | 'private'>('private')
 
   // Handle title input focus to select all text if it's the default value
   const handleTitleFocus = () => {
@@ -40,6 +51,43 @@ export const ItineraryHeader: React.FC<ItineraryHeaderProps> = ({
       setTimeout(() => {
         titleInputRef.current?.select()
       }, 0)
+    }
+  }
+
+  const handleSave = async (data: {
+    title: string
+    description?: string
+    coverImage?: string
+    isPublished: boolean
+  }) => {
+    setLocalTitle(data.title)
+    setLocalDesc(data.description ?? '')
+    setLocalCoverImage(data.coverImage)
+    setVisibility(data.isPublished ? 'public' : 'private')
+
+    onTitleChange({
+      target: { value: data.title },
+    } as React.ChangeEvent<HTMLInputElement>)
+    onDescChange({
+      target: { value: data.description ?? '' },
+    } as React.ChangeEvent<HTMLInputElement>)
+    if (data.coverImage) {
+      onCoverImageChange({
+        info: { secure_url: data.coverImage },
+      } as CloudinaryUploadWidgetResults)
+    }
+
+    try {
+      await customFetch<CreateItineraryResponse>(
+        `/itineraries/${itineraryId}/publish`,
+        {
+          method: 'PATCH',
+          body: customFetchBody({ isPublished: data.isPublished }),
+          credentials: 'include',
+        }
+      )
+    } catch (error) {
+      console.error('Failed to publish itinerary:', error)
     }
   }
 
@@ -100,22 +148,35 @@ export const ItineraryHeader: React.FC<ItineraryHeaderProps> = ({
         </div>
       </div>
 
-      <CldUploadButton
-        uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
-        onSuccess={onCoverImageChange}
-        className={cn(
-          buttonVariants({ variant: 'ghost', size: 'sm' }),
-          isContingency && 'opacity-50 cursor-not-allowed pointer-events-none',
-          'absolute top-2 right-2 sm:top-4 sm:right-4 z-10 text-white bg-[#1C1C1C99]'
-        )}
-        options={{
-          clientAllowedFormats: ['image'],
-          maxFiles: 1,
-          maxFileSize: 1024 * 256, // 256 KB
-        }}
-      >
-        Ganti foto cover
-      </CldUploadButton>
+      <div className="absolute top-2 right-2 sm:top-4 sm:right-4 z-10 flex gap-2">
+        <Button
+          type="button"
+          size="icon"
+          variant="ghost"
+          className={cn(
+            'bg-white text-black rounded-xl shadow',
+            isContingency && 'opacity-50 cursor-not-allowed pointer-events-none'
+          )}
+          onClick={() => setIsSettingsModalOpen(true)}
+          disabled={isContingency}
+        >
+          <Settings className="w-6 h-6 text-[#004080]" />
+        </Button>
+      </div>
+
+      <SettingsItineraryModal
+        isPublished={isPublished}
+        isOpen={isSettingsModalOpen}
+        onClose={() => setIsSettingsModalOpen(false)}
+        onSave={handleSave}
+        onTitleChange={onTitleChange}
+        onDescChange={onDescChange}
+        onCoverImageChange={onCoverImageChange}
+        isContingency={isContingency}
+        title={title}
+        description={description}
+        coverImage={coverImage}
+      />
     </div>
   )
 }

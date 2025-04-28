@@ -85,6 +85,7 @@ jest.mock('@vis.gl/react-google-maps', () => ({
 describe('Maps Component', () => {
   const mockApiKey = 'MOCK-API-KEY'
   const mockItineraryData: CreateItineraryDto = {
+    isPublished: false,
     title: 'Trip to Jakarta',
     description: 'Exploring the city',
     coverImage: 'image-url',

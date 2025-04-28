@@ -1,4 +1,4 @@
-import { deleteCookie, getCookie } from 'cookies-next'
+import { deleteCookie, getCookie, getCookies } from 'cookies-next'
 import {
   type CustomFetchBaseResponse,
   type CustomFetchRequestInit,
@@ -23,7 +23,14 @@ export async function customFetch<T>(
     delete headers['Content-Type']
   }
 
-  const AT = await getCookie('AT')
+  let AT
+  if (isServer) {
+    const { cookies } = await import('next/headers')
+    const serverCookies = await cookies()
+    AT = serverCookies.get('AT')?.value
+  } else {
+    AT = await getCookie('AT')
+  }
 
   if (AT) {
     headers.authorization = `Bearer ${String(AT)}`
