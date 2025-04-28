@@ -20,7 +20,7 @@ const ItineraryCard: React.FC<ItineraryCardProps> = ({
 }) => {
   const { id, firstName, lastName, photoProfile } = itinerary.user
   const fullName = `${firstName} ${lastName}`
-  const initials = `${firstName.charAt(0)}${lastName?.charAt(0)}`
+  const initials = `${firstName.charAt(0)}${lastName?.charAt(0) || ''}`
 
   const visibleTags = itinerary.tags.slice(0, maxVisibleTags)
   const hiddenTagsCount = Math.max(0, itinerary.tags.length - maxVisibleTags)
