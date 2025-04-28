@@ -3,7 +3,7 @@ import { type CustomFetchBaseResponse } from '@/utils/customFetch/interface'
 export interface UserInfo {
   id: string
   firstName: string
-  lastName: string
+  lastName?: string
   photoProfile?: string | null
 }
 
