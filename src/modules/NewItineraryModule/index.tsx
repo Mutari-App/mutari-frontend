@@ -18,11 +18,12 @@ import {
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
 import {
-  ItineraryData,
-  ItineraryResponse,
-  metadataType,
+  type ItineraryData,
+  type ItineraryResponse,
+  type metadataType,
 } from '../ItineraryModule/module-elements/types'
 import MyItineraryList from './sections/MyItineraryList'
+import ExploreItinerarySection from '../ItineraryModule/sections/ExploreItinerarySection'
 
 interface FilterState {
   shared: boolean
@@ -220,6 +221,7 @@ export default function NewItineraryModule() {
         height={720}
         className="w-screen"
       />
+      <ExploreItinerarySection />
     </div>
   )
 }

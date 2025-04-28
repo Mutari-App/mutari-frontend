@@ -14,6 +14,7 @@ import type {
   metadataType,
 } from './module-elements/types'
 import { toast } from 'sonner'
+import ExploreItinerarySection from './sections/ExploreItinerarySection'
 
 export default function ItineraryModule() {
   const searchParams = useSearchParams()
@@ -205,6 +206,7 @@ export default function ItineraryModule() {
         height={720}
         className="w-screen"
       />
+      <ExploreItinerarySection />
     </div>
   )
 }

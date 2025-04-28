@@ -55,6 +55,13 @@ const mockData = {
     { tag: { id: 'tag-1', name: 'Beach' } },
     { tag: { id: 'tag-2', name: 'Adventure' } },
   ],
+  user: {
+    id: 'usr-123',
+    firstName: 'John',
+    lastName: 'Doe',
+    photoProfile: 'profile.jpg',
+    email: 'john.doe@example.com',
+  },
   sections: [],
   pendingInvites: [
     {
@@ -74,6 +81,9 @@ const mockData = {
       email: 'hobahoba@gmail.com',
     },
   ],
+  _count: {
+    likes: 42,
+  },
 }
 
 describe('ItineraryHeader Component', () => {

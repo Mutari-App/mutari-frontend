@@ -159,72 +159,103 @@ export const ItineraryHeader = ({
             {data.title}
           </h1>
           {data.description && (
-            <p className="text-xs md:text-sm font-raleway text-white max-h-16 overflow-y-auto">
-              <style jsx>{`
-                p::-webkit-scrollbar {
-                  width: 4px;
-                }
-                p::-webkit-scrollbar-track {
-                  background: transparent;
-                }
-                p::-webkit-scrollbar-thumb {
-                  background-color: rgba(255, 255, 255, 0.3);
-                  border-radius: 20px;
-                }
-              `}</style>
-              {data.description}
-            </p>
+            <div className="flex flex-col gap-2">
+              <p className="text-xs md:text-sm font-raleway text-white max-h-16 overflow-y-auto">
+                <style jsx>{`
+                  p::-webkit-scrollbar {
+                    width: 4px;
+                  }
+                  p::-webkit-scrollbar-track {
+                    background: transparent;
+                  }
+                  p::-webkit-scrollbar-thumb {
+                    background-color: rgba(255, 255, 255, 0.3);
+                    border-radius: 20px;
+                  }
+                `}</style>
+                {data.description}
+              </p>
+              {user?.id !== data.userId && (
+                <div>
+                  <p className="text-[14px] md:text-s font-raleway text-white/80 italic">
+                    {data.user.firstName} {data.user.lastName}
+                  </p>
+                  <p className="text-[10px] md:text-xs font-raleway text-white/80 italic">
+                    {data._count.likes} orang menyukai itinerary ini
+                  </p>
+                </div>
+              )}
+            </div>
           )}
         </div>
       </div>
-      <div className="absolute top-2 right-2 sm:top-4 sm:right-4 z-10 flex gap-2">
-        <Button
-          type="button"
-          size="icon"
-          variant="ghost"
-          className="bg-white text-black rounded-xl shadow"
-          onClick={openInviteDialog}
-        >
-          <UserRoundPlus className="w-6 h-6 text-[#004080]" />
-        </Button>
-
-        <Button
-          type="button"
-          size="icon"
-          variant="ghost"
-          className="bg-white text-black rounded-xl shadow"
-          onClick={() => setShowModal(true)}
-        >
-          <Share2 className="w-6 h-6 text-[#004080]" />
-        </Button>
-        {user?.id === data.userId && (
-          <Link
-            href={contingencyId ? `${contingencyId}/edit` : `${data.id}/edit`}
+      {user?.id === data.userId && (
+        <div className="absolute top-2 right-2 sm:top-4 sm:right-4 z-10 flex gap-2">
+          <Button
+            type="button"
+            size="icon"
+            variant="ghost"
+            className="bg-white text-black rounded-xl shadow"
+            onClick={openInviteDialog}
           >
-            <Button
-              size="sm"
-              type="button"
-              variant="ghost"
-              className="bg-white text-[#004080] rounded-xl shadow"
+            <UserRoundPlus className="w-6 h-6 text-[#004080]" />
+          </Button>
+
+          <Button
+            type="button"
+            size="icon"
+            variant="ghost"
+            className="bg-white text-black rounded-xl shadow"
+            onClick={() => setShowModal(true)}
+          >
+            <Share2 className="w-6 h-6 text-[#004080]" />
+          </Button>
+          {user?.id === data.userId && (
+            <Link
+              href={contingencyId ? `${contingencyId}/edit` : `${data.id}/edit`}
             >
-              Edit
-            </Button>
-          </Link>
-        )}
-      </div>
+              <Button
+                size="sm"
+                type="button"
+                variant="ghost"
+                className="bg-white text-[#004080] rounded-xl shadow"
+              >
+                Edit
+              </Button>
+            </Link>
+          )}
+        </div>
+      )}
+      {user?.id !== data.userId && (
+        <div className="absolute top-2 right-2 sm:top-4 sm:right-4 z-10 flex">
+          <Button
+            size="sm"
+            type="button"
+            variant="ghost"
+            className="bg-white text-[#004080] rounded-xl shadow"
+          >
+            Duplikasi dan Edit
+          </Button>
+        </div>
+      )}
 
       <Dialog open={showModal} onOpenChange={setShowModal}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle className="text-2xl text-center w-full font-semibold">
-              Share Itinerary Ini
+              Share Itinerary Ini Share Itinerary Ini
             </DialogTitle>
           </DialogHeader>
           <div className="text-sm text-center text-gray-600">
             Copy dan kirim link dibawah ini. Orang yang mempunyai link dapat
-            melihat, tetapi tidak bisa edit maupun duplikat
+            melihat, tetapi tidak bisa edit maupun duplikat Copy dan kirim link
+            dibawah ini. Orang yang mempunyai link dapat melihat, tetapi tidak
+            bisa edit maupun duplikat
           </div>
           <div className="flex items-center gap-2 mt-4 bg-gray-100 rounded-md p-2">
+            <span className="text-sm text-gray-800 truncate w-[300px]">
+              {shareLink}
+            </span>
             <span className="text-sm text-gray-800 truncate w-[300px]">
               {shareLink}
             </span>
