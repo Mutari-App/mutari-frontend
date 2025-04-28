@@ -1,4 +1,3 @@
-import { User } from '@/contexts/AuthContext/interface'
 import type { CustomFetchBaseResponse } from '@/utils/customFetch/interface'
 
 export type metadataType = {
