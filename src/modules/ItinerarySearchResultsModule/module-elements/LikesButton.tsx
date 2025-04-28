@@ -31,23 +31,19 @@ const LikesButton: React.FC<LikesButtonProps> = ({
 
   const toggleLike = async () => {
     try {
-      if (isLiked) {
-        // unsave
-        setIsLiked(false)
-        setLikeCount(likeCount - 1)
-      } else {
-        setIsLiked(true)
-        setLikeCount(likeCount + 1)
-      }
-
-      await customFetch(`/itineraries/${itineraryId}/save`, {
+      const response = await customFetch(`/itineraries/${itineraryId}/save`, {
         method: isLiked === true ? 'DELETE' : 'POST',
         credentials: 'include',
       })
 
-      toast.success(isLiked === true ? 'Itinerary unsaved' : 'Itinerary saved!')
+      if (!response.success) throw Error(response.message)
+      setIsLiked(!isLiked)
+      setLikeCount(isLiked === true ? likeCount - 1 : likeCount + 1)
+      toast.message(isLiked === true ? 'Itinerary unsaved' : 'Itinerary saved!')
     } catch (error) {
-      console.error('Failed to save/unsave itinerary:', error)
+      toast.error(
+        error instanceof Error ? error.message : 'An unexpected error occurred'
+      )
     }
   }
 
