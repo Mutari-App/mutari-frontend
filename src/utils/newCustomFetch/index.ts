@@ -32,8 +32,6 @@ export async function customFetch<T>(
     AT = await getCookie('AT')
   }
 
-  console.log('AT', AT)
-
   if (AT) {
     headers.authorization = `Bearer ${String(AT)}`
   }

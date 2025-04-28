@@ -192,4 +192,149 @@ describe('SearchHistoryDropdown Component', () => {
     const container = screen.getByText('Riwayat Pencarian').closest('div')
     expect(container?.parentElement?.parentElement).toHaveClass('custom-class')
   })
+
+  // New tests for keyboard interactions
+  test('calls onSelectItem when pressing Enter on history item', () => {
+    render(
+      <SearchHistoryDropdown
+        searchHistory={searchHistory}
+        suggestions={suggestions}
+        onSelectItem={mockOnSelectItem}
+        onClearHistoryItem={mockOnClearHistoryItem}
+        onClearAllHistory={mockOnClearAllHistory}
+      />
+    )
+
+    // Find history item button
+    const historyItemButton = screen
+      .getByText('Past Search 1')
+      .closest('button')
+    expect(historyItemButton).not.toBeNull()
+
+    // Simulate pressing Enter key
+    fireEvent.keyDown(historyItemButton!, { key: 'Enter' })
+
+    // onSelectItem should be called
+    expect(mockOnSelectItem).toHaveBeenCalledWith('Past Search 1')
+  })
+
+  test('calls onSelectItem when pressing Space on history item', () => {
+    render(
+      <SearchHistoryDropdown
+        searchHistory={searchHistory}
+        suggestions={suggestions}
+        onSelectItem={mockOnSelectItem}
+        onClearHistoryItem={mockOnClearHistoryItem}
+        onClearAllHistory={mockOnClearAllHistory}
+      />
+    )
+
+    // Find history item button
+    const historyItemButton = screen
+      .getByText('Past Search 1')
+      .closest('button')
+    expect(historyItemButton).not.toBeNull()
+
+    // Simulate pressing Space key
+    fireEvent.keyDown(historyItemButton!, { key: ' ' })
+
+    // onSelectItem should be called
+    expect(mockOnSelectItem).toHaveBeenCalledWith('Past Search 1')
+  })
+
+  test('calls onSelectItem when pressing Enter on suggestion item', () => {
+    render(
+      <SearchHistoryDropdown
+        searchHistory={searchHistory}
+        suggestions={suggestions}
+        onSelectItem={mockOnSelectItem}
+        onClearHistoryItem={mockOnClearHistoryItem}
+        onClearAllHistory={mockOnClearAllHistory}
+      />
+    )
+
+    // Find suggestion item button
+    const suggestionItemButton = screen
+      .getByText('Suggested Search 1')
+      .closest('button')
+    expect(suggestionItemButton).not.toBeNull()
+
+    // Simulate pressing Enter key
+    fireEvent.keyDown(suggestionItemButton!, { key: 'Enter' })
+
+    // onSelectItem should be called
+    expect(mockOnSelectItem).toHaveBeenCalledWith('Suggested Search 1')
+  })
+
+  test('calls onSelectItem when pressing Space on suggestion item', () => {
+    render(
+      <SearchHistoryDropdown
+        searchHistory={searchHistory}
+        suggestions={suggestions}
+        onSelectItem={mockOnSelectItem}
+        onClearHistoryItem={mockOnClearHistoryItem}
+        onClearAllHistory={mockOnClearAllHistory}
+      />
+    )
+
+    // Find suggestion item button
+    const suggestionItemButton = screen
+      .getByText('Suggested Search 1')
+      .closest('button')
+    expect(suggestionItemButton).not.toBeNull()
+
+    // Simulate pressing Space key
+    fireEvent.keyDown(suggestionItemButton!, { key: ' ' })
+
+    // onSelectItem should be called
+    expect(mockOnSelectItem).toHaveBeenCalledWith('Suggested Search 1')
+  })
+
+  test('other keys do not trigger onSelectItem on history items', () => {
+    render(
+      <SearchHistoryDropdown
+        searchHistory={searchHistory}
+        suggestions={suggestions}
+        onSelectItem={mockOnSelectItem}
+        onClearHistoryItem={mockOnClearHistoryItem}
+        onClearAllHistory={mockOnClearAllHistory}
+      />
+    )
+
+    // Find history item button
+    const historyItemButton = screen
+      .getByText('Past Search 1')
+      .closest('button')
+    expect(historyItemButton).not.toBeNull()
+
+    // Simulate pressing a key that shouldn't trigger selection
+    fireEvent.keyDown(historyItemButton!, { key: 'A' })
+
+    // onSelectItem should not be called
+    expect(mockOnSelectItem).not.toHaveBeenCalled()
+  })
+
+  test('other keys do not trigger onSelectItem on suggestion items', () => {
+    render(
+      <SearchHistoryDropdown
+        searchHistory={searchHistory}
+        suggestions={suggestions}
+        onSelectItem={mockOnSelectItem}
+        onClearHistoryItem={mockOnClearHistoryItem}
+        onClearAllHistory={mockOnClearAllHistory}
+      />
+    )
+
+    // Find suggestion item button
+    const suggestionItemButton = screen
+      .getByText('Suggested Search 1')
+      .closest('button')
+    expect(suggestionItemButton).not.toBeNull()
+
+    // Simulate pressing a key that shouldn't trigger selection
+    fireEvent.keyDown(suggestionItemButton!, { key: 'Escape' })
+
+    // onSelectItem should not be called
+    expect(mockOnSelectItem).not.toHaveBeenCalled()
+  })
 })
