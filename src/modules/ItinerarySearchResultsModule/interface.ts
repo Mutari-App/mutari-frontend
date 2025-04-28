@@ -39,6 +39,12 @@ export interface SearchItinerariesResponse extends CustomFetchBaseResponse {
   metadata: SearchMetadata
 }
 
+export interface BatchCheckItinerarySavedResponse
+  extends CustomFetchBaseResponse {
+  // eslint-disable-next-line @typescript-eslint/consistent-indexed-object-style
+  result: { [key: string]: boolean }
+}
+
 export interface ItineraryFilters {
   tags: string
   minDaysCount?: string
