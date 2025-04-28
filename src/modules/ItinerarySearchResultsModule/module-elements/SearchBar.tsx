@@ -10,6 +10,7 @@ interface SearchBarProps {
   onSearch: (query: string) => void
   className?: string
   searchHistoryDropdownPadding?: string
+  variant?: 'default' | 'iconLeft'
 }
 
 const SEARCH_HISTORY_KEY = 'itinerary-search-history'
@@ -20,6 +21,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
   onSearch,
   className = '',
   searchHistoryDropdownPadding = '',
+  variant = 'default',
 }) => {
   const [inputValue, setInputValue] = useState(initialValue)
   const [isFocused, setIsFocused] = useState(false)
@@ -144,9 +146,74 @@ const SearchBar: React.FC<SearchBarProps> = ({
     localStorage.removeItem(SEARCH_HISTORY_KEY)
   }
 
+  if (variant === 'default') {
+    return (
+      <div
+        className={`relative flex w-full max-w-lg items-center ${className}`}
+      >
+        <form onSubmit={handleSubmit} className="relative w-full">
+          <Input
+            ref={inputRef}
+            type="text"
+            placeholder="Cari Rencana Perjalanan..."
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            onFocus={() => setIsFocused(true)}
+            className="pr-[106px] rounded-full opacity-70 text-[13px]"
+          />
+          <div className="absolute inset-y-0 right-0 flex items-center justify-center pr-[2.5px]">
+            {inputValue && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={handleClearInput}
+                className="mr-1 h-8 w-8 hover:bg-transparent text-gray-800 hover:text-black"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            )}
+            <Button
+              type="submit"
+              size="sm"
+              className="text-white hover:text-white w-12 sm:w-16 rounded-full bg-gradient-to-r from-[#0073E6] to-[#004080] hover:from-[#0066cc] hover:to-[#003366] flex items-center justify-center"
+            >
+              <Search className="h-4 sm:h-5 w-4 sm:w-5" />
+            </Button>
+          </div>
+        </form>
+        {isFocused && (
+          <div
+            ref={dropdownRef}
+            className="absolute top-full left-0 right-0 z-10 mt-1"
+          >
+            <SearchHistoryDropdown
+              searchHistory={searchHistory}
+              suggestions={suggestions}
+              onSelectItem={handleSelectItem}
+              onClearHistoryItem={handleClearHistoryItem}
+              onClearAllHistory={handleClearAllHistory}
+              className={`${searchHistoryDropdownPadding}`}
+            />
+          </div>
+        )}
+      </div>
+    )
+  }
+
   return (
-    <div className={`relative flex w-full max-w-lg items-center ${className}`}>
-      <form onSubmit={handleSubmit} className="relative w-full">
+    <div className={`relative flex w-full items-center ${className}`}>
+      <form onSubmit={handleSubmit} className="relative w-full flex">
+        <div className="absolute inset-y-0 left-0 flex items-center pl-1.5 z-10">
+          <Button
+            type="submit"
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 p-0 hover:bg-transparent text-gray-600 hover:text-black"
+          >
+            <Search className="h-4 sm:h-5 w-4 sm:w-5" />
+          </Button>
+        </div>
         <Input
           ref={inputRef}
           type="text"
@@ -154,28 +221,21 @@ const SearchBar: React.FC<SearchBarProps> = ({
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           onFocus={() => setIsFocused(true)}
-          className="pr-[106px] rounded-full opacity-70 text-[13px]"
+          className="pl-10 pr-10 rounded-full opacity-70 text-[13px] w-full"
         />
-        <div className="absolute inset-y-0 right-0 flex items-center justify-center pr-[2.5px]">
-          {inputValue && (
+        {inputValue && (
+          <div className="absolute inset-y-0 right-0 flex items-center pr-3">
             <Button
               type="button"
               variant="ghost"
               size="icon"
               onClick={handleClearInput}
-              className="mr-1 h-8 w-8 hover:bg-transparent text-gray-800 hover:text-black"
+              className="h-8 w-8 hover:bg-transparent text-gray-800 hover:text-black"
             >
               <X className="h-4 w-4" />
             </Button>
-          )}
-          <Button
-            type="submit"
-            size="sm"
-            className="text-white hover:text-white w-12 sm:w-16 rounded-full bg-gradient-to-r from-[#0073E6] to-[#004080] hover:from-[#0066cc] hover:to-[#003366] flex items-center justify-center"
-          >
-            <Search className="h-4 sm:h-5 w-4 sm:w-5" />
-          </Button>
-        </div>
+          </div>
+        )}
       </form>
       {isFocused && (
         <div
