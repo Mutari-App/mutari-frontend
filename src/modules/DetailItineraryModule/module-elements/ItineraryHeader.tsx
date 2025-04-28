@@ -145,6 +145,87 @@ export const ItineraryHeader = ({
     }
   }
 
+  const renderAcceptedUsers = () => {
+    if (isLoading) {
+      return <div className="text-center py-4">Memuat...</div>
+    }
+
+    if (data.invitedUsers?.length > 0) {
+      return (
+        <div className="space-y-2 max-h-48 overflow-y-auto">
+          {data.invitedUsers?.map((user) => (
+            <div
+              key={user.id}
+              className="flex items-center justify-between p-2 bg-gray-50 rounded-md"
+            >
+              <div className="flex items-center gap-2">
+                <div className="relative rounded-full overflow-hidden aspect-square w-10  ">
+                  <Avatar>
+                    <AvatarImage
+                      src={user.photoProfile}
+                      alt={`${user.firstName} ${user.lastName}`}
+                    />
+                    <AvatarFallback>
+                      {user.firstName.charAt(0)}
+                      {user.lastName?.charAt(0)}
+                    </AvatarFallback>
+                  </Avatar>
+                </div>
+                <div className="flex flex-col">
+                  <span className="font-medium">
+                    {user.firstName} {user.lastName}
+                  </span>
+                  <span className="text-gray-400 text-sm">{user.email}</span>
+                </div>
+              </div>
+              <button onClick={() => removeUser(user.id)}>
+                <X />
+              </button>
+            </div>
+          ))}
+        </div>
+      )
+    }
+
+    return (
+      <div className="text-center py-4 text-gray-500">
+        Belum ada akun yang terdaftar
+      </div>
+    )
+  }
+
+  const renderPendingInvites = () => {
+    if (isLoading) {
+      return <div className="text-center py-4">Memuat...</div>
+    }
+
+    if (data.pendingInvites?.length > 0) {
+      return (
+        <div className="space-y-2 max-h-48 overflow-y-auto">
+          {data.pendingInvites.map((user) => (
+            <div
+              key={user.id}
+              className="flex items-center justify-between p-2 bg-gray-50 rounded-md"
+            >
+              <div className="flex items-center gap-2">
+                <Avatar>
+                  <AvatarFallback>{user.email[0].toUpperCase()}</AvatarFallback>
+                </Avatar>
+                <span>{user.email}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      )
+    }
+
+    return (
+      <div className="text-center py-4 text-gray-500">
+        Tidak ada undangan yang tertunda
+      </div>
+    )
+  }
+
   return (
     <div
       className="relative w-full h-40 md:h-64 rounded-md mb-4 flex items-center justify-center overflow-hidden"
@@ -341,76 +422,11 @@ export const ItineraryHeader = ({
                 </TabsList>
 
                 <TabsContent value="accepted" className="mt-4">
-                  {isLoading ? (
-                    <div className="text-center py-4">Memuat...</div>
-                  ) : data.invitedUsers?.length > 0 ? (
-                    <div className="space-y-2 max-h-48 overflow-y-auto">
-                      {data.invitedUsers?.map((user) => (
-                        <div
-                          key={user.id}
-                          className="flex items-center justify-between p-2 bg-gray-50 rounded-md"
-                        >
-                          <div className="flex items-center gap-2">
-                            <div className="relative rounded-full overflow-hidden aspect-square w-10  ">
-                              <Avatar>
-                                <AvatarImage
-                                  src={user.photoProfile}
-                                  alt={`${user.firstName} ${user.lastName}`}
-                                />
-                                <AvatarFallback>
-                                  {user.firstName.charAt(0)}
-                                  {user.lastName?.charAt(0)}
-                                </AvatarFallback>
-                              </Avatar>
-                            </div>
-                            <div className="flex flex-col">
-                              <span className="font-medium">
-                                {user.firstName} {user.lastName}
-                              </span>
-                              <span className="text-gray-400 text-sm">
-                                {user.email}
-                              </span>
-                            </div>
-                          </div>
-                          <button onClick={() => removeUser(user.id)}>
-                            <X />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-center py-4 text-gray-500">
-                      Belum ada akun yang terdaftar
-                    </div>
-                  )}
+                  {renderAcceptedUsers()}
                 </TabsContent>
 
                 <TabsContent value="pending" className="mt-4">
-                  {isLoading ? (
-                    <div className="text-center py-4">Memuat...</div>
-                  ) : data.pendingInvites?.length > 0 ? (
-                    <div className="space-y-2 max-h-48 overflow-y-auto">
-                      {data.pendingInvites.map((user) => (
-                        <div
-                          key={user.id}
-                          className="flex items-center justify-between p-2 bg-gray-50 rounded-md"
-                        >
-                          <div className="flex items-center gap-2">
-                            <Avatar>
-                              <AvatarFallback>
-                                {user.email[0].toUpperCase()}
-                              </AvatarFallback>
-                            </Avatar>
-                            <span>{user.email}</span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-center py-4 text-gray-500">
-                      Tidak ada undangan yang tertunda
-                    </div>
-                  )}
+                  {renderPendingInvites()}
                 </TabsContent>
               </Tabs>
             </TabsContent>
