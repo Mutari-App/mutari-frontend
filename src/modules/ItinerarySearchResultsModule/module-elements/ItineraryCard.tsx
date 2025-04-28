@@ -49,7 +49,7 @@ const ItineraryCard: React.FC<ItineraryCardProps> = ({
             )}
             {/* Mobile-only (< 640px) Likes button at top right with semi-transparent background */}
             <div
-              className="absolute top-2 right-2 z-10 bg-black bg-opacity-25 rounded-full px-1.5 py-[3px] sm:hidden"
+              className="absolute top-2 right-2 bg-black bg-opacity-25 rounded-full px-1.5 py-[3px] sm:hidden"
               data-testid="mobile-likes-wrapper"
             >
               <LikesButton
@@ -103,7 +103,7 @@ const ItineraryCard: React.FC<ItineraryCardProps> = ({
         <CardFooter className="flex items-center justify-between px-2 py-1.5 mt-auto sm:px-3 sm:py-2 border-t border-slate-100">
           <Link
             href={`/profile/${id}`}
-            className="flex items-center gap-1 sm:gap-2 z-10 relative"
+            className="flex items-center gap-1 sm:gap-2 relative"
           >
             <Avatar className="h-6 w-6">
               <AvatarImage src={photoProfile ?? undefined} alt={fullName} />
