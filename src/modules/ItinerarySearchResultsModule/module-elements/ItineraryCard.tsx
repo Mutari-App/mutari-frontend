@@ -53,6 +53,8 @@ const ItineraryCard: React.FC<ItineraryCardProps> = ({
               data-testid="mobile-likes-wrapper"
             >
               <LikesButton
+                itineraryId={itinerary.id}
+                liked={false}
                 count={itinerary.likes}
                 className="text-xs text-white"
               />
@@ -118,6 +120,8 @@ const ItineraryCard: React.FC<ItineraryCardProps> = ({
           {/* Desktop-only (≥ 640px) Likes button */}
           <div className="hidden sm:block" data-testid="desktop-likes-wrapper">
             <LikesButton
+              itineraryId={itinerary.id}
+              liked={false}
               count={itinerary.likes}
               className="text-[10px] pl-1 sm:text-sm"
             />
