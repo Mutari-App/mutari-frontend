@@ -140,6 +140,7 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
         if (response.statusCode === 200) {
           setIsAuthenticated(true)
           setUser(response.user)
+          router.refresh()
         } else {
           setIsAuthenticated(false)
           setUser(null)
@@ -176,7 +177,7 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
         toast.promise(validate({ ticket: ticket! }), {
           loading: 'Logging in...',
           success: () => {
-            router.refresh()
+            router.push('/')
             return 'Login berhasil!'
           },
           error: (err: Error) => `Oops. Login gagal! ${err.message}`,

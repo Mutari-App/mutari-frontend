@@ -67,13 +67,15 @@ export const Navbar: React.FC = () => {
     }
   }
 
+  const isLandingPage = pathname === '/landing-page'
+
   return (
     <NavigationMenu
       className={`p-4 fixed bg-transparent max-w-full w-full z-[101] transition-colors duration-300 ${
         pathname == '/' && isScrolledToScreen
           ? 'bg-[#0059B3] shadow-md'
           : 'bg-transparent'
-      } ${pathname != '/' && 'bg-white shadow-md'}`}
+      } ${!isLandingPage && 'bg-white shadow-md'}`}
     >
       <div className="mx-auto w-full container flex justify-between items-center">
         <div className="flex justify-start gap-5 items-center">
@@ -83,7 +85,7 @@ export const Navbar: React.FC = () => {
           >
             <Image
               src={getImage(
-                `${pathname == '/' ? 'logo-white.png' : 'logo-no-background.png'}`
+                `${pathname == '/landing-page' ? 'logo-white.png' : 'logo-no-background.png'}`
               )}
               alt="Mutari Logo"
               width={150}
@@ -91,13 +93,13 @@ export const Navbar: React.FC = () => {
               className="h-12 w-auto z-30"
             />
             <span
-              className={`${pathname == '/' ? 'text-white' : 'text-[#0059B3]'} font-hammersmithOne text-[30px]`}
+              className={`${isLandingPage ? 'text-white' : 'text-[#0059B3]'} font-hammersmithOne text-[30px]`}
             >
               MUTARI
             </span>
           </Link>
           <NavigationMenuList
-            className={`flex space-x-4 ${pathname == '/' ? 'text-white' : 'text-black'}`}
+            className={`flex space-x-4 ${isLandingPage ? 'text-white' : 'text-black'}`}
           >
             <NavigationMenuItem>
               <NavigationMenuLink href="/itinerary" className="hover:underline">
@@ -147,7 +149,7 @@ export const Navbar: React.FC = () => {
             <Link href="/login">
               <Button
                 className={`transition-colors px-6 ${
-                  pathname === '/'
+                  isLandingPage
                     ? 'bg-white text-[#0059B3] hover:bg-gray-100'
                     : 'bg-[#0059B3] text-white hover:bg-[#004C99]'
                 }`}

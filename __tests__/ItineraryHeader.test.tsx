@@ -87,7 +87,7 @@ describe('ItineraryHeader Component', () => {
     render(<ItineraryHeader data={mockData} />)
     expect(screen.getByText('Edit')).toBeInTheDocument()
   })
-  
+
   it('has the correct edit page link', () => {
     render(<ItineraryHeader data={mockData} />)
     const linkElement = screen.getByRole('link', { name: /Edit/i })
