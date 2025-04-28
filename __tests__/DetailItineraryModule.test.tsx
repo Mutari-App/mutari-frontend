@@ -1,12 +1,11 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import DetailItineraryModule from '../src/modules/DetailItineraryModule/index'
 import { customFetch } from '@/utils/newCustomFetch'
-import { notFound, useParams, useRouter } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 
 // Mock dependencies
 jest.mock('@/utils/newCustomFetch')
 jest.mock('next/navigation', () => ({
-  notFound: jest.fn(),
   useParams: jest.fn(),
   useRouter: jest.fn(),
 }))
@@ -49,6 +48,11 @@ jest.mock('lucide-react', () => ({
       Loading...
     </div>
   ),
+}))
+
+jest.mock('@/app/not-found', () => ({
+  __esModule: true,
+  default: () => <div data-testid="custom-not-found-page">Not Found Page</div>,
 }))
 
 const mockItinerary = {
@@ -148,7 +152,7 @@ describe('DetailItineraryModule', () => {
     render(<DetailItineraryModule />)
 
     await waitFor(() => {
-      expect(notFound).toHaveBeenCalled()
+      expect(screen.getByTestId('custom-not-found-page')).toBeInTheDocument()
     })
   })
 
@@ -163,7 +167,7 @@ describe('DetailItineraryModule', () => {
     render(<DetailItineraryModule />)
 
     await waitFor(() => {
-      expect(notFound).toHaveBeenCalled()
+      expect(screen.getByTestId('custom-not-found-page')).toBeInTheDocument()
     })
   })
 
@@ -178,7 +182,7 @@ describe('DetailItineraryModule', () => {
     render(<DetailItineraryModule />)
 
     await waitFor(() => {
-      expect(notFound).toHaveBeenCalled()
+      expect(screen.getByTestId('custom-not-found-page')).toBeInTheDocument()
     })
   })
 
@@ -203,7 +207,7 @@ describe('DetailItineraryModule', () => {
     render(<DetailItineraryModule />)
 
     await waitFor(() => {
-      expect(notFound).toHaveBeenCalled()
+      expect(screen.getByTestId('custom-not-found-page')).toBeInTheDocument()
     })
   })
 
@@ -228,7 +232,7 @@ describe('DetailItineraryModule', () => {
     render(<DetailItineraryModule />)
 
     await waitFor(() => {
-      expect(notFound).toHaveBeenCalled()
+      expect(screen.getByTestId('custom-not-found-page')).toBeInTheDocument()
     })
   })
 
@@ -246,7 +250,7 @@ describe('DetailItineraryModule', () => {
     render(<DetailItineraryModule />)
 
     await waitFor(() => {
-      expect(screen.getByTestId('itinerary-header')).toBeInTheDocument()
+      expect(screen.getByTestId('custom-not-found-page')).toBeInTheDocument()
     })
   })
 })
