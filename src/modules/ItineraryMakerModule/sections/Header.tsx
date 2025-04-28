@@ -191,9 +191,11 @@ export const ItineraryHeader: React.FC<ItineraryHeaderProps> = ({
         onDescChange={onDescChange}
         onCoverImageChange={onCoverImageChange}
         isContingency={isContingency}
+        itineraryId={itineraryId}
         title={title}
         description={description}
         coverImage={coverImage}
+        onDuplicate={handleDuplicate}
       />
     </div>
   )
