@@ -12,10 +12,12 @@ import { toast } from 'sonner'
 import { Loader, PlusIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
+import { useAuthContext } from '@/contexts/AuthContext'
 
 export const ItinerariesSection: React.FC<ProfileModuleProps> = ({
   profile,
 }) => {
+  const { user } = useAuthContext()
   const [itineraries, setItineraries] = useState<ItineraryProps[]>([])
   const [loading, setLoading] = useState<boolean>(true)
 
@@ -68,17 +70,19 @@ export const ItinerariesSection: React.FC<ProfileModuleProps> = ({
     <section className="mx-auto pb-6 pt-3 w-full">
       <div className="flex flex-col md:flex-row gap-2  w-full justify-between items-center pb-5">
         <h2 className="font-semibold font-poppins text-center text-xl md:text-2xl">
-          Rencana Perjalanan Saya
+          Rencana Perjalanan
         </h2>
-        <Link href={'/itinerary/create'}>
-          <Button
-            size={'sm'}
-            className="bg-gradient-to-r from-[#016CD7] to-[#014285] text-white items-center flex gap-3"
-          >
-            <PlusIcon />
-            Buat Itinerary Baru
-          </Button>
-        </Link>
+        {user?.id === profile.id && (
+          <Link href={'/itinerary/create'}>
+            <Button
+              size={'sm'}
+              className="bg-gradient-to-r from-[#016CD7] to-[#014285] text-white items-center flex gap-3"
+            >
+              <PlusIcon />
+              Buat Itinerary Baru
+            </Button>
+          </Link>
+        )}
       </div>
       {renderContent()}
     </section>
