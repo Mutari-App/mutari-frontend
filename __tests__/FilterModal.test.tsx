@@ -115,6 +115,8 @@ jest.mock('@/components/ui/input', () => ({
     placeholder,
     className,
     ref,
+    onFocus,
+    onKeyDown,
   }: {
     id?: string
     type?: string
@@ -124,6 +126,8 @@ jest.mock('@/components/ui/input', () => ({
     placeholder?: string
     className?: string
     ref?: React.RefObject<HTMLInputElement>
+    onFocus?: () => void
+    onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void
   }) => (
     <input
       data-testid={id ?? 'input'}
@@ -135,6 +139,8 @@ jest.mock('@/components/ui/input', () => ({
       placeholder={placeholder}
       className={className}
       ref={ref}
+      onFocus={onFocus}
+      onKeyDown={onKeyDown}
     />
   ),
 }))
@@ -839,5 +845,64 @@ describe('FilterModal Component', () => {
         sortBy: 'daysCount',
       })
     )
+  })
+
+  // New test for keyboard interaction
+  test('adds tag when pressing Enter or Space on tag option', async () => {
+    render(
+      <FilterModal
+        open={true}
+        onClose={mockOnClose}
+        filters={defaultFilters}
+        onApplyFilters={mockOnApplyFilters}
+        availableTags={availableTags}
+      />
+    )
+
+    const tagSearchInput = screen.getByTestId('tagSearch')
+
+    // Search for Beach tag to make it visible
+    await act(async () => {
+      fireEvent.change(tagSearchInput, { target: { value: 'Be' } })
+      fireEvent.focus(tagSearchInput)
+    })
+
+    // Wait for Beach option to appear in the dropdown
+    await waitFor(() => {
+      expect(screen.getByText('Beach')).toBeInTheDocument()
+    })
+
+    // Find the Beach option button
+    const beachOption = screen.getByText('Beach').closest('button')
+    expect(beachOption).not.toBeNull()
+
+    // Simulate pressing Enter key on the Beach option
+    await act(async () => {
+      fireEvent.keyDown(beachOption!, { key: 'Enter' })
+    })
+
+    // Beach tag should be added
+    expect(screen.getByText(/^Beach$/)).toBeInTheDocument()
+
+    // Now try with Space key for Mountain tag
+    await act(async () => {
+      fireEvent.change(tagSearchInput, { target: { value: 'Mo' } })
+    })
+
+    // Wait for Mountain option to appear
+    await waitFor(() => {
+      expect(screen.getByText('Mountain')).toBeInTheDocument()
+    })
+
+    const mountainOption = screen.getByText('Mountain').closest('button')
+    expect(mountainOption).not.toBeNull()
+
+    // Simulate pressing Space key
+    await act(async () => {
+      fireEvent.keyDown(mountainOption!, { key: ' ' })
+    })
+
+    // Mountain tag should be added
+    expect(screen.getByText(/^Mountain$/)).toBeInTheDocument()
   })
 })
