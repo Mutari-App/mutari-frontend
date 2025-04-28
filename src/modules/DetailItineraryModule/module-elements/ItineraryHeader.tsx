@@ -1,9 +1,8 @@
 import { Button } from '@/components/ui/button'
 import { useAuthContext } from '@/contexts/AuthContext'
-import { UserRoundPlus, Share2, X } from 'lucide-react'
+import { Share2, X } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
-import Image from 'next/image'
 import {
   Dialog,
   DialogContent,
@@ -14,7 +13,6 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { customFetch } from '@/utils/newCustomFetch'
 import { toast } from 'sonner'
-import { useRouter } from 'next/navigation'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
 export const ItineraryHeader = ({
@@ -26,7 +24,6 @@ export const ItineraryHeader = ({
   contingencyId?: string
   refresh: () => Promise<void>
 }) => {
-  const router = useRouter()
   const { user } = useAuthContext()
   const [showModal, setShowModal] = useState(false)
   const [isLoading, setIsLoading] = useState(false)

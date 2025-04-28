@@ -1,7 +1,6 @@
 import { render, screen } from '@testing-library/react'
 import { ItineraryHeader } from '@/modules/DetailItineraryModule/module-elements/ItineraryHeader'
 import React from 'react'
-import userEvent from '@testing-library/user-event'
 
 jest.mock('lucide-react', () => ({
   X: 'X',
