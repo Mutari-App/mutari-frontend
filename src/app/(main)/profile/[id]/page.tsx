@@ -14,10 +14,8 @@ export default async function ProfilePage({
   const { id } = await params
   try {
     const response = await customFetch<GetProfileResponse>(`/profile/${id}`)
-    console.log(response)
     return <ProfileModule profile={response.profile} />
   } catch (err) {
-    console.log(err)
     if ((err as Error).message === 'TokenExpiredOnServer') {
       return <></>
     }
