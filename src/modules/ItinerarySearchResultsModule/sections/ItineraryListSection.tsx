@@ -15,6 +15,8 @@ import {
 
 interface ItineraryListSectionProps {
   itineraries: ItinerarySearchResult[]
+  // eslint-disable-next-line @typescript-eslint/consistent-indexed-object-style
+  itinerariesLiked: { [key: string]: boolean }
   isLoading: boolean
   currentPage: number
   totalPages: number
@@ -26,6 +28,7 @@ interface ItineraryListSectionProps {
 
 const ItineraryListSection: React.FC<ItineraryListSectionProps> = ({
   itineraries,
+  itinerariesLiked,
   isLoading,
   currentPage,
   totalPages,
@@ -94,7 +97,13 @@ const ItineraryListSection: React.FC<ItineraryListSectionProps> = ({
       <div className="flex-grow">
         <div className="grid grid-cols-2 gap-2 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
           {itineraries.map((itinerary) => (
-            <ItineraryCard key={itinerary.id} itinerary={itinerary} />
+            <ItineraryCard
+              key={itinerary.id}
+              itinerary={itinerary}
+              isLiked={
+                itinerariesLiked ? itinerariesLiked[itinerary.id] : false
+              }
+            />
           ))}
         </div>
       </div>

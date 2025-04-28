@@ -3,8 +3,9 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import HeaderSection from './sections/HeaderSection'
 import ItineraryListSection from './sections/ItineraryListSection'
-import { customFetch } from '@/utils/newCustomFetch'
+import { customFetch, customFetchBody } from '@/utils/newCustomFetch'
 import {
+  BatchCheckItinerarySavedResponse,
   type ItineraryFilters,
   type ItinerarySearchResult,
   type SearchItinerariesResponse,
@@ -16,6 +17,10 @@ const ItinerarySearchResultsModule = () => {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(true)
   const [itineraries, setItineraries] = useState<ItinerarySearchResult[]>([])
+  // eslint-disable-next-line @typescript-eslint/consistent-indexed-object-style
+  const [itinerariesLiked, setItinerariesLiked] = useState<{
+    [key: string]: boolean
+  }>({})
   const [totalPages, setTotalPages] = useState(1)
   const [currentPage, setCurrentPage] = useState(
     Number(searchParams.get('page')) || 1
@@ -52,6 +57,18 @@ const ItinerarySearchResultsModule = () => {
           method: 'GET',
         }
       )
+
+      const itineraryIds = response.data.map((itinerary) => itinerary.id)
+      const responseLikes = await customFetch<BatchCheckItinerarySavedResponse>(
+        `/itineraries/checkSave`,
+        {
+          method: 'POST',
+          body: customFetchBody(itineraryIds),
+          credentials: 'include',
+        }
+      )
+      setItinerariesLiked(responseLikes.result)
+
       setItineraries(response.data)
       setTotalPages(response.metadata.totalPages)
       setTotalResults(response.metadata.total)
@@ -126,6 +143,7 @@ const ItinerarySearchResultsModule = () => {
         onPageChange={handlePageChange}
         searchQuery={searchQuery}
         onResetSearch={handleResetSearch}
+        itinerariesLiked={itinerariesLiked}
       />
     </div>
   )
