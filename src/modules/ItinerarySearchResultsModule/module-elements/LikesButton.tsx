@@ -1,8 +1,12 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Heart } from 'lucide-react'
+import { customFetch } from '@/utils/newCustomFetch'
+import { toast } from 'sonner'
 
 interface LikesButtonProps {
   count: number
+  liked: boolean
+  itineraryId: string
   className?: string
 }
 
@@ -16,11 +20,46 @@ const formatLikes = (likes: number): string => {
   return likes.toString()
 }
 
-const LikesButton: React.FC<LikesButtonProps> = ({ count, className = '' }) => {
+const LikesButton: React.FC<LikesButtonProps> = ({
+  count,
+  liked,
+  itineraryId,
+  className = '',
+}) => {
+  const [isLiked, setIsLiked] = useState(liked)
+  const [likeCount, setLikeCount] = useState(count)
+
+  const toggleLike = async () => {
+    try {
+      if (isLiked) {
+        // unsave
+        setIsLiked(false)
+        setLikeCount(likeCount - 1)
+      } else {
+        setIsLiked(true)
+        setLikeCount(likeCount + 1)
+      }
+
+      await customFetch(`/itineraries/${itineraryId}/save`, {
+        method: isLiked === true ? 'DELETE' : 'POST',
+        credentials: 'include',
+      })
+
+      toast.success(isLiked === true ? 'Itinerary unsaved' : 'Itinerary saved!')
+    } catch (error) {
+      console.error('Failed to save/unsave itinerary:', error)
+    }
+  }
+
   return (
-    <div className={`flex items-center gap-1 ${className}`}>
-      <Heart className="h-4 w-4" />
-      <span>{formatLikes(count)}</span>
+    <div
+      className={`flex items-center gap-1 ${className} ${isLiked ? 'text-red-500' : 'text-gray-500'}`}
+    >
+      <Heart
+        onClick={toggleLike}
+        className={`h-4 w-4 cursor-pointer ${isLiked ? 'text-red-500 fill-red-500' : 'text-gray-500'}`}
+      />
+      <span>{formatLikes(likeCount)}</span>
     </div>
   )
 }
