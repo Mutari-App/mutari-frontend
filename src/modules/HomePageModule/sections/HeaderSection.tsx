@@ -15,7 +15,7 @@ const HeaderSection = () => {
 
   return (
     <div
-      className="relative py-4 sm:py-8 md:py-14 lg:py-16 bg-cover bg-center"
+      className="relative py-4 sm:py-8 md:py-14 lg:py-16 bg-cover bg-center w-full"
       style={{
         backgroundImage: `url(${getImage('HomepageHeader.png')})`,
       }}
