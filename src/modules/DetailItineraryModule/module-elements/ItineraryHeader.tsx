@@ -13,6 +13,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { customFetch } from '@/utils/newCustomFetch'
 import { toast } from 'sonner'
+import { DuplicateItineraryResponse } from '@/modules/ItineraryModule/module-elements/types'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
 export const ItineraryHeader = ({
@@ -138,6 +139,26 @@ export const ItineraryHeader = ({
       if (response.statusCode !== 200) throw new Error(response.message)
       toast.success('User berhasil dihapus!')
       await refresh()
+    } catch (err) {
+      if (err instanceof Error) toast.error(`${err.message}`)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const duplicateItinerary = async () => {
+    try {
+      setIsLoading(true)
+      const response = await customFetch<DuplicateItineraryResponse>(
+        `/itineraries/${data.id}/duplicate`,
+        {
+          method: 'POST',
+          credentials: 'include',
+        }
+      )
+
+      if (response.statusCode !== 201) throw new Error(response.message)
+      toast.success('Itinerary duplicated successfully!')
     } catch (err) {
       if (err instanceof Error) toast.error(`${err.message}`)
     } finally {
@@ -304,6 +325,7 @@ export const ItineraryHeader = ({
       {user?.id !== data.userId && (
         <div className="absolute top-2 right-2 sm:top-4 sm:right-4 z-10 flex">
           <Button
+            onClick={duplicateItinerary}
             size="sm"
             type="button"
             variant="ghost"

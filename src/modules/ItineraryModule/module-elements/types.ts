@@ -23,6 +23,9 @@ export interface ItineraryResponse extends CustomFetchBaseResponse {
 export interface CompletedItineraryResponse extends CustomFetchBaseResponse {
   itinerary: ItineraryData[]
 }
+export interface DuplicateItineraryResponse extends CustomFetchBaseResponse {
+  duplicatedItinerary: ItineraryData
+}
 
 export interface ItineraryData {
   id: string

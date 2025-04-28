@@ -55,15 +55,18 @@ jest.mock('@/lib/utils', () => ({
 describe('SettingsItineraryModal', () => {
   const mockOnSave = jest.fn()
   const mockOnClose = jest.fn()
+  const mockOnDuplicate = jest.fn()
   const mockOnCoverImageChange = jest.fn()
 
   const defaultProps = {
     isOpen: true,
+    itineraryId: 'itn-123',
     title: 'Test Title',
     description: 'Test Description',
     isPublished: false,
     onClose: mockOnClose,
     onSave: mockOnSave,
+    onDuplicate: mockOnDuplicate,
     onCoverImageChange: mockOnCoverImageChange,
     onTitleChange: jest.fn(),
     onDescChange: jest.fn(),

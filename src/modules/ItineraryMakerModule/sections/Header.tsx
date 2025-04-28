@@ -7,6 +7,8 @@ import { type CloudinaryUploadWidgetResults } from 'next-cloudinary'
 import { SettingsItineraryModal } from '../module-elements/settingsModal'
 import { customFetch, customFetchBody } from '@/utils/newCustomFetch'
 import { CreateItineraryResponse } from '../interface'
+import { DuplicateItineraryResponse } from '@/modules/ItineraryModule/module-elements/types'
+import { toast } from 'sonner'
 
 interface ItineraryHeaderProps {
   itineraryId: string
@@ -88,6 +90,22 @@ export const ItineraryHeader: React.FC<ItineraryHeaderProps> = ({
       )
     } catch (error) {
       console.error('Failed to publish itinerary:', error)
+    }
+  }
+
+  const handleDuplicate = async (data: { itineraryId: string }) => {
+    try {
+      const response = await customFetch<DuplicateItineraryResponse>(
+        `/itineraries/${data.itineraryId}/duplicate`,
+        {
+          method: 'POST',
+          credentials: 'include',
+        }
+      )
+      toast.success('Itinerary duplicated successfully!')
+      return response.duplicatedItinerary.id
+    } catch (error) {
+      console.error('Failed to duplicate itinerary:', error)
     }
   }
 
@@ -173,9 +191,11 @@ export const ItineraryHeader: React.FC<ItineraryHeaderProps> = ({
         onDescChange={onDescChange}
         onCoverImageChange={onCoverImageChange}
         isContingency={isContingency}
+        itineraryId={itineraryId}
         title={title}
         description={description}
         coverImage={coverImage}
+        onDuplicate={handleDuplicate}
       />
     </div>
   )

@@ -27,6 +27,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
 import { ItineraryData } from './types'
 import { useAuthContext } from '@/contexts/AuthContext'
+import { DuplicateItineraryResponse } from '@/modules/ItineraryModule/module-elements/types'
 
 function ItineraryCard({
   shared = false,
@@ -200,6 +201,23 @@ function ItineraryCard({
     }
   }
 
+  const duplicateItinerary = async () => {
+    try {
+      const response = await customFetch<DuplicateItineraryResponse>(
+        `/itineraries/${item.id}/duplicate`,
+        {
+          method: 'POST',
+        }
+      )
+
+      if (response.statusCode !== 201) throw new Error(response.message)
+      else router.push(`/itinerary/${response.duplicatedItinerary.id}/edit`)
+      toast.success('Itinerary duplicated successfully!')
+    } catch (err) {
+      if (err instanceof Error) toast.error(`${err.message}`)
+    }
+  }
+
   return (
     <div
       onClick={() => router.push(`/itinerary/${item.id}`)}
@@ -259,6 +277,9 @@ function ItineraryCard({
                 Mark as Completed
               </DropdownMenuItem>
             )}
+            <DropdownMenuItem onClick={duplicateItinerary}>
+              Duplicate & Edit
+            </DropdownMenuItem>
             <DropdownMenuItem
               onClick={openDeleteConfirmation}
               className="text-red-500 focus:text-red-500"
