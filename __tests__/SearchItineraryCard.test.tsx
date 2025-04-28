@@ -150,7 +150,7 @@ describe('ItineraryCard Component', () => {
   }
 
   test('renders itinerary card with all elements', () => {
-    render(<ItineraryCard itinerary={mockItinerary} />)
+    render(<ItineraryCard itinerary={mockItinerary} isLiked={false} />)
 
     // Check if the card is rendered
     expect(screen.getByTestId('card')).toBeInTheDocument()
@@ -195,7 +195,7 @@ describe('ItineraryCard Component', () => {
       coverImage: null,
     }
 
-    render(<ItineraryCard itinerary={itineraryNoImage} />)
+    render(<ItineraryCard itinerary={itineraryNoImage} isLiked={false} />)
 
     // Check if the placeholder text is rendered
     expect(screen.getByText('Tidak Ada Gambar')).toBeInTheDocument()
@@ -210,7 +210,7 @@ describe('ItineraryCard Component', () => {
       },
     }
 
-    render(<ItineraryCard itinerary={itineraryNoUserPhoto} />)
+    render(<ItineraryCard itinerary={itineraryNoUserPhoto} isLiked={false} />)
 
     // Check if avatar fallback with initials is rendered
     expect(screen.getByTestId('avatar-fallback')).toHaveTextContent('JD') // Initials of John Doe
@@ -218,7 +218,13 @@ describe('ItineraryCard Component', () => {
 
   test('limits visible tags to the specified maxVisibleTags prop', () => {
     // Set maxVisibleTags to 2
-    render(<ItineraryCard itinerary={mockItinerary} maxVisibleTags={2} />)
+    render(
+      <ItineraryCard
+        itinerary={mockItinerary}
+        maxVisibleTags={2}
+        isLiked={false}
+      />
+    )
 
     // Only the first 2 tags should be visible
     expect(screen.getByText('Beach')).toBeInTheDocument()
@@ -236,7 +242,13 @@ describe('ItineraryCard Component', () => {
       tags: mockItinerary.tags.slice(0, 2), // Only keep the first 2 tags
     }
 
-    render(<ItineraryCard itinerary={fewTagsItinerary} maxVisibleTags={3} />)
+    render(
+      <ItineraryCard
+        itinerary={fewTagsItinerary}
+        maxVisibleTags={3}
+        isLiked={false}
+      />
+    )
 
     // Both tags should be visible
     expect(screen.getByText('Beach')).toBeInTheDocument()
@@ -252,14 +264,14 @@ describe('ItineraryCard Component', () => {
       tags: [],
     }
 
-    render(<ItineraryCard itinerary={noTagsItinerary} />)
+    render(<ItineraryCard itinerary={noTagsItinerary} isLiked={false} />)
 
     // No tags or '+n' badge should be shown
     expect(screen.queryByTestId('badge')).not.toBeInTheDocument()
   })
 
   test('renders correct link URLs for itinerary and user profile', () => {
-    render(<ItineraryCard itinerary={mockItinerary} />)
+    render(<ItineraryCard itinerary={mockItinerary} isLiked={false} />)
 
     const links = screen.getAllByTestId('next-link')
 

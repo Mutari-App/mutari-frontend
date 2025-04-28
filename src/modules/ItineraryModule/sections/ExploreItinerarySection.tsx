@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import ItineraryCard from '@/modules/ItinerarySearchResultsModule/module-elements/ItineraryCard'
 import SearchBar from '@/modules/ItinerarySearchResultsModule/module-elements/SearchBar'
-import { customFetch } from '@/utils/newCustomFetch'
+import { customFetch, customFetchBody } from '@/utils/newCustomFetch'
 import {
+  BatchCheckItinerarySavedResponse,
   type ItinerarySearchResult,
   type SearchItinerariesResponse,
 } from '@/modules/ItinerarySearchResultsModule/interface'
@@ -13,6 +14,10 @@ import { v4 } from 'uuid'
 const ExploreItinerarySection = () => {
   const router = useRouter()
   const [itineraries, setItineraries] = useState<ItinerarySearchResult[]>([])
+  // eslint-disable-next-line @typescript-eslint/consistent-indexed-object-style
+  const [itinerariesLiked, setItinerariesLiked] = useState<{
+    [key: string]: boolean
+  }>({})
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
@@ -23,6 +28,19 @@ const ExploreItinerarySection = () => {
           '/itineraries/search?page=1&limit=8',
           { method: 'GET' }
         )
+
+        const itineraryIds = response.data.map((itinerary) => itinerary.id)
+        const responseLikes =
+          await customFetch<BatchCheckItinerarySavedResponse>(
+            `/itineraries/checkSave`,
+            {
+              method: 'POST',
+              body: customFetchBody(itineraryIds),
+              credentials: 'include',
+            }
+          )
+        setItinerariesLiked(responseLikes.result)
+
         setItineraries(response.data || [])
       } catch (error) {
         console.error('Failed to fetch itineraries:', error)
@@ -72,7 +90,11 @@ const ExploreItinerarySection = () => {
             {itineraries &&
               itineraries.length > 0 &&
               itineraries.map((itinerary) => (
-                <ItineraryCard key={itinerary.id} itinerary={itinerary} />
+                <ItineraryCard
+                  key={itinerary.id}
+                  itinerary={itinerary}
+                  isLiked={itinerariesLiked[itinerary.id]}
+                />
               ))}
           </div>
           {itineraries && itineraries.length > 0 && (
