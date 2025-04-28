@@ -19,10 +19,12 @@ interface SettingsItineraryModalProps {
     coverImage?: string
     isPublished: boolean
   }) => void
+  onDuplicate: (data: { itineraryId: string }) => void
   onTitleChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void
   onDescChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void
   onCoverImageChange: (result: CloudinaryUploadWidgetResults) => void
   isContingency: boolean
+  itineraryId: string
   title: string
   description?: string
   isPublished: boolean
@@ -33,8 +35,10 @@ export const SettingsItineraryModal: React.FC<SettingsItineraryModalProps> = ({
   coverImage,
   onClose,
   onSave,
+  onDuplicate,
   onCoverImageChange,
   isContingency,
+  itineraryId,
   title,
   description,
   isPublished,
@@ -66,6 +70,13 @@ export const SettingsItineraryModal: React.FC<SettingsItineraryModalProps> = ({
       description: localDesc,
       coverImage: localCoverImage,
       isPublished: visibility === 'public',
+    })
+    onClose()
+  }
+
+  const handleDuplicate = () => {
+    onDuplicate({
+      itineraryId: itineraryId,
     })
     onClose()
   }
@@ -195,7 +206,10 @@ export const SettingsItineraryModal: React.FC<SettingsItineraryModalProps> = ({
           <hr />
 
           <div className="text-sm">
-            <button className="flex items-center gap-2 text-gray-700 font-medium mb-4">
+            <button
+              className="flex items-center gap-2 text-gray-700 font-medium mb-4"
+              onClick={handleDuplicate}
+            >
               <Clipboard size={18} /> Duplikat itinerary
             </button>
             <button className="flex items-center gap-2 text-red-600 font-medium">
