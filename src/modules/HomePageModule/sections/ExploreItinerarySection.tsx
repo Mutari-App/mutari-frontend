@@ -2,14 +2,16 @@
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import ItineraryCard from '@/modules/ItinerarySearchResultsModule/module-elements/ItineraryCard'
-import { customFetch } from '@/utils/newCustomFetch'
+import { customFetch, customFetchBody } from '@/utils/newCustomFetch'
 import {
+  BatchCheckItinerarySavedResponse,
   type ItinerarySearchResult,
   type SearchItinerariesResponse,
 } from '@/modules/ItinerarySearchResultsModule/interface'
 import { Button } from '@/components/ui/button'
 import { v4 } from 'uuid'
 import { DiscoverItinerariesByTagResponse } from '../interface'
+import { toast } from 'sonner'
 
 const ExploreItinerarySection = () => {
   const router = useRouter()
@@ -17,6 +19,10 @@ const ExploreItinerarySection = () => {
   const [itinerariesByTag, setItinerariesByTag] = useState<
     ItinerarySearchResult[]
   >([])
+  // eslint-disable-next-line @typescript-eslint/consistent-indexed-object-style
+  const [likedItineraries, setLikedItineraries] = useState<{
+    [key: string]: boolean
+  }>({})
   const [isLoadingPopular, setIsLoadingPopular] = useState(true)
   const [isLoadingTag, setIsLoadingTag] = useState(true)
 
@@ -57,6 +63,40 @@ const ExploreItinerarySection = () => {
     void fetchExploreItinerariesByTag()
   }, [])
 
+  useEffect(() => {
+    const fetchLikedItineraries = async () => {
+      try {
+        setIsLoadingPopular(true)
+        setIsLoadingTag(true)
+        const popularItineraryIds = itineraries.map((itinerary) => itinerary.id)
+        const tagItineraryIds = itinerariesByTag.map(
+          (itinerary) => itinerary.id
+        )
+        const itineraryIds = [...popularItineraryIds, ...tagItineraryIds]
+        const response = await customFetch<BatchCheckItinerarySavedResponse>(
+          `/itineraries/checkSave`,
+          {
+            method: 'POST',
+            body: customFetchBody(itineraryIds),
+            credentials: 'include',
+          }
+        )
+        setLikedItineraries(response.result)
+      } catch (error) {
+        toast.error('Gagal memuat eksplorasi itinerary')
+        setItineraries([])
+        setLikedItineraries({})
+        setItinerariesByTag([])
+        console.error(error)
+      } finally {
+        setIsLoadingPopular(false)
+        setIsLoadingTag(false)
+      }
+    }
+
+    void fetchLikedItineraries()
+  }, [itineraries, itinerariesByTag])
+
   const handleViewMore = () => {
     router.push('/itinerary/search')
   }
@@ -87,7 +127,7 @@ const ExploreItinerarySection = () => {
                 <ItineraryCard
                   key={itinerary.id}
                   itinerary={itinerary}
-                  isLiked={false}
+                  isLiked={likedItineraries[itinerary.id] ?? false}
                 />
               ))}
           </div>
@@ -117,7 +157,7 @@ const ExploreItinerarySection = () => {
                   <ItineraryCard
                     key={itinerary.id}
                     itinerary={itinerary}
-                    isLiked={false}
+                    isLiked={likedItineraries[itinerary.id] ?? false}
                   />
                 ))}
             </div>
