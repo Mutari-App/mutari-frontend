@@ -1,6 +1,6 @@
 'use client'
 
-import { customFetch } from '@/utils/customFetch'
+import { customFetch } from '@/utils/newCustomFetch'
 import React, { useEffect, useState } from 'react'
 import type {
   RecentlyViewedItineraries,
