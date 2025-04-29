@@ -1,6 +1,5 @@
 import type { CustomFetchBaseResponse } from '@/utils/customFetch/interface'
-// import type { ItineraryData } from '../ItineraryModule/module-elements/types'
-import { ItinerarySearchResult } from '../ItinerarySearchResultsModule/interface'
+import { type ItinerarySearchResult } from '../ItinerarySearchResultsModule/interface'
 import type {
   ItineraryTag,
   UserInfo,
