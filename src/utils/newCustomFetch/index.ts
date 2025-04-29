@@ -1,4 +1,4 @@
-import { deleteCookie, getCookie, getCookies } from 'cookies-next'
+import { deleteCookie, getCookie } from 'cookies-next'
 import {
   type CustomFetchBaseResponse,
   type CustomFetchRequestInit,
