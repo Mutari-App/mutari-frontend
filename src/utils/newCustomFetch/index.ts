@@ -59,7 +59,7 @@ export async function customFetch<T>(
       const { cookies } = await import('next/headers')
       const serverCookies = await cookies()
       const refreshToken = serverCookies.get('refreshToken')
-      if (refreshToken) {
+      if (refreshToken?.value) {
         throw new Error('TokenExpiredOnServer')
       }
     }
