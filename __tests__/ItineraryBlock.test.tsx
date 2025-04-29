@@ -39,15 +39,23 @@ jest.mock('@/modules/ItineraryMakerModule/module-elements/TimeInput', () => ({
       blockId,
       isVisible,
       toggleInput,
+      removeFeedbackForField,
     }: {
       blockId: string
       isVisible: boolean
       toggleInput: (id: string, type: string) => void
+      removeFeedbackForField: () => void
     }) => (
       <div data-testid={`time-input-${blockId}`}>
         {isVisible ? 'Time Input Visible' : 'Time Input Button'}
         <button onClick={() => toggleInput(blockId, 'time')}>
           Toggle Time
+        </button>
+        <button
+          data-testid="remove-time-feedback"
+          onClick={() => removeFeedbackForField()}
+        >
+          Remove Time Feedback
         </button>
       </div>
     )
@@ -64,15 +72,23 @@ jest.mock('@/modules/ItineraryMakerModule/module-elements/PriceInput', () => ({
       blockId,
       isVisible,
       toggleInput,
+      removeFeedbackForField,
     }: {
       blockId: string
       isVisible: boolean
       toggleInput: (id: string, type: string) => void
+      removeFeedbackForField: () => void
     }) => (
       <div data-testid={`price-input-${blockId}`}>
         {isVisible ? 'Price Input Visible' : 'Price Input Button'}
         <button onClick={() => toggleInput(blockId, 'price')}>
           Toggle Price
+        </button>
+        <button
+          data-testid="remove-price-feedback"
+          onClick={() => removeFeedbackForField()}
+        >
+          Remove Price Feedback
         </button>
       </div>
     )
@@ -722,6 +738,70 @@ describe('ItineraryBlock Component', () => {
 
     expect(screen.getByTestId('draggable-props')).not.toHaveClass(
       'border-red-500'
+    )
+  })
+
+  test('calls removeFeedbackForField for time input when feedback removal button is clicked', () => {
+    const locationBlock = createLocationBlock()
+
+    render(
+      <ItineraryBlock
+        block={locationBlock}
+        blockIndex={blockIndex}
+        sectionNumber={sectionNumber}
+        timeWarning={null}
+        isInputVisible={mockIsInputVisible}
+        toggleInput={mockToggleInput}
+        updateBlock={mockUpdateBlock}
+        removeBlock={mockRemoveBlock}
+        removeFeedbackForField={mockRemoveFeedbackForField}
+        feedbackItems={[]}
+        showRoute={false}
+        setPositionToView={mockSetPositionToView}
+      />
+    )
+
+    // Find and click the remove feedback button in TimeInput component
+    const removeFeedbackButton = screen.getByTestId('remove-time-feedback')
+    fireEvent.click(removeFeedbackButton)
+
+    // Verify that removeFeedbackForField was called with the correct parameters
+    expect(mockRemoveFeedbackForField).toHaveBeenCalledWith(
+      sectionNumber,
+      blockId,
+      'time'
+    )
+  })
+
+  test('calls removeFeedbackForField for price input when feedback removal button is clicked', () => {
+    const locationBlock = createLocationBlock()
+
+    render(
+      <ItineraryBlock
+        block={locationBlock}
+        blockIndex={blockIndex}
+        sectionNumber={sectionNumber}
+        timeWarning={null}
+        isInputVisible={mockIsInputVisible}
+        toggleInput={mockToggleInput}
+        updateBlock={mockUpdateBlock}
+        removeBlock={mockRemoveBlock}
+        removeFeedbackForField={mockRemoveFeedbackForField}
+        feedbackItems={[]}
+        showRoute={false}
+        setPositionToView={mockSetPositionToView}
+      />
+    )
+
+    // Find and click the remove feedback button in PriceInput component
+    const removeFeedbackButton = screen.getByTestId('remove-price-feedback')
+    fireEvent.click(removeFeedbackButton)
+
+    // Verify that removeFeedbackForField was called with the correct parameters
+    expect(mockRemoveFeedbackForField).toHaveBeenCalledWith(
+      sectionNumber,
+      blockId,
+      'price'
     )
   })
 })

@@ -48,13 +48,13 @@ export const PriceInput: React.FC<PriceInputProps> = ({
   }
 
   return (
-    <div className="flex items-center gap-1 bg-gray-100 p-1 rounded-md h-8">
+    <div className="flex w-[196px] items-center gap-1 bg-gray-100 p-1 rounded-md h-8">
       <Tag className="h-6 w-6 ml-1" />
       <span>Rp</span>
       <Input
         type="number"
         placeholder="50000"
-        className="w-[74px] h-6 text-sm focus-visible:ring-1 focus-visible:ring-offset-0"
+        className="h-6 text-sm focus-visible:ring-1 focus-visible:ring-offset-0"
         value={price ?? ''}
         onChange={(e) => {
           removeFeedbackForField(sectionNumber, blockId, 'price')

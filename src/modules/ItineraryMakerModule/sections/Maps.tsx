@@ -1,23 +1,25 @@
 'use client'
 import useDeepCompareEffect from 'use-deep-compare-effect'
 import { useEffect, useMemo, useState } from 'react'
-import {
-  GoogleMap,
-  type Libraries,
-  Marker,
-  useLoadScript,
-  Polyline,
-} from '@react-google-maps/api'
 import type {
   GetPlaceDetailsResponse,
+  ILocationMarker,
   PlaceResult,
   Section,
 } from '../interface'
-import { customFetch } from '@/utils/newCustomFetch'
+import { customFetch } from '@/utils/customFetch'
 import { Globe, Phone } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { decodePolyline } from '../utils'
+import {
+  AdvancedMarker,
+  Map,
+  useMap,
+  type MapMouseEvent,
+} from '@vis.gl/react-google-maps'
+import CustomPin from '../module-elements/CustomPin'
+import { SECTION_COLORS } from '../constants'
 
 type MapsProps = {
   readonly itineraryData: Readonly<Section[]>
@@ -26,7 +28,8 @@ type MapsProps = {
   addLocationToSection?: (
     sectionNumber: number,
     title: string,
-    location: string
+    location: string,
+    price?: number
   ) => void
   _testSelectedPlace?: {
     placeId: string
@@ -89,8 +92,7 @@ function Maps({
     east: 141.1,
     west: 95.0,
   }
-
-  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? ''
+  const map = useMap('main-map')
 
   const defaultCenter = useMemo(
     () =>
@@ -106,10 +108,9 @@ function Maps({
   )
   const [selectedPlaceDetails, setSelectedPlaceDetails] =
     useState<PlaceResult | null>(_testSelectedPlaceDetails ?? null)
-  const [map, setMap] = useState<google.maps.Map | null>(null)
 
   const { locations, routes } = useMemo(() => {
-    const locations: { lat: number; lng: number }[] = []
+    const locations: ILocationMarker[] = []
     const routes: {
       path: { lat: number; lng: number }[]
       options?: google.maps.PolylineOptions
@@ -122,7 +123,14 @@ function Maps({
             const [lat, lng] = block.location
               .split(',')
               .map((coord) => parseFloat(coord.trim()))
-            locations.push({ lat, lng })
+            const order = index + 1
+            locations.push({
+              lat,
+              lng,
+              section: section.sectionNumber,
+              order,
+              title: block.title,
+            })
           }
 
           if (block.routeToNext?.polyline) {
@@ -130,7 +138,7 @@ function Maps({
             routes.push({
               path: decodedPath,
               options: {
-                strokeColor: '#4285F4',
+                strokeColor: SECTION_COLORS[section.sectionNumber % 10].hex,
                 strokeWeight: 4,
                 strokeOpacity: 0.8,
               },
@@ -142,13 +150,6 @@ function Maps({
 
     return { locations, routes }
   }, [itineraryData])
-
-  const [libraries] = useState<Libraries>(['places'])
-
-  const { isLoaded } = useLoadScript({
-    googleMapsApiKey: apiKey,
-    libraries,
-  })
 
   const fetchPlaceDetails = async (placeId: string) => {
     try {
@@ -166,19 +167,21 @@ function Maps({
     }
   }
 
-  const handleMapClick = (e: google.maps.MapMouseEvent) => {
+  const handleMapClick = (e: MapMouseEvent) => {
     if (!isEditing) {
       e.stop()
       return
     }
-    if ('placeId' in e) {
-      console.log(e.placeId)
+    if (e.detail.placeId) {
       setSelectedPlace({
-        placeId: e.placeId as string,
-        latLng: { lat: e.latLng?.lat() ?? 0, lng: e.latLng?.lng() ?? 0 },
+        placeId: e.detail.placeId,
+        latLng: {
+          lat: e.detail.latLng?.lat ?? 0,
+          lng: e.detail.latLng?.lng ?? 0,
+        },
       })
-      if (e.latLng && map) {
-        map.panTo(e.latLng)
+      if (e.detail.latLng) {
+        e.map.panTo(e.detail.latLng)
       }
     } else {
       setSelectedPlace(defaultSelectedPlace)
@@ -192,9 +195,10 @@ function Maps({
       const location = `${selectedPlace.latLng.lat}, ${selectedPlace.latLng.lng}`
       const sectionNumber = itineraryData.length
       const title = name || 'New Place'
+      const price = selectedPlaceDetails.priceRange?.startPrice
 
       if (addLocationToSection) {
-        addLocationToSection(sectionNumber, title, location)
+        addLocationToSection(sectionNumber, title, location, price)
       }
     }
     setSelectedPlace(defaultSelectedPlace)
@@ -215,103 +219,101 @@ function Maps({
 
   return (
     <div className="w-full h-full">
-      {!isLoaded ? (
-        <div>Loading...</div>
-      ) : (
-        <GoogleMap
-          mapContainerClassName="w-full h-full relative"
-          center={defaultCenter}
-          zoom={12}
-          onLoad={(map) => setMap(map)}
-          options={{
-            streetViewControl: false,
-            restriction: {
-              latLngBounds: INDONESIA_BOUNDS,
-              strictBounds: false,
-            },
-          }}
-          onClick={handleMapClick}
-        >
-          {locations.map((loc) => (
-            <Marker
-              key={`${loc.lat}-${loc.lng}`}
-              position={loc}
-              data-testid="map-marker"
+      <Map
+        id="main-map"
+        defaultCenter={defaultCenter}
+        defaultZoom={12}
+        streetViewControl={false}
+        onClick={handleMapClick}
+        mapId={process.env.NEXT_PUBLIC_GOOGLE_MAPS_ID}
+        restriction={{
+          latLngBounds: INDONESIA_BOUNDS,
+          strictBounds: false,
+        }}
+      >
+        {locations.map((loc) => (
+          <AdvancedMarker
+            key={`${loc.lat}-${loc.lng}`}
+            position={loc}
+            data-testid="map-marker"
+          >
+            <CustomPin
+              number={loc.order}
+              color={SECTION_COLORS[loc.section % 10].class}
+              title={loc.title}
             />
-          ))}
+          </AdvancedMarker>
+        ))}
 
-          {routes.map((route, idx) => (
-            <PolyLine
-              key={`polyline-${idx}`}
-              map={map}
-              path={route.path}
-              options={route.options!}
-            />
-          ))}
+        {routes.map((route, idx) => (
+          <PolyLine
+            key={`polyline-${idx}`}
+            map={map}
+            path={route.path}
+            options={route.options!}
+          />
+        ))}
 
-          {selectedPlace.latLng.lat && selectedPlace.latLng.lng && (
-            <Marker
-              position={selectedPlace.latLng}
-              onClick={() => {
-                setSelectedPlace(selectedPlace)
-              }}
-            />
-          )}
+        {selectedPlace.latLng.lat && selectedPlace.latLng.lng && (
+          <AdvancedMarker
+            position={selectedPlace.latLng}
+            onClick={() => {
+              setSelectedPlace(selectedPlace)
+            }}
+          />
+        )}
 
-          {selectedPlace.placeId && selectedPlaceDetails && (
-            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 w-11/12 flex flex-col gap-5 bg-white max-h-[50dvh] overflow-auto rounded-2xl shadow-md p-6">
-              <div className="flex justify-between ">
-                <div className="flex gap-2 flex-col">
-                  <h3 className="font-semibold text-lg">
-                    {selectedPlaceDetails.name}
-                  </h3>
+        {selectedPlace.placeId && selectedPlaceDetails && (
+          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 w-11/12 flex flex-col gap-5 bg-white max-h-[50dvh] overflow-auto rounded-2xl shadow-md p-6">
+            <div className="flex justify-between ">
+              <div className="flex gap-2 flex-col">
+                <h3 className="font-semibold text-lg">
+                  {selectedPlaceDetails.name}
+                </h3>
+                <p className="text-gray-600">{selectedPlaceDetails.vicinity}</p>
+                <div className="flex gap-1 items-center text-sm">
+                  ⭐
                   <p className="text-gray-600">
-                    {selectedPlaceDetails.vicinity}
+                    <span className="text-yellow-500 font-semibold">
+                      {selectedPlaceDetails.rating}{' '}
+                    </span>
+                    ({selectedPlaceDetails.user_ratings_total})
                   </p>
-                  <div className="flex gap-1 items-center text-sm">
-                    ⭐
-                    <p className="text-gray-600">
-                      <span className="text-yellow-500 font-semibold">
-                        {selectedPlaceDetails.rating}{' '}
-                      </span>
-                      ({selectedPlaceDetails.user_ratings_total})
-                    </p>
-                  </div>
                 </div>
-
-                <Button
-                  size={'sm'}
-                  variant={'gradient'}
-                  onClick={handleAddToItinerary}
-                >
-                  Tambahkan ke itinerary
-                </Button>
               </div>
 
-              <div className="flex gap-2 flex-col text-sm text-gray-600">
-                {selectedPlaceDetails.international_phone_number && (
-                  <div className="flex gap-2 items-center">
-                    <Phone size={16} />
-                    <p>{selectedPlaceDetails.international_phone_number}</p>
-                  </div>
-                )}
-                {selectedPlaceDetails.website && (
-                  <div className="flex gap-2 items-center">
-                    <Globe size={16} />
-                    <Link
-                      href={selectedPlaceDetails.website}
-                      target="_blank"
-                      className="text-sky-600 hover:text-blue-400 underline"
-                    >
-                      {selectedPlaceDetails.website}
-                    </Link>
-                  </div>
-                )}
-              </div>
+              <Button
+                size={'sm'}
+                variant={'gradient'}
+                onClick={handleAddToItinerary}
+              >
+                Tambahkan ke itinerary
+              </Button>
             </div>
-          )}
-        </GoogleMap>
-      )}
+
+            <div className="flex gap-2 flex-col text-sm text-gray-600">
+              {selectedPlaceDetails.international_phone_number && (
+                <div className="flex gap-2 items-center">
+                  <Phone size={16} />
+                  <p>{selectedPlaceDetails.international_phone_number}</p>
+                </div>
+              )}
+              {selectedPlaceDetails.website && (
+                <div className="flex gap-2 items-center">
+                  <Globe size={16} />
+                  <Link
+                    href={selectedPlaceDetails.website}
+                    target="_blank"
+                    className="text-sky-600 hover:text-blue-400 underline"
+                  >
+                    {selectedPlaceDetails.website}
+                  </Link>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </Map>
     </div>
   )
 }

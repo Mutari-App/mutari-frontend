@@ -14,6 +14,7 @@ import type {
   metadataType,
 } from './module-elements/types'
 import { toast } from 'sonner'
+import ExploreItinerarySection from './sections/ExploreItinerarySection'
 
 export default function ItineraryModule() {
   const searchParams = useSearchParams()
@@ -78,7 +79,6 @@ export default function ItineraryModule() {
       }
 
       if (res.statusCode !== 200) throw new Error(res.message)
-      console.log(res.itinerary)
       setData(res.itinerary.data)
       setMyItineraryMetadata(res.itinerary.metadata)
     } catch (err: any) {
@@ -206,6 +206,7 @@ export default function ItineraryModule() {
         height={720}
         className="w-screen"
       />
+      <ExploreItinerarySection />
     </div>
   )
 }
