@@ -1,6 +1,9 @@
 import type { CustomFetchBaseResponse } from '@/utils/customFetch/interface'
 // import type { ItineraryData } from '../ItineraryModule/module-elements/types'
-import type { ItineraryTag, UserInfo } from '../ItinerarySearchResultsModule/interface'
+import type {
+  ItineraryTag,
+  UserInfo,
+} from '../ItinerarySearchResultsModule/interface'
 
 export interface RecentlyViewedItineraryResponse
   extends CustomFetchBaseResponse {
