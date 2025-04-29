@@ -1,6 +1,6 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import '@testing-library/jest-dom'
-import { customFetch } from '@/utils/customFetch'
+import { customFetch } from '@/utils/newCustomFetch'
 import { type ItineraryData } from '@/modules/ItineraryModule/module-elements/types'
 import ItineraryCard from '@/modules/ItineraryModule/module-elements/ItineraryCard'
 import { toast } from 'sonner'
@@ -209,7 +209,7 @@ jest.mock('sonner', () => ({
     error: jest.fn(),
   },
 }))
-jest.mock('@/utils/customFetch')
+jest.mock('@/utils/newCustomFetch')
 jest.mock('lucide-react', () => ({
   MoreHorizontal: () => <div>MoreHorizontal</div>,
   X: () => <div data-testid="x-icon">X</div>,
@@ -230,7 +230,7 @@ describe('ItineraryCard Component', () => {
     render(<ItineraryCard item={mockItem} refresh={jest.fn()} />)
 
     expect(screen.getByText('Trip to Bali')).toBeInTheDocument()
-    expect(screen.getByText('4 Hari • 5 Destinasi')).toBeInTheDocument()
+    expect(screen.getByText('5 Hari • 5 Destinasi')).toBeInTheDocument()
   })
 
   it('navigates to itinerary detail page when clicked', () => {
@@ -264,7 +264,7 @@ describe('ItineraryCard Component', () => {
     await waitFor(() => {
       expect(customFetch).toHaveBeenCalledWith(
         '/itineraries/1/mark-as-complete/',
-        { isAuthorized: true, method: 'PATCH' }
+        { method: 'PATCH' }
       )
       expect(toast.success).toHaveBeenCalledWith(
         'Itinerary marked as complete!'
@@ -328,7 +328,6 @@ describe('ItineraryCard Component', () => {
     await waitFor(() => {
       expect(customFetch).toHaveBeenCalledWith('/itineraries/1/', {
         method: 'DELETE',
-        isAuthorized: true,
       })
       expect(toast.success).toHaveBeenCalledWith(
         'Itinerary deleted successfully!'

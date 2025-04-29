@@ -96,8 +96,14 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
     })
 
     if (response.statusCode === 200) {
-      setIsAuthenticated(true)
-      return response
+      const userResponse = await customFetch<UserResponseInterface>('/auth/me')
+      if (userResponse.statusCode === 200) {
+        setIsAuthenticated(true)
+        setUser(userResponse.user)
+        return response
+      } else {
+        throw new Error(userResponse.message)
+      }
     } else {
       throw new Error(response.message)
     }
@@ -122,6 +128,7 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
       credentials: 'include',
     })
     setIsAuthenticated(false)
+    setUser(null)
     await deleteCookie('accessToken')
     await deleteCookie('refreshToken')
     return response
@@ -129,6 +136,7 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
 
   const getMe = async () => {
     const refreshToken = getCookie('refreshToken')
+
     if (
       (userResponse as UserResponseInterface).statusCode === 401 &&
       !!refreshToken
@@ -140,6 +148,7 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
         if (response.statusCode === 200) {
           setIsAuthenticated(true)
           setUser(response.user)
+          router.refresh()
         } else {
           setIsAuthenticated(false)
           setUser(null)
@@ -176,7 +185,7 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
         toast.promise(validate({ ticket: ticket! }), {
           loading: 'Logging in...',
           success: () => {
-            router.refresh()
+            router.push('/')
             return 'Login berhasil!'
           },
           error: (err: Error) => `Oops. Login gagal! ${err.message}`,

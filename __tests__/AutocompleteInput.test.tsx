@@ -1,10 +1,25 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import AutocompleteInput from '@/modules/ItineraryMakerModule/module-elements/AutocompleteInput'
-import { useLoadScript } from '@react-google-maps/api'
 import usePlacesAutocomplete from 'use-places-autocomplete'
+import useOutsideClick from '@/hooks/useOutsideClick'
 
-jest.mock('@react-google-maps/api', () => ({
-  useLoadScript: jest.fn(),
+// Mock useOutsideClick hook
+jest.mock('@/hooks/useOutsideClick', () => ({
+  __esModule: true,
+  default: jest.fn(),
+}))
+
+jest.mock('@vis.gl/react-google-maps', () => ({
+  APIProvider: ({
+    children,
+    onLoad,
+  }: {
+    children: React.ReactNode
+    onLoad?: () => void
+  }) => {
+    onLoad?.() // call it manually so it's covered
+    return <div data-testid="api-provider">{children}</div>
+  },
 }))
 
 jest.mock('use-places-autocomplete', () => ({
@@ -36,42 +51,35 @@ jest.mock('use-places-autocomplete', () => ({
   }),
 }))
 
+jest.mock('lucide-react', () => ({
+  Edit2: () => <div data-testid="edit-icon">Edit2</div>,
+}))
+
 describe('AutocompleteInput Component', () => {
   const updateBlock = jest.fn()
-  const toggleInput = jest.fn()
   const mockSetPositionToView = jest.fn()
   const blockId = 'test-block'
   const title = 'Initial Title'
 
+  const originalEnv = process.env
+
   beforeEach(() => {
-    ;(useLoadScript as jest.Mock).mockReturnValue({ isLoaded: true })
+    process.env = {
+      ...originalEnv,
+      NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: 'dummy-key',
+    }
+    jest.clearAllMocks()
   })
 
   afterEach(() => {
     jest.clearAllMocks()
   })
 
-  test('renders loading state when Google Maps API is not loaded', () => {
-    ;(useLoadScript as jest.Mock).mockReturnValueOnce({ isLoaded: false })
-    render(
-      <AutocompleteInput
-        updateBlock={updateBlock}
-        setPositionToView={mockSetPositionToView}
-        toggleInput={toggleInput}
-        blockId={blockId}
-        title={title}
-      />
-    )
-    expect(screen.getByText(/Loading/i)).toBeInTheDocument()
-  })
-
   test('renders input field when Google Maps API is loaded', () => {
-    ;(useLoadScript as jest.Mock).mockReturnValueOnce({ isLoaded: true })
     render(
       <AutocompleteInput
         updateBlock={updateBlock}
         setPositionToView={mockSetPositionToView}
-        toggleInput={toggleInput}
         blockId={blockId}
         title={title}
       />
@@ -81,7 +89,6 @@ describe('AutocompleteInput Component', () => {
 
   test('updates input value on change', async () => {
     const setValueMock = jest.fn()
-    ;(useLoadScript as jest.Mock).mockReturnValueOnce({ isLoaded: true })
     ;(usePlacesAutocomplete as jest.Mock).mockReturnValue({
       ready: true,
       value: '',
@@ -94,7 +101,6 @@ describe('AutocompleteInput Component', () => {
       <AutocompleteInput
         updateBlock={updateBlock}
         setPositionToView={mockSetPositionToView}
-        toggleInput={toggleInput}
         blockId={blockId}
         title={title}
       />
@@ -106,7 +112,6 @@ describe('AutocompleteInput Component', () => {
   })
 
   test('handles selecting a location correctly', async () => {
-    ;(useLoadScript as jest.Mock).mockReturnValueOnce({ isLoaded: true })
     ;(usePlacesAutocomplete as jest.Mock).mockReturnValue({
       ready: true,
       value: '',
@@ -128,7 +133,6 @@ describe('AutocompleteInput Component', () => {
       <AutocompleteInput
         updateBlock={updateBlock}
         setPositionToView={mockSetPositionToView}
-        toggleInput={toggleInput}
         blockId={blockId}
         title={title}
       />
@@ -158,5 +162,195 @@ describe('AutocompleteInput Component', () => {
       )
       expect(updateBlock).toHaveBeenCalledWith(blockId, 'title', 'Test Place')
     })
+  })
+
+  test('renders input and APIProvider', () => {
+    render(
+      <AutocompleteInput
+        updateBlock={updateBlock}
+        setPositionToView={mockSetPositionToView}
+        blockId={blockId}
+        title={title}
+      />
+    )
+    expect(screen.getByTestId('autocomplete-input')).toBeInTheDocument()
+    expect(screen.getByTestId('api-provider')).toBeInTheDocument()
+  })
+
+  test('env var fallback to empty string when undefined', () => {
+    const originalEnv = process.env
+    process.env = { ...originalEnv, NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: undefined }
+
+    render(
+      <AutocompleteInput
+        updateBlock={updateBlock}
+        setPositionToView={mockSetPositionToView}
+        blockId={blockId}
+        title={title}
+      />
+    )
+
+    // Komponen tetap render tanpa error
+    expect(screen.getByTestId('autocomplete-input')).toBeInTheDocument()
+
+    process.env = originalEnv
+  })
+
+  test('triggers useOutsideClick handler correctly', async () => {
+    let capturedHandler: () => void = () => {
+      /* no-op */
+    }
+
+    ;(useOutsideClick as jest.Mock).mockImplementation(
+      ({ handler }: { handler: () => void }) => {
+        capturedHandler = handler
+        return null
+      }
+    )
+
+    const mockValue = 'Test Location'
+    ;(usePlacesAutocomplete as jest.Mock).mockReturnValue({
+      ready: true,
+      value: mockValue,
+      setValue: jest.fn(),
+      suggestions: { status: 'OK', data: [] },
+      clearSuggestions: jest.fn(),
+    })
+
+    render(
+      <AutocompleteInput
+        updateBlock={updateBlock}
+        setPositionToView={mockSetPositionToView}
+        blockId={blockId}
+        title={title}
+      />
+    )
+    capturedHandler()
+    expect(updateBlock).toHaveBeenCalledWith(blockId, 'title', mockValue)
+  })
+
+  test('handles input focus when value is "Masukkan Lokasi"', () => {
+    // Mock select method
+    const mockSelect = jest.fn()
+
+    // Setup component with specific value
+    ;(usePlacesAutocomplete as jest.Mock).mockReturnValue({
+      ready: true,
+      value: 'Masukkan Lokasi',
+      setValue: jest.fn(),
+      suggestions: { status: 'OK', data: [] },
+      clearSuggestions: jest.fn(),
+    })
+
+    render(
+      <AutocompleteInput
+        updateBlock={updateBlock}
+        setPositionToView={mockSetPositionToView}
+        blockId={blockId}
+        title="Masukkan Lokasi"
+      />
+    )
+
+    const input = screen.getByTestId('autocomplete-input')
+
+    // Mock select function on the input element
+    Object.defineProperty(input, 'select', {
+      value: mockSelect,
+    })
+
+    // Trigger focus event
+    fireEvent.focus(input)
+
+    // Verify select was called
+    expect(mockSelect).toHaveBeenCalled()
+  })
+
+  test('handles input focus when value is not "Masukkan Lokasi"', () => {
+    // Mock select method
+    const mockSelect = jest.fn()
+
+    // Setup component with different value
+    ;(usePlacesAutocomplete as jest.Mock).mockReturnValue({
+      ready: true,
+      value: 'Different Value',
+      setValue: jest.fn(),
+      suggestions: { status: 'OK', data: [] },
+      clearSuggestions: jest.fn(),
+    })
+
+    render(
+      <AutocompleteInput
+        updateBlock={updateBlock}
+        setPositionToView={mockSetPositionToView}
+        blockId={blockId}
+        title="Different Value"
+      />
+    )
+
+    const input = screen.getByTestId('autocomplete-input')
+
+    // Mock select function on the input element
+    Object.defineProperty(input, 'select', {
+      value: mockSelect,
+    })
+
+    // Trigger focus event
+    fireEvent.focus(input)
+
+    // Verify select was not called
+    expect(mockSelect).not.toHaveBeenCalled()
+  })
+
+  test('shows Edit2 icon on mouse hover and hides on mouse leave', () => {
+    render(
+      <AutocompleteInput
+        updateBlock={updateBlock}
+        setPositionToView={mockSetPositionToView}
+        blockId={blockId}
+        title={title}
+      />
+    )
+
+    // Initially, edit icon should not be visible
+    expect(screen.queryByTestId('edit-icon')).not.toBeInTheDocument()
+
+    // Find the container div and trigger mouse enter
+    const container =
+      screen.getByTestId('autocomplete-input').parentElement?.parentElement
+    fireEvent.mouseEnter(container!)
+
+    // Now edit icon should be visible
+    expect(screen.getByTestId('edit-icon')).toBeInTheDocument()
+
+    // Trigger mouse leave
+    fireEvent.mouseLeave(container!)
+
+    // Edit icon should no longer be visible
+    expect(screen.queryByTestId('edit-icon')).not.toBeInTheDocument()
+  })
+
+  test('initializes with title value when provided', () => {
+    const mockSetValue = jest.fn()
+    ;(usePlacesAutocomplete as jest.Mock).mockReturnValue({
+      ready: true,
+      value: '',
+      setValue: mockSetValue,
+      suggestions: { status: 'OK', data: [] },
+      clearSuggestions: jest.fn(),
+    })
+
+    const customTitle = 'Custom Location'
+
+    render(
+      <AutocompleteInput
+        updateBlock={updateBlock}
+        setPositionToView={mockSetPositionToView}
+        blockId={blockId}
+        title={customTitle}
+      />
+    )
+
+    // Verify setValue was called with the title and false
+    expect(mockSetValue).toHaveBeenCalledWith(customTitle, false)
   })
 })

@@ -23,7 +23,14 @@ export async function customFetch<T>(
     delete headers['Content-Type']
   }
 
-  const AT = await getCookie('AT')
+  let AT
+  if (isServer) {
+    const { cookies } = await import('next/headers')
+    const serverCookies = await cookies()
+    AT = serverCookies.get('AT')?.value
+  } else {
+    AT = await getCookie('AT')
+  }
 
   if (AT) {
     headers.authorization = `Bearer ${String(AT)}`
@@ -52,7 +59,7 @@ export async function customFetch<T>(
       const { cookies } = await import('next/headers')
       const serverCookies = await cookies()
       const refreshToken = serverCookies.get('refreshToken')
-      if (refreshToken) {
+      if (refreshToken?.value) {
         throw new Error('TokenExpiredOnServer')
       }
     }

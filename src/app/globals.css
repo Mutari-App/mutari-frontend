@@ -158,3 +158,90 @@ header .call-to-action {
     width: 0;
   }
 }
+
+.overflow-fade-container {
+  position: relative;
+  width: 100%;
+}
+
+.fade-left,
+.fade-right {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 10px;
+  pointer-events: none;
+  z-index: 10;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.fade-left {
+  left: 0;
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 1) 0%,
+    rgba(255, 255, 255, 0) 100%
+  );
+}
+
+.fade-right {
+  right: 0;
+  background: linear-gradient(
+    to left,
+    rgba(255, 255, 255, 1) 0%,
+    rgba(255, 255, 255, 0) 100%
+  );
+}
+
+.content-container::-webkit-scrollbar {
+  height: 2px;
+  margin-top: 1px; /* Add gap above the scrollbar */
+}
+
+.content-container::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 0 4px; /* Add horizontal padding to the track */
+}
+
+.content-container::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 20px;
+  border: 2px solid transparent; /* Creates space around the thumb */
+  background-clip: content-box;
+}
+
+/* For Firefox */
+.content-container {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+  padding-bottom: 1px;
+}
+
+.has-overflow .fade-right {
+  opacity: 1;
+}
+
+.scrolled-left .fade-left {
+  opacity: 1;
+}
+
+.scrolled-right .fade-right {
+  opacity: 0;
+}
+
+@keyframes pop {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.25);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.pop-animation {
+  animation: pop 0.3s ease;
+}

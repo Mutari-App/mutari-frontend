@@ -1,15 +1,21 @@
 'use client'
-import { customFetch } from '@/utils/customFetch'
+import { customFetch } from '@/utils/newCustomFetch'
 import { ItineraryHeader } from './module-elements/ItineraryHeader'
 import { ItineraryList } from './module-elements/ItineraryList'
 import { ItinerarySummary } from './module-elements/ItinerarySummary'
 import { useEffect, useState } from 'react'
-import { notFound, useParams, useRouter } from 'next/navigation'
+import { useParams } from 'next/navigation'
 import Maps from '../ItineraryMakerModule/sections/Maps'
 import { PlanPicker } from './module-elements/PlanPicker'
+import { APIProvider } from '@vis.gl/react-google-maps'
+import { Loader2 } from 'lucide-react'
+import NotFound from '@/app/not-found'
+import { useAuthContext } from '@/contexts/AuthContext'
 
 export default function DetailItineraryModule() {
-  const [data, setData] = useState<Itinerary>({} as Itinerary)
+  const { isAuthenticated } = useAuthContext()
+
+  const [data, setData] = useState<Itinerary | null>(null)
   const [contingencies, setContingencies] = useState<ContingencyPlan[]>()
   const [selectedContingency, setSelectedContingency] =
     useState<ContingencyPlan>()
@@ -18,28 +24,27 @@ export default function DetailItineraryModule() {
     id: string
     contingencyId: string
   }>()
-  const router = useRouter()
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await customFetch<ItineraryDetailResponse>(
-          `/itineraries/${id}`,
-          {
-            credentials: 'include',
-            isAuthorized: true,
-          }
-        )
-
-        if (res.statusCode === 404) {
-          setIsNotFound(true)
+  const fetchData = async () => {
+    try {
+      const res = await customFetch<ItineraryDetailResponse>(
+        `/itineraries/${id}`,
+        {
+          credentials: 'include',
         }
+      )
 
-        setData(res.data)
-      } catch (err: any) {
+      if (res.statusCode === 404 || res.statusCode === 403) {
         setIsNotFound(true)
       }
+
+      setData(res.data)
+    } catch (err: any) {
+      setIsNotFound(true)
     }
+  }
+
+  useEffect(() => {
     void fetchData()
     const fetchContingencies = async () => {
       try {
@@ -47,7 +52,6 @@ export default function DetailItineraryModule() {
           `itineraries/${id}/contingencies`,
           {
             credentials: 'include',
-            isAuthorized: true,
           }
         )
 
@@ -74,7 +78,6 @@ export default function DetailItineraryModule() {
           `itineraries/${id}/contingencies/${contingencyId}`,
           {
             credentials: 'include',
-            isAuthorized: true,
           }
         )
 
@@ -95,41 +98,70 @@ export default function DetailItineraryModule() {
     void fetchContingencyDetail()
   }, [contingencyId])
 
-  if (isNotFound) {
-    notFound()
-  }
+  useEffect(() => {
+    const viewItinerary = async () => {
+      try {
+        await customFetch(`itineraries/views/${id}`, {
+          method: 'POST',
+        })
+      } catch (err: any) {
+        console.error('Error viewing itinerary:', err)
+      }
+    }
+    if (isAuthenticated) {
+      void viewItinerary()
+    }
+  }, [id])
 
-  return (
-    <div className="flex max-h-screen">
-      <div className="container max-w-4xl mx-auto p-4 pt-24 min-h-screen max-h-screen overflow-auto">
-        <ItineraryHeader
-          data={
-            selectedContingency
-              ? {
-                  ...data,
-                  title: `(${selectedContingency.title}) ${data.title}`,
-                }
-              : data
-          }
-          contingencyId={contingencyId}
-        />
-        <ItinerarySummary startDate={data.startDate} endDate={data.endDate} />
-        <ItineraryList
-          section={
-            selectedContingency
-              ? selectedContingency.sections || []
-              : data.sections || []
-          }
-        />
-        <PlanPicker
-          itineraryId={id}
-          contingencies={contingencies || []}
-          selectedPlan={selectedContingency ?? data}
-        />
+  if (isNotFound) {
+    return <NotFound />
+  }
+  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? ''
+
+  return data ? (
+    <APIProvider apiKey={apiKey}>
+      <div className="flex max-h-screen">
+        <div className="container max-w-4xl mx-auto p-4 pt-24 min-h-screen max-h-screen overflow-auto">
+          <ItineraryHeader
+            data={
+              selectedContingency
+                ? {
+                    ...data,
+                    title: `(${selectedContingency.title}) ${data.title}`,
+                  }
+                : data
+            }
+            contingencyId={contingencyId}
+            refresh={fetchData}
+          />
+          <ItinerarySummary startDate={data.startDate} endDate={data.endDate} />
+          <ItineraryList
+            section={
+              selectedContingency
+                ? selectedContingency.sections || []
+                : data.sections || []
+            }
+          />
+          <PlanPicker
+            itineraryId={id}
+            contingencies={contingencies || []}
+            selectedPlan={selectedContingency ?? data}
+          />
+        </div>
+        <div className="w-full min-h-screen hidden md:block">
+          <Maps
+            itineraryData={
+              selectedContingency
+                ? selectedContingency.sections || []
+                : (data.sections ?? [])
+            }
+          />
+        </div>
       </div>
-      <div className="w-full min-h-screen hidden md:block">
-        <Maps itineraryData={data.sections ?? []} />
-      </div>
+    </APIProvider>
+  ) : (
+    <div className="flex items-center justify-center h-screen">
+      <Loader2 className="animate-spin w-6 h-6 mr-2" />
     </div>
   )
 }

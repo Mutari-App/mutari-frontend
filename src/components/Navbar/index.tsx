@@ -12,14 +12,13 @@ import Image from 'next/image'
 import { getImage } from '@/utils/getImage'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { customFetch } from '@/utils/customFetch'
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { LogOut } from 'lucide-react'
+import { LogOut, User } from 'lucide-react'
 import { Button } from '../ui/button'
 import { useAuthContext } from '@/contexts/AuthContext'
 import { toast } from 'sonner'
@@ -30,7 +29,7 @@ export const Navbar: React.FC = () => {
   )
   const nowDate = new Date()
   const isLaunching = nowDate > launchingDate
-  const { isAuthenticated, logout } = useAuthContext()
+  const { isAuthenticated, logout, user } = useAuthContext()
   const pathname = usePathname() // Get current route path
   const router = useRouter()
 
@@ -50,7 +49,6 @@ export const Navbar: React.FC = () => {
       window.removeEventListener('scroll', handleScroll)
     }
   }, [])
-  console.log({ isAuthenticated })
 
   const handleLogout = async () => {
     try {
@@ -69,13 +67,15 @@ export const Navbar: React.FC = () => {
     }
   }
 
+  const isLandingPage = pathname === '/landing-page'
+
   return (
     <NavigationMenu
       className={`p-4 fixed bg-transparent max-w-full w-full z-[101] transition-colors duration-300 ${
         pathname == '/' && isScrolledToScreen
           ? 'bg-[#0059B3] shadow-md'
           : 'bg-transparent'
-      } ${pathname != '/' && 'bg-white shadow-md'}`}
+      } ${!isLandingPage && 'bg-white shadow-md'}`}
     >
       <div className="mx-auto w-full container flex justify-between items-center">
         <div className="flex justify-start gap-5 items-center">
@@ -85,7 +85,7 @@ export const Navbar: React.FC = () => {
           >
             <Image
               src={getImage(
-                `${pathname == '/' ? 'logo-white.png' : 'logo-no-background.png'}`
+                `${pathname == '/landing-page' ? 'logo-white.png' : 'logo-no-background.png'}`
               )}
               alt="Mutari Logo"
               width={150}
@@ -93,13 +93,13 @@ export const Navbar: React.FC = () => {
               className="h-12 w-auto z-30"
             />
             <span
-              className={`${pathname == '/' ? 'text-white' : 'text-[#0059B3]'} font-hammersmithOne text-[30px]`}
+              className={`${isLandingPage ? 'text-white' : 'text-[#0059B3]'} font-hammersmithOne text-[30px]`}
             >
               MUTARI
             </span>
           </Link>
           <NavigationMenuList
-            className={`flex space-x-4 ${pathname == '/' ? 'text-white' : 'text-black'}`}
+            className={`flex space-x-4 ${isLandingPage ? 'text-white' : 'text-black'}`}
           >
             <NavigationMenuItem>
               <NavigationMenuLink href="/itinerary" className="hover:underline">
@@ -110,7 +110,7 @@ export const Navbar: React.FC = () => {
         </div>
 
         {isLaunching &&
-          (isAuthenticated ? (
+          (isAuthenticated && !!user ? (
             <DropdownMenu>
               <DropdownMenuTrigger className="focus:outline-none ">
                 <div className="rounded-full overflow-hidden hover:opacity-80 transition-opacity">
@@ -127,6 +127,15 @@ export const Navbar: React.FC = () => {
                 align="end"
                 className="w-48 p-2 relative z-[102]"
               >
+                <DropdownMenuItem>
+                  <Link
+                    href={`/profile/${user.id}`}
+                    className=" w-full cursor-pointer flex items-center gap-2 text-slate-600 hover:text-slate-700 focus:text-slate-700"
+                  >
+                    <User className="h-4 w-4" />
+                    <span>Profile</span>
+                  </Link>
+                </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={handleLogout}
                   className="cursor-pointer flex items-center gap-2 text-red-500 hover:text-red-700 focus:text-red-700"
@@ -140,7 +149,7 @@ export const Navbar: React.FC = () => {
             <Link href="/login">
               <Button
                 className={`transition-colors px-6 ${
-                  pathname === '/'
+                  isLandingPage
                     ? 'bg-white text-[#0059B3] hover:bg-gray-100'
                     : 'bg-[#0059B3] text-white hover:bg-[#004C99]'
                 }`}
