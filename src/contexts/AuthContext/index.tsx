@@ -96,8 +96,14 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
     })
 
     if (response.statusCode === 200) {
-      setIsAuthenticated(true)
-      return response
+      const userResponse = await customFetch<UserResponseInterface>('/auth/me')
+      if (userResponse.statusCode === 200) {
+        setIsAuthenticated(true)
+        setUser(userResponse.user)
+        return response
+      } else {
+        throw new Error(userResponse.message)
+      }
     } else {
       throw new Error(response.message)
     }
