@@ -5,7 +5,7 @@ import MyItinerarySection from './sections/MyItinerarySection'
 
 export default function HomePageModule() {
   return (
-    <div className="flex flex-col items-center gap-7 pt-20 w-full mb-5">
+    <div className="flex flex-col items-center gap-7 w-full mb-5">
       <HeaderSection />
       <RecentlyViewed />
       <MyItinerarySection />
