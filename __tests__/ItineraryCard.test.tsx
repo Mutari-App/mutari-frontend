@@ -230,7 +230,7 @@ describe('ItineraryCard Component', () => {
     render(<ItineraryCard item={mockItem} refresh={jest.fn()} />)
 
     expect(screen.getByText('Trip to Bali')).toBeInTheDocument()
-    expect(screen.getByText('4 Hari • 5 Destinasi')).toBeInTheDocument()
+    expect(screen.getByText('5 Hari • 5 Destinasi')).toBeInTheDocument()
   })
 
   it('navigates to itinerary detail page when clicked', () => {

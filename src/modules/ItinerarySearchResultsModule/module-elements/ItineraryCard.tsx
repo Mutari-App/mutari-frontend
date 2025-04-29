@@ -13,22 +13,26 @@ interface ItineraryCardProps {
   itinerary: ItinerarySearchResult
   isLiked: boolean
   maxVisibleTags?: number
+  className?: string
 }
 
 const ItineraryCard: React.FC<ItineraryCardProps> = ({
   itinerary,
   isLiked,
   maxVisibleTags = 3,
+  className = '',
 }) => {
   const { id, firstName, lastName, photoProfile } = itinerary.user
-  const fullName = `${firstName} ${lastName}`
+  const fullName = `${firstName} ${lastName ?? ''}`
   const initials = `${firstName.charAt(0)}${lastName?.charAt(0) || ''}`
 
   const visibleTags = itinerary.tags.slice(0, maxVisibleTags)
   const hiddenTagsCount = Math.max(0, itinerary.tags.length - maxVisibleTags)
 
   return (
-    <Card className="h-full flex flex-col overflow-hidden transition-all hover:shadow-md font-raleway group">
+    <Card
+      className={`flex flex-col overflow-hidden transition-all hover:shadow-md font-raleway group ${className}`}
+    >
       <div className="flex flex-col h-full">
         <Link
           href={`/itinerary/${itinerary.id}`}
