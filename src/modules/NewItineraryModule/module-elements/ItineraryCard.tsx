@@ -53,7 +53,7 @@ function ItineraryCard({
   const daysTotal = Math.floor(
     (new Date(item.endDate).getTime() - new Date(item.startDate).getTime()) /
       (1000 * 60 * 60 * 24)
-  )
+  ) + 1
 
   useOutsideClick({
     ref: optionRef,
