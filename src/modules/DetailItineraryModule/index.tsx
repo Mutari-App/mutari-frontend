@@ -9,6 +9,7 @@ import Maps from '../ItineraryMakerModule/sections/Maps'
 import { PlanPicker } from './module-elements/PlanPicker'
 import { APIProvider } from '@vis.gl/react-google-maps'
 import { Loader2 } from 'lucide-react'
+import NotFound from '@/app/not-found'
 
 export default function DetailItineraryModule() {
   const [data, setData] = useState<Itinerary | null>(null)
@@ -109,7 +110,7 @@ export default function DetailItineraryModule() {
   }, [id])
 
   if (isNotFound) {
-    notFound()
+    return <NotFound />
   }
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? ''
 

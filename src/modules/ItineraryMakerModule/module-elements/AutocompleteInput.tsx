@@ -112,22 +112,26 @@ function AutocompleteInput({
             />
           )}
         </div>
-        {status === 'OK' && optionsOpen && (
+        {optionsOpen && (
           <div
             ref={suggestionsRef}
             className="absolute top-full w-full z-30 bg-white shadow-md border border-gray-200 rounded-md mt-1"
           >
-            {data.map(({ place_id, structured_formatting, description }) => (
-              <div
-                key={place_id}
-                className="p-2 hover:bg-gray-100 cursor-pointer text-sm"
-                onClick={() =>
-                  handleSelect(description, structured_formatting.main_text)
-                }
-              >
-                {structured_formatting.main_text}
-              </div>
-            ))}
+            {status !== 'OK' ? (
+              <div className="p-2 text-sm text-gray-400">Mencari Lokasi...</div>
+            ) : status === 'OK' ? (
+              data.map(({ place_id, structured_formatting, description }) => (
+                <div
+                  key={place_id}
+                  className="p-2 hover:bg-gray-100 cursor-pointer text-sm"
+                  onClick={() =>
+                    handleSelect(description, structured_formatting.main_text)
+                  }
+                >
+                  {structured_formatting.main_text}
+                </div>
+              ))
+            ) : null}
           </div>
         )}
       </div>

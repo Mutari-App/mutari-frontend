@@ -122,6 +122,7 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
       credentials: 'include',
     })
     setIsAuthenticated(false)
+    setUser(null)
     await deleteCookie('accessToken')
     await deleteCookie('refreshToken')
     return response
@@ -129,6 +130,7 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
 
   const getMe = async () => {
     const refreshToken = getCookie('refreshToken')
+
     if (
       (userResponse as UserResponseInterface).statusCode === 401 &&
       !!refreshToken
