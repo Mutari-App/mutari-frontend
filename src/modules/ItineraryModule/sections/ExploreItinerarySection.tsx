@@ -10,9 +10,11 @@ import {
 } from '@/modules/ItinerarySearchResultsModule/interface'
 import { Button } from '@/components/ui/button'
 import { v4 } from 'uuid'
+import { useAuthContext } from '@/contexts/AuthContext'
 
 const ExploreItinerarySection = () => {
   const router = useRouter()
+  const { isAuthenticated } = useAuthContext()
   const [itineraries, setItineraries] = useState<ItinerarySearchResult[]>([])
   // eslint-disable-next-line @typescript-eslint/consistent-indexed-object-style
   const [itinerariesLiked, setItinerariesLiked] = useState<{
@@ -30,18 +32,19 @@ const ExploreItinerarySection = () => {
         )
 
         const itineraryIds = response.data.map((itinerary) => itinerary.id)
-        const responseLikes =
-          await customFetch<BatchCheckItinerarySavedResponse>(
-            `/itineraries/checkSave`,
-            {
-              method: 'POST',
-              body: customFetchBody(itineraryIds),
-              credentials: 'include',
-            }
-          )
-        setItinerariesLiked(responseLikes.result)
-
         setItineraries(response.data || [])
+
+        if (isAuthenticated) {
+          const responseLikes =
+            await customFetch<BatchCheckItinerarySavedResponse>(
+              `/itineraries/checkSave`,
+              {
+                method: 'POST',
+                body: customFetchBody(itineraryIds),
+              }
+            )
+          setItinerariesLiked(responseLikes.result)
+        }
       } catch (error) {
         console.error('Failed to fetch itineraries:', error)
         setItineraries([])

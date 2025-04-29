@@ -120,7 +120,6 @@ function AutocompleteInput({
             {status !== 'OK' ? (
               <div className="p-2 text-sm text-gray-400">Mencari Lokasi...</div>
             ) : status === 'OK' ? (
-
               data.map(({ place_id, structured_formatting, description }) => (
                 <div
                   key={place_id}
