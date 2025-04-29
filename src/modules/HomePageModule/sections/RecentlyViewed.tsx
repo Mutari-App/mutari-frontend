@@ -6,11 +6,10 @@ import type {
   RecentlyViewedItineraries,
   RecentlyViewedItineraryResponse,
 } from '../interface'
-import ViewedItineraryCard from '../module-elements/ViewedItineraryCard'
 import ItineraryCard from '@/modules/ItinerarySearchResultsModule/module-elements/ItineraryCard'
 import { useAuthContext } from '@/contexts/AuthContext'
 import { customFetchBody } from '@/utils/newCustomFetch'
-import { BatchCheckItinerarySavedResponse } from '@/modules/ItinerarySearchResultsModule/interface'
+import type { BatchCheckItinerarySavedResponse } from '@/modules/ItinerarySearchResultsModule/interface'
 
 function RecentlyViewed() {
   const [recentlyViewed, setRecentlyViewed] = useState<
