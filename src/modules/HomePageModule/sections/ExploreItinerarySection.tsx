@@ -69,7 +69,11 @@ const ExploreItinerarySection = () => {
               {itineraries &&
                 itineraries.length > 0 &&
                 itineraries.map((itinerary) => (
-                  <ItineraryCard key={itinerary.id} itinerary={itinerary} />
+                  <ItineraryCard
+                    isLiked={false}
+                    key={itinerary.id}
+                    itinerary={itinerary}
+                  />
                 ))}
             </div>
           </div>
