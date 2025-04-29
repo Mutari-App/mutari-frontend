@@ -4,14 +4,17 @@ import { ItineraryHeader } from './module-elements/ItineraryHeader'
 import { ItineraryList } from './module-elements/ItineraryList'
 import { ItinerarySummary } from './module-elements/ItinerarySummary'
 import { useEffect, useState } from 'react'
-import { notFound, useParams } from 'next/navigation'
+import { useParams } from 'next/navigation'
 import Maps from '../ItineraryMakerModule/sections/Maps'
 import { PlanPicker } from './module-elements/PlanPicker'
 import { APIProvider } from '@vis.gl/react-google-maps'
 import { Loader2 } from 'lucide-react'
 import NotFound from '@/app/not-found'
+import { useAuthContext } from '@/contexts/AuthContext'
 
 export default function DetailItineraryModule() {
+  const { isAuthenticated } = useAuthContext()
+
   const [data, setData] = useState<Itinerary | null>(null)
   const [contingencies, setContingencies] = useState<ContingencyPlan[]>()
   const [selectedContingency, setSelectedContingency] =
@@ -30,7 +33,6 @@ export default function DetailItineraryModule() {
           credentials: 'include',
         }
       )
-      console.log('res: ', res)
 
       if (res.statusCode === 404 || res.statusCode === 403) {
         setIsNotFound(true)
@@ -106,7 +108,9 @@ export default function DetailItineraryModule() {
         console.error('Error viewing itinerary:', err)
       }
     }
-    void viewItinerary()
+    if (isAuthenticated) {
+      void viewItinerary()
+    }
   }, [id])
 
   if (isNotFound) {
