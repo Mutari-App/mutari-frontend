@@ -20,7 +20,7 @@ function RecentlyViewed() {
     [key: string]: boolean
   }>({})
   const { isAuthenticated } = useAuthContext()
-  const [ loading, setLoading] = React.useState(false)
+  const [loading, setLoading] = React.useState(false)
 
   useEffect(() => {
     const fetchRecentlyViewed = async () => {
