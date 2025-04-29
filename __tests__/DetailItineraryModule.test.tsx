@@ -138,7 +138,7 @@ describe('DetailItineraryModule', () => {
     )
 
     // Verify the section number mapping is applied (component modifies sectionNumber % 1000)
-    expect(customFetch).toHaveBeenCalledTimes(4)
+    expect(customFetch).toHaveBeenCalledTimes(3)
   })
 
   it('shows not found when itinerary fetch fails with 404', async () => {

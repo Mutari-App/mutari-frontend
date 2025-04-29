@@ -1,5 +1,9 @@
 import type { CustomFetchBaseResponse } from '@/utils/customFetch/interface'
-import type { ItineraryData } from '../ItineraryModule/module-elements/types'
+import { type ItinerarySearchResult } from '../ItinerarySearchResultsModule/interface'
+import type {
+  ItineraryTag,
+  UserInfo,
+} from '../ItinerarySearchResultsModule/interface'
 
 export interface RecentlyViewedItineraryResponse
   extends CustomFetchBaseResponse {
@@ -7,11 +11,18 @@ export interface RecentlyViewedItineraryResponse
 }
 
 export interface RecentlyViewedItineraries {
-  createdAt: string
   id: string
-  itinerary: ItineraryData
-  itineraryId: string
-  updatedAt: string
-  userId: string
-  viewedAt: string
+  createdAt: string
+  title: string
+  description?: string | null
+  coverImage?: string | null
+  user: UserInfo
+  tags: ItineraryTag[]
+  daysCount: number
+  likes: number
+}
+
+export interface DiscoverItinerariesByTagResponse
+  extends CustomFetchBaseResponse {
+  itineraries: ItinerarySearchResult[]
 }
