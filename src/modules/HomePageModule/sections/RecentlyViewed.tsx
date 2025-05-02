@@ -10,6 +10,7 @@ import ItineraryCard from '@/modules/ItinerarySearchResultsModule/module-element
 import { useAuthContext } from '@/contexts/AuthContext'
 import { customFetchBody } from '@/utils/newCustomFetch'
 import type { BatchCheckItinerarySavedResponse } from '@/modules/ItinerarySearchResultsModule/interface'
+import ItineraryCardSkeleton from '../module-elements/ItineraryCardSkeleton'
 
 function RecentlyViewed() {
   const [recentlyViewed, setRecentlyViewed] = useState<
@@ -59,7 +60,13 @@ function RecentlyViewed() {
       <h2 className="font-semibold text-2xl md:text-left md:text-[36px] sel">
         Baru Dilihat
       </h2>
-      <div className="flex gap-5 w-full overflow-auto pb-5 justify-start items-stretch">
+      {loading ? (
+        <div className='flex gap-5 w-full overflow-auto'>
+          <ItineraryCardSkeleton />
+          <ItineraryCardSkeleton />
+          <ItineraryCardSkeleton />
+        </div>
+      ) : (<div className="flex gap-5 w-full overflow-auto pb-5 justify-start items-stretch">
         {recentlyViewed.length > 0 ? (
           recentlyViewed.map((viewed) => (
             <ItineraryCard
@@ -76,7 +83,7 @@ function RecentlyViewed() {
             </p>
           </div>
         )}
-      </div>
+      </div>)}
     </section>
   )
 }
