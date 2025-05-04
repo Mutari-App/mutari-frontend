@@ -8,11 +8,10 @@ import { useParams, useRouter } from 'next/navigation'
 import Maps from '../ItineraryMakerModule/sections/Maps'
 import { PlanPicker } from './module-elements/PlanPicker'
 import { APIProvider } from '@vis.gl/react-google-maps'
-import { ListChecks, Loader2, Map, Pin } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 import NotFound from '@/app/not-found'
 import { useAuthContext } from '@/contexts/AuthContext'
 import { toast } from 'sonner'
-import { Button } from '@/components/ui/button'
 
 export default function DetailItineraryModule() {
   const { isAuthenticated, user } = useAuthContext()
