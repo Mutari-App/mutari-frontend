@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button'
 import { useAuthContext } from '@/contexts/AuthContext'
-import { Share2, X } from 'lucide-react'
+import { Heart, Share2, X } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import {
@@ -33,6 +33,7 @@ export const ItineraryHeader = ({
   const [emailInput, setEmailInput] = useState('')
   const [emails, setEmails] = useState<string[]>([])
   const inputRef = useRef<HTMLInputElement>(null)
+  const [isLiked, setIsLiked] = useState(false)
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -163,6 +164,22 @@ export const ItineraryHeader = ({
       if (err instanceof Error) toast.error(`${err.message}`)
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const toggleSaveItinerary = async () => {
+    try {
+      const response = await customFetch(`/itineraries/${data.id}/save`, {
+        method: isLiked === true ? 'DELETE' : 'POST',
+        credentials: 'include',
+      })
+
+      if (!response.success) throw Error(response.message)
+      setIsLiked(!isLiked)
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : 'An unexpected error occurred'
+      )
     }
   }
 
@@ -321,15 +338,26 @@ export const ItineraryHeader = ({
             </Link>
           </>
         ) : (
-          <Button
-            onClick={duplicateItinerary}
-            size="sm"
-            type="button"
-            variant="ghost"
-            className="bg-white text-[#004080] rounded-xl shadow"
-          >
-            Duplikasi dan Edit
-          </Button>
+          <>
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              className="bg-white text-black rounded-xl shadow"
+              onClick={toggleSaveItinerary}
+            >
+              <Heart className="w-6 h-6 text-[#004080]" />
+            </Button>
+            <Button
+              onClick={duplicateItinerary}
+              size="sm"
+              type="button"
+              variant="ghost"
+              className="bg-white text-[#004080] rounded-xl shadow"
+            >
+              Duplikasi dan Edit
+            </Button>
+          </>
         )}
       </div>
 
