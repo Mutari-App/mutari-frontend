@@ -4,16 +4,18 @@ import { ItineraryHeader } from './module-elements/ItineraryHeader'
 import { ItineraryList } from './module-elements/ItineraryList'
 import { ItinerarySummary } from './module-elements/ItinerarySummary'
 import { useEffect, useState } from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import Maps from '../ItineraryMakerModule/sections/Maps'
 import { PlanPicker } from './module-elements/PlanPicker'
 import { APIProvider } from '@vis.gl/react-google-maps'
 import { Loader2 } from 'lucide-react'
 import NotFound from '@/app/not-found'
 import { useAuthContext } from '@/contexts/AuthContext'
+import { toast } from 'sonner'
 
 export default function DetailItineraryModule() {
-  const { isAuthenticated } = useAuthContext()
+  const { isAuthenticated, user } = useAuthContext()
+  const router = useRouter()
 
   const [data, setData] = useState<Itinerary | null>(null)
   const [contingencies, setContingencies] = useState<ContingencyPlan[]>()
@@ -34,8 +36,11 @@ export default function DetailItineraryModule() {
         }
       )
 
-      if (res.statusCode === 404 || res.statusCode === 403) {
+      if (res.statusCode === 404) {
         setIsNotFound(true)
+      } else if (res.statusCode === 403) {
+        router.push('/')
+        toast.error('Itinerary ini merupakan itinerary pribadi')
       }
 
       setData(res.data)
@@ -108,10 +113,13 @@ export default function DetailItineraryModule() {
         console.error('Error viewing itinerary:', err)
       }
     }
-    if (isAuthenticated) {
+    if (isAuthenticated && data?.isPublished) {
       void viewItinerary()
+    } else if (data && !data?.isPublished && data?.user?.id !== user?.id) {
+      router.push('/')
+      toast.error('Itinerary ini merupakan itinerary pribadi')
     }
-  }, [id])
+  }, [data, data?.isPublished, id, isAuthenticated, router])
 
   if (isNotFound) {
     return <NotFound />
