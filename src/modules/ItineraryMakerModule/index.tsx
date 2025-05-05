@@ -1902,29 +1902,27 @@ export default function ItineraryMakerModule({
                 reminderOptions={reminderOptions}
               />
             )}
-            {!isContingency && (
-              <Button
-                size="sm"
-                className={cn(
-                  'group relative overflow-hidden rounded-md px-4 py-1 ml-auto text-sm font-medium text-white',
-                  'focus:outline-none focus:ring-2 focus:ring-offset-2',
-                  'disabled:opacity-70 disabled:cursor-not-allowed'
-                )}
-                onClick={handleGenerateFeedback}
-                disabled={isGenerating}
-              >
-                {/* Base gradient layer */}
-                <span className="absolute inset-0 bg-gradient-to-r from-[#0073E6] to-[#80004B] transition-opacity duration-300 ease-in-out" />
+            <Button
+              size="sm"
+              className={cn(
+                'group relative overflow-hidden rounded-md px-4 py-1 ml-auto text-sm font-medium text-white',
+                'focus:outline-none focus:ring-2 focus:ring-offset-2',
+                'disabled:opacity-70 disabled:cursor-not-allowed'
+              )}
+              onClick={handleGenerateFeedback}
+              disabled={isGenerating}
+            >
+              {/* Base gradient layer */}
+              <span className="absolute inset-0 bg-gradient-to-r from-[#0073E6] to-[#80004B] transition-opacity duration-300 ease-in-out" />
 
-                {/* Hover gradient layer */}
-                <span className="absolute inset-0 bg-gradient-to-r from-[#80004B] to-[#0073E6] opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out" />
+              {/* Hover gradient layer */}
+              <span className="absolute inset-0 bg-gradient-to-r from-[#80004B] to-[#0073E6] opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out" />
 
-                <span className="relative flex items-center gap-1.5">
-                  <Wand2 size={16} />
-                  {isGenerating ? 'Memproses...' : 'Buat Saran AI'}
-                </span>
-              </Button>
-            )}
+              <span className="relative flex items-center gap-1.5">
+                <Wand2 size={16} />
+                {isGenerating ? 'Memproses...' : 'Buat Saran AI'}
+              </span>
+            </Button>
           </div>
           <TagSelector
             selectedTags={itineraryData.tags ?? []}
