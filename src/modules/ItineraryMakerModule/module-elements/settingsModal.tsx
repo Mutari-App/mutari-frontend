@@ -45,7 +45,7 @@ export const SettingsItineraryModal: React.FC<SettingsItineraryModalProps> = ({
 }) => {
   const [isClient, setIsClient] = React.useState(false)
   const [visibility, setVisibility] = React.useState<'public' | 'private'>(
-    'private'
+    isPublished ? 'public' : 'private'
   )
   const [localTitle, setLocalTitle] = React.useState(title)
   const [localDesc, setLocalDesc] = React.useState(description)
@@ -56,10 +56,12 @@ export const SettingsItineraryModal: React.FC<SettingsItineraryModalProps> = ({
   }, [])
 
   useEffect(() => {
-    setLocalTitle(title)
-    setLocalDesc(description)
-    setLocalCoverImage(coverImage)
-    setVisibility(isPublished ? 'public' : 'private')
+    if (isOpen) {
+      setLocalTitle(title)
+      setLocalDesc(description)
+      setLocalCoverImage(coverImage)
+      setVisibility(isPublished ? 'public' : 'private')
+    }
   }, [title, description, coverImage, isPublished, isOpen])
 
   if (!isClient || !isOpen) return null
