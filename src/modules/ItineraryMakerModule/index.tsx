@@ -1860,39 +1860,62 @@ export default function ItineraryMakerModule({
             isContingency={!!contingencyId}
           />
           <div className="flex flex-wrap items-center gap-2 mb-4">
-            <Popover>
-              <PopoverTrigger asChild>
-                <div className="p-[1.5px] flex items-center bg-gradient-to-r from-[#0073E6] to-[#004080] hover:from-[#0066cc] hover:to-[#003366] rounded-lg group">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-8 w-full bg-white group-hover:bg-transparent border-none"
-                    disabled={isContingency}
-                  >
-                    <span className="bg-gradient-to-r from-[#0073E6] to-[#004080] group-hover:text-white text-transparent bg-clip-text flex items-center">
-                      <CalendarIcon className="h-4 w-4 sm:mr-1 text-[#0073E6] group-hover:text-white" />
-                      {dateRange.from && dateRange.to ? (
-                        `${format(dateRange.from, 'dd MMM')} - ${format(dateRange.to, 'dd MMM')}`
-                      ) : (
-                        <>
-                          <span className="hidden min-[500px]:inline md:hidden min-[1034px]:inline">
-                            Masukkan Tanggal Perjalanan
-                          </span>
-                        </>
-                      )}
-                    </span>
-                  </Button>
-                </div>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="range"
-                  selected={dateRange}
-                  onSelect={handleDateRangeChange}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
+            {isContingency ? (
+              <div className="p-[1.5px] flex items-center bg-gradient-to-r from-[#0073E6] to-[#004080] rounded-lg">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 w-full bg-white border-none opacity-100 cursor-not-allowed disabled:opacity-100"
+                  disabled
+                >
+                  <span className="bg-gradient-to-r from-[#0073E6] to-[#004080] text-transparent bg-clip-text flex items-center">
+                    <CalendarIcon className="h-4 w-4 sm:mr-1 text-[#0073E6]" />
+                    {dateRange.from && dateRange.to ? (
+                      `${format(dateRange.from, 'dd MMM')} - ${format(dateRange.to, 'dd MMM')}`
+                    ) : (
+                      <>
+                        <span className="hidden min-[500px]:inline md:hidden min-[1034px]:inline">
+                          Masukkan Tanggal Perjalanan
+                        </span>
+                      </>
+                    )}
+                  </span>
+                </Button>
+              </div>
+            ) : (
+              <Popover>
+                <PopoverTrigger asChild>
+                  <div className="p-[1.5px] flex items-center bg-gradient-to-r from-[#0073E6] to-[#004080] hover:from-[#0066cc] hover:to-[#003366] rounded-lg group">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-8 w-full bg-white group-hover:bg-transparent border-none"
+                    >
+                      <span className="bg-gradient-to-r from-[#0073E6] to-[#004080] group-hover:text-white text-transparent bg-clip-text flex items-center">
+                        <CalendarIcon className="h-4 w-4 sm:mr-1 text-[#0073E6] group-hover:text-white" />
+                        {dateRange.from && dateRange.to ? (
+                          `${format(dateRange.from, 'dd MMM')} - ${format(dateRange.to, 'dd MMM')}`
+                        ) : (
+                          <>
+                            <span className="hidden min-[500px]:inline md:hidden min-[1034px]:inline">
+                              Masukkan Tanggal Perjalanan
+                            </span>
+                          </>
+                        )}
+                      </span>
+                    </Button>
+                  </div>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="range"
+                    selected={dateRange}
+                    onSelect={handleDateRangeChange}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            )}
             {!isContingency && (
               <ReminderSelector
                 selectedReminder={
