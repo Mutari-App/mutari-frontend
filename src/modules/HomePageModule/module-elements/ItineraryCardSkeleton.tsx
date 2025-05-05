@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react'
 
 function ItineraryCardSkeleton() {
   return (
@@ -16,4 +16,4 @@ function ItineraryCardSkeleton() {
   )
 }
 
-export default ItineraryCardSkeleton;
+export default ItineraryCardSkeleton
