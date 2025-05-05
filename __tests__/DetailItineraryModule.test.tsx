@@ -193,7 +193,7 @@ describe('DetailItineraryModule', () => {
       if (url.endsWith('/contingencies')) {
         return Promise.resolve({ statusCode: 404 })
       }
-  
+
       // Mock fetchData (kalau perlu)
       return Promise.resolve({
         statusCode: 200,
@@ -203,14 +203,13 @@ describe('DetailItineraryModule', () => {
         },
       })
     })
-  
+
     render(<DetailItineraryModule />)
-  
+
     await waitFor(() => {
       expect(screen.getByTestId('custom-not-found-page')).toBeInTheDocument()
     })
   })
-  
 
   it('shows not found when fetch throws an error', async () => {
     ;(customFetch as jest.Mock).mockImplementation((url: string) => {
@@ -300,13 +299,15 @@ describe('DetailItineraryModule', () => {
       id: '123',
       contingencyId: '456',
     })
-
     ;(customFetch as jest.Mock).mockImplementation((url: string) => {
       if (url.endsWith('/contingencies')) {
         return Promise.resolve({ statusCode: 200 })
       }
       if (url.endsWith('/contingencies/456')) {
-        return Promise.resolve({ statusCode: 200, contingency: {sections: [{sectionNumber: 1}]} })
+        return Promise.resolve({
+          statusCode: 200,
+          contingency: { sections: [{ sectionNumber: 1 }] },
+        })
       }
 
       return Promise.resolve({
@@ -317,7 +318,7 @@ describe('DetailItineraryModule', () => {
         },
       })
     })
-    
+
     render(<DetailItineraryModule />)
 
     await waitFor(() => {
@@ -335,13 +336,15 @@ describe('DetailItineraryModule', () => {
       id: '123',
       contingencyId: '456',
     })
-
     ;(customFetch as jest.Mock).mockImplementation((url: string) => {
       if (url.endsWith('/contingencies')) {
         return Promise.resolve({ statusCode: 200 })
       }
       if (url.endsWith('/contingencies/456')) {
-        return Promise.resolve({ statusCode: 200, contingency: {sections: [{sectionNumber: 1}]} })
+        return Promise.resolve({
+          statusCode: 200,
+          contingency: { sections: [{ sectionNumber: 1 }] },
+        })
       }
       if (url.endsWith('/views/123')) {
         return Promise.reject(new Error('Network error'))
@@ -356,7 +359,9 @@ describe('DetailItineraryModule', () => {
       })
     })
 
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => void 0)
+    const consoleErrorSpy = jest
+      .spyOn(console, 'error')
+      .mockImplementation(() => void 0)
 
     render(<DetailItineraryModule />)
 
@@ -368,22 +373,20 @@ describe('DetailItineraryModule', () => {
       'Error viewing itinerary:',
       expect.any(Error)
     )
-    
-    consoleErrorSpy.mockRestore()    
+
+    consoleErrorSpy.mockRestore()
   })
 
   it('redirects and shows toast when user lacks access to unpublished itinerary', async () => {
     const mockPush = jest.fn()
     const mockToast = jest.fn()
-  
+
     ;(useParams as jest.Mock).mockReturnValue({
       id: '123',
       contingencyId: '456',
     })
-  
     ;(useRouter as jest.Mock).mockReturnValue({ push: mockPush })
     toast.error = mockToast
-  
     ;(customFetch as jest.Mock).mockImplementation((url: string) => {
       if (url.endsWith('/contingencies')) {
         return Promise.resolve({ statusCode: 200 })
@@ -394,7 +397,7 @@ describe('DetailItineraryModule', () => {
           contingency: { sections: [{ sectionNumber: 1 }] },
         })
       }
-  
+
       return Promise.resolve({
         statusCode: 200,
         data: {
@@ -403,13 +406,14 @@ describe('DetailItineraryModule', () => {
         },
       })
     })
-  
+
     render(<DetailItineraryModule />)
-  
+
     await waitFor(() => {
       expect(mockPush).toHaveBeenCalledWith('/')
-      expect(mockToast).toHaveBeenCalledWith('Itinerary ini merupakan itinerary pribadi')
+      expect(mockToast).toHaveBeenCalledWith(
+        'Itinerary ini merupakan itinerary pribadi'
+      )
     })
   })
-  
 })

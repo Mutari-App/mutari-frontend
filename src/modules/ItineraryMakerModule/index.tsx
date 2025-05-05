@@ -2009,7 +2009,7 @@ export default function ItineraryMakerModule({
         </div>
         <div className="w-full min-h-screen hidden md:block">
           <Maps
-            itineraryData={contingency?.sections ?? itineraryData.sections}
+            itineraryData={itineraryData.sections}
             addLocationToSection={addLocationToSection}
             isEditing
             positionToView={positionToView}
