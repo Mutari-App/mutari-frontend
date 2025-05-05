@@ -61,29 +61,31 @@ function RecentlyViewed() {
         Baru Dilihat
       </h2>
       {loading ? (
-        <div className='flex gap-5 w-full overflow-auto'>
+        <div className="flex gap-5 w-full overflow-auto">
           <ItineraryCardSkeleton />
           <ItineraryCardSkeleton />
           <ItineraryCardSkeleton />
         </div>
-      ) : (<div className="flex gap-5 w-full overflow-auto pb-5 justify-start items-stretch">
-        {recentlyViewed.length > 0 ? (
-          recentlyViewed.map((viewed) => (
-            <ItineraryCard
-              key={viewed.id}
-              itinerary={viewed}
-              isLiked={itinerariesLiked[viewed.id]}
-              className="w-1/5 min-w-[250px]"
-            />
-          ))
-        ) : (
-          <div className="flex flex-col items-center justify-center w-full h-full gap-5 p-5 text-center bg-white rounded-lg shadow-md">
-            <p className="text-gray-500">
-              Tidak ada itinerary yang baru dilihat.
-            </p>
-          </div>
-        )}
-      </div>)}
+      ) : (
+        <div className="flex gap-5 w-full overflow-auto pb-5 justify-start items-stretch">
+          {recentlyViewed.length > 0 ? (
+            recentlyViewed.map((viewed) => (
+              <ItineraryCard
+                key={viewed.id}
+                itinerary={viewed}
+                isLiked={itinerariesLiked[viewed.id]}
+                className="w-1/5 min-w-[250px]"
+              />
+            ))
+          ) : (
+            <div className="flex flex-col items-center justify-center w-full h-full gap-5 p-5 text-center bg-white rounded-lg shadow-md">
+              <p className="text-gray-500">
+                Tidak ada itinerary yang baru dilihat.
+              </p>
+            </div>
+          )}
+        </div>
+      )}
     </section>
   )
 }
