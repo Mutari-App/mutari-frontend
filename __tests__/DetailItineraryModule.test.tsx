@@ -2,9 +2,13 @@ import { render, screen, waitFor } from '@testing-library/react'
 import DetailItineraryModule from '../src/modules/DetailItineraryModule/index'
 import { customFetch } from '@/utils/newCustomFetch'
 import { useParams, useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 
 // Mock dependencies
 jest.mock('@/utils/newCustomFetch')
+
+const mockPush = jest.fn()
+
 jest.mock('next/navigation', () => ({
   useParams: jest.fn(),
   useRouter: jest.fn(),
@@ -31,6 +35,12 @@ jest.mock(
     ),
   })
 )
+jest.mock('@/contexts/AuthContext', () => ({
+  useAuthContext: () => ({
+    isAuthenticated: true,
+    user: { id: 'user1' },
+  }),
+}))
 jest.mock(
   '../src/modules/DetailItineraryModule/module-elements/PlanPicker',
   () => ({
@@ -53,6 +63,12 @@ jest.mock('lucide-react', () => ({
 jest.mock('@/app/not-found', () => ({
   __esModule: true,
   default: () => <div data-testid="custom-not-found-page">Not Found Page</div>,
+}))
+jest.mock('sonner', () => ({
+  toast: {
+    success: jest.fn(),
+    error: jest.fn(),
+  },
 }))
 
 const mockItinerary = {
@@ -163,13 +179,38 @@ describe('DetailItineraryModule', () => {
       }
       return Promise.resolve({})
     })
+    ;(useRouter as jest.Mock).mockReturnValue({ push: mockPush })
 
     render(<DetailItineraryModule />)
 
     await waitFor(() => {
+      expect(mockPush).toHaveBeenCalledWith('/')
+    })
+  })
+
+  it('sets not found when fetchContingencies returns 404', async () => {
+    ;(customFetch as jest.Mock).mockImplementation((url: string) => {
+      if (url.endsWith('/contingencies')) {
+        return Promise.resolve({ statusCode: 404 })
+      }
+  
+      // Mock fetchData (kalau perlu)
+      return Promise.resolve({
+        statusCode: 200,
+        data: {
+          isPublished: true,
+          user: { id: 'user1' },
+        },
+      })
+    })
+  
+    render(<DetailItineraryModule />)
+  
+    await waitFor(() => {
       expect(screen.getByTestId('custom-not-found-page')).toBeInTheDocument()
     })
   })
+  
 
   it('shows not found when fetch throws an error', async () => {
     ;(customFetch as jest.Mock).mockImplementation((url: string) => {
@@ -253,4 +294,122 @@ describe('DetailItineraryModule', () => {
       expect(screen.getByTestId('custom-not-found-page')).toBeInTheDocument()
     })
   })
+
+  it('update views when loading detail itinerary', async () => {
+    ;(useParams as jest.Mock).mockReturnValue({
+      id: '123',
+      contingencyId: '456',
+    })
+
+    ;(customFetch as jest.Mock).mockImplementation((url: string) => {
+      if (url.endsWith('/contingencies')) {
+        return Promise.resolve({ statusCode: 200 })
+      }
+      if (url.endsWith('/contingencies/456')) {
+        return Promise.resolve({ statusCode: 200, contingency: {sections: [{sectionNumber: 1}]} })
+      }
+
+      return Promise.resolve({
+        statusCode: 200,
+        data: {
+          isPublished: true,
+          user: { id: 'user1' },
+        },
+      })
+    })
+    
+    render(<DetailItineraryModule />)
+
+    await waitFor(() => {
+      expect(screen.getByTestId('itinerary-header')).toBeInTheDocument()
+    })
+
+    expect(customFetch).toHaveBeenCalledWith(
+      'itineraries/views/123',
+      expect.objectContaining({ method: 'POST' })
+    )
+  })
+
+  it('logs error when viewing itinerary failed', async () => {
+    ;(useParams as jest.Mock).mockReturnValue({
+      id: '123',
+      contingencyId: '456',
+    })
+
+    ;(customFetch as jest.Mock).mockImplementation((url: string) => {
+      if (url.endsWith('/contingencies')) {
+        return Promise.resolve({ statusCode: 200 })
+      }
+      if (url.endsWith('/contingencies/456')) {
+        return Promise.resolve({ statusCode: 200, contingency: {sections: [{sectionNumber: 1}]} })
+      }
+      if (url.endsWith('/views/123')) {
+        return Promise.reject(new Error('Network error'))
+      }
+
+      return Promise.resolve({
+        statusCode: 200,
+        data: {
+          isPublished: true,
+          user: { id: 'user1' },
+        },
+      })
+    })
+
+    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => void 0)
+
+    render(<DetailItineraryModule />)
+
+    await waitFor(() => {
+      expect(screen.getByTestId('itinerary-header')).toBeInTheDocument()
+    })
+
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      'Error viewing itinerary:',
+      expect.any(Error)
+    )
+    
+    consoleErrorSpy.mockRestore()    
+  })
+
+  it('redirects and shows toast when user lacks access to unpublished itinerary', async () => {
+    const mockPush = jest.fn()
+    const mockToast = jest.fn()
+  
+    ;(useParams as jest.Mock).mockReturnValue({
+      id: '123',
+      contingencyId: '456',
+    })
+  
+    ;(useRouter as jest.Mock).mockReturnValue({ push: mockPush })
+    toast.error = mockToast
+  
+    ;(customFetch as jest.Mock).mockImplementation((url: string) => {
+      if (url.endsWith('/contingencies')) {
+        return Promise.resolve({ statusCode: 200 })
+      }
+      if (url.endsWith('/contingencies/456')) {
+        return Promise.resolve({
+          statusCode: 200,
+          contingency: { sections: [{ sectionNumber: 1 }] },
+        })
+      }
+  
+      return Promise.resolve({
+        statusCode: 200,
+        data: {
+          isPublished: false,
+          user: { id: 'not_user1' },
+        },
+      })
+    })
+  
+    render(<DetailItineraryModule />)
+  
+    await waitFor(() => {
+      expect(mockPush).toHaveBeenCalledWith('/')
+      expect(mockToast).toHaveBeenCalledWith('Itinerary ini merupakan itinerary pribadi')
+    })
+  })
+  
 })
