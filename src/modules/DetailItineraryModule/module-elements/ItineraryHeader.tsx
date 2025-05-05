@@ -295,18 +295,18 @@ export const ItineraryHeader = ({
           )}
         </div>
       </div>
-      {user?.id === data.userId && (
-        <div className="absolute top-2 right-2 sm:top-4 sm:right-4 z-10 flex gap-2">
-          <Button
-            type="button"
-            size="sm"
-            variant="ghost"
-            className="bg-white text-black rounded-xl shadow"
-            onClick={openInviteDialog}
-          >
-            <Share2 className="w-6 h-6 text-[#004080]" />
-          </Button>
-          {user?.id === data.userId && (
+      <div className="absolute top-2 right-2 sm:top-4 sm:right-4 z-10 flex gap-2">
+        {user?.id === data.userId ? (
+          <>
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              className="bg-white text-black rounded-xl shadow"
+              onClick={openInviteDialog}
+            >
+              <Share2 className="w-6 h-6 text-[#004080]" />
+            </Button>
             <Link
               href={contingencyId ? `${contingencyId}/edit` : `${data.id}/edit`}
             >
@@ -319,11 +319,8 @@ export const ItineraryHeader = ({
                 Edit
               </Button>
             </Link>
-          )}
-        </div>
-      )}
-      {user?.id !== data.userId && (
-        <div className="absolute top-2 right-2 sm:top-4 sm:right-4 z-10 flex">
+          </>
+        ) : (
           <Button
             onClick={duplicateItinerary}
             size="sm"
@@ -333,8 +330,8 @@ export const ItineraryHeader = ({
           >
             Duplikasi dan Edit
           </Button>
-        </div>
-      )}
+        )}
+      </div>
 
       <Dialog
         open={showModal || showInviteDialog}
