@@ -9,7 +9,6 @@ import { customFetch, customFetchBody } from '@/utils/newCustomFetch'
 import { CreateItineraryResponse } from '../interface'
 import { DuplicateItineraryResponse } from '@/modules/ItineraryModule/module-elements/types'
 import { toast } from 'sonner'
-
 interface ItineraryHeaderProps {
   itineraryId: string
   title: string
@@ -28,7 +27,6 @@ interface ItineraryHeaderProps {
   isPublished: boolean
   isContingency: boolean
 }
-
 export const ItineraryHeader: React.FC<ItineraryHeaderProps> = ({
   itineraryId,
   title,
@@ -45,7 +43,15 @@ export const ItineraryHeader: React.FC<ItineraryHeaderProps> = ({
   const [localTitle, setLocalTitle] = useState(title)
   const [localDesc, setLocalDesc] = useState(description ?? '')
   const [localCoverImage, setLocalCoverImage] = useState(coverImage)
-  const [visibility, setVisibility] = useState<'public' | 'private'>('private')
+  const [localIsPublished, setLocalIsPublished] = useState(isPublished)
+
+  // Update local state when props change
+  useEffect(() => {
+    setLocalTitle(title)
+    setLocalDesc(description ?? '')
+    setLocalCoverImage(coverImage)
+    setLocalIsPublished(isPublished)
+  }, [title, description, coverImage, isPublished])
 
   // Handle title input focus to select all text if it's the default value
   const handleTitleFocus = () => {
@@ -65,7 +71,7 @@ export const ItineraryHeader: React.FC<ItineraryHeaderProps> = ({
     setLocalTitle(data.title)
     setLocalDesc(data.description ?? '')
     setLocalCoverImage(data.coverImage)
-    setVisibility(data.isPublished ? 'public' : 'private')
+    setLocalIsPublished(data.isPublished)
 
     onTitleChange({
       target: { value: data.title },
@@ -113,8 +119,8 @@ export const ItineraryHeader: React.FC<ItineraryHeaderProps> = ({
     <div
       className="relative w-full h-40 lg:h-64 rounded-md mb-4 flex items-center justify-center overflow-hidden"
       style={{
-        backgroundImage: coverImage
-          ? `url(${coverImage})`
+        backgroundImage: localCoverImage
+          ? `url(${localCoverImage})`
           : 'linear-gradient(360deg, #004080, #0073E6, #60A5FA)',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
@@ -130,8 +136,11 @@ export const ItineraryHeader: React.FC<ItineraryHeaderProps> = ({
                 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 
                 disabled:opacity-100 disabled:text-white disabled:bg-transparent 
                 placeholder:text-white/60"
-              value={title}
-              onChange={onTitleChange}
+              value={localTitle}
+              onChange={(e) => {
+                setLocalTitle(e.target.value)
+                onTitleChange(e)
+              }}
               onFocus={handleTitleFocus}
               placeholder="Masukkan Judul Perjalanan"
               disabled={isContingency}
@@ -150,8 +159,11 @@ export const ItineraryHeader: React.FC<ItineraryHeaderProps> = ({
                 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 
                 disabled:opacity-100 disabled:text-white disabled:bg-transparent 
                 placeholder:text-white/60"
-              value={description}
-              onChange={onDescChange}
+              value={localDesc}
+              onChange={(e) => {
+                setLocalDesc(e.target.value)
+                onDescChange(e)
+              }}
               placeholder="Masukkan Deskripsi Perjalanan"
               disabled={isContingency}
               style={{ cursor: isContingency ? 'not-allowed' : 'text' }}
@@ -165,7 +177,6 @@ export const ItineraryHeader: React.FC<ItineraryHeaderProps> = ({
           </div>
         </div>
       </div>
-
       <div className="absolute top-2 right-2 sm:top-4 sm:right-4 z-10 flex gap-2">
         <Button
           type="button"
@@ -181,9 +192,8 @@ export const ItineraryHeader: React.FC<ItineraryHeaderProps> = ({
           <Settings className="w-6 h-6 text-[#004080]" />
         </Button>
       </div>
-
       <SettingsItineraryModal
-        isPublished={isPublished}
+        isPublished={localIsPublished}
         isOpen={isSettingsModalOpen}
         onClose={() => setIsSettingsModalOpen(false)}
         onSave={handleSave}
@@ -192,9 +202,9 @@ export const ItineraryHeader: React.FC<ItineraryHeaderProps> = ({
         onCoverImageChange={onCoverImageChange}
         isContingency={isContingency}
         itineraryId={itineraryId}
-        title={title}
-        description={description}
-        coverImage={coverImage}
+        title={localTitle}
+        description={localDesc}
+        coverImage={localCoverImage}
         onDuplicate={handleDuplicate}
       />
     </div>
