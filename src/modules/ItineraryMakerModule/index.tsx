@@ -321,6 +321,7 @@ export default function ItineraryMakerModule({
         coverImage: data.coverImage,
         startDate: data.startDate,
         endDate: data.endDate,
+        isPublished: data.isPublished,
         tags: mappedTags,
         sections: mappedSections,
       } as CreateItineraryDto
