@@ -67,7 +67,7 @@ describe('SubmitOtpForm', () => {
 
     // Check validation error message
     expect(
-      await screen.findByText(/kode otp harus 8 digit/i)
+      await screen.findByText(/Kode OTP harus terdiri dari 8 karakter/i)
     ).toBeInTheDocument()
   })
 

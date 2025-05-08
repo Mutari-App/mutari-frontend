@@ -109,22 +109,23 @@ export const ProfileHeader: React.FC<ProfileProps> = ({
             />
           )}
         </div>
-
-        <CldUploadButton
-          uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
-          onSuccess={onPhotoProfileChange}
-          className={cn(
-            buttonVariants({ variant: 'outline' }),
-            'w-full border-[#024C98] border-2 rounded-2xl text-[#024C98] font-semibold'
-          )}
-          options={{
-            clientAllowedFormats: ['image'],
-            maxFiles: 1,
-            maxFileSize: 1024 * 256, // 256 KB
-          }}
-        >
-          Pilih Foto
-        </CldUploadButton>
+        {isAuthenticated && user?.id === id && (
+          <CldUploadButton
+            uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
+            onSuccess={onPhotoProfileChange}
+            className={cn(
+              buttonVariants({ variant: 'outline' }),
+              'w-full border-[#024C98] border-2 rounded-2xl text-[#024C98] font-semibold'
+            )}
+            options={{
+              clientAllowedFormats: ['image'],
+              maxFiles: 1,
+              maxFileSize: 1024 * 256, // 256 KB
+            }}
+          >
+            Pilih Foto
+          </CldUploadButton>
+        )}
       </div>
       <div className="flex flex-col items-center sm:items-start gap-3 w-full">
         <span className="text-2xl text-center sm:text-start font-semibold">
@@ -164,7 +165,12 @@ export const ProfileHeader: React.FC<ProfileProps> = ({
 
           <Dialog
             open={isProfileDialogOpen}
-            onOpenChange={setIsProfileDialogOpen}
+            onOpenChange={(open) => {
+              setIsProfileDialogOpen(open)
+              if (!open) {
+                setFormStep('EDIT_PROFILE')
+              }
+            }}
           >
             <DialogContent className="sm:max-w-[425px] md:p-8 rounded-2xl sm:rounded-3xl  ">
               <DialogHeader>

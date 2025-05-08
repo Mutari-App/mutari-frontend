@@ -95,8 +95,11 @@ export const EditProfileForm: React.FC<EditProfileFormProps> = ({
         }
         throw new Error(response.message)
       } catch (err: any) {
-        if (err instanceof Error) toast.error(`${err.message}`)
-        toast.error('Terjadi kesalahan. Silakan coba lagi.')
+        toast.error(
+          err instanceof Error
+            ? err.message
+            : 'Terjadi kesalahan. Silakan coba lagi.'
+        )
       } finally {
         setSubmitLoading(false)
       }
