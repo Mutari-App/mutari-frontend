@@ -135,37 +135,37 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
   }
 
   const getMe = async () => {
-    const refreshToken = getCookie('refreshToken')
+    try {
+      setLoadingRefreshToken(true)
+      const response = await customFetch<UserResponseInterface>('/auth/me')
 
-    if (
-      (userResponse as UserResponseInterface).statusCode === 401 &&
-      !!refreshToken
-    ) {
-      try {
-        setLoadingRefreshToken(true)
-        const response = await customFetch<UserResponseInterface>('/auth/me')
-
-        if (response.statusCode === 200) {
-          setIsAuthenticated(true)
-          setUser(response.user)
-          router.refresh()
-        } else {
-          setIsAuthenticated(false)
-          setUser(null)
-        }
-      } catch (err) {
+      if (response.statusCode === 200) {
+        setIsAuthenticated(true)
+        setUser(response.user)
+        router.refresh()
+      } else {
         setIsAuthenticated(false)
         setUser(null)
-      } finally {
-        setLoadingRefreshToken(false)
       }
+    } catch (err) {
+      setIsAuthenticated(false)
+      setUser(null)
+    } finally {
+      setLoadingRefreshToken(false)
     }
-    setLoadingRefreshToken(false)
   }
 
   useEffect(() => {
     if (isLaunching) {
-      void getMe()
+      const refreshToken = getCookie('refreshToken')
+
+      if (
+        (userResponse as UserResponseInterface).statusCode === 401 &&
+        !!refreshToken
+      ) {
+        void getMe()
+      }
+      setLoadingRefreshToken(false)
     } else {
       setLoadingRefreshToken(true)
 
@@ -200,15 +200,28 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
     }
   }, [searchParams, fullUrl])
 
-  const contextValue = {
-    user,
-    isAuthenticated,
-    setIsAuthenticated,
-    validate,
-    preRegistLogin,
-    login,
-    logout,
-  }
+  const contextValue = React.useMemo(
+    () => ({
+      user,
+      isAuthenticated,
+      setIsAuthenticated,
+      validate,
+      preRegistLogin,
+      login,
+      logout,
+      getMe,
+    }),
+    [
+      user,
+      isAuthenticated,
+      setIsAuthenticated,
+      validate,
+      preRegistLogin,
+      login,
+      logout,
+      getMe,
+    ]
+  )
   return (
     <AuthContext.Provider value={contextValue}>
       {loadingRefreshToken ? (
