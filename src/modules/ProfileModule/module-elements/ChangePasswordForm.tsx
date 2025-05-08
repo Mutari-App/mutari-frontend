@@ -31,6 +31,34 @@ export const ChangePasswordForm: React.FC<FormProps> = ({ closeDialog }) => {
     },
   })
 
+  const handlePasswordError = (err: any) => {
+    if (!(err instanceof Error)) {
+      toast.error('Terjadi kesalahan. Silakan coba lagi.')
+      return
+    }
+
+    if (err.message.includes('Old password is incorrect')) {
+      changePasswordForm.setError('oldPassword', {
+        type: 'manual',
+        message: 'Password lama tidak sesuai',
+      })
+    } else if (
+      err.message.includes('New password and confirmation do not match')
+    ) {
+      changePasswordForm.setError('confirmPassword', {
+        type: 'manual',
+        message: 'Password baru dan konfirmasi tidak sesuai',
+      })
+    } else if (err.message.includes('New password cannot be the same as old')) {
+      changePasswordForm.setError('newPassword', {
+        type: 'manual',
+        message: 'Password baru tidak boleh sama dengan password lama',
+      })
+    } else {
+      toast.error('Terjadi kesalahan. Silakan coba lagi.')
+    }
+  }
+
   const handleChangePasswordSubmit = async (
     values: z.infer<typeof changePasswordSchema>
   ) => {
@@ -39,53 +67,31 @@ export const ChangePasswordForm: React.FC<FormProps> = ({ closeDialog }) => {
       formState: { errors },
     } = changePasswordForm
 
-    if (!Object.keys(errors).length) {
-      try {
-        const response = await customFetch('/profile/password', {
-          method: 'PATCH',
-          body: customFetchBody({
-            oldPassword: values.oldPassword,
-            newPassword: values.newPassword,
-            confirmPassword: values.confirmPassword,
-          }),
-        })
+    if (Object.keys(errors).length) {
+      setSubmitLoading(false)
+      return
+    }
 
-        if (response.statusCode === 200) {
-          toast.success('Password berhasil diubah!')
-          closeDialog()
-          return
-        }
-        throw new Error(response.message)
-      } catch (err: any) {
-        if (err instanceof Error) {
-          if (err.message.includes('Old password is incorrect')) {
-            changePasswordForm.setError('oldPassword', {
-              type: 'manual',
-              message: 'Password lama tidak sesuai',
-            })
-          } else if (
-            err.message.includes('New password and confirmation do not match')
-          ) {
-            changePasswordForm.setError('confirmPassword', {
-              type: 'manual',
-              message: 'Password baru dan konfirmasi tidak sesuai',
-            })
-          } else if (
-            err.message.includes('New password cannot be the same as old')
-          ) {
-            changePasswordForm.setError('newPassword', {
-              type: 'manual',
-              message: 'Password baru tidak boleh sama dengan password lama',
-            })
-          } else {
-            toast.error('Terjadi kesalahan. Silakan coba lagi.')
-          }
-        } else {
-          toast.error('Terjadi kesalahan. Silakan coba lagi.')
-        }
-      } finally {
-        setSubmitLoading(false)
+    try {
+      const response = await customFetch('/profile/password', {
+        method: 'PATCH',
+        body: customFetchBody({
+          oldPassword: values.oldPassword,
+          newPassword: values.newPassword,
+          confirmPassword: values.confirmPassword,
+        }),
+      })
+
+      if (response.statusCode === 200) {
+        toast.success('Password berhasil diubah!')
+        closeDialog()
+        return
       }
+      throw new Error(response.message)
+    } catch (err: any) {
+      handlePasswordError(err)
+    } finally {
+      setSubmitLoading(false)
     }
   }
 
