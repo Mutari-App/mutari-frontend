@@ -265,7 +265,7 @@ function Maps({
 
         {selectedPlace.placeId && selectedPlaceDetails && (
           <div className="absolute bottom-8 left-1/2 -translate-x-1/2 w-11/12 flex flex-col gap-5 bg-white max-h-[50dvh] overflow-auto rounded-2xl shadow-md p-6">
-            <div className="flex justify-between ">
+            <div className="flex flex-col-reverse md:flex-row gap-4 md:justify-between ">
               <div className="flex gap-2 flex-col">
                 <h3 className="font-semibold text-lg">
                   {selectedPlaceDetails.name}

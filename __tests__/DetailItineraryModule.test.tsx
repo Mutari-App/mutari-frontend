@@ -58,6 +58,8 @@ jest.mock('lucide-react', () => ({
       Loading...
     </div>
   ),
+  MapIcon: () => <div data-testid="map-icon">Map Icon</div>,
+  ListChecksIcon: () => <div data-testid="list-checks-icon">List Icon</div>,
 }))
 
 jest.mock('@/app/not-found', () => ({
@@ -77,6 +79,7 @@ const mockItinerary = {
   startDate: '2023-01-01',
   endDate: '2023-01-07',
   sections: [{ id: '1', title: 'Day 1', sectionNumber: 1 }],
+  userId: 'user1',
 }
 
 const mockContingencies = [{ id: '456', title: 'Rain Plan', sections: [] }]
@@ -291,6 +294,35 @@ describe('DetailItineraryModule', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('custom-not-found-page')).toBeInTheDocument()
+    })
+  })
+
+  it("update views when loading logged in user's private detail itinerary", async () => {
+    ;(useParams as jest.Mock).mockReturnValue({
+      id: '123',
+      contingencyId: '456',
+    })
+    ;(customFetch as jest.Mock).mockImplementation((url: string) => {
+      if (url.endsWith('/itineraries/123')) {
+        console.log('fetching itinerary')
+        return Promise.resolve({
+          statusCode: 200,
+          data: {
+            isPublished: false,
+            user: { id: 'user1' },
+          },
+        })
+      }
+      return Promise.resolve({})
+    })
+
+    render(<DetailItineraryModule />)
+
+    await waitFor(() => {
+      expect(customFetch).toHaveBeenCalledWith(
+        'itineraries/views/123',
+        expect.objectContaining({ method: 'POST' })
+      )
     })
   })
 
