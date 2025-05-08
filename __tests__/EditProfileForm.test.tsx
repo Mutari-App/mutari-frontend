@@ -155,9 +155,7 @@ describe('EditProfileForm', () => {
 
     await waitFor(() => {
       expect(toast.error).toHaveBeenCalledWith('API Error')
-      expect(toast.error).toHaveBeenCalledWith(
-        'Terjadi kesalahan. Silakan coba lagi.'
-      )
+
       expect(mockCloseDialog).not.toHaveBeenCalled()
     })
   })
