@@ -297,7 +297,7 @@ describe('DetailItineraryModule', () => {
     })
   })
 
-  it('update views when loading logged in user\'s private detail itinerary', async () => {
+  it("update views when loading logged in user's private detail itinerary", async () => {
     ;(useParams as jest.Mock).mockReturnValue({
       id: '123',
       contingencyId: '456',

@@ -18,6 +18,8 @@ import {
   Wand2,
   ListChecks,
   Map,
+  MapIcon,
+  ListChecksIcon,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import {
@@ -2022,19 +2024,14 @@ export default function ItineraryMakerModule({
             positionToView={positionToView}
           />
         </div>
-        <div className="absolute bottom-5 mx-auto left-1/2 transform -translate-x-1/2 z-10 md:hidden">
-          <Button onClick={() => setIsMapView(!isMapView)} variant={'gradient'}>
-            {isMapView ? (
-              <div className="flex items-center gap-2">
-                <ListChecks />
-                <span>Itinerary View</span>
-              </div>
-            ) : (
-              <div className="flex items-center gap-2">
-                <Map />
-                <span>Map View</span>
-              </div>
-            )}
+        <div className="absolute bottom-5 left-1/2 -translate-x-1/2 shadow-lg z-10 md:hidden">
+          <Button
+            variant={'gradient'}
+            onClick={() => setIsMapView((prev) => !prev)}
+            className="w-full"
+          >
+            {isMapView ? <ListChecksIcon /> : <MapIcon />}
+            {isMapView ? 'Tampilkan Itinerary' : 'Tampilkan Peta'}
           </Button>
         </div>
         {isConfirmModalOpen && (
