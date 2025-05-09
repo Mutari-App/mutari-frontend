@@ -85,10 +85,10 @@ interface Tour {
 }
 
 interface Include {
-  id: number;
-  tourid: number;
-  icon: string;
-  text: string;
+  id: number
+  tourid: number
+  icon: string
+  text: string
 }
 
 interface TourDetailResponse {
