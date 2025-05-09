@@ -60,6 +60,13 @@ const mockSection = {
   ],
 }
 
+const formatTime = (time: string) =>
+  new Date(time).toLocaleTimeString('id-ID', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  })
+
 describe('TourDay', () => {
   it('renders MapPin icon when sectionNumber is 1', () => {
     render(<TourDay section={mockSection} />)
@@ -73,10 +80,14 @@ describe('TourDay', () => {
 
   it('renders LOCATION block with title, times, and description', () => {
     render(<TourDay section={mockSection} />)
+
+    const start = formatTime(mockSection.blocks[0].startTime)
+    const end = formatTime(mockSection.blocks[0].endTime)
+
     expect(screen.getByText('Block Title 1')).toBeInTheDocument()
     expect(screen.getByText('Block Description 1')).toBeInTheDocument()
     expect(screen.getByTestId('clock-icon')).toBeInTheDocument()
-    expect(screen.getByText(/17.00 - 19.00/)).toBeInTheDocument()
+    expect(screen.getByText(`${start} - ${end}`)).toBeInTheDocument()
   })
 
   it('renders NOTE block with description only', () => {
