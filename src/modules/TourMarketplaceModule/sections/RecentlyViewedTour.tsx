@@ -1,10 +1,10 @@
 'use client'
 
-import { customFetch } from '@/utils/customFetch'
 import React, { useEffect, useState } from 'react'
 import type { RecentlyViewedTourResponse, TourView } from '../interface'
 import ItineraryCardSkeleton from '@/modules/HomePageModule/module-elements/ItineraryCardSkeleton'
 import TourCard from '../module-elements/TourCard'
+import { customFetch } from '@/utils/newCustomFetch'
 
 function RecentlyViewedTour() {
   const [recentlyViewed, setRecentlyViewed] = useState<TourView[]>([])
