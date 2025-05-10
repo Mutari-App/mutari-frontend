@@ -3,7 +3,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Card, CardContent, CardFooter } from '@/components/ui/card'
 import { type ItineraryProps } from '../../interface'
-import { Heart } from 'lucide-react'
+import LikesButton from '@/modules/ItinerarySearchResultsModule/module-elements/LikesButton'
 
 interface ItineraryCardProps {
   itinerary: ItineraryProps
@@ -53,10 +53,13 @@ export const LikedItineraryCard: React.FC<ItineraryCardProps> = ({
             </span>
           </div>
 
-          <div className="flex items-center gap-1 text-[10px] pl-1 sm:text-sm">
-            <Heart className="h-4 w-4" />
-            <span>{itinerary.totalLikes}</span>
-          </div>
+          <LikesButton
+            itineraryId={itinerary.id}
+            liked={true}
+            count={itinerary.totalLikes}
+            enabled={true}
+            className="text-[10px] pl-1 sm:text-sm"
+          />
         </CardFooter>
       </Card>
     </Link>
