@@ -7,14 +7,12 @@ import {
 } from '@/modules/ItineraryModule/module-elements/types'
 import MyItineraryList from '@/modules/ItineraryModule/sections/MyItineraryList'
 import { customFetch } from '@/utils/newCustomFetch'
-import { PlusIcon } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
 export default function MyItinerarySection() {
-  const router = useRouter()
   const [data, setData] = useState<ItineraryData[]>([])
   const [myItineraryMetadata, setMyItineraryMetadata] = useState<metadataType>({
     page: 1,
@@ -48,10 +46,14 @@ export default function MyItinerarySection() {
           href={'/itinerary/create'}
           className="w-3/4 lg:w-auto self-center lg:self-end"
         >
-          <Button className="bg-gradient-to-r from-[#016CD7] to-[#014285] text-white items-center flex gap-3 w-full">
-            <PlusIcon />
-            Buat Itinerary Baru
-          </Button>
+          <div className="p-[1.5px] flex w-full items-center bg-gradient-to-r from-[#0073E6] to-[#004080] hover:from-[#0066cc] hover:to-[#003366] rounded-lg group">
+            <Button className="h-8 w-full bg-white group-hover:bg-transparent">
+              <span className="bg-gradient-to-r from-[#0073E6] to-[#004080] group-hover:text-white text-transparent bg-clip-text flex items-center">
+                <Plus className="h-4 w-4 mr-1 text-[#0073E6] group-hover:text-white" />
+                Buat Itinerary Baru
+              </span>
+            </Button>
+          </div>
         </Link>
       </div>
       <MyItineraryList
@@ -62,16 +64,18 @@ export default function MyItinerarySection() {
         includePagination={false}
       />
       {data && data.length > 0 && (
-        <div className="flex justify-center">
-          <Button
-            onClick={() => router.push('/itinerary')}
-            variant="outline"
-            size="sm"
-            className="bg-gradient-to-r from-[#016CD7] to-[#014285] text-white items-center flex gap-3 w-full md:w-3/4 lg:w-1/2"
-          >
-            Lihat Lebih Banyak
-          </Button>
-        </div>
+        <Link
+          href={'/itinerary'}
+          className="w-full md:w-3/4 lg:w-1/2 mx-auto flex justify-center"
+        >
+          <div className="p-[1.5px] flex w-full items-center bg-gradient-to-r from-[#0073E6] to-[#004080] hover:from-[#0066cc] hover:to-[#003366] rounded-lg group">
+            <Button className="h-8 w-full bg-white group-hover:bg-transparent">
+              <span className="bg-gradient-to-r from-[#0073E6] to-[#004080] group-hover:text-white text-transparent bg-clip-text flex items-center">
+                Lihat Lebih Banyak
+              </span>
+            </Button>
+          </div>
+        </Link>
       )}
     </div>
   )

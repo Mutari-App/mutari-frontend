@@ -1,6 +1,6 @@
 'use client'
 
-import { customFetch } from '@/utils/customFetch'
+import { customFetch, customFetchBody } from '@/utils/customFetch'
 import React, { useEffect, useState } from 'react'
 import type {
   RecentlyViewedItineraries,
@@ -8,7 +8,6 @@ import type {
 } from '../interface'
 import ItineraryCard from '@/modules/ItinerarySearchResultsModule/module-elements/ItineraryCard'
 import { useAuthContext } from '@/contexts/AuthContext'
-import { customFetchBody } from '@/utils/newCustomFetch'
 import type { BatchCheckItinerarySavedResponse } from '@/modules/ItinerarySearchResultsModule/interface'
 import ItineraryCardSkeleton from '../module-elements/ItineraryCardSkeleton'
 

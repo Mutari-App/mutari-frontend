@@ -73,14 +73,18 @@ export const ItinerariesSection: React.FC<ProfileModuleProps> = ({
           Rencana Perjalanan
         </h2>
         {user?.id === profile.id && (
-          <Link href={'/itinerary/create'}>
-            <Button
-              size={'sm'}
-              className="bg-gradient-to-r from-[#016CD7] to-[#014285] text-white items-center flex gap-3"
-            >
-              <PlusIcon />
-              Buat Itinerary Baru
-            </Button>
+          <Link
+            href={'/itinerary/create'}
+            className="w-3/4 lg:w-auto self-center lg:self-end"
+          >
+            <div className="p-[1.5px] flex w-full items-center bg-gradient-to-r from-[#0073E6] to-[#004080] hover:from-[#0066cc] hover:to-[#003366] rounded-lg group">
+              <Button className="h-8 w-full bg-white group-hover:bg-transparent">
+                <span className="bg-gradient-to-r from-[#0073E6] to-[#004080] group-hover:text-white text-transparent bg-clip-text flex items-center">
+                  <PlusIcon className="h-4 w-4 mr-1 text-[#0073E6] group-hover:text-white" />
+                  Buat Itinerary Baru
+                </span>
+              </Button>
+            </div>
           </Link>
         )}
       </div>
