@@ -12,7 +12,7 @@ interface RecentlyViewedSectionProps<T> {
   emptyMessage: string
 }
 
-function RecentlyViewedSection<T>({
+function RecentlyViewedSection<T extends { id: string }>({
   title,
   fetchEndpoint,
   mapData,
@@ -51,8 +51,8 @@ function RecentlyViewedSection<T>({
       ) : (
         <div className="flex gap-5 w-full overflow-auto pb-5 justify-start items-stretch">
           {items.length > 0 ? (
-            items.map((item, index) => (
-              <React.Fragment key={index}>{renderCard(item)}</React.Fragment>
+            items.map((item) => (
+              <React.Fragment key={item.id}>{renderCard(item)}</React.Fragment>
             ))
           ) : (
             <div className="flex flex-col items-center justify-center w-full h-full gap-5 p-5 text-center bg-white rounded-lg shadow-md">
