@@ -18,7 +18,7 @@ function RecentlyViewedSection<T extends { id: string }>({
   mapData,
   renderCard,
   emptyMessage,
-}: RecentlyViewedSectionProps<T>) {
+}: Readonly<RecentlyViewedSectionProps<T>>) {
   const [items, setItems] = useState<T[]>([])
   const [loading, setLoading] = React.useState(false)
 
