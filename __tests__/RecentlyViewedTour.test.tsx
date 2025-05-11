@@ -45,7 +45,9 @@ describe('RecentlyViewedTour', () => {
 
     // Wait for the tour card to appear
     await waitFor(() => {
-      expect(screen.getByTestId('tour-card')).toHaveTextContent('Tour ke Gunung')
+      expect(screen.getByTestId('tour-card')).toHaveTextContent(
+        'Tour ke Gunung'
+      )
     })
   })
 
