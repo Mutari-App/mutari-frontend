@@ -29,14 +29,18 @@ describe('RecentlyViewedSection', () => {
     })
   })
 
-    it('should handle fetch error gracefully', async () => {
+  it('should handle fetch error gracefully', async () => {
     // Mock customFetch to throw an error
     ;(customFetch as jest.Mock).mockImplementation(() => {
       return Promise.reject(new Error('Failed to fetch'))
     })
 
     // Spy on console.error to suppress error logs in the test output
-    const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {void 0 })
+    const consoleErrorSpy = jest
+      .spyOn(console, 'error')
+      .mockImplementation(() => {
+        void 0
+      })
 
     render(
       <RecentlyViewedSection
