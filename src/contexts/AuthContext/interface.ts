@@ -19,13 +19,23 @@ export interface AuthContextInterface {
     email: string
   }) => Promise<CustomFetchBaseResponse>
   logout: () => Promise<CustomFetchBaseResponse>
+  getMe: () => Promise<void>
 }
 
 export interface User {
   id: string
   email: string
   firstName: string
-  referralCode: string
+  lastName: string
+  phoneNumber: string | null
+  photoProfile: string | null
+  referralCode: string | null
+  isEmailConfirmed: boolean
+  referredById: string | null
+  loyaltyPoints: number
+  birthDate: string
+  createdAt: string
+  updatedAt: string
   usedCount: number
 }
 
