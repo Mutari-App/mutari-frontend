@@ -4,7 +4,10 @@ import React, { useEffect, useState } from 'react'
 import ItineraryCard from '@/modules/ItinerarySearchResultsModule/module-elements/ItineraryCard'
 import { customFetch, customFetchBody } from '@/utils/newCustomFetch'
 import RecentlyViewedSection from '@/modules/TourMarketplaceModule/sections/RecentlyViewedSection'
-import { type RecentlyViewedItineraries, type RecentlyViewedItineraryResponse } from '../interface'
+import {
+  type RecentlyViewedItineraries,
+  type RecentlyViewedItineraryResponse,
+} from '../interface'
 import { type BatchCheckItinerarySavedResponse } from '@/modules/ItinerarySearchResultsModule/interface'
 
 function RecentlyViewed() {
@@ -49,7 +52,7 @@ function RecentlyViewed() {
         <ItineraryCard
           key={itinerary.id}
           itinerary={itinerary}
-          isLiked={itinerariesLiked[itinerary.id]} 
+          isLiked={itinerariesLiked[itinerary.id]}
           className="w-1/5 min-w-[250px]"
         />
       )}

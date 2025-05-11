@@ -51,7 +51,9 @@ function RecentlyViewedSection<T>({
       ) : (
         <div className="flex gap-5 w-full overflow-auto pb-5 justify-start items-stretch">
           {items.length > 0 ? (
-            items.map((item, index) => <React.Fragment key={index}>{renderCard(item)}</React.Fragment>)
+            items.map((item, index) => (
+              <React.Fragment key={index}>{renderCard(item)}</React.Fragment>
+            ))
           ) : (
             <div className="flex flex-col items-center justify-center w-full h-full gap-5 p-5 text-center bg-white rounded-lg shadow-md">
               <p className="text-gray-500">{emptyMessage}</p>
