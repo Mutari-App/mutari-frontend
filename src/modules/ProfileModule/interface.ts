@@ -32,3 +32,63 @@ export interface GetItinerariesProps {
 export interface GetItineraryLikesProps {
   itineraryLikes: ItineraryProps[]
 }
+
+export interface GetTransactionProps {
+  transactions: TransactionProps[]
+}
+
+export interface TransactionProps {
+  id: string
+  createdAt: string
+  quantity: number
+  totalPrice: number
+  paymentStatus: PAYMENT_STATUS
+  tour: TourProps
+  guests: GuestProps[]
+}
+
+export enum PAYMENT_STATUS {
+  UNPAID = 'UNPAID',
+  PAID = 'PAID',
+  REFUNDED = 'REFUNDED',
+}
+
+export enum PAYMENT_STATUS_COLOR {
+  UNPAID = 'text-red-500',
+  PAID = 'text-green-500',
+  REFUNDED = 'text-yellow-500',
+}
+
+interface TourProps {
+  title: string
+  location: string
+}
+
+interface GuestProps {
+  id: string
+  title: GUEST_TITLE
+  firstName: string
+  lastName: string
+  phoneNumber: string
+  email: string
+}
+
+export enum GUEST_TITLE {
+  MR = 'MR',
+  MRS = 'MRS',
+  MS = 'MS',
+}
+
+export const GUEST_TITLE_DISPLAY = {
+  [GUEST_TITLE.MR]: 'Tn.',
+  [GUEST_TITLE.MRS]: 'Ny.',
+  [GUEST_TITLE.MS]: 'Nn.',
+}
+
+export interface TransactionCardProps {
+  transaction: TransactionProps
+}
+
+export interface TransactionDetailModalProps {
+  transaction: TransactionProps
+}
