@@ -1,10 +1,17 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import Maps from '@/modules/ItineraryMakerModule/sections/Maps'
 import type { CreateItineraryDto } from '@/modules/ItineraryMakerModule/interface'
+import { customFetch } from '@/utils/customFetch'
+
+// Mock customFetch to control loading states
+jest.mock('@/utils/customFetch', () => ({
+  customFetch: jest.fn(),
+}))
 
 jest.mock('lucide-react', () => ({
   Globe: () => <span data-testid="globe-icon">Globe Icon Mock</span>,
   Phone: () => <span data-testid="phone-icon">Phone Icon Mock</span>,
+  Loader2: () => <span data-testid="loader-icon">Loader Icon Mock</span>,
 }))
 
 jest.mock('@vis.gl/react-google-maps', () => ({
@@ -78,7 +85,7 @@ jest.mock('@vis.gl/react-google-maps', () => ({
       // Add other map methods you might use
     }
 
-    return { map: mockMap }
+    return mockMap
   },
 }))
 
@@ -165,6 +172,27 @@ describe('Maps Component', () => {
     ],
   }
 
+  const mockPlaceDetails = {
+    name: 'Test Place',
+    vicinity: 'Jakarta',
+    rating: 4.5,
+    user_ratings_total: 100,
+    international_phone_number: '+62 812 3456 7890',
+    website: 'https://example.com',
+    photos: [],
+  }
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+    // Default mock implementation
+    ;(customFetch as jest.Mock).mockResolvedValue({
+      success: true,
+      details: {
+        result: mockPlaceDetails,
+      },
+    })
+  })
+
   test('renders Google Map when loaded', () => {
     render(<Maps itineraryData={mockItineraryData.sections} />)
     expect(screen.getByTestId('mock-map')).toBeInTheDocument()
@@ -187,6 +215,66 @@ describe('Maps Component', () => {
     expect(screen.queryByTestId('map-marker')).not.toBeInTheDocument()
   })
 
+  test('shows loading indicator immediately after selecting a place', async () => {
+    // Delay the API response to simulate loading
+    ;(customFetch as jest.Mock).mockImplementation(() => {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          resolve({
+            success: true,
+            details: {
+              result: mockPlaceDetails,
+            },
+          })
+        }, 500)
+      })
+    })
+
+    render(<Maps itineraryData={mockItineraryData.sections} isEditing />)
+
+    // Simulate clicking on the map to select a place
+    fireEvent.click(screen.getByTestId('mock-map'))
+
+    // Loading indicator should appear immediately
+    expect(screen.getByTestId('loader-icon')).toBeInTheDocument()
+    expect(screen.getByText('Mengambil detail lokasi...')).toBeInTheDocument()
+  })
+
+  test('replaces loading indicator with place details after loading completes', async () => {
+    render(<Maps itineraryData={mockItineraryData.sections} isEditing />)
+
+    // Simulate clicking on the map
+    fireEvent.click(screen.getByTestId('mock-map'))
+
+    // Wait for the details to load and the place name to appear
+    await waitFor(() => {
+      expect(screen.queryByTestId('loader-icon')).not.toBeInTheDocument()
+      expect(screen.getByText('Test Place')).toBeInTheDocument()
+    })
+  })
+
+  test('handles API error gracefully', async () => {
+    // Mock API failure
+    ;(customFetch as jest.Mock).mockRejectedValue(new Error('API error'))
+
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation()
+
+    render(<Maps itineraryData={mockItineraryData.sections} isEditing />)
+
+    // Simulate clicking on the map
+    fireEvent.click(screen.getByTestId('mock-map'))
+
+    // Wait for the error to be logged
+    await waitFor(() => {
+      expect(consoleSpy).toHaveBeenCalledWith(
+        'Error fetching place details:',
+        expect.any(Error)
+      )
+    })
+
+    consoleSpy.mockRestore()
+  })
+
   test('calls addLocationToSection when adding a place to itinerary', async () => {
     const addLocationToSectionMock = jest.fn()
     render(
@@ -198,23 +286,20 @@ describe('Maps Component', () => {
           placeId: 'abc123',
           latLng: { lat: -6.2, lng: 106.8 },
         }}
-        _testSelectedPlaceDetails={{
-          name: 'Test Place',
-          vicinity: 'Jakarta',
-          rating: 4.5,
-          user_ratings_total: 100,
-          international_phone_number: '+62 812 3456 7890',
-          website: 'https://example.com',
-          photos: [],
-        }}
+        _testSelectedPlaceDetails={mockPlaceDetails}
       />
     )
 
-    // Simulate selecting a place
+    // First wait for the place details to load (bypassing the loading state)
+    await waitFor(() => {
+      expect(screen.getByText('Test Place')).toBeInTheDocument()
+      expect(screen.getByText('Tambahkan ke itinerary')).toBeInTheDocument()
+    })
+
+    // Then click the button
     fireEvent.click(screen.getByText('Tambahkan ke itinerary'))
 
-    await waitFor(() => {
-      expect(addLocationToSectionMock).toHaveBeenCalled()
-    })
+    // Verify the function was called
+    expect(addLocationToSectionMock).toHaveBeenCalled()
   })
 })

@@ -20,6 +20,7 @@ import {
 } from '@vis.gl/react-google-maps'
 import CustomPin from '../module-elements/CustomPin'
 import { SECTION_COLORS } from '../constants'
+import { Loader2 } from 'lucide-react'
 
 type MapsProps = {
   readonly itineraryData: Readonly<Section[]>
@@ -108,6 +109,7 @@ function Maps({
   )
   const [selectedPlaceDetails, setSelectedPlaceDetails] =
     useState<PlaceResult | null>(_testSelectedPlaceDetails ?? null)
+  const [isLoading, setIsLoading] = useState(false)
 
   const { locations, routes } = useMemo(() => {
     const locations: ILocationMarker[] = []
@@ -153,6 +155,7 @@ function Maps({
 
   const fetchPlaceDetails = async (placeId: string) => {
     try {
+      setIsLoading(true)
       const res = await customFetch<GetPlaceDetailsResponse>(
         `/map/details?placeId=${placeId}`,
         {
@@ -164,6 +167,8 @@ function Maps({
       }
     } catch (error) {
       console.error('Error fetching place details:', error)
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -173,6 +178,8 @@ function Maps({
       return
     }
     if (e.detail.placeId) {
+      // Clear previous details when selecting a new place
+      setSelectedPlaceDetails(null)
       setSelectedPlace({
         placeId: e.detail.placeId,
         latLng: {
@@ -263,54 +270,71 @@ function Maps({
           />
         )}
 
-        {selectedPlace.placeId && selectedPlaceDetails && (
+        {/* Show modal immediately when a place is selected, even during loading */}
+        {selectedPlace.placeId && (
           <div className="absolute bottom-8 left-1/2 -translate-x-1/2 w-11/12 flex flex-col gap-5 bg-white max-h-[50dvh] overflow-auto rounded-2xl shadow-md p-6">
-            <div className="flex flex-col-reverse md:flex-row gap-4 md:justify-between ">
-              <div className="flex gap-2 flex-col">
-                <h3 className="font-semibold text-lg">
-                  {selectedPlaceDetails.name}
-                </h3>
-                <p className="text-gray-600">{selectedPlaceDetails.vicinity}</p>
-                <div className="flex gap-1 items-center text-sm">
-                  ⭐
-                  <p className="text-gray-600">
-                    <span className="text-yellow-500 font-semibold">
-                      {selectedPlaceDetails.rating}{' '}
-                    </span>
-                    ({selectedPlaceDetails.user_ratings_total})
-                  </p>
-                </div>
+            {isLoading ? (
+              <div className="flex flex-col items-center justify-center py-8">
+                <Loader2 className="h-8 w-8 text-blue-500 animate-spin mb-2" />
+                <p className="text-gray-600">Mengambil detail lokasi...</p>
               </div>
+            ) : selectedPlaceDetails ? (
+              <>
+                <div className="flex flex-col-reverse md:flex-row gap-4 md:justify-between ">
+                  <div className="flex gap-2 flex-col">
+                    <h3 className="font-semibold text-lg">
+                      {selectedPlaceDetails.name}
+                    </h3>
+                    <p className="text-gray-600">
+                      {selectedPlaceDetails.vicinity}
+                    </p>
+                    <div className="flex gap-1 items-center text-sm">
+                      ⭐
+                      <p className="text-gray-600">
+                        <span className="text-yellow-500 font-semibold">
+                          {selectedPlaceDetails.rating}{' '}
+                        </span>
+                        ({selectedPlaceDetails.user_ratings_total})
+                      </p>
+                    </div>
+                  </div>
 
-              <Button
-                size={'sm'}
-                variant={'gradient'}
-                onClick={handleAddToItinerary}
-              >
-                Tambahkan ke itinerary
-              </Button>
-            </div>
-
-            <div className="flex gap-2 flex-col text-sm text-gray-600">
-              {selectedPlaceDetails.international_phone_number && (
-                <div className="flex gap-2 items-center">
-                  <Phone size={16} />
-                  <p>{selectedPlaceDetails.international_phone_number}</p>
-                </div>
-              )}
-              {selectedPlaceDetails.website && (
-                <div className="flex gap-2 items-center">
-                  <Globe size={16} />
-                  <Link
-                    href={selectedPlaceDetails.website}
-                    target="_blank"
-                    className="text-sky-600 hover:text-blue-400 underline"
+                  <Button
+                    size={'sm'}
+                    variant={'gradient'}
+                    onClick={handleAddToItinerary}
                   >
-                    {selectedPlaceDetails.website}
-                  </Link>
+                    Tambahkan ke itinerary
+                  </Button>
                 </div>
-              )}
-            </div>
+
+                <div className="flex gap-2 flex-col text-sm text-gray-600">
+                  {selectedPlaceDetails.international_phone_number && (
+                    <div className="flex gap-2 items-center">
+                      <Phone size={16} />
+                      <p>{selectedPlaceDetails.international_phone_number}</p>
+                    </div>
+                  )}
+                  {selectedPlaceDetails.website && (
+                    <div className="flex gap-2 items-center">
+                      <Globe size={16} />
+                      <Link
+                        href={selectedPlaceDetails.website}
+                        target="_blank"
+                        className="text-sky-600 hover:text-blue-400 underline"
+                      >
+                        {selectedPlaceDetails.website}
+                      </Link>
+                    </div>
+                  )}
+                </div>
+              </>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-8">
+                <Loader2 className="h-8 w-8 text-blue-500 animate-spin mb-2" />
+                <p className="text-gray-600">Mengambil detail lokasi...</p>
+              </div>
+            )}
           </div>
         )}
       </Map>

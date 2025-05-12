@@ -78,10 +78,10 @@ export const Navbar: React.FC = () => {
       } ${!isLandingPage && 'bg-white shadow-md'}`}
     >
       <div className="mx-auto w-full container flex justify-between items-center">
-        <div className="flex justify-start gap-5 items-center">
+        <div className="flex justify-start gap-4 sm:gap-5 items-center">
           <Link
             href={'/#hero'}
-            className="flex items-end gap-3 hover:cursor-pointer"
+            className="flex items-end gap-2 sm:gap-3 hover:cursor-pointer"
           >
             <Image
               src={getImage(
@@ -90,16 +90,16 @@ export const Navbar: React.FC = () => {
               alt="Mutari Logo"
               width={150}
               height={50}
-              className="h-12 w-auto z-30"
+              className="h-10 sm:h-12 w-auto z-30"
             />
             <span
-              className={`${isLandingPage ? 'text-white' : 'text-[#0059B3]'} font-hammersmithOne text-[30px]`}
+              className={`${isLandingPage ? 'text-white' : 'text-[#0059B3]'} font-hammersmithOne text-[24px] sm:text-[30px] hidden sm:inline`}
             >
               MUTARI
             </span>
           </Link>
           <NavigationMenuList
-            className={`flex space-x-4 ${isLandingPage ? 'text-white' : 'text-black'}`}
+            className={`flex space-x-4 ${isLandingPage ? 'text-white' : 'text-black'} text-sm sm:text-base`}
           >
             <NavigationMenuItem>
               <NavigationMenuLink href="/itinerary" className="hover:underline">
@@ -119,7 +119,7 @@ export const Navbar: React.FC = () => {
                     alt="Profile"
                     width={40}
                     height={40}
-                    className="h-10 w-10 object-cover"
+                    className="h-8 w-8 sm:h-10 sm:w-10 object-cover"
                   />
                 </div>
               </DropdownMenuTrigger>
@@ -148,7 +148,7 @@ export const Navbar: React.FC = () => {
           ) : (
             <Link href="/login">
               <Button
-                className={`transition-colors px-6 ${
+                className={`transition-colors px-4 sm:px-6 py-1 sm:py-2 text-sm sm:text-base ${
                   isLandingPage
                     ? 'bg-white text-[#0059B3] hover:bg-gray-100'
                     : 'bg-[#0059B3] text-white hover:bg-[#004C99]'
