@@ -11,6 +11,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { v4 } from 'uuid'
 import { useAuthContext } from '@/contexts/AuthContext'
+import Link from 'next/link'
 
 const ExploreItinerarySection = () => {
   const router = useRouter()
@@ -101,16 +102,18 @@ const ExploreItinerarySection = () => {
               ))}
           </div>
           {itineraries && itineraries.length > 0 && (
-            <div className="flex justify-center">
-              <Button
-                onClick={handleViewMore}
-                variant="outline"
-                size="sm"
-                className="rounded-full px-6 border-[#0073E6] text-[#014285] hover:bg-blue-50"
-              >
-                Lihat Lebih Banyak
-              </Button>
-            </div>
+            <Link
+              href={'/itinerary/search'}
+              className="w-full md:w-3/4 lg:w-1/2 mx-auto flex justify-center"
+            >
+              <div className="p-[1.5px] flex w-full items-center bg-gradient-to-r from-[#0073E6] to-[#004080] hover:from-[#0066cc] hover:to-[#003366] rounded-lg group">
+                <Button className="h-8 w-full bg-white group-hover:bg-transparent">
+                  <span className="bg-gradient-to-r from-[#0073E6] to-[#004080] group-hover:text-white text-transparent bg-clip-text flex items-center">
+                    Lihat Lebih Banyak
+                  </span>
+                </Button>
+              </div>
+            </Link>
           )}
         </>
       )}
