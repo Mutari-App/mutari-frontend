@@ -15,6 +15,7 @@ import { customFetch } from '@/utils/newCustomFetch'
 import { toast } from 'sonner'
 import { DuplicateItineraryResponse } from '@/modules/ItineraryModule/module-elements/types'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import Head from 'next/head'
 
 export const ItineraryHeader = ({
   data,
@@ -343,6 +344,13 @@ export const ItineraryHeader = ({
           setShowInviteDialog(open)
         }}
       >
+        {(showModal || showInviteDialog) && (
+          <Head>
+            <meta property="og:title" content={data.title} />
+            <meta property="og:description" content={data.description || 'Lihat itinerary ini!'} />
+            <meta property="og:image" content={data.coverImage || '/default-image.jpg'} />
+          </Head>
+        )}
         <DialogContent className="font-roboto cursor-default p-6 pb-10 max-w-md">
           <DialogHeader>
             <DialogTitle className="text-2xl text-center w-full font-semibold">
