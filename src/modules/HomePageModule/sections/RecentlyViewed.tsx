@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 import ItineraryCard from '@/modules/ItinerarySearchResultsModule/module-elements/ItineraryCard'
-import { customFetch, customFetchBody } from '@/utils/newCustomFetch'
+import { customFetch, customFetchBody } from '@/utils/customFetch'
 import RecentlyViewedSection from '@/modules/TourMarketplaceModule/sections/RecentlyViewedSection'
 import {
   type RecentlyViewedItineraries,
