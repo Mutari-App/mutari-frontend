@@ -3,37 +3,16 @@ import { TourHeader } from './module-elements/TourHeader'
 import { TourDescription } from './module-elements/TourDescription'
 import { TourInclude } from './module-elements/TourInclude'
 import { TourOrderCard } from './module-elements/TourOrderCard'
-import { useEffect, useState } from 'react'
-import { customFetch } from '@/utils/newCustomFetch'
+import { useState } from 'react'
 import { Loader2 } from 'lucide-react'
-import { useParams } from 'next/navigation'
-import { TourSchedule } from './module-elements/TourSchedule'
 import { TourList } from './module-elements/TourList'
 
-export default function DetailTourModule() {
-  const [data, setData] = useState<Tour | null>(null)
-  const [isNotFound, setIsNotFound] = useState(false)
-  const { id } = useParams<{ id: string }>()
-
-  const fetchData = async () => {
-    try {
-      const res = await customFetch<TourDetailResponse>(`/tour/${id}`, {
-        credentials: 'include',
-      })
-
-      if (res.statusCode === 404 || res.statusCode === 403) {
-        setIsNotFound(true)
-      }
-
-      setData(res.data)
-    } catch (err: any) {
-      setIsNotFound(true)
-    }
-  }
-
-  useEffect(() => {
-    void fetchData()
-  }, [id])
+export default function DetailTourModule({
+  initialData,
+}: {
+  initialData: Tour
+}) {
+  const [data] = useState<Tour>(initialData)
 
   return data ? (
     <div className="max-w-6xl mx-auto p-4 pt-24 py-8">
@@ -49,8 +28,7 @@ export default function DetailTourModule() {
             description={data.description}
             maxCapacity={data.maxCapacity}
           />
-          {/* <TourInclude includes={[]} /> */}
-          {/* <TourSchedule/> */}
+          <TourInclude includes={data.includes} />
         </div>
         <div className="lg:col-span-1">
           <TourOrderCard pricePerTicket={data.pricePerTicket} />
