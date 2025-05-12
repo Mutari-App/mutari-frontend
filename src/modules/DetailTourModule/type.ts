@@ -82,6 +82,7 @@ interface Tour {
   createdAt: Date
   updatedAt: Date
   itinerary: Itinerary
+  includes: Include[]
 }
 
 interface Include {
