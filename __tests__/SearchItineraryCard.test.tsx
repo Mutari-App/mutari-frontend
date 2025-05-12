@@ -42,6 +42,12 @@ jest.mock('next/link', () => ({
   ),
 }))
 
+jest.mock('@/contexts/AuthContext', () => ({
+  useAuthContext: () => ({
+    user: { id: 'user1' },
+  }),
+}))
+
 // Mock UI components
 jest.mock('@/components/ui/card', () => ({
   Card: ({

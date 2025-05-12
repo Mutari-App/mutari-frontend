@@ -8,6 +8,7 @@ import { format } from 'date-fns'
 import { id as localeId } from 'date-fns/locale'
 import { Badge } from '@/components/ui/badge'
 import LikesButton from './LikesButton'
+import { useAuthContext } from '@/contexts/AuthContext'
 
 interface ItineraryCardProps {
   itinerary: ItinerarySearchResult
@@ -28,6 +29,7 @@ const ItineraryCard: React.FC<ItineraryCardProps> = ({
 
   const visibleTags = itinerary.tags.slice(0, maxVisibleTags)
   const hiddenTagsCount = Math.max(0, itinerary.tags.length - maxVisibleTags)
+  const { isAuthenticated, user } = useAuthContext()
 
   return (
     <Card
@@ -62,6 +64,7 @@ const ItineraryCard: React.FC<ItineraryCardProps> = ({
                 itineraryId={itinerary.id}
                 liked={isLiked}
                 count={itinerary.likes}
+                enabled={isAuthenticated && itinerary.user.id !== user?.id}
                 className="text-xs text-white"
               />
             </div>
@@ -129,6 +132,7 @@ const ItineraryCard: React.FC<ItineraryCardProps> = ({
               itineraryId={itinerary.id}
               liked={isLiked}
               count={itinerary.likes}
+              enabled={isAuthenticated && itinerary.user.id !== user?.id}
               className="text-[10px] pl-1 sm:text-sm"
             />
           </div>
