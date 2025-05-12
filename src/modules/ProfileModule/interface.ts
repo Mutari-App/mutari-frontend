@@ -71,6 +71,25 @@ export interface SubmitOtpFormProps extends FormProps {
   newEmail: string
 }
 
+export interface FormProps {
+  closeDialog: () => void
+}
+
+export interface ChangeEmailFormProps extends FormProps {
+  setNewEmail: (email: string) => void
+  enableSubmitOtpMode: () => void
+  editProfileButtonHandler: () => void
+}
+
+export interface EditProfileFormProps extends FormProps {
+  changeEmailButtonHandler: () => void
+}
+
+export interface SubmitOtpFormProps extends FormProps {
+  backButtonHandler: () => void
+  newEmail: string
+}
+
 export interface GetTransactionProps {
   transactions: TransactionProps[]
 }
