@@ -16,6 +16,10 @@ import {
   Loader2,
   Lightbulb,
   Wand2,
+  ListChecks,
+  Map,
+  MapIcon,
+  ListChecksIcon,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import {
@@ -97,6 +101,7 @@ export default function ItineraryMakerModule({
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
   const pendingDateRange = useRef<DateRange | undefined>(undefined)
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
+  const [isMapView, setIsMapView] = useState(false)
   const [availableTags, setAvailableTags] = useState<Tag[]>([])
   const { isAuthenticated } = useAuthContext()
   const router = useRouter()
@@ -316,6 +321,7 @@ export default function ItineraryMakerModule({
         coverImage: data.coverImage,
         startDate: data.startDate,
         endDate: data.endDate,
+        isPublished: data.isPublished,
         tags: mappedTags,
         sections: mappedSections,
       } as CreateItineraryDto
@@ -1833,7 +1839,9 @@ export default function ItineraryMakerModule({
   return (
     <APIProvider apiKey={apiKey}>
       <div className="flex max-h-screen">
-        <div className="container max-w-4xl mx-auto p-4 pt-24 min-h-screen max-h-screen overflow-auto">
+        <div
+          className={`container max-w-4xl mx-auto p-4 pt-24 min-h-screen max-h-screen overflow-auto ${isMapView && 'hidden'} md:block`}
+        >
           <button
             onClick={handleSubmit}
             disabled={isSubmitting}
@@ -1860,39 +1868,62 @@ export default function ItineraryMakerModule({
             isContingency={!!contingencyId}
           />
           <div className="flex flex-wrap items-center gap-2 mb-4">
-            <Popover>
-              <PopoverTrigger asChild>
-                <div className="p-[1.5px] flex items-center bg-gradient-to-r from-[#0073E6] to-[#004080] hover:from-[#0066cc] hover:to-[#003366] rounded-lg group">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-8 w-full bg-white group-hover:bg-transparent border-none"
-                    disabled={isContingency}
-                  >
-                    <span className="bg-gradient-to-r from-[#0073E6] to-[#004080] group-hover:text-white text-transparent bg-clip-text flex items-center">
-                      <CalendarIcon className="h-4 w-4 sm:mr-1 text-[#0073E6] group-hover:text-white" />
-                      {dateRange.from && dateRange.to ? (
-                        `${format(dateRange.from, 'dd MMM')} - ${format(dateRange.to, 'dd MMM')}`
-                      ) : (
-                        <>
-                          <span className="hidden min-[500px]:inline md:hidden min-[1034px]:inline">
-                            Masukkan Tanggal Perjalanan
-                          </span>
-                        </>
-                      )}
-                    </span>
-                  </Button>
-                </div>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="range"
-                  selected={dateRange}
-                  onSelect={handleDateRangeChange}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
+            {isContingency ? (
+              <div className="p-[1.5px] flex items-center bg-gradient-to-r from-[#0073E6] to-[#004080] rounded-lg">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 w-full bg-white border-none opacity-100 cursor-not-allowed disabled:opacity-100"
+                  disabled
+                >
+                  <span className="bg-gradient-to-r from-[#0073E6] to-[#004080] text-transparent bg-clip-text flex items-center">
+                    <CalendarIcon className="h-4 w-4 sm:mr-1 text-[#0073E6]" />
+                    {dateRange.from && dateRange.to ? (
+                      `${format(dateRange.from, 'dd MMM')} - ${format(dateRange.to, 'dd MMM')}`
+                    ) : (
+                      <>
+                        <span className="hidden min-[500px]:inline md:hidden min-[1034px]:inline">
+                          Masukkan Tanggal Perjalanan
+                        </span>
+                      </>
+                    )}
+                  </span>
+                </Button>
+              </div>
+            ) : (
+              <Popover>
+                <PopoverTrigger asChild>
+                  <div className="p-[1.5px] flex items-center bg-gradient-to-r from-[#0073E6] to-[#004080] hover:from-[#0066cc] hover:to-[#003366] rounded-lg group">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-8 w-full bg-white group-hover:bg-transparent border-none"
+                    >
+                      <span className="bg-gradient-to-r from-[#0073E6] to-[#004080] group-hover:text-white text-transparent bg-clip-text flex items-center">
+                        <CalendarIcon className="h-4 w-4 sm:mr-1 text-[#0073E6] group-hover:text-white" />
+                        {dateRange.from && dateRange.to ? (
+                          `${format(dateRange.from, 'dd MMM')} - ${format(dateRange.to, 'dd MMM')}`
+                        ) : (
+                          <>
+                            <span className="hidden min-[500px]:inline md:hidden min-[1034px]:inline">
+                              Masukkan Tanggal Perjalanan
+                            </span>
+                          </>
+                        )}
+                      </span>
+                    </Button>
+                  </div>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="range"
+                    selected={dateRange}
+                    onSelect={handleDateRangeChange}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            )}
             {!isContingency && (
               <ReminderSelector
                 selectedReminder={
@@ -1902,29 +1933,27 @@ export default function ItineraryMakerModule({
                 reminderOptions={reminderOptions}
               />
             )}
-            {!isContingency && (
-              <Button
-                size="sm"
-                className={cn(
-                  'group relative overflow-hidden rounded-md px-4 py-1 ml-auto text-sm font-medium text-white',
-                  'focus:outline-none focus:ring-2 focus:ring-offset-2',
-                  'disabled:opacity-70 disabled:cursor-not-allowed'
-                )}
-                onClick={handleGenerateFeedback}
-                disabled={isGenerating}
-              >
-                {/* Base gradient layer */}
-                <span className="absolute inset-0 bg-gradient-to-r from-[#0073E6] to-[#80004B] transition-opacity duration-300 ease-in-out" />
+            <Button
+              size="sm"
+              className={cn(
+                'group relative overflow-hidden rounded-md px-4 py-1 ml-auto text-sm font-medium text-white',
+                'focus:outline-none focus:ring-2 focus:ring-offset-2',
+                'disabled:opacity-70 disabled:cursor-not-allowed'
+              )}
+              onClick={handleGenerateFeedback}
+              disabled={isGenerating}
+            >
+              {/* Base gradient layer */}
+              <span className="absolute inset-0 bg-gradient-to-r from-[#0073E6] to-[#80004B] transition-opacity duration-300 ease-in-out" />
 
-                {/* Hover gradient layer */}
-                <span className="absolute inset-0 bg-gradient-to-r from-[#80004B] to-[#0073E6] opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out" />
+              {/* Hover gradient layer */}
+              <span className="absolute inset-0 bg-gradient-to-r from-[#80004B] to-[#0073E6] opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out" />
 
-                <span className="relative flex items-center gap-1.5">
-                  <Wand2 size={16} />
-                  {isGenerating ? 'Memproses...' : 'Buat Saran AI'}
-                </span>
-              </Button>
-            )}
+              <span className="relative flex items-center gap-1.5">
+                <Wand2 size={16} />
+                {isGenerating ? 'Memproses...' : 'Buat Saran AI'}
+              </span>
+            </Button>
           </div>
           <TagSelector
             selectedTags={itineraryData.tags ?? []}
@@ -2007,13 +2036,25 @@ export default function ItineraryMakerModule({
             </div>
           )}
         </div>
-        <div className="w-full min-h-screen hidden md:block">
+        <div
+          className={`w-full min-h-screen md:block ${!isMapView && 'hidden'}`}
+        >
           <Maps
-            itineraryData={contingency?.sections ?? itineraryData.sections}
+            itineraryData={itineraryData.sections}
             addLocationToSection={addLocationToSection}
             isEditing
             positionToView={positionToView}
           />
+        </div>
+        <div className="absolute bottom-5 left-1/2 -translate-x-1/2 shadow-lg z-10 md:hidden">
+          <Button
+            variant={'gradient'}
+            onClick={() => setIsMapView((prev) => !prev)}
+            className="w-full"
+          >
+            {isMapView ? <ListChecksIcon /> : <MapIcon />}
+            {isMapView ? 'Tampilkan Itinerary' : 'Tampilkan Peta'}
+          </Button>
         </div>
         {isConfirmModalOpen && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center font-roboto">

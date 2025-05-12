@@ -38,6 +38,17 @@ jest.mock(
   })
 )
 
+jest.mock('../src/modules/ProfileModule/sections/TransactionSection', () => ({
+  TransactionSection: ({ profile }: { profile: ProfileProps }) => (
+    <div
+      data-testid="transaction-section"
+      data-profile={JSON.stringify(profile)}
+    >
+      Transaction History Section
+    </div>
+  ),
+}))
+
 // Mock the UI components
 jest.mock('@/components/ui/tabs', () => ({
   Tabs: ({

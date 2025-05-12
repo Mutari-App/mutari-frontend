@@ -1,6 +1,5 @@
 'use client'
 import React, { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 import ItineraryCard from '@/modules/ItinerarySearchResultsModule/module-elements/ItineraryCard'
 import { customFetch, customFetchBody } from '@/utils/newCustomFetch'
 import {
@@ -12,9 +11,9 @@ import { Button } from '@/components/ui/button'
 import { v4 } from 'uuid'
 import { DiscoverItinerariesByTagResponse } from '../interface'
 import { toast } from 'sonner'
+import Link from 'next/link'
 
 const ExploreItinerarySection = () => {
-  const router = useRouter()
   const [itineraries, setItineraries] = useState<ItinerarySearchResult[]>([])
   const [itinerariesByTag, setItinerariesByTag] = useState<
     ItinerarySearchResult[]
@@ -97,10 +96,6 @@ const ExploreItinerarySection = () => {
     void fetchLikedItineraries()
   }, [itineraries, itinerariesByTag])
 
-  const handleViewMore = () => {
-    router.push('/itinerary/search')
-  }
-
   return (
     <section className="flex flex-col justify-start gap-7 w-4/5">
       <p className="font-semibold text-2xl md:text-left md:text-[36px] md:text-left  self-start">
@@ -165,16 +160,18 @@ const ExploreItinerarySection = () => {
         )
       )}
       {itineraries && itineraries.length > 0 && (
-        <div className="flex justify-center">
-          <Button
-            onClick={handleViewMore}
-            variant="outline"
-            size="sm"
-            className="bg-gradient-to-r from-[#016CD7] to-[#014285] text-white items-center flex gap-3 w-full md:w-3/4 lg:w-1/2"
-          >
-            Lihat Lebih Banyak
-          </Button>
-        </div>
+        <Link
+          href={'/itinerary/search'}
+          className="w-full md:w-3/4 lg:w-1/2 mx-auto flex justify-center"
+        >
+          <div className="p-[1.5px] flex w-full items-center bg-gradient-to-r from-[#0073E6] to-[#004080] hover:from-[#0066cc] hover:to-[#003366] rounded-lg group">
+            <Button className="h-8 w-full bg-white group-hover:bg-transparent">
+              <span className="bg-gradient-to-r from-[#0073E6] to-[#004080] group-hover:text-white text-transparent bg-clip-text flex items-center">
+                Lihat Lebih Banyak
+              </span>
+            </Button>
+          </div>
+        </Link>
       )}
     </section>
   )
