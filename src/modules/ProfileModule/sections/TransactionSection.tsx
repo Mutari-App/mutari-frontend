@@ -9,9 +9,7 @@ import { customFetch } from '@/utils/newCustomFetch'
 import { toast } from 'sonner'
 import TransactionCard from '../module-elements/ItineraryCard/TransactionCard'
 
-export const TransactionSection: React.FC<ProfileModuleProps> = ({
-  profile,
-}) => {
+export const TransactionSection: React.FC<ProfileModuleProps> = () => {
   const [transactions, setTransactions] = useState<TransactionProps[]>([])
   const [loading, setLoading] = useState<boolean>(true)
 
@@ -19,7 +17,7 @@ export const TransactionSection: React.FC<ProfileModuleProps> = ({
     try {
       setLoading(true)
       const response = await customFetch<GetTransactionProps>(
-        `/profile/${profile.id}/transactions`
+        `/profile/transactions`
       )
 
       if (response.statusCode !== 200) {
