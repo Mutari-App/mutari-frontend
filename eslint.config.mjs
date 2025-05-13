@@ -86,7 +86,6 @@ export default [
       ],
 
       'import/no-anonymous-default-export': 'off',
-      'react-hooks/rules-of-hooks': 'warn',
     },
   },
 ]
