@@ -100,7 +100,7 @@ function Maps({
       firstLoc
         ? { lat: parseFloat(firstLoc[0]), lng: parseFloat(firstLoc[1]) }
         : { lat: -6.3604, lng: 106.82719 },
-    []
+    [firstLoc]
   )
   const defaultSelectedPlace = { placeId: '', latLng: { lat: 0, lng: 0 } }
 

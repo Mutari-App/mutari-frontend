@@ -1,6 +1,6 @@
 'use client'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import MyItineraryList from './sections/MyItineraryList'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
@@ -53,17 +53,20 @@ export default function ItineraryModule() {
     await fetchMySharedItinerary()
   }
 
-  function handleSearchparams(query: string, value: string) {
-    const params = new URLSearchParams(searchParams)
-    if (value) {
-      params.set(query, value)
-    } else {
-      params.delete(query)
-    }
-    router.replace(`${pathname}?${params.toString()}`)
-  }
+  const handleSearchparams = useCallback(
+    (query: string, value: string) => {
+      const params = new URLSearchParams(searchParams)
+      if (value) {
+        params.set(query, value)
+      } else {
+        params.delete(query)
+      }
+      router.replace(`${pathname}?${params.toString()}`)
+    },
+    [pathname, router, searchParams]
+  )
 
-  const fetchMyItinerary = async () => {
+  const fetchMyItinerary = useCallback(async () => {
     try {
       const res = await customFetch<ItineraryResponse>(
         `/itineraries/me?page=${myItineraryPage}`,
@@ -84,9 +87,9 @@ export default function ItineraryModule() {
     } catch (err: any) {
       if (err instanceof Error) toast.error(`${err.message}`)
     }
-  }
+  }, [handleSearchparams, myItineraryPage])
 
-  const fetchMySharedItinerary = async () => {
+  const fetchMySharedItinerary = useCallback(async () => {
     try {
       const res = await customFetch<ItineraryResponse>(
         `/itineraries/me/shared?page=${sharedItineraryPage}`,
@@ -106,9 +109,9 @@ export default function ItineraryModule() {
     } catch (err: any) {
       if (err instanceof Error) toast.error(`${err.message}`)
     }
-  }
+  }, [handleSearchparams, sharedItineraryPage])
 
-  const fetchMyCompletedItinerary = async () => {
+  const fetchMyCompletedItinerary = useCallback(async () => {
     try {
       const res = await customFetch<ItineraryResponse>(
         `/itineraries/me/completed?page=${completedItineraryPage}`,
@@ -130,19 +133,19 @@ export default function ItineraryModule() {
     } catch (err: any) {
       if (err instanceof Error) toast.error(`${err.message}`)
     }
-  }
+  }, [completedItineraryPage, handleSearchparams])
 
   useEffect(() => {
     fetchMyItinerary().catch((err) => console.log(err))
-  }, [myItineraryPage])
+  }, [fetchMyItinerary, myItineraryPage])
 
   useEffect(() => {
     fetchMySharedItinerary().catch((err) => console.log(err))
-  }, [sharedItineraryPage])
+  }, [fetchMySharedItinerary, sharedItineraryPage])
 
   useEffect(() => {
     fetchMyCompletedItinerary().catch((err) => console.log(err))
-  }, [completedItineraryPage])
+  }, [completedItineraryPage, fetchMyCompletedItinerary])
 
   return (
     <div className="flex flex-col items-center gap-7 pt-28">

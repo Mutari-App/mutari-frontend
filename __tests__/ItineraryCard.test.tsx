@@ -4,7 +4,7 @@ import { customFetch } from '@/utils/newCustomFetch'
 import { type ItineraryData } from '@/modules/ItineraryModule/module-elements/types'
 import ItineraryCard from '@/modules/ItineraryModule/module-elements/ItineraryCard'
 import { toast } from 'sonner'
-import { ImageProps } from 'next/image'
+import { type ImageProps } from 'next/image'
 
 const mockPush = jest.fn()
 jest.mock('next/navigation', () => ({
@@ -16,8 +16,8 @@ jest.mock('next/navigation', () => ({
 jest.mock('next/image', () => ({
   __esModule: true,
   default: ({ alt, ...props }: ImageProps) => {
-    // eslint-disable-next-line @next/next/no-img-element
     return (
+      // eslint-disable-next-line @next/next/no-img-element
       <img
         {...props}
         alt={alt || ''}
@@ -34,14 +34,12 @@ jest.mock('@/components/ui/dropdown-menu', () => ({
   ),
   DropdownMenuTrigger: ({
     children,
-    asChild,
   }: {
     children: React.ReactNode
     asChild?: boolean
   }) => <div data-testid="dropdown-trigger">{children}</div>,
   DropdownMenuContent: ({
     children,
-    align,
   }: {
     children: React.ReactNode
     align?: string
@@ -49,7 +47,6 @@ jest.mock('@/components/ui/dropdown-menu', () => ({
   DropdownMenuItem: ({
     children,
     onClick,
-    className,
   }: {
     children: React.ReactNode
     onClick?: () => void
@@ -65,7 +62,6 @@ jest.mock('@/components/ui/dialog', () => ({
   Dialog: ({
     children,
     open,
-    onOpenChange,
   }: {
     children: React.ReactNode
     open?: boolean
@@ -73,7 +69,6 @@ jest.mock('@/components/ui/dialog', () => ({
   }) => <div data-testid="dialog">{open ? children : null}</div>,
   DialogContent: ({
     children,
-    className,
     onClick,
   }: {
     children: React.ReactNode
@@ -86,21 +81,18 @@ jest.mock('@/components/ui/dialog', () => ({
   ),
   DialogTitle: ({
     children,
-    className,
   }: {
     children: React.ReactNode
     className?: string
   }) => <div data-testid="dialog-title">{children}</div>,
   DialogDescription: ({
     children,
-    className,
   }: {
     children: React.ReactNode
     className?: string
   }) => <div data-testid="dialog-description">{children}</div>,
   DialogFooter: ({
     children,
-    className,
   }: {
     children: React.ReactNode
     className?: string
@@ -110,14 +102,12 @@ jest.mock('@/components/ui/dialog', () => ({
 jest.mock('@/components/ui/tabs', () => ({
   Tabs: ({
     children,
-    defaultValue,
   }: {
     children: React.ReactNode
     defaultValue?: string
   }) => <div data-testid="tabs">{children}</div>,
   TabsList: ({
     children,
-    className,
   }: {
     children: React.ReactNode
     className?: string
@@ -136,7 +126,6 @@ jest.mock('@/components/ui/tabs', () => ({
   TabsContent: ({
     children,
     value,
-    className,
   }: {
     children: React.ReactNode
     value?: string
@@ -152,7 +141,6 @@ jest.mock('@/components/ui/button', () => ({
   Button: ({
     children,
     onClick,
-    className,
     type,
   }: {
     children: React.ReactNode
@@ -238,7 +226,7 @@ describe('ItineraryCard Component', () => {
 
     // Find the main card element (excluding the dropdown trigger)
     const card =
-      screen.getByText('Trip to Bali').closest('div[role="button"]') ||
+      screen.getByText('Trip to Bali').closest('div[role="button"]') ??
       screen.getByText('Trip to Bali').closest('div')
 
     fireEvent.click(card!)
@@ -578,8 +566,6 @@ describe('ItineraryCard Component', () => {
     fireEvent.click(screen.getByTestId('option-btn'))
     fireEvent.click(screen.getByText('Invite'))
 
-    // Find and click remove button for the user
-    const removeButtons = screen.getAllByTestId('x-icon')
     // Find all divs that contain the user's name
     const userContainers = Array.from(document.querySelectorAll('div')).filter(
       (div) => div.textContent?.includes('John Doe')

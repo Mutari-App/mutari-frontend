@@ -16,8 +16,6 @@ import {
   Loader2,
   Lightbulb,
   Wand2,
-  ListChecks,
-  Map,
   MapIcon,
   ListChecksIcon,
 } from 'lucide-react'
@@ -60,7 +58,7 @@ export default function ItineraryMakerModule({
 }: Readonly<ItineraryMakerModuleProps>) {
   const { user } = useAuthContext()
   const launchingDate = new Date(
-    process.env.NEXT_PUBLIC_LAUNCHING_DATE || '2025-01-22T00:00:00'
+    process.env.NEXT_PUBLIC_LAUNCHING_DATE ?? '2025-01-22T00:00:00'
   )
   const nowDate = new Date()
   const isLaunching = nowDate > launchingDate
@@ -198,7 +196,8 @@ export default function ItineraryMakerModule({
           const mapped = await fetchContingencyDetail()
           setData({ ...res.data, sections: mapped })
         }
-      } catch (err: any) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (err) {
         return <NotFound statusCode={404} />
       }
 
@@ -238,14 +237,15 @@ export default function ItineraryMakerModule({
 
         setContingency({ ...res.contingency, sections: mappedSections })
         return mappedSections
-      } catch (err: any) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (err) {
         notFound()
       }
     }
     if (!wasAlreadyRequested.current) {
       void fetchData()
     }
-  }, [itineraryId, router, user?.id, wasAlreadyRequested])
+  }, [contingencyId, itineraryId, router, user?.id, wasAlreadyRequested])
 
   // Map existing data if fetched
   useEffect(() => {
@@ -399,6 +399,7 @@ export default function ItineraryMakerModule({
         } else {
           toast.error('Gagal mengambil tag')
         }
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
         toast.error('Gagal mengambil tag')
       }
@@ -1276,7 +1277,6 @@ export default function ItineraryMakerModule({
     blockId: string
   ): Section[] => {
     // First, find the block and its position
-    let blockToRemove: Block | null = null
     let blockSectionIndex = -1
     let blockIndex = -1
 
@@ -1285,7 +1285,6 @@ export default function ItineraryMakerModule({
 
       const index = section.blocks.findIndex((block) => block.id === blockId)
       if (index !== -1) {
-        blockToRemove = section.blocks[index]
         blockSectionIndex = sIndex
         blockIndex = index
       }
@@ -1512,6 +1511,7 @@ export default function ItineraryMakerModule({
       } else {
         return handleSuccessfulSubmission(response as CreateItineraryResponse)
       }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       if (isCreateAndValidUmami()) {
         window.umami.track('create_itinerary_fail')
@@ -1640,6 +1640,7 @@ export default function ItineraryMakerModule({
         recipientName: user?.firstName,
       }
       await submitItineraryReminder(submissionData)
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       toast.error(`Failed with scheduling itinerary reminder`)
     } finally {
@@ -1797,6 +1798,7 @@ export default function ItineraryMakerModule({
       )
       setFeedbackItems(response.feedback)
       toast.success('Feedback berhasil di-generate')
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       toast.error('Gagal generate feedback. Silahkan coba lagi')
     } finally {
@@ -1819,20 +1821,21 @@ export default function ItineraryMakerModule({
     )
   }
 
-  const syncFeedbackWithItinerary = () => {
-    setFeedbackItems((prev) =>
-      prev.filter((item) => {
-        const section = itineraryData.sections[item.target.sectionIndex - 1]
-        if (!section?.blocks) return false
-
-        return section.blocks.some((block) => block.id === item.target.blockId)
-      })
-    )
-  }
-
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? ''
 
   useEffect(() => {
+    const syncFeedbackWithItinerary = () => {
+      setFeedbackItems((prev) =>
+        prev.filter((item) => {
+          const section = itineraryData.sections[item.target.sectionIndex - 1]
+          if (!section?.blocks) return false
+
+          return section.blocks.some(
+            (block) => block.id === item.target.blockId
+          )
+        })
+      )
+    }
     syncFeedbackWithItinerary()
   }, [itineraryData])
 

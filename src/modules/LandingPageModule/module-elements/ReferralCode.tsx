@@ -16,6 +16,7 @@ export const ReferralCode: React.FC<ReferralCodeProps> = ({ user }) => {
       )
 
       toast.success('Berhasil menyalin kode!')
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
       toast.error('Gagal menyalin kode!')
     }

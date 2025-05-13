@@ -1,7 +1,7 @@
 'use client'
 
 import { Home, Bus, Ticket, Utensils, Users } from 'lucide-react'
-import { JSX } from 'react'
+import { type JSX } from 'react'
 
 const iconMap: Record<string, JSX.Element> = {
   ticket: <Ticket className="text-blue-500" />,

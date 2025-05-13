@@ -5,10 +5,10 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Loader } from 'lucide-react'
 import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { z } from 'zod'
+import { type z } from 'zod'
 import { toast } from 'sonner'
 import { customFetch, customFetchBody } from '@/utils/newCustomFetch'
-import { FormProps } from '../interface'
+import { type FormProps } from '../interface'
 import {
   Form,
   FormControl,

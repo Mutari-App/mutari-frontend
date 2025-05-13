@@ -1,9 +1,9 @@
 'use client'
 import { createContext, useContext, useState } from 'react'
 import {
-  FormContextInterface,
-  RegisterContextProviderProps,
-  RegisterDataInterface,
+  type FormContextInterface,
+  type RegisterContextProviderProps,
+  type RegisterDataInterface,
 } from '../interface'
 
 const RegisterContext = createContext({} as FormContextInterface)

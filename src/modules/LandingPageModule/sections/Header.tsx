@@ -1,7 +1,7 @@
 'use client'
 
 import Image from 'next/image'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState, useCallback } from 'react'
 import { HERO_IMAGES } from '../constant'
 import { Button } from '@/components/ui/button'
 import { ChevronLeft, ChevronRight, ChevronsDownIcon } from 'lucide-react'
@@ -12,7 +12,7 @@ import { useAuthContext } from '@/contexts/AuthContext'
 export const Header: React.FC = () => {
   const { isAuthenticated } = useAuthContext()
   const launchingDate = new Date(
-    process.env.NEXT_PUBLIC_LAUNCHING_DATE || '2025-01-22T00:00:00'
+    process.env.NEXT_PUBLIC_LAUNCHING_DATE ?? '2025-01-22T00:00:00'
   )
   const nowDate = new Date()
   const isLaunching = nowDate > launchingDate
@@ -28,39 +28,42 @@ export const Header: React.FC = () => {
   const TIME_RUNNING = 1000
   const TIME_AUTO_NEXT = 5000
 
-  const showSlider = (type: 'prev' | 'next') => {
-    if (!carouselRef.current || !sliderRef.current || !thumbnailRef.current)
-      return
+  const showSlider = useCallback(
+    (type: 'prev' | 'next') => {
+      if (!carouselRef.current || !sliderRef.current || !thumbnailRef.current)
+        return
 
-    const sliderItems =
-      sliderRef.current.querySelectorAll<HTMLDivElement>('.item')
-    const thumbnailItems =
-      thumbnailRef.current.querySelectorAll<HTMLDivElement>('.item')
+      const sliderItems =
+        sliderRef.current.querySelectorAll<HTMLDivElement>('.item')
+      const thumbnailItems =
+        thumbnailRef.current.querySelectorAll<HTMLDivElement>('.item')
 
-    if (type === 'next') {
-      sliderRef.current.appendChild(sliderItems[0])
-      thumbnailRef.current.appendChild(thumbnailItems[0])
-      carouselRef.current.classList.add('next')
-    } else {
-      sliderRef.current.prepend(sliderItems[sliderItems.length - 1])
-      thumbnailRef.current.prepend(thumbnailItems[thumbnailItems.length - 1])
-      carouselRef.current.classList.add('prev')
-    }
+      if (type === 'next') {
+        sliderRef.current.appendChild(sliderItems[0])
+        thumbnailRef.current.appendChild(thumbnailItems[0])
+        carouselRef.current.classList.add('next')
+      } else {
+        sliderRef.current.prepend(sliderItems[sliderItems.length - 1])
+        thumbnailRef.current.prepend(thumbnailItems[thumbnailItems.length - 1])
+        carouselRef.current.classList.add('prev')
+      }
 
-    if (resetClassTimeout) clearTimeout(resetClassTimeout)
-    setResetClassTimeout(
-      setTimeout(() => {
-        carouselRef.current?.classList.remove('next', 'prev')
-      }, TIME_RUNNING)
-    )
+      if (resetClassTimeout) clearTimeout(resetClassTimeout)
+      setResetClassTimeout(
+        setTimeout(() => {
+          carouselRef.current?.classList.remove('next', 'prev')
+        }, TIME_RUNNING)
+      )
 
-    if (autoNextTimeout) clearTimeout(autoNextTimeout)
-    setAutoNextTimeout(
-      setTimeout(() => {
-        showSlider('next')
-      }, TIME_AUTO_NEXT)
-    )
-  }
+      if (autoNextTimeout) clearTimeout(autoNextTimeout)
+      setAutoNextTimeout(
+        setTimeout(() => {
+          showSlider('next')
+        }, TIME_AUTO_NEXT)
+      )
+    },
+    [autoNextTimeout, resetClassTimeout]
+  )
 
   useEffect(() => {
     if (thumbnailRef.current) {
@@ -81,6 +84,7 @@ export const Header: React.FC = () => {
       if (autoNextTimeout) clearTimeout(autoNextTimeout)
       if (resetClassTimeout) clearTimeout(resetClassTimeout)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return (

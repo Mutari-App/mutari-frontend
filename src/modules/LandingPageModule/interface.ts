@@ -1,20 +1,21 @@
 import { type User } from '@/contexts/AuthContext/interface'
-import React, { type Dispatch, type SetStateAction } from 'react'
+import type React from 'react'
+import { type Dispatch, type SetStateAction } from 'react'
 
 export interface LoginFormProps {
   isSuccess: boolean
-  setIsSuccess: Dispatch<SetStateAction<boolean>>
-  showRegisterForm: () => void
+  setIsSuccessAction: Dispatch<SetStateAction<boolean>>
+  showRegisterFormAction: () => void
   email: string
-  setEmail: Dispatch<SetStateAction<string>>
+  setEmailAction: Dispatch<SetStateAction<string>>
 }
 
 export interface PreRegisterFormProps {
   isSuccess: boolean
-  setIsSuccess: Dispatch<SetStateAction<boolean>>
-  showLoginForm: () => void
+  setIsSuccessAction: Dispatch<SetStateAction<boolean>>
+  showLoginFormAction: () => void
   email: string
-  setEmail: Dispatch<SetStateAction<string>>
+  setEmailAction: Dispatch<SetStateAction<string>>
 }
 export interface ReferralCodeProps {
   user: User

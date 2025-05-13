@@ -1,5 +1,4 @@
 import React from 'react'
-import Link from 'next/link'
 import { ChevronLeft, ChevronRightIcon } from 'lucide-react'
 import type { clientMetadataType } from './types'
 import { generatePageNumbers } from './utils'

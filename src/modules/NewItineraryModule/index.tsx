@@ -1,6 +1,6 @@
 'use client'
 import { useSearchParams, useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { PlusIcon, FilterIcon } from 'lucide-react'
@@ -56,7 +56,7 @@ export default function NewItineraryModule() {
     await fetchAllMyItinerary()
   }
 
-  const fetchAllMyItinerary = async () => {
+  const fetchAllMyItinerary = useCallback(async () => {
     try {
       let url = `/itineraries/me/all?page=${page}`
 
@@ -80,7 +80,7 @@ export default function NewItineraryModule() {
     } catch (err: any) {
       if (err instanceof Error) toast.error(`${err.message}`)
     }
-  }
+  }, [filters.finished, filters.shared, page])
 
   const handleFilterChange = (filterType: keyof FilterState) => {
     // Toggle the selected filter
@@ -107,7 +107,7 @@ export default function NewItineraryModule() {
 
   useEffect(() => {
     fetchAllMyItinerary().catch((err) => console.log(err))
-  }, [page, filters])
+  }, [page, filters, fetchAllMyItinerary])
 
   return (
     <div className="flex flex-col items-center gap-7 pt-28">

@@ -13,7 +13,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { customFetch } from '@/utils/newCustomFetch'
 import { toast } from 'sonner'
-import { DuplicateItineraryResponse } from '@/modules/ItineraryModule/module-elements/types'
+import { type DuplicateItineraryResponse } from '@/modules/ItineraryModule/module-elements/types'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import Head from 'next/head'
 

@@ -30,7 +30,7 @@ export const PreRegisterSection: React.FC<PreRegisterSectionProps> = ({
   }
 
   const launchingDate = new Date(
-    process.env.NEXT_PUBLIC_LAUNCHING_DATE || '2025-01-10T00:00:00'
+    process.env.NEXT_PUBLIC_LAUNCHING_DATE ?? '2025-01-10T00:00:00'
   )
 
   const nowDate = new Date()
@@ -100,22 +100,22 @@ export const PreRegisterSection: React.FC<PreRegisterSectionProps> = ({
           <div className="overflow-hidden relative bg-gradient-to-br from-[#ffffff47] to-[#ffffff00] shadow-[0_0_0_0.5px_rgba(255,255,255)] rounded-xl sm:rounded-3xl py-6 px-4 sm:px-8 md:px-16">
             <div className="absolute top-0 left-0 w-full h-full bg-black/25" />
             {isAuthenticated && !!user ? (
-              <ReferralCode user={user!} />
+              <ReferralCode user={user} />
             ) : isLoginForm ? (
               <LoginForm
                 email={email}
-                setEmail={setEmail}
+                setEmailAction={setEmail}
                 isSuccess={isLoginSuccess}
-                setIsSuccess={setIsLoginSuccess}
-                showRegisterForm={showRegisterForm}
+                setIsSuccessAction={setIsLoginSuccess}
+                showRegisterFormAction={showRegisterForm}
               />
             ) : (
               <PreRegisterForm
                 email={email}
-                setEmail={setEmail}
+                setEmailAction={setEmail}
                 isSuccess={isRegisterSuccess}
-                setIsSuccess={setIsRegisterSuccess}
-                showLoginForm={showLoginForm}
+                setIsSuccessAction={setIsRegisterSuccess}
+                showLoginFormAction={showLoginForm}
               />
             )}
           </div>
