@@ -347,8 +347,14 @@ export const ItineraryHeader = ({
         {(showModal || showInviteDialog) && (
           <Head>
             <meta property="og:title" content={data.title} />
-            <meta property="og:description" content={data.description || 'Lihat itinerary ini!'} />
-            <meta property="og:image" content={data.coverImage || '/default-image.jpg'} />
+            <meta
+              property="og:description"
+              content={data.description || 'Lihat itinerary ini!'}
+            />
+            <meta
+              property="og:image"
+              content={data.coverImage || '/default-image.jpg'}
+            />
           </Head>
         )}
         <DialogContent className="font-roboto cursor-default p-6 pb-10 max-w-md">
