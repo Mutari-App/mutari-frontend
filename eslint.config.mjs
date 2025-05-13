@@ -27,6 +27,9 @@ export default [
       'eslint.config.mjs',
       'postcss.config.mjs',
       '**/coverage',
+      '**/icons/*',
+      '**/type.ts',
+      '**/types.ts',
     ],
   },
   ...compat.extends(
