@@ -106,6 +106,11 @@ export const Navbar: React.FC = () => {
                 Itinerary
               </NavigationMenuLink>
             </NavigationMenuItem>
+            <NavigationMenuItem>
+              <NavigationMenuLink href="/tour" className="hover:underline">
+                Tur
+              </NavigationMenuLink>
+            </NavigationMenuItem>
           </NavigationMenuList>
         </div>
 
