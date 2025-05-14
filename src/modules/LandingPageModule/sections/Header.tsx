@@ -130,7 +130,7 @@ export const Header: React.FC = () => {
         ))}
       </div>
       <div
-        className="thumbnail absolute bottom-[80px] md:bottom-[100px] left-1/2 w-max z-[100] flex gap-5"
+        className="thumbnail absolute bottom-[80px] md:bottom-[100px] left-1/2 w-max z-20 flex gap-5"
         ref={thumbnailRef}
       >
         {HERO_IMAGES.map((item, index) => (
@@ -184,8 +184,8 @@ export const Header: React.FC = () => {
         </div>
       </div>
 
-      <div className="time absolute top-0 left-0 w-[0%] h-1 bg-blue-500 z-[1000]"></div>
-      <div className="bg-gradient-to-t from-white via-white/30 to-white/0 absolute left-0 bottom-0 h-[10%] z-[1001] w-full"></div>
+      <div className="time absolute top-0 left-0 w-[0%] h-1 bg-blue-500 z-20"></div>
+      <div className="bg-gradient-to-t from-white via-white/30 to-white/0 absolute left-0 bottom-0 h-[10%] z-20 w-full"></div>
     </header>
   )
 }
