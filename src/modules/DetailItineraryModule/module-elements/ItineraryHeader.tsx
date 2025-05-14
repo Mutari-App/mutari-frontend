@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button'
 import { useAuthContext } from '@/contexts/AuthContext'
-import { Share2, X } from 'lucide-react'
+import { Heart, Share2, X } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import {
@@ -34,6 +34,7 @@ export const ItineraryHeader = ({
   const [emailInput, setEmailInput] = useState('')
   const [emails, setEmails] = useState<string[]>([])
   const inputRef = useRef<HTMLInputElement>(null)
+  const [isLiked, setIsLiked] = useState(false)
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -167,6 +168,22 @@ export const ItineraryHeader = ({
     }
   }
 
+  const toggleSaveItinerary = async () => {
+    try {
+      const response = await customFetch(`/itineraries/${data.id}/save`, {
+        method: isLiked === true ? 'DELETE' : 'POST',
+        credentials: 'include',
+      })
+
+      if (!response.success) throw Error(response.message)
+      setIsLiked(!isLiked)
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : 'An unexpected error occurred'
+      )
+    }
+  }
+
   const renderAcceptedUsers = () => {
     if (isLoading) {
       return <div className="text-center py-4">Memuat...</div>
@@ -296,18 +313,18 @@ export const ItineraryHeader = ({
           )}
         </div>
       </div>
-      {user?.id === data.userId && (
-        <div className="absolute top-2 right-2 sm:top-4 sm:right-4 z-10 flex gap-2">
-          <Button
-            type="button"
-            size="sm"
-            variant="ghost"
-            className="bg-white text-black rounded-xl shadow"
-            onClick={openInviteDialog}
-          >
-            <Share2 className="w-6 h-6 text-[#004080]" />
-          </Button>
-          {user?.id === data.userId && (
+      <div className="absolute top-2 right-2 sm:top-4 sm:right-4 z-10 flex gap-2">
+        {user?.id === data.userId ? (
+          <>
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              className="bg-white text-black rounded-xl shadow"
+              onClick={openInviteDialog}
+            >
+              <Share2 className="w-6 h-6 text-[#004080]" />
+            </Button>
             <Link
               href={contingencyId ? `${contingencyId}/edit` : `${data.id}/edit`}
             >
@@ -320,22 +337,30 @@ export const ItineraryHeader = ({
                 Edit
               </Button>
             </Link>
-          )}
-        </div>
-      )}
-      {user?.id !== data.userId && (
-        <div className="absolute top-2 right-2 sm:top-4 sm:right-4 z-10 flex">
-          <Button
-            onClick={duplicateItinerary}
-            size="sm"
-            type="button"
-            variant="ghost"
-            className="bg-white text-[#004080] rounded-xl shadow"
-          >
-            Duplikasi dan Edit
-          </Button>
-        </div>
-      )}
+          </>
+        ) : (
+          <>
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              className="bg-white text-black rounded-xl shadow"
+              onClick={toggleSaveItinerary}
+            >
+              <Heart className="w-6 h-6 text-[#004080]" />
+            </Button>
+            <Button
+              onClick={duplicateItinerary}
+              size="sm"
+              type="button"
+              variant="ghost"
+              className="bg-white text-[#004080] rounded-xl shadow"
+            >
+              Duplikasi dan Edit
+            </Button>
+          </>
+        )}
+      </div>
 
       <Dialog
         open={showModal || showInviteDialog}
