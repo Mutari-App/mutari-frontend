@@ -47,10 +47,8 @@ export async function customFetch<T>(
     ...options,
   })
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   let result = (await rawResult.json()) as CustomFetchBaseResponse
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
   if (
     result.message === 'token has expired' ||
     result.message === 'token not provided'
@@ -117,6 +115,7 @@ async function handleRefreshToken(): Promise<boolean> {
     }
 
     return true
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     return false
   }

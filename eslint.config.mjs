@@ -27,6 +27,9 @@ export default [
       'eslint.config.mjs',
       'postcss.config.mjs',
       '**/coverage',
+      '**/icons/*',
+      '**/type.ts',
+      '**/types.ts',
     ],
   },
   ...compat.extends(
@@ -83,7 +86,6 @@ export default [
       ],
 
       'import/no-anonymous-default-export': 'off',
-      'react-hooks/rules-of-hooks': 'warn',
     },
   },
 ]

@@ -3,7 +3,7 @@
 import { useForm } from 'react-hook-form'
 import { useRegisterContext } from '../contexts/RegisterContext'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
+import { type z } from 'zod'
 import { useEffect, useState } from 'react'
 import {
   Form,
@@ -72,6 +72,7 @@ export const CodeVerificationForm: React.FC = () => {
         toast.error('Terjadi kesalahan. Silakan coba lagi.')
         setSubmitLoading(false)
       }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       toast.error('Terjadi kesalahan. Silakan coba lagi.')
       setSubmitLoading(false)
@@ -80,7 +81,7 @@ export const CodeVerificationForm: React.FC = () => {
 
   useEffect(() => {
     form.reset({ uniqueCode })
-  }, [uniqueCode])
+  }, [form, uniqueCode])
 
   const [submitLoading, setSubmitLoading] = useState(false)
 

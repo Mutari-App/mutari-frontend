@@ -3,7 +3,7 @@
 import { useForm } from 'react-hook-form'
 import { useRegisterContext } from '../contexts/RegisterContext'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
+import { type z } from 'zod'
 import { useEffect, useState } from 'react'
 import {
   Form,
@@ -93,6 +93,7 @@ export const RegisterForm: React.FC = () => {
         }
         setSubmitLoading(false)
       }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       toast.error('Terjadi kesalahan. Silakan coba lagi.')
       if (typeof window !== 'undefined' && window.umami) {
@@ -107,7 +108,7 @@ export const RegisterForm: React.FC = () => {
       password,
       confirmPassword,
     })
-  }, [password, confirmPassword])
+  }, [password, confirmPassword, form])
 
   const [submitLoading, setSubmitLoading] = useState(false)
 

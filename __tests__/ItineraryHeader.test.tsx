@@ -18,7 +18,8 @@ jest.mock('@/contexts/AuthContext', () => ({
 jest.mock('next/image', () => ({
   __esModule: true,
   default: (props: any) => (
-    <img alt={((props as { alt: string }).alt as string) || ''} {...props} />
+    // eslint-disable-next-line @next/next/no-img-element
+    <img alt={(props as { alt: string }).alt || ''} {...props} />
   ),
 }))
 

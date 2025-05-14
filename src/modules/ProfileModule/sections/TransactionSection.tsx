@@ -1,9 +1,9 @@
 import { Loader } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import {
-  GetTransactionProps,
-  ProfileModuleProps,
-  TransactionProps,
+  type GetTransactionProps,
+  type ProfileModuleProps,
+  type TransactionProps,
 } from '../interface'
 import { customFetch } from '@/utils/newCustomFetch'
 import { toast } from 'sonner'
@@ -15,7 +15,7 @@ export const TransactionSection: React.FC<ProfileModuleProps> = ({
   const [transactions, setTransactions] = useState<TransactionProps[]>([])
   const [loading, setLoading] = useState<boolean>(true)
 
-  const getTransactions = async () => {
+  const getTransactions = useCallback(async () => {
     try {
       setLoading(true)
       const response = await customFetch<GetTransactionProps>(
@@ -32,11 +32,11 @@ export const TransactionSection: React.FC<ProfileModuleProps> = ({
     } finally {
       setLoading(false)
     }
-  }
+  }, [profile.id])
 
   useEffect(() => {
     void getTransactions()
-  }, [])
+  }, [getTransactions])
 
   if (loading) {
     return (

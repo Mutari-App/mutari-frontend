@@ -1,17 +1,15 @@
-// __tests__/TourCard.test.tsx
 import { render, screen } from '@testing-library/react'
 import '@testing-library/jest-dom'
-import { useRouter } from 'next/router'
-import { TourCardProps } from '@/modules/TourMarketplaceModule/interface'
-import { ImageProps } from 'next/image'
+import { type TourCardProps } from '@/modules/TourMarketplaceModule/interface'
+import { type ImageProps } from 'next/image'
 import TourCard from '@/modules/TourMarketplaceModule/module-elements/TourCard'
 
 // Mock next/image and next/link
 jest.mock('next/image', () => ({
   __esModule: true,
   default: ({ alt, ...props }: ImageProps) => {
-    // eslint-disable-next-line @next/next/no-img-element
     return (
+      // eslint-disable-next-line @next/next/no-img-element
       <img
         {...props}
         alt={alt || ''}

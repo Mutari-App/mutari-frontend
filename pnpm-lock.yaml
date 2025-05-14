@@ -146,6 +146,9 @@ importers:
       '@eslint/js':
         specifier: ^9.20.0
         version: 9.21.0
+      '@next/eslint-plugin-next':
+        specifier: ^15.3.2
+        version: 15.3.2
       '@testing-library/dom':
         specifier: ^10.4.0
         version: 10.4.0
@@ -194,6 +197,9 @@ importers:
       eslint-plugin-prettier:
         specifier: ^5.2.3
         version: 5.2.3(eslint-config-prettier@10.0.2(eslint@9.21.0(jiti@1.21.7)))(eslint@9.21.0(jiti@1.21.7))(prettier@3.5.3)
+      eslint-plugin-react-hooks:
+        specifier: ^5.2.0
+        version: 5.2.0(eslint@9.21.0(jiti@1.21.7))
       husky:
         specifier: ^9.1.7
         version: 9.1.7
@@ -1051,6 +1057,12 @@ packages:
     resolution:
       {
         integrity: sha512-+slMxhTgILUntZDGNgsKEYHUvpn72WP1YTlkmEhS51vnVd7S9jEEy0n9YAMcI21vUG4akTw9voWH02lrClt/yw==,
+      }
+
+  '@next/eslint-plugin-next@15.3.2':
+    resolution:
+      {
+        integrity: sha512-ijVRTXBgnHT33aWnDtmlG+LJD+5vhc9AKTJPquGG5NKXjpKNjc62woIhFtrAcWdBobt8kqjCoaJ0q6sDQoX7aQ==,
       }
 
   '@next/swc-darwin-arm64@15.1.6':
@@ -7069,6 +7081,10 @@ snapshots:
   '@next/env@15.1.6': {}
 
   '@next/eslint-plugin-next@15.1.6':
+    dependencies:
+      fast-glob: 3.3.1
+
+  '@next/eslint-plugin-next@15.3.2':
     dependencies:
       fast-glob: 3.3.1
 

@@ -1,10 +1,5 @@
 import React from 'react'
-import {
-  AboutSection,
-  FeatureSection,
-  Header,
-  PreRegisterSection,
-} from './sections'
+import { AboutSection, Header, PreRegisterSection } from './sections'
 import { customFetch } from '@/utils/customFetch'
 import { type PreRegisterCountResponse } from './interface'
 import { MockupSection } from './sections/MockupSection'

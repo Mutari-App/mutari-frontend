@@ -13,8 +13,8 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { ArrowLeft, Loader } from 'lucide-react'
 import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { SubmitOtpFormProps } from '../interface'
-import { z } from 'zod'
+import { type SubmitOtpFormProps } from '../interface'
+import { type z } from 'zod'
 import { customFetch, customFetchBody } from '@/utils/newCustomFetch'
 import { toast } from 'sonner'
 import { otpFormSchema } from '../schemas/otpFormSchema'
@@ -22,7 +22,6 @@ import { otpFormSchema } from '../schemas/otpFormSchema'
 export const SubmitOtpForm: React.FC<SubmitOtpFormProps> = ({
   closeDialog,
   backButtonHandler,
-  newEmail,
 }) => {
   const [submitLoading, setSubmitLoading] = useState<boolean>(false)
 

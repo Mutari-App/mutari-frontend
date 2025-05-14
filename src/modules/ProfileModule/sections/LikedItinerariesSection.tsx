@@ -4,9 +4,9 @@ import { useState, useEffect } from 'react'
 import { LikedItineraryCard } from '../module-elements/ItineraryCard'
 import { customFetch } from '@/utils/newCustomFetch'
 import {
-  GetItineraryLikesProps,
-  ItineraryProps,
-  ProfileModuleProps,
+  type GetItineraryLikesProps,
+  type ItineraryProps,
+  type ProfileModuleProps,
 } from '../interface'
 import { toast } from 'sonner'
 import { Loader } from 'lucide-react'
@@ -17,28 +17,27 @@ export const LikedItinerariesSection: React.FC<ProfileModuleProps> = ({
   const [itineraries, setItineraries] = useState<ItineraryProps[]>([])
   const [loading, setLoading] = useState<boolean>(true)
 
-  const getItineraries = async () => {
-    try {
-      setLoading(true)
-      const response = await customFetch<GetItineraryLikesProps>(
-        `/profile/${profile.id}/itinerary-likes`
-      )
-
-      if (response.statusCode !== 200) {
-        throw new Error('Terjadi kesalahan saat mengambil data itineraries')
-      }
-
-      setItineraries(response.itineraryLikes)
-    } catch (err: any) {
-      toast.error(err instanceof Error ? err.message : 'Terjadi kesalahan')
-    } finally {
-      setLoading(false)
-    }
-  }
-
   useEffect(() => {
+    const getItineraries = async () => {
+      try {
+        setLoading(true)
+        const response = await customFetch<GetItineraryLikesProps>(
+          `/profile/${profile.id}/itinerary-likes`
+        )
+
+        if (response.statusCode !== 200) {
+          throw new Error('Terjadi kesalahan saat mengambil data itineraries')
+        }
+
+        setItineraries(response.itineraryLikes)
+      } catch (err: any) {
+        toast.error(err instanceof Error ? err.message : 'Terjadi kesalahan')
+      } finally {
+        setLoading(false)
+      }
+    }
     void getItineraries()
-  }, [])
+  }, [profile.id])
 
   const renderContent = () => {
     if (loading) {

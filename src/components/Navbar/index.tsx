@@ -25,7 +25,7 @@ import { toast } from 'sonner'
 
 export const Navbar: React.FC = () => {
   const launchingDate = new Date(
-    process.env.NEXT_PUBLIC_LAUNCHING_DATE || '2025-01-22T00:00:00'
+    process.env.NEXT_PUBLIC_LAUNCHING_DATE ?? '2025-01-22T00:00:00'
   )
   const nowDate = new Date()
   const isLaunching = nowDate > launchingDate

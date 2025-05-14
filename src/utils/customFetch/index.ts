@@ -1,4 +1,4 @@
-import { ReadonlyRequestCookies } from 'next/dist/server/web/spec-extension/adapters/request-cookies'
+import { type ReadonlyRequestCookies } from 'next/dist/server/web/spec-extension/adapters/request-cookies'
 import {
   type CustomFetchBaseResponse,
   type CustomFetchRequestInit,
@@ -57,10 +57,8 @@ export async function customFetch<T>(
     credentials: 'include',
   })
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   let result = (await rawResult.json()) as CustomFetchBaseResponse
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
   if (
     result.message === 'token has expired' ||
     result.message === 'token not provided'
@@ -104,22 +102,12 @@ export function customFetchBody(body: object) {
 }
 
 async function handleRefreshToken(): Promise<boolean> {
-  const isServer = typeof window === 'undefined'
-
-  let serverCookies
-
-  if (isServer) {
-    const { cookies } = await import('next/headers')
-    serverCookies = await cookies()
-  }
-
   try {
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh-token`,
       {
         method: 'POST',
         credentials: 'include',
-        headers: isServer ? { Cookie: serverCookies!.toString() } : {},
       }
     )
 
@@ -130,6 +118,7 @@ async function handleRefreshToken(): Promise<boolean> {
     }
 
     return true
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     return false
   }

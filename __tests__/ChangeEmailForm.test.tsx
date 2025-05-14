@@ -197,6 +197,7 @@ describe('ChangeEmailForm', () => {
 
   it('displays loader instead of text during form submission', async () => {
     // Create a promise that we can control
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     let resolvePromise: (value: any) => void
     const mockPromise = new Promise((resolve) => {
       resolvePromise = resolve

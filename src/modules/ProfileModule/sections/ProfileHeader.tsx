@@ -21,8 +21,8 @@ import { SubmitOtpForm } from '../module-elements/SubmitOtpForm'
 import { ChangePasswordForm } from '../module-elements/ChangePasswordForm'
 import {
   CldUploadButton,
-  CloudinaryUploadWidgetInfo,
-  CloudinaryUploadWidgetResults,
+  type CloudinaryUploadWidgetInfo,
+  type CloudinaryUploadWidgetResults,
 } from 'next-cloudinary'
 import { cn } from '@/lib/utils'
 import { customFetch, customFetchBody } from '@/utils/newCustomFetch'
@@ -89,6 +89,7 @@ export const ProfileHeader: React.FC<ProfileProps> = ({
           return
         }
         throw new Error(response.message)
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
         toast.error('Gagal memperbarui foto profil')
       }

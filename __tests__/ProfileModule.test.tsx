@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import '@testing-library/jest-dom'
 import ProfileModule from '../src/modules/ProfileModule' // Adjust this path as needed
-import { ProfileProps } from '../src/modules/ProfileModule/interface' // Import the interface
+import { type ProfileProps } from '../src/modules/ProfileModule/interface' // Import the interface
 import React from 'react'
 
 // Mock the imported components
@@ -113,7 +113,7 @@ describe('ProfileModule', () => {
   it('passes profile data to ProfileHeader correctly', () => {
     render(<ProfileModule profile={mockProfile} />)
     const header = screen.getByTestId('profile-header')
-    expect(JSON.parse(header.dataset.props || '{}')).toEqual(mockProfile)
+    expect(JSON.parse(header.dataset.props ?? '{}')).toEqual(mockProfile)
   })
 
   it('renders tabs with correct default value', () => {
@@ -138,12 +138,12 @@ describe('ProfileModule', () => {
     render(<ProfileModule profile={mockProfile} />)
 
     const itinerariesSection = screen.getByTestId('itineraries-section')
-    expect(JSON.parse(itinerariesSection.dataset.profile || '{}')).toEqual(
+    expect(JSON.parse(itinerariesSection.dataset.profile ?? '{}')).toEqual(
       mockProfile
     )
 
     const likedSection = screen.getByTestId('liked-itineraries-section')
-    expect(JSON.parse(likedSection.dataset.profile || '{}')).toEqual(
+    expect(JSON.parse(likedSection.dataset.profile ?? '{}')).toEqual(
       mockProfile
     )
   })

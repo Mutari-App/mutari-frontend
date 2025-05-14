@@ -1,4 +1,4 @@
-import { FeedbackItem } from './interface'
+import { type FeedbackItem } from './interface'
 
 export function feedbackForField(
   feedbackItems: FeedbackItem[] = [],

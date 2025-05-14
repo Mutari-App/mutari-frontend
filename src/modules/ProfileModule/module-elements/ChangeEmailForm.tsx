@@ -14,9 +14,9 @@ import { ArrowLeft, Loader } from 'lucide-react'
 import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { changeEmailFormSchema } from '../schemas/changeEmailSchema'
-import { ChangeEmailFormProps } from '../interface'
+import { type ChangeEmailFormProps } from '../interface'
 import { useAuthContext } from '@/contexts/AuthContext'
-import { z } from 'zod'
+import { type z } from 'zod'
 import { customFetch, customFetchBody } from '@/utils/newCustomFetch'
 import { toast } from 'sonner'
 
@@ -56,6 +56,7 @@ export const ChangeEmailForm: React.FC<ChangeEmailFormProps> = ({
       } else {
         toast.error(response.message)
       }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       toast.error('Terjadi kesalahan, silakan coba lagi')
     } finally {

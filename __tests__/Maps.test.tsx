@@ -34,7 +34,7 @@ jest.mock('@vis.gl/react-google-maps', () => ({
     <div
       data-testid="mock-map"
       id={id}
-      onClick={(e) => {
+      onClick={() => {
         // Create a proper mock event structure that matches MapMouseEvent
         if (onClick) {
           onClick({
@@ -90,7 +90,6 @@ jest.mock('@vis.gl/react-google-maps', () => ({
 }))
 
 describe('Maps Component', () => {
-  const mockApiKey = 'MOCK-API-KEY'
   const mockItineraryData: CreateItineraryDto = {
     isPublished: false,
     title: 'Trip to Jakarta',

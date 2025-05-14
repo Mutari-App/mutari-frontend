@@ -17,7 +17,6 @@ jest.mock('@/components/ui/dialog', () => ({
   ),
   DialogTrigger: ({
     children,
-    asChild,
     className,
   }: React.PropsWithChildren<{ asChild?: boolean; className?: string }>) => (
     <div data-testid="dialog-trigger" className={className}>

@@ -4,7 +4,7 @@ import { ProfileHeader } from './sections/ProfileHeader'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ItinerariesSection } from './sections/ItinerariesSection'
 import { LikedItinerariesSection } from './sections/LikedItinerariesSection'
-import { ProfileModuleProps } from './interface'
+import { type ProfileModuleProps } from './interface'
 import { TransactionSection } from './sections/TransactionSection'
 
 export default function ProfileModule({
