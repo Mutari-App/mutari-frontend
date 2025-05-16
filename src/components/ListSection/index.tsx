@@ -22,7 +22,6 @@ interface ListSectionProps<T> {
   searchQuery: string
   onResetSearch: () => void
   searchType?: string
-  additionalProps?: Record<string, any>
 }
 
 const ListSection = <T extends { id: string }>({
