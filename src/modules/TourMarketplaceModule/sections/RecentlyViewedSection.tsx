@@ -36,11 +36,13 @@ function RecentlyViewedSection<T extends { id: string }>({
         setLoading(false)
       }
     }
-    if ( isAuthenticated ) {void fetchData()}
+    if (isAuthenticated) {
+      void fetchData()
+    }
   }, [fetchEndpoint, isAuthenticated, mapData])
 
   if (!isAuthenticated) {
-    return null;
+    return null
   }
 
   return (
