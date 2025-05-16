@@ -43,7 +43,7 @@ describe('RecentlyViewedSection', () => {
 
   it('should show data when data is not empty', async () => {
     const mockTour = {
-      id: 'tour-1'
+      id: 'tour-1',
     } as Tour
     ;(customFetch as jest.Mock).mockImplementation(() => {
       return Promise.resolve({ tours: [mockTour] })
@@ -60,9 +60,7 @@ describe('RecentlyViewedSection', () => {
     )
 
     await waitFor(() => {
-      expect(
-        screen.getByText('Card tour-1')
-      ).toBeInTheDocument()
+      expect(screen.getByText('Card tour-1')).toBeInTheDocument()
     })
   })
 
