@@ -1,5 +1,7 @@
+import { Button } from '@/components/ui/button'
 import { getImage } from '@/utils/getImage'
 import Image from 'next/image'
+import Link from 'next/link'
 import React from 'react'
 
 export const CreateItinerarySection: React.FC = () => {
@@ -12,6 +14,12 @@ export const CreateItinerarySection: React.FC = () => {
         Susun rencana perjalananmu bersama Mutari! <br />
         Jelajahi Indonesia dengan menyenangkan
       </p>
+      <Link
+        href="/itinerary/create"
+        className="bg-white/50 backdrop-blur-xl border-[#0073E6]/50 border-2 rounded-xl p-1 h-full z-10 mb-6"
+      >
+        <Button variant={'gradient'}>Buat Itinerary Sekarang</Button>
+      </Link>
       <div className="w-full relative max-w-screen-lg ">
         <div className="absolute top-0 left-0 -translate-y-1/2 w-full aspect-[3]">
           <Image

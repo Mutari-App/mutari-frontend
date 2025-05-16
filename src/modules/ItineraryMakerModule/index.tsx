@@ -1745,7 +1745,7 @@ export default function ItineraryMakerModule({
 
     if (
       itineraryData.sections.length === 1 &&
-      (itineraryData.sections[0].blocks?.length ?? 0) <= 1
+      (itineraryData.sections[0].blocks?.length ?? 0) < 1
     ) {
       toast.error('Itinerary harus memiliki setidaknya satu bagian.')
       return
