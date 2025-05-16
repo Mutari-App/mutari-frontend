@@ -1,7 +1,7 @@
 import React from 'react'
 import TourCard from '../module-elements/TourCard'
 import LoadingSkeleton from '../module-elements/LoadingSkeleton'
-import NoResults from '../module-elements/NoResults'
+import NoResults from '@/modules/ItinerarySearchResultsModule/module-elements/NoResults'
 import { type TourSearchResult } from '../interface'
 import {
   Pagination,
@@ -47,7 +47,11 @@ const TourListSection: React.FC<TourListSectionProps> = ({
   if (tours.length === 0) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <NoResults query={searchQuery} onReset={onResetSearch} />
+        <NoResults
+          query={searchQuery}
+          searchType="tur"
+          onReset={onResetSearch}
+        />
       </div>
     )
   }
