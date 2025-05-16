@@ -136,15 +136,15 @@ export default function ItineraryModule() {
   }, [completedItineraryPage, handleSearchparams])
 
   useEffect(() => {
-    fetchMyItinerary().catch((err) => console.log(err))
+    fetchMyItinerary().catch((err: Error) => toast.error(err.message))
   }, [fetchMyItinerary, myItineraryPage])
 
   useEffect(() => {
-    fetchMySharedItinerary().catch((err) => console.log(err))
+    fetchMySharedItinerary().catch((err: Error) => toast.error(err.message))
   }, [fetchMySharedItinerary, sharedItineraryPage])
 
   useEffect(() => {
-    fetchMyCompletedItinerary().catch((err) => console.log(err))
+    fetchMyCompletedItinerary().catch((err: Error) => toast.error(err.message))
   }, [completedItineraryPage, fetchMyCompletedItinerary])
 
   return (

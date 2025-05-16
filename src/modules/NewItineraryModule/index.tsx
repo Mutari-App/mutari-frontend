@@ -106,7 +106,7 @@ export default function NewItineraryModule() {
   const activeFilterCount = getActiveFilterCount()
 
   useEffect(() => {
-    fetchAllMyItinerary().catch((err) => console.log(err))
+    fetchAllMyItinerary().catch((err: Error) => toast.error(err.message))
   }, [page, filters, fetchAllMyItinerary])
 
   return (

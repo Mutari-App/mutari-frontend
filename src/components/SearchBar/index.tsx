@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { Search, X } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import SearchHistoryDropdown from './SearchHistoryDropdown'
+import SearchHistoryDropdown from '../SearchHistoryDropdown'
 import { customFetch } from '@/utils/newCustomFetch'
 
 interface SearchBarProps {
@@ -11,9 +11,10 @@ interface SearchBarProps {
   className?: string
   searchHistoryDropdownPadding?: string
   variant?: 'default' | 'iconLeft'
+  placeholder?: string
+  searchType?: 'itinerary' | 'tour'
 }
 
-const SEARCH_HISTORY_KEY = 'itinerary-search-history'
 const MAX_HISTORY_ITEMS = 5
 
 const SearchBar: React.FC<SearchBarProps> = ({
@@ -22,7 +23,14 @@ const SearchBar: React.FC<SearchBarProps> = ({
   className = '',
   searchHistoryDropdownPadding = '',
   variant = 'default',
+  placeholder = 'Cari Rencana Perjalanan...',
+  searchType = 'itinerary', // Default to itinerary
 }) => {
+  const SEARCH_HISTORY_KEY =
+    searchType === 'itinerary'
+      ? 'itinerary-search-history'
+      : 'tour-search-history'
+
   const [inputValue, setInputValue] = useState(initialValue)
   const [isFocused, setIsFocused] = useState(false)
   const [searchHistory, setSearchHistory] = useState<string[]>([])
@@ -43,7 +51,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
     if (history) {
       setSearchHistory(JSON.parse(history) as string[])
     }
-  }, [])
+  }, [SEARCH_HISTORY_KEY]) // Add SEARCH_HISTORY_KEY as a dependency
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -74,8 +82,13 @@ const SearchBar: React.FC<SearchBarProps> = ({
 
     const fetchSuggestions = async () => {
       try {
+        const endpoint =
+          searchType === 'itinerary'
+            ? `/itineraries/suggestions?q=${inputValue}`
+            : `/tour/suggestions?q=${inputValue}`
+
         const response = await customFetch<{ suggestions: string[] }>(
-          `/itineraries/suggestions?q=${inputValue}`,
+          endpoint,
           { method: 'GET' }
         )
         setSuggestions(response.suggestions || [])
@@ -90,7 +103,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
     }, 300)
 
     return () => clearTimeout(timer)
-  }, [inputValue, isFocused])
+  }, [inputValue, isFocused, searchType])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -155,7 +168,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
           <Input
             ref={inputRef}
             type="text"
-            placeholder="Cari Rencana Perjalanan..."
+            placeholder={placeholder}
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onFocus={() => setIsFocused(true)}
@@ -217,7 +230,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
         <Input
           ref={inputRef}
           type="text"
-          placeholder="Cari Rencana Perjalanan..."
+          placeholder={placeholder}
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           onFocus={() => setIsFocused(true)}
