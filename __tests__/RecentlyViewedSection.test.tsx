@@ -3,10 +3,22 @@ import { render, screen, waitFor } from '@testing-library/react'
 import { customFetch } from '@/utils/newCustomFetch'
 import RecentlyViewedSection from '@/modules/TourMarketplaceModule/sections/RecentlyViewedSection'
 import { type RecentlyViewedTourResponse } from '@/modules/TourMarketplaceModule/interface'
+import { useAuthContext } from '@/contexts/AuthContext'
 
 jest.mock('@/utils/newCustomFetch')
+jest.mock('@/contexts/AuthContext')
+jest.mock('lucide-react', () => ({
+  CalendarIcon: () => <div data-testid="calendar-icon">CalendarIcon</div>,
+  MapPinIcon: () => <div data-testid="map-pin-icon">MapPinIcon</div>,
+}))
 
 describe('RecentlyViewedSection', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    ;(useAuthContext as jest.Mock).mockReturnValue({
+      isAuthenticated: true,
+    })
+  })
   it('should show empty message when data is empty', async () => {
     ;(customFetch as jest.Mock).mockImplementation(() => {
       return Promise.resolve({ tours: [] })
