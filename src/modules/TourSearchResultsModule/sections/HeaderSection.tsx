@@ -1,21 +1,15 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import SearchBar from '@/components/SearchBar'
-import FilterButton from '../module-elements/FilterButton'
+import FilterButton from '@/modules/ItinerarySearchResultsModule/module-elements/FilterButton'
 import FilterModal from '../module-elements/FilterModal'
-import { type ItineraryFilters } from '../interface'
-import { customFetch } from '@/utils/newCustomFetch'
+import { type TourFilters } from '../interface'
 import { getImage } from '@/utils/getImage'
 
 interface HeaderSectionProps {
   searchQuery: string
   onSearch: (query: string) => void
-  filters: ItineraryFilters
-  onFilterChange: (filters: ItineraryFilters) => void
-}
-
-interface Tag {
-  id: string
-  name: string
+  filters: TourFilters
+  onFilterChange: (filters: TourFilters) => void
 }
 
 const HeaderSection: React.FC<HeaderSectionProps> = ({
@@ -25,39 +19,24 @@ const HeaderSection: React.FC<HeaderSectionProps> = ({
   onFilterChange,
 }) => {
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false)
-  const [availableTags, setAvailableTags] = useState<
-    { id: string; name: string }[]
-  >([])
 
   const hasFilters =
-    !!filters.tags ||
-    !!filters.minDaysCount ||
-    !!filters.maxDaysCount ||
+    !!filters.location ||
+    !!filters.minPrice ||
+    !!filters.maxPrice ||
+    !!filters.minDuration ||
+    !!filters.maxDuration ||
+    !!filters.durationType ||
+    // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+    filters.hasAvailableTickets ||
     filters.sortBy !== '' ||
     filters.order !== ''
-
-  useEffect(() => {
-    const fetchTags = async () => {
-      try {
-        const response = await customFetch<{ tags: Tag[] }>(
-          '/itineraries/tags',
-          { method: 'GET' }
-        )
-        if (response.tags) {
-          setAvailableTags(response.tags)
-        }
-      } catch (error) {
-        console.error('Failed to fetch tags:', error)
-      }
-    }
-    void fetchTags()
-  }, [])
 
   return (
     <div
       className="relative py-6 sm:py-8 md:py-10 lg:py-14 bg-cover bg-center"
       style={{
-        backgroundImage: `url(${getImage('Header_SRP_Itinerary.png')})`,
+        backgroundImage: `url(${getImage('Header_SRP_Tour.png')})`,
       }}
     >
       <div className="container relative mx-auto flex flex-col items-center justify-center px-4 z-10 pt-20">
@@ -66,6 +45,8 @@ const HeaderSection: React.FC<HeaderSectionProps> = ({
             initialValue={searchQuery}
             onSearch={onSearch}
             className="flex-grow w-full sm:w-auto sm:flex-1"
+            placeholder="Cari Tiket Tur..."
+            searchType="tour"
           />
           <FilterButton
             onClick={() => setIsFilterModalOpen(true)}
@@ -77,7 +58,6 @@ const HeaderSection: React.FC<HeaderSectionProps> = ({
           onClose={() => setIsFilterModalOpen(false)}
           filters={filters}
           onApplyFilters={onFilterChange}
-          availableTags={availableTags}
         />
       </div>
     </div>

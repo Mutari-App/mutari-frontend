@@ -1,7 +1,7 @@
 import React from 'react'
 import { render, screen } from '@testing-library/react'
 import '@testing-library/jest-dom'
-import LoadingSkeleton from '@/modules/ItinerarySearchResultsModule/module-elements/LoadingSkeleton'
+import LoadingSkeleton from '@/components/LoadingSkeleton'
 
 // Mock UI components
 jest.mock('@/components/ui/card', () => ({

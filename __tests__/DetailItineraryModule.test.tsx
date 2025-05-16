@@ -304,7 +304,6 @@ describe('DetailItineraryModule', () => {
     })
     ;(customFetch as jest.Mock).mockImplementation((url: string) => {
       if (url.endsWith('/itineraries/123')) {
-        console.log('fetching itinerary')
         return Promise.resolve({
           statusCode: 200,
           data: {

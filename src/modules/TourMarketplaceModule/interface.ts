@@ -23,7 +23,7 @@ export interface Tour {
   location: string
   pricePerTicket: string
   duration: number
-  durationType: 'HOUR' | 'DAY' | 'WEEK'
+  durationType: 'HOUR' | 'DAY'
   itineraryId: string
   createdAt: string
   updatedAt: string

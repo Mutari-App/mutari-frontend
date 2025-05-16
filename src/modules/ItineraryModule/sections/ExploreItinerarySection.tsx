@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import ItineraryCard from '@/modules/ItinerarySearchResultsModule/module-elements/ItineraryCard'
-import SearchBar from '@/modules/ItinerarySearchResultsModule/module-elements/SearchBar'
+import SearchBar from '@/components/SearchBar'
 import { customFetch, customFetchBody } from '@/utils/newCustomFetch'
 import {
   type BatchCheckItinerarySavedResponse,

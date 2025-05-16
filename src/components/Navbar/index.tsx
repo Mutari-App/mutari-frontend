@@ -1,5 +1,4 @@
 'use client'
-
 import type React from 'react'
 import { useEffect, useState } from 'react'
 import {
@@ -7,7 +6,7 @@ import {
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
-} from '../ui/navigation-menu'
+} from '@/components/ui/navigation-menu'
 import Image from 'next/image'
 import { getImage } from '@/utils/getImage'
 import Link from 'next/link'
@@ -18,10 +17,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { LogOut, User } from 'lucide-react'
-import { Button } from '../ui/button'
+import { LogOut, Menu, User } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import { useAuthContext } from '@/contexts/AuthContext'
 import { toast } from 'sonner'
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+  SheetTitle,
+} from '@/components/ui/sheet'
 
 export const Navbar: React.FC = () => {
   const launchingDate = new Date(
@@ -32,8 +37,9 @@ export const Navbar: React.FC = () => {
   const { isAuthenticated, logout, user } = useAuthContext()
   const pathname = usePathname() // Get current route path
   const router = useRouter()
-
+  const [isOpen, setIsOpen] = useState(false)
   const [isScrolledToScreen, setIsScrolledToScreen] = useState(false)
+
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY >= window.innerHeight) {
@@ -42,9 +48,7 @@ export const Navbar: React.FC = () => {
         setIsScrolledToScreen(false)
       }
     }
-
     window.addEventListener('scroll', handleScroll)
-
     return () => {
       window.removeEventListener('scroll', handleScroll)
     }
@@ -71,14 +75,73 @@ export const Navbar: React.FC = () => {
 
   return (
     <NavigationMenu
-      className={`p-4 fixed bg-transparent max-w-full w-full z-[101] transition-colors duration-300 ${
+      className={`p-4 fixed bg-transparent max-w-full w-full z-50 transition-colors duration-300 ${
         pathname == '/' && isScrolledToScreen
           ? 'bg-[#0059B3] shadow-md'
           : 'bg-transparent'
       } ${!isLandingPage && 'bg-white shadow-md'}`}
     >
       <div className="mx-auto w-full container flex justify-between items-center">
-        <div className="flex justify-start gap-4 sm:gap-5 items-center">
+        <div className="flex justify-start gap-2 sm:gap-8 items-center">
+          {/* Hamburger menu for mobile */}
+          <Sheet open={isOpen} onOpenChange={setIsOpen}>
+            <SheetTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="md:hidden hover:bg-transparent focus:bg-transparent"
+              >
+                <Menu
+                  className={`h-6 w-6 ${isLandingPage ? 'text-white' : 'text-[#0059B3]'}`}
+                />
+                <span className="sr-only">Toggle menu</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-[240px] sm:w-[300px]">
+              <SheetTitle></SheetTitle>
+              <div className="flex flex-col gap-6 pt-6">
+                <Link
+                  href={'/#hero'}
+                  className="flex items-end gap-2 hover:cursor-pointer"
+                  onClick={() => setIsOpen(false)}
+                >
+                  <Image
+                    src={getImage('logo-no-background.png')}
+                    alt="Mutari Logo"
+                    width={100}
+                    height={50}
+                    className="h-8 w-auto"
+                  />
+                  <span className="text-[#0059B3] font-hammersmithOne text-[20px]">
+                    MUTARI
+                  </span>
+                </Link>
+                <nav className="flex flex-col space-y-4">
+                  <Link
+                    href="/"
+                    className="hover:text-[#0059B3] transition-colors"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    Beranda
+                  </Link>
+                  <Link
+                    href="/itinerary"
+                    className="hover:text-[#0059B3] transition-colors"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    Itinerary
+                  </Link>
+                  <Link
+                    href="/tour"
+                    className="hover:text-[#0059B3] transition-colors"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    Tur
+                  </Link>
+                </nav>
+              </div>
+            </SheetContent>
+          </Sheet>
           <Link
             href={'/#hero'}
             className="flex items-end gap-2 sm:gap-3 hover:cursor-pointer"
@@ -90,25 +153,35 @@ export const Navbar: React.FC = () => {
               alt="Mutari Logo"
               width={150}
               height={50}
-              className="h-10 sm:h-12 w-auto z-30"
+              className="h-10 sm:h-12 w-auto z-50"
             />
             <span
-              className={`${isLandingPage ? 'text-white' : 'text-[#0059B3]'} font-hammersmithOne text-[24px] sm:text-[30px] hidden sm:inline`}
+              className={`${isLandingPage ? 'text-white' : 'text-[#0059B3]'} font-hammersmithOne text-[24px] sm:text-[30px]`}
             >
               MUTARI
             </span>
           </Link>
+          {/* Desktop navigation */}
           <NavigationMenuList
-            className={`flex space-x-4 ${isLandingPage ? 'text-white' : 'text-black'} text-sm sm:text-base`}
+            className={`hidden md:flex space-x-8 ${isLandingPage ? 'text-white' : 'text-black'} text-sm sm:text-base`}
           >
+            <NavigationMenuItem>
+              <NavigationMenuLink href="/" className="hover:underline">
+                Beranda
+              </NavigationMenuLink>
+            </NavigationMenuItem>
             <NavigationMenuItem>
               <NavigationMenuLink href="/itinerary" className="hover:underline">
                 Itinerary
               </NavigationMenuLink>
             </NavigationMenuItem>
+            <NavigationMenuItem>
+              <NavigationMenuLink href="/tour" className="hover:underline">
+                Tur
+              </NavigationMenuLink>
+            </NavigationMenuItem>
           </NavigationMenuList>
         </div>
-
         {isLaunching &&
           (isAuthenticated && !!user ? (
             <DropdownMenu>
@@ -125,7 +198,7 @@ export const Navbar: React.FC = () => {
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 align="end"
-                className="w-48 p-2 relative z-[102]"
+                className="w-48 p-2 relative z-50"
               >
                 <DropdownMenuItem>
                   <Link
