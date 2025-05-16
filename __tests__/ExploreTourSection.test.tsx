@@ -2,23 +2,17 @@ import React from 'react'
 import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import ExploreTourSection from '@/modules/TourMarketplaceModule/sections/ExploreTourSection'
 import { customFetch } from '@/utils/newCustomFetch'
-import { Tour } from '@/modules/TourMarketplaceModule/interface'
+import type { Tour } from '@/modules/TourMarketplaceModule/interface'
 
 jest.mock('@/utils/newCustomFetch', () => ({
   customFetch: jest.fn(),
 }))
 
-jest.mock('next/image', () => ({
-  __esModule: true,
-  default: (props: any) => (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img alt={(props as { alt: string }).alt || ''} {...props} />
-  ),
-}))
-
 jest.mock('@/modules/TourMarketplaceModule/module-elements/TourCard', () => ({
   __esModule: true,
-  default: ({ tour }: any) => <div>{tour.title}</div>,
+  default: ({ tour }: { tour: { title: string } }) => (
+    <div data-testid="tour-card">{tour.title}</div>
+  ),
 }))
 
 const mockTours: Tour[] = Array.from({ length: 8 }).map((_, i) => ({
@@ -42,7 +36,7 @@ describe('ExploreTourSection', () => {
   })
 
   it('renders loading state initially', async () => {
-    (customFetch as jest.Mock).mockResolvedValueOnce({ data: mockTours })
+    ;(customFetch as jest.Mock).mockResolvedValueOnce({ data: mockTours })
 
     render(<ExploreTourSection />)
 
@@ -50,7 +44,7 @@ describe('ExploreTourSection', () => {
   })
 
   it('fetches and displays tours correctly', async () => {
-    (customFetch as jest.Mock).mockResolvedValueOnce({ data: mockTours })
+    ;(customFetch as jest.Mock).mockResolvedValueOnce({ data: mockTours })
 
     render(<ExploreTourSection />)
 
@@ -60,7 +54,7 @@ describe('ExploreTourSection', () => {
   })
 
   it('loads more tours when button is clicked', async () => {
-    (customFetch as jest.Mock)
+    ;(customFetch as jest.Mock)
       .mockResolvedValueOnce({ data: mockTours })
       .mockResolvedValueOnce({
         data: mockTours.map((t) => ({ ...t, id: `${t.id}-more` })),
