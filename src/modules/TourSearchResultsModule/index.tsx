@@ -60,7 +60,6 @@ const TourSearchResultsModule = () => {
           method: 'GET',
         }
       )
-      console.log(response)
 
       setTours(response.data)
       setTotalPages(response.metadata.totalPages)

@@ -91,7 +91,6 @@ const SearchBar: React.FC<SearchBarProps> = ({
           endpoint,
           { method: 'GET' }
         )
-        console.log(response.suggestions)
         setSuggestions(response.suggestions || [])
       } catch (error) {
         console.error('Failed to fetch suggestions:', error)

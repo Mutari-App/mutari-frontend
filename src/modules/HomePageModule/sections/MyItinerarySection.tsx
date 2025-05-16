@@ -27,13 +27,14 @@ export default function MyItinerarySection() {
       if (res.statusCode !== 200) throw new Error(res.message)
       setData(res.itinerary.data)
       setMyItineraryMetadata(res.itinerary.metadata)
-      console.log('data', res.itinerary.data)
     } catch (err: any) {
       if (err instanceof Error) toast.error(`${err.message}`)
     }
   }
   useEffect(() => {
-    fetchMyItinerary().catch((err) => console.log(err))
+    fetchMyItinerary().catch((err: Error) => {
+      toast.error(`${err.message}`)
+    })
   }, [])
 
   return (
