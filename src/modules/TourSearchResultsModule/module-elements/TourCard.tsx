@@ -8,7 +8,6 @@ import { type TourSearchResult } from '../interface'
 
 interface TourCardProps {
   tour: TourSearchResult
-  className?: string
 }
 
 const TourCard: React.FC<TourCardProps> = ({ tour }) => {
