@@ -41,6 +41,31 @@ describe('RecentlyViewedSection', () => {
     })
   })
 
+  it('should show data when data is not empty', async () => {
+    const mockTour = {
+      id: 'tour-1'
+    } as Tour
+    ;(customFetch as jest.Mock).mockImplementation(() => {
+      return Promise.resolve({ tours: [mockTour] })
+    })
+
+    render(
+      <RecentlyViewedSection
+        title="Baru Dilihat"
+        fetchEndpoint="/tour/views"
+        mapData={(data: RecentlyViewedTourResponse) => data.tours}
+        renderCard={(item) => <div key={item.id}>Card {item.id}</div>}
+        emptyMessage="Tidak ada tour yang baru dilihat."
+      />
+    )
+
+    await waitFor(() => {
+      expect(
+        screen.getByText('Card tour-1')
+      ).toBeInTheDocument()
+    })
+  })
+
   it('should handle fetch error gracefully', async () => {
     // Mock customFetch to throw an error
     ;(customFetch as jest.Mock).mockImplementation(() => {
@@ -79,5 +104,27 @@ describe('RecentlyViewedSection', () => {
 
     // Restore the original console.error
     consoleErrorSpy.mockRestore()
+  })
+
+  it('should render nothing when user is not authenticated', async () => {
+    ;(customFetch as jest.Mock).mockResolvedValue({ tours: [] })
+    ;(useAuthContext as jest.Mock).mockReturnValue({
+      isAuthenticated: false,
+    })
+
+    const { container } = render(
+      <RecentlyViewedSection
+        title="Baru Dilihat"
+        fetchEndpoint="/tour/views"
+        mapData={(data: RecentlyViewedTourResponse) => data.tours}
+        renderCard={(item) => <div key={item.id}>Card {item.id}</div>}
+        emptyMessage="Tidak ada tour yang baru dilihat."
+      />
+    )
+
+    await waitFor(() => {
+      // container.firstChild bakal null kalau gak ada apa-apa yang dirender
+      expect(container.firstChild).toBeNull()
+    })
   })
 })
