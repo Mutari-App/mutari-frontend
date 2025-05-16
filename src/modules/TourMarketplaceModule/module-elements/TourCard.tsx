@@ -6,10 +6,10 @@ import { type TourCardProps } from '../interface'
 import { DurationTypeMap } from '../constant'
 import { CalendarIcon, MapPinIcon } from 'lucide-react'
 
-function TourCard({ tour }: Readonly<TourCardProps>) {
+function TourCard({ tour, className }: Readonly<TourCardProps>) {
   return (
     <Card
-      className={`flex flex-col overflow-hidden transition-all hover:shadow-md font-raleway group w-1/5 min-w-[250px]`}
+      className={`flex flex-col overflow-hidden transition-all hover:shadow-md font-raleway group ${className}`}
     >
       <div className="flex flex-col h-full">
         <Link href={`/tour/${tour.id}`} className="flex flex-col h-full">
