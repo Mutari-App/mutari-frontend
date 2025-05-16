@@ -42,11 +42,11 @@ const mockTourData = {
 
 describe('RecentlyViewedTour', () => {
   beforeEach(() => {
-      jest.clearAllMocks()
-      ;(useAuthContext as jest.Mock).mockReturnValue({
-        isAuthenticated: true,
-      })
+    jest.clearAllMocks()
+    ;(useAuthContext as jest.Mock).mockReturnValue({
+      isAuthenticated: true,
     })
+  })
 
   it('renders title and fetched tour cards', async () => {
     ;(customFetch as jest.Mock).mockImplementation(() => {
