@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { Search, X } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import SearchHistoryDropdown from './SearchHistoryDropdown'
+import SearchHistoryDropdown from '../SearchHistoryDropdown'
 import { customFetch } from '@/utils/newCustomFetch'
 
 interface SearchBarProps {

@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import SearchBar from '@/modules/ItinerarySearchResultsModule/module-elements/SearchBar'
+import SearchBar from '@/components/SearchBar'
 import FilterButton from '@/modules/ItinerarySearchResultsModule/module-elements/FilterButton'
 import FilterModal from '../module-elements/FilterModal'
 import { type TourFilters } from '../interface'

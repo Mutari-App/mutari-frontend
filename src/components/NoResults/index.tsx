@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button'
 
 interface NoResultsProps {
   query: string
-  searchType?: 'itinerary' | 'tur'
+  searchType?: string
   onReset: () => void
 }
 
