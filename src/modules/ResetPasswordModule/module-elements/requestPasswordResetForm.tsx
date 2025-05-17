@@ -58,19 +58,17 @@ export const RequestPasswordResetForm: React.FC = () => {
           }
         })
         toast.success('Kode verifikasi dikirim! Silakan cek email Anda.')
-        setSubmitLoading(false)
         goToNextPage()
       } else if (response.statusCode === 400) {
         toast.error('Email tidak valid atau tidak terverifikasi!')
-        setSubmitLoading(false)
       } else {
         toast.error('Terjadi kesalahan. Silakan coba lagi.')
-        setSubmitLoading(false)
       }
     } catch (error) {
       if (error instanceof Error) {
         toast.error('Terjadi kesalahan. Silakan coba lagi.')
       }
+    } finally {
       setSubmitLoading(false)
     }
   }

@@ -47,7 +47,6 @@ export const ResetPasswordForm: React.FC = () => {
   const handleResponseError = () => {
     toast.error('Terjadi kesalahan. Silakan coba lagi.')
     trackUmami('reset_password_fail')
-    setSubmitLoading(false)
   }
 
   const submitResetPasswordForm = async (
@@ -78,7 +77,6 @@ export const ResetPasswordForm: React.FC = () => {
           confirmPassword: values.confirmPassword,
         }))
         toast.success('Password baru berhasil disimpan!')
-        setSubmitLoading(false)
         router.push('/login')
         trackUmami('reset_password_success', { email })
       } else {
@@ -88,6 +86,8 @@ export const ResetPasswordForm: React.FC = () => {
       if (error instanceof Error) {
         handleResponseError()
       }
+    } finally {
+      setSubmitLoading(false)
     }
   }
 

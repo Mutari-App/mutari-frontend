@@ -61,18 +61,16 @@ export const CodeVerificationForm: React.FC = () => {
           }
         })
         toast.success('Verifikasi kode berhasil!')
-        setSubmitLoading(false)
         goToNextPage()
-        return
       } else {
         toast.error('Terjadi kesalahan. Silakan coba lagi.')
-        setSubmitLoading(false)
       }
     } catch (error) {
       if (error instanceof Error) {
         toast.error('Terjadi kesalahan. Silakan coba lagi.')
-        setSubmitLoading(false)
       }
+    } finally {
+      setSubmitLoading(false)
     }
   }
 
