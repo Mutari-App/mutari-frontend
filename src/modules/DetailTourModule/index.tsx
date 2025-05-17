@@ -31,7 +31,10 @@ export default function DetailTourModule({
           <TourInclude includes={data.includes} />
         </div>
         <div className="lg:col-span-1">
-          <TourOrderCard pricePerTicket={data.pricePerTicket} />
+          <TourOrderCard
+            tourId={initialData.id}
+            pricePerTicket={data.pricePerTicket}
+          />
         </div>
         <TourList section={data.itinerary.sections} />
       </div>

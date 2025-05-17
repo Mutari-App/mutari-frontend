@@ -9,7 +9,9 @@ import { customFetch } from '@/utils/newCustomFetch'
 import { toast } from 'sonner'
 import TransactionCard from '../module-elements/ItineraryCard/TransactionCard'
 
-export const TransactionSection: React.FC<ProfileModuleProps> = () => {
+export const TransactionSection: React.FC<ProfileModuleProps> = ({
+  profile,
+}) => {
   const [transactions, setTransactions] = useState<TransactionProps[]>([])
   const [loading, setLoading] = useState<boolean>(true)
 
@@ -19,6 +21,7 @@ export const TransactionSection: React.FC<ProfileModuleProps> = () => {
       const response = await customFetch<GetTransactionProps>(
         `/profile/transactions`
       )
+      console.log(response)
 
       if (response.statusCode !== 200) {
         throw new Error('Terjadi kesalahan saat mengambil data itineraries')

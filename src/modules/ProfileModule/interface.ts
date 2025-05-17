@@ -12,6 +12,7 @@ export interface ProfileProps {
 
 export interface ProfileModuleProps {
   profile: ProfileProps
+  tabValue?: string
 }
 
 export interface ItineraryProps {

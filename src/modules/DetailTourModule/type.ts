@@ -79,8 +79,8 @@ interface Tour {
   duration: number
   durationType: 'DAY' | 'HOUR'
   itineraryId: string
-  createdAt: Date
-  updatedAt: Date
+  createdAt: string
+  updatedAt: string
   itinerary: Itinerary
   includes: Include[]
 }
