@@ -1,17 +1,17 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import TourCard from '@/modules/TourMarketplaceModule/module-elements/TourCard'
+import TourCard from '@/modules/TourSearchResultsModule/module-elements/TourCard'
 import { customFetch } from '@/utils/newCustomFetch'
 import type {
-  Tour,
-  SearchTourResponse,
-} from '@/modules/TourMarketplaceModule/interface'
+  TourSearchResult,
+  SearchToursResponse,
+} from '@/modules/TourSearchResultsModule/interface'
 import { Button } from '@/components/ui/button'
 import { v4 } from 'uuid'
 
 const ExploreTourSection = () => {
-  const [tours, setTours] = useState<Tour[]>([])
+  const [tours, setTours] = useState<TourSearchResult[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [page, setPage] = useState(1)
   const [hasMore, setHasMore] = useState(true)
@@ -24,7 +24,7 @@ const ExploreTourSection = () => {
   const fetchTours = async (currentPage: number) => {
     try {
       setIsLoading(true)
-      const response = await customFetch<SearchTourResponse>(
+      const response = await customFetch<SearchToursResponse>(
         `/tour/search?page=${currentPage}&limit=${limit}`,
         { method: 'GET' }
       )
