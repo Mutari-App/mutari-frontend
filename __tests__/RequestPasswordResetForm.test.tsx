@@ -38,20 +38,20 @@ jest.mock('next/navigation', () => ({
   }),
 }))
 
-interface ReqeuestPasswordResetRequest {
+interface RequestPasswordResetRequest {
   email: string
 }
 
 interface CustomFetchRequest {
   method: string
-  body: ReqeuestPasswordResetRequest
+  body: RequestPasswordResetRequest
 }
 
 jest.mock('@/utils/customFetch', () => ({
   customFetch: jest.fn() as jest.Mock<Promise<ApiResponse>>,
   customFetchBody: (
-    data: ReqeuestPasswordResetRequest
-  ): ReqeuestPasswordResetRequest => data,
+    data: RequestPasswordResetRequest
+  ): RequestPasswordResetRequest => data,
 }))
 
 jest.mock('sonner', () => ({
