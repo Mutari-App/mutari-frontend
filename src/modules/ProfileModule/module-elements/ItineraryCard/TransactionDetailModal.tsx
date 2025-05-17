@@ -13,13 +13,14 @@ import {
 } from '../../interface'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { PaymentButton } from './PaymentButton'
 
 const TransactionDetailModal: React.FC<TransactionDetailModalProps> = ({
   transaction,
 }) => {
   return (
     <Dialog>
-      <DialogTrigger asChild className="w-full md:w-1/4 md:self-end">
+      <DialogTrigger asChild className="w-full md:w-1/4 md:self-end z-0">
         <div className="p-[1.5px] flex w-28 items-center bg-gradient-to-r from-[#0073E6] to-[#004080] hover:from-[#0066cc] hover:to-[#003366] rounded-lg group">
           <Button className="h-8 w-full bg-white group-hover:bg-transparent">
             <span className="bg-gradient-to-r from-[#0073E6] to-[#004080] group-hover:text-white text-transparent bg-clip-text flex items-center">
@@ -124,6 +125,18 @@ const TransactionDetailModal: React.FC<TransactionDetailModalProps> = ({
                   })}
                 </p>
               </div>
+              {transaction.paymentStatus === PAYMENT_STATUS.UNPAID && (
+                <div className="mt-4 w-full">
+                  <PaymentButton
+                    transactionId={transaction.id}
+                    totalPrice={transaction.totalPrice}
+                    quantity={transaction.quantity}
+                    tourId={transaction.tour.title}
+                    tourName={transaction.tour.title}
+                    guests={transaction.guests}
+                  />
+                </div>
+              )}
             </CardContent>
           </Card>
           <Card className="rounded-2xl drop-shadow-md text-[#3c3744] font-raleway">

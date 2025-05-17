@@ -10,3 +10,8 @@ export interface MidtransScriptProps {
   clientKey: string
   onLoad?: () => void
 }
+
+export interface BuyTourResultInterface {
+  id: string
+  statusCode: number
+}

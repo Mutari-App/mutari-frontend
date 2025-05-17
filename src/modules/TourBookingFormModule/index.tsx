@@ -4,7 +4,10 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
-import { type TourBookingFormModuleProps } from './interface'
+import {
+  type BuyTourResultInterface,
+  type TourBookingFormModuleProps,
+} from './interface'
 import { useForm, useFieldArray, FormProvider } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
@@ -84,10 +87,32 @@ export const TourBookingFormModule: React.FC<TourBookingFormModuleProps> = ({
 
   // Effect to open Midtrans popup when token is received
   useEffect(() => {
+    const confirmPayment = async (orderId: string) => {
+      try {
+        const result = await customFetch(`/tour/${orderId}/pay`, {
+          method: 'PATCH',
+        })
+
+        if (result.statusCode !== 200) throw new Error(result.message)
+
+        toast.success('Pembayaran Success')
+        router.push(`/profile/${user?.id}?tab=transaction`)
+      } catch (error: any) {
+        if (error instanceof Error) {
+          toast.error(error.message)
+        } else {
+          toast.error(
+            'Terjadi kesalahan saat memproses pembayaran. Silakan coba lagi.'
+          )
+        }
+      } finally {
+        setIsLoading(false)
+      }
+    }
     if (snapToken && typeof window !== 'undefined' && window.snap) {
       window.snap.pay(snapToken, {
-        onSuccess: function (_result: any) {
-          toast.success('Pembayaran Success')
+        onSuccess: function (result: { order_id: string }) {
+          void confirmPayment(result.order_id)
           setIsLoading(false)
         },
         onPending: function (_result: any) {
@@ -151,74 +176,96 @@ export const TourBookingFormModule: React.FC<TourBookingFormModuleProps> = ({
     void form.handleSubmit(onSubmit)()
   }
 
-  const onSubmit = async (data: FormValues) => {
-    if (user) {
-      try {
-        setIsLoading(true)
+  // Format customer data for API
+  const formatCustomerData = (customer: FormValues['customer']) => ({
+    title: customer.title,
+    firstName: customer.firstName,
+    lastName: customer.lastName,
+    phoneNumber: customer.phone,
+    email: customer.email,
+  })
 
-        const transaction = await customFetch(`/tour/${tourDetail.id}/buy`, {
+  // Format visitors data for API
+  const formatVisitorsData = (visitors: FormValues['visitors']) =>
+    visitors.map((visitor) => ({
+      title: visitor.title,
+      firstName: visitor.firstName,
+      lastName: visitor.lastName,
+      phoneNumber: visitor.phone,
+      email: visitor.email,
+    }))
+
+  // Handle transaction errors
+  const handleTransactionError = (transaction: BuyTourResultInterface) => {
+    if (transaction.statusCode === 404) {
+      router.push('/tour')
+      throw new Error('Tour tidak ditemukan!')
+    }
+    if (transaction.statusCode === 400) {
+      router.push(`/tour/${tourDetail.id}`)
+      throw new Error('Kapasitas tidak tersedia!')
+    }
+    if (transaction.statusCode !== 201) {
+      throw new Error(
+        'Terjadi kesalahan saat memproses pembayaran. Silakan coba lagi.'
+      )
+    }
+    return transaction
+  }
+
+  const onSubmit = async (data: FormValues) => {
+    if (!user) return
+
+    try {
+      setIsLoading(true)
+
+      // Create transaction
+      const transaction = await customFetch<BuyTourResultInterface>(
+        `/tour/${tourDetail.id}/buy`,
+        {
           method: 'POST',
           body: customFetchBody({
             tourDate,
             quantity: guests,
-            customer: {
-              title: data.customer.title,
-              firstName: data.customer.firstName,
-              lastName: data.customer.lastName,
-              phoneNumber: data.customer.phone,
-              email: data.customer.email,
-            },
-            visitors: data.visitors.map((visitor) => ({
-              title: visitor.title,
-              firstName: visitor.firstName,
-              lastName: visitor.lastName,
-              phoneNumber: visitor.phone,
-              email: visitor.email,
-            })),
+            customer: formatCustomerData(data.customer),
+            visitors: formatVisitorsData(data.visitors),
           }),
-        })
-        if (transaction.statusCode === 404) {
-          router.push('/tour')
-          throw new Error('Tour tidak ditemukan!')
         }
-        if (transaction.statusCode === 400) {
-          router.push(`/tour/${tourDetail.id}`)
-          throw new Error('Kapasitas tidak tersedia!')
-        }
-        if (transaction.statusCode !== 201) {
-          throw new Error(
-            'Terjadi kesalahan saat memproses pembayaran. Silakan coba lagi.'
-          )
-        }
-        const result = await createPayment({
-          userId: user?.id,
-          customerFirstName: data.customer.firstName,
-          customerLastName: data.customer.lastName,
-          customerEmail: data.customer.email,
-          customerPhone: data.customer.phone,
-          tourId: tourDetail.id,
-          tourName: tourDetail.title,
-          pricePerPerson: tourDetail.pricePerTicket,
-          numberOfGuests: guests,
-        })
+      )
 
-        if (result.success && result.token) {
-          setSnapToken(result.token)
-          setOrderId(result.orderId || null)
-        } else {
-          throw new Error(result.error ?? 'Failed to create payment')
-        }
-      } catch (error: any) {
-        if (error instanceof Error) {
-          toast.error(error.message)
-        } else {
-          toast.error(
-            'Terjadi kesalahan saat memproses pembayaran. Silakan coba lagi.'
-          )
-        }
+      // Validate transaction
+      const validatedTransaction = handleTransactionError(transaction)
 
-        setIsLoading(false)
+      // Create payment
+      const result = await createPayment({
+        userId: user.id,
+        transactionId: validatedTransaction.id,
+        customerFirstName: data.customer.firstName,
+        customerLastName: data.customer.lastName,
+        customerEmail: data.customer.email,
+        customerPhone: data.customer.phone,
+        tourId: tourDetail.id,
+        tourName: tourDetail.title,
+        pricePerPerson: tourDetail.pricePerTicket,
+        numberOfGuests: guests,
+      })
+
+      // Handle payment result
+      if (result.success && result.token) {
+        setSnapToken(result.token)
+        setOrderId(result.transactionId || null)
+      } else {
+        throw new Error(result.error ?? 'Failed to create payment')
       }
+    } catch (error: any) {
+      if (error instanceof Error) {
+        toast.error(error.message)
+      } else {
+        toast.error(
+          'Terjadi kesalahan saat memproses pembayaran. Silakan coba lagi.'
+        )
+      }
+      setIsLoading(false)
     }
   }
 

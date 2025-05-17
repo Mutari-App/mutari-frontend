@@ -2,28 +2,27 @@
 
 import { initMidtrans } from '@/utils/midtrans/midtrans'
 
-interface PaymentDetails {
+interface ResumePaymentDetails {
   userId: string
   transactionId: string
+  totalPrice: number
+  quantity: number
   customerFirstName: string
   customerLastName: string
   customerEmail: string
   customerPhone: string
   tourId: string
   tourName: string
-  pricePerPerson: number
-  numberOfGuests: number
 }
 
-export async function createPayment(details: PaymentDetails) {
+export async function resumePayment(details: ResumePaymentDetails) {
   try {
-    const totalAmount = details.pricePerPerson * details.numberOfGuests
     const midtransService = initMidtrans()
 
     const transaction = {
       transaction_details: {
         order_id: details.transactionId,
-        gross_amount: totalAmount,
+        gross_amount: details.totalPrice,
       },
       customer_details: {
         first_name: details.customerFirstName,
@@ -34,23 +33,22 @@ export async function createPayment(details: PaymentDetails) {
       item_details: [
         {
           id: details.tourId,
-          price: details.pricePerPerson,
-          quantity: details.numberOfGuests,
+          price: details.totalPrice / details.quantity, // Calculate price per person
+          quantity: details.quantity,
           name: details.tourName,
         },
       ],
       callbacks: {
-        finish: `${process.env.NEXT_PUBLIC_CLIENT_URL}/profile/${details.userId}`,
-        error: `${process.env.NEXT_PUBLIC_CLIENT_URL}/profile/${details.userId}`,
-        pending: `${process.env.NEXT_PUBLIC_CLIENT_URL}/profile/${details.userId}`,
+        finish: `${process.env.NEXT_PUBLIC_CLIENT_URL}/profile/${details.userId}?tab=transaction`,
+        error: `${process.env.NEXT_PUBLIC_CLIENT_URL}/profile/${details.userId}?tab=transaction`,
+        pending: `${process.env.NEXT_PUBLIC_CLIENT_URL}/profile/${details.userId}?tab=transaction`,
       },
     }
 
     const token = await midtransService.createTransaction(transaction)
-
     return { success: true, token, transactionId: details.transactionId }
   } catch (error) {
-    console.error('Error creating payment:', error)
-    return { success: false, error: 'Failed to create payment' }
+    console.error('Error resuming payment:', error)
+    return { success: false, error: 'Failed to resume payment' }
   }
 }
