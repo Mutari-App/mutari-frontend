@@ -11,10 +11,10 @@ export default async function ProfilePage({
   searchParams,
 }: Readonly<{
   params: Promise<{ id: string }>
-  searchParams: Record<string, string | string[] | undefined>
+  searchParams: Promise<Record<string, string | string[] | undefined>>
 }>) {
   const { id } = await params
-  const { tab } = searchParams
+  const { tab } = await searchParams
   try {
     const response = await customFetch<GetProfileResponse>(`/profile/${id}`)
     return (
