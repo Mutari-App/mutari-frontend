@@ -103,6 +103,11 @@ export const LoginForm = () => {
                     />
                   </FormControl>
                   <FormMessage />
+                  <span className="text-sm text-center text-[#64748B]">
+                    <Link href="/password-reset" className="underline">
+                      Lupa password?
+                    </Link>
+                  </span>
                 </FormItem>
               )}
             />
