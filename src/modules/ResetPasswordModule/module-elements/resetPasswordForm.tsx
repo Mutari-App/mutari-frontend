@@ -72,6 +72,11 @@ export const ResetPasswordForm: React.FC = () => {
       })
 
       if (response.statusCode == 200) {
+        setResetPasswordData((prevValue) => ({
+          ...prevValue,
+          password: values.password,
+          confirmPassword: values.confirmPassword,
+        }))
         toast.success('Password baru berhasil disimpan!')
         setSubmitLoading(false)
         router.push('/login')

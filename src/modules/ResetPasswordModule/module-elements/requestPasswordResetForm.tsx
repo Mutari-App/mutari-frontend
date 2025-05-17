@@ -42,33 +42,36 @@ export const RequestPasswordResetForm: React.FC = () => {
 
     if (Object.keys(errors).length) return
 
-      try {
-        const response = await customFetch('/auth/requestPasswordReset', {
-          method: 'POST',
-          body: customFetchBody({
-            email: values.email,
-          }),
-        })
+    try {
+      const response = await customFetch('/auth/requestPasswordReset', {
+        method: 'POST',
+        body: customFetchBody({
+          email: values.email,
+        }),
+      })
 
-        if (response.statusCode === 200) {
-          toast.success('Kode verifikasi dikirim! Silakan cek email Anda.')
-          setSubmitLoading(false)
-          goToNextPage()
-          return
-        } else if (response.statusCode === 400) {
-          toast.error('Email tidak valid atau tidak terverifikasi!')
-          setSubmitLoading(false)
-          return
-        } else {
-          toast.error('Terjadi kesalahan. Silakan coba lagi.')
-          setSubmitLoading(false)
-        }
-      } catch (error) {
-        if (error instanceof Error) {
-          toast.error('Terjadi kesalahan. Silakan coba lagi.')
-        }
+      if (response.statusCode === 200) {
+        setResetPasswordData((prevValue) => {
+          return {
+            ...prevValue,
+            email: values.email,
+          }
+        })
+        toast.success('Kode verifikasi dikirim! Silakan cek email Anda.')
+        setSubmitLoading(false)
+        goToNextPage()
+      } else if (response.statusCode === 400) {
+        toast.error('Email tidak valid atau tidak terverifikasi!')
+        setSubmitLoading(false)
+      } else {
+        toast.error('Terjadi kesalahan. Silakan coba lagi.')
         setSubmitLoading(false)
       }
+    } catch (error) {
+      if (error instanceof Error) {
+        toast.error('Terjadi kesalahan. Silakan coba lagi.')
+      }
+      setSubmitLoading(false)
     }
   }
 

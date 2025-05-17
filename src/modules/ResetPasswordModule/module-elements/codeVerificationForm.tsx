@@ -54,6 +54,12 @@ export const CodeVerificationForm: React.FC = () => {
       })
 
       if (response.statusCode === 200) {
+        setResetPasswordData((prevValue) => {
+          return {
+            ...prevValue,
+            uniqueCode: values.uniqueCode,
+          }
+        })
         toast.success('Verifikasi kode berhasil!')
         setSubmitLoading(false)
         goToNextPage()
