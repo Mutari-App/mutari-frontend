@@ -58,13 +58,7 @@ export const ResetPasswordForm: React.FC = () => {
       formState: { errors },
     } = form
 
-    if (!Object.keys(errors).length) {
-      setResetPasswordData((prevValue) => ({
-        ...prevValue,
-        password: values.password,
-        confirmPassword: values.confirmPassword,
-      }))
-    }
+    if (Object.keys(errors).length) return
 
     try {
       const response = await customFetch('/auth/resetPassword', {
