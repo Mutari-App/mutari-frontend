@@ -175,7 +175,7 @@ describe('ResetPasswordForm', () => {
     ;(customFetch as jest.Mock).mockResolvedValueOnce({
       statusCode: 500,
       message: 'Internal Server Error',
-      success: true,
+      success: false,
     })
 
     fireEvent.change(screen.getByPlaceholderText(/^Password$/i), {
