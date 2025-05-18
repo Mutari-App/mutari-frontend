@@ -3,7 +3,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { useResetPasswordContext } from '@/modules/ResetPasswordModule/contexts/ResetPasswordContext'
 import { ResetPasswordForm } from '@/modules/ResetPasswordModule/module-elements/resetPasswordForm'
 import { toast } from 'sonner'
-import { customFetch } from '@/utils/customFetch'
+import { customFetch } from '@/utils/newCustomFetch'
 
 jest.mock('lucide-react', () => ({
   Loader: () => 'Loader',
@@ -18,7 +18,7 @@ jest.mock('next/navigation', () => ({
   }),
 }))
 
-jest.mock('@/utils/customFetch', () => ({
+jest.mock('@/utils/newCustomFetch', () => ({
   customFetch: jest.fn(),
   customFetchBody: (data: object) => JSON.stringify(data),
 }))

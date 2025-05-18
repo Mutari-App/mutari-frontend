@@ -3,7 +3,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { RequestPasswordResetForm } from '@/modules/ResetPasswordModule/module-elements/requestPasswordResetForm'
 import { ResetPasswordContextProvider } from '@/modules/ResetPasswordModule/contexts/ResetPasswordContext'
 import { ResetPasswordFormSection } from '@/modules/ResetPasswordModule/sections/ResetPasswordFormSection'
-import { customFetch } from '@/utils/customFetch'
+import { customFetch } from '@/utils/newCustomFetch'
 import { toast } from 'sonner'
 
 // Define API response types
@@ -47,7 +47,7 @@ interface CustomFetchRequest {
   body: RequestPasswordResetRequest
 }
 
-jest.mock('@/utils/customFetch', () => ({
+jest.mock('@/utils/newCustomFetch', () => ({
   customFetch: jest.fn() as jest.Mock<Promise<ApiResponse>>,
   customFetchBody: (
     data: RequestPasswordResetRequest

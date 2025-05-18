@@ -15,7 +15,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { codeVerificationFormSchema } from '../schemas/codeVerificationFormSchema'
-import { customFetch, customFetchBody } from '@/utils/customFetch'
+import { customFetch, customFetchBody } from '@/utils/newCustomFetch'
 import { toast } from 'sonner'
 import { Loader } from 'lucide-react'
 

@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { customFetch, customFetchBody } from '@/utils/customFetch'
+import { customFetch, customFetchBody } from '@/utils/newCustomFetch'
 import { toast } from 'sonner'
 import { Loader } from 'lucide-react'
 

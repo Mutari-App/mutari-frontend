@@ -18,7 +18,7 @@ import { Button } from '@/components/ui/button'
 import { resetPasswordFormSchema } from '../schemas/resetPasswordFormSchema'
 import { useRouter } from 'next/navigation'
 import { Loader } from 'lucide-react'
-import { customFetch, customFetchBody } from '@/utils/customFetch'
+import { customFetch, customFetchBody } from '@/utils/newCustomFetch'
 import { toast } from 'sonner'
 
 export const ResetPasswordForm: React.FC = () => {
