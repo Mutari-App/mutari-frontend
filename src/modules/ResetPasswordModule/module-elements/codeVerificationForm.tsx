@@ -1,21 +1,21 @@
 'use client'
 
 import { useForm } from 'react-hook-form'
-import { useRegisterContext } from '../contexts/RegisterContext'
+import { useResetPasswordContext } from '../contexts/ResetPasswordContext'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { type z } from 'zod'
 import { useEffect, useState } from 'react'
-import { codeVerificationFormSchema } from '../schemas/codeVerificationFormSchema'
-import { customFetch, customFetchBody } from '@/utils/customFetch'
+import { codeVerificationFormSchema } from '@/modules/RegisterModule/schemas/codeVerificationFormSchema'
+import { customFetch, customFetchBody } from '@/utils/newCustomFetch'
 import { toast } from 'sonner'
-import { CodeVerificationFormElement } from './codeVerificationFormElement'
+import { CodeVerificationFormElement } from '@/modules/RegisterModule/module-elements/codeVerificationFormElement'
 
 export const CodeVerificationForm: React.FC = () => {
   const {
     goToNextPage,
-    registerData: { firstName, lastName, email, birthDate, uniqueCode },
-    setRegisterData,
-  } = useRegisterContext()
+    resetPasswordData: { email, uniqueCode },
+    setResetPasswordData,
+  } = useResetPasswordContext()
 
   const form = useForm<z.infer<typeof codeVerificationFormSchema>>({
     resolver: zodResolver(codeVerificationFormSchema),
@@ -33,39 +33,34 @@ export const CodeVerificationForm: React.FC = () => {
       formState: { errors },
     } = form
 
-    if (!Object.keys(errors).length) {
-      setRegisterData((prevValue) => {
-        return {
-          ...prevValue,
-          uniqueCode: values.uniqueCode,
-        }
-      })
-    }
+    if (Object.keys(errors).length) return
 
     try {
-      const response = await customFetch('/auth/verify', {
+      const response = await customFetch('/auth/verifyPasswordReset', {
         method: 'POST',
         body: customFetchBody({
-          firstName,
-          lastName,
           email,
-          birthDate,
           verificationCode: values.uniqueCode,
         }),
       })
 
       if (response.statusCode === 200) {
+        setResetPasswordData((prevValue) => {
+          return {
+            ...prevValue,
+            uniqueCode: values.uniqueCode,
+          }
+        })
         toast.success('Verifikasi kode berhasil!')
-        setSubmitLoading(false)
         goToNextPage()
-        return
       } else {
         toast.error('Terjadi kesalahan. Silakan coba lagi.')
-        setSubmitLoading(false)
       }
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
-      toast.error('Terjadi kesalahan. Silakan coba lagi.')
+      if (error instanceof Error) {
+        toast.error('Terjadi kesalahan. Silakan coba lagi.')
+      }
+    } finally {
       setSubmitLoading(false)
     }
   }
