@@ -7,16 +7,17 @@ export default async function TourBookingForm({
   searchParams,
 }: Readonly<{
   params: Promise<{ id: string }>
-  searchParams: Record<string, string | string[] | undefined>
+  searchParams: Promise<Record<string, string | string[] | undefined>>
 }>) {
+  const { tourDate, guests } = await searchParams
   if (
-    searchParams.tourDate === undefined ||
-    typeof searchParams.tourDate !== 'string' ||
-    isNaN(new Date(searchParams.tourDate).getTime()) ||
-    searchParams.guests === undefined ||
-    typeof searchParams.guests !== 'string' ||
-    isNaN(Number(searchParams.guests)) ||
-    Number(searchParams.guests) < 1
+    tourDate === undefined ||
+    typeof tourDate !== 'string' ||
+    isNaN(new Date(tourDate).getTime()) ||
+    guests === undefined ||
+    typeof guests !== 'string' ||
+    isNaN(Number(guests)) ||
+    Number(guests) < 1
   ) {
     redirect(`/tour/${(await params).id}`)
   }
@@ -32,8 +33,8 @@ export default async function TourBookingForm({
     return (
       <TourBookingFormModule
         tourDetail={res.data}
-        guests={Number(searchParams.guests)}
-        tourDate={new Date(searchParams.tourDate)}
+        guests={Number(guests)}
+        tourDate={new Date(tourDate)}
       />
     )
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
