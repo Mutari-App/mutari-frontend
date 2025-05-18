@@ -63,15 +63,11 @@ describe('ResetPasswordForm', () => {
     expect(
       screen.getByPlaceholderText(/^Konfirmasi Password$/i)
     ).toBeInTheDocument()
-    expect(
-      screen.getByRole('button', { name: /Simpan password baru/i })
-    ).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Simpan/i })).toBeInTheDocument()
   })
 
   it('should validate password requirements', async () => {
-    fireEvent.click(
-      screen.getByRole('button', { name: /Simpan password baru/i })
-    )
+    fireEvent.click(screen.getByRole('button', { name: /Simpan/i }))
 
     await waitFor(() => {
       const errorMessages = screen.getAllByText(
@@ -90,9 +86,7 @@ describe('ResetPasswordForm', () => {
       target: { value: 'password123' },
     })
 
-    fireEvent.click(
-      screen.getByRole('button', { name: /Simpan password baru/i })
-    )
+    fireEvent.click(screen.getByRole('button', { name: /Simpan/i }))
 
     await waitFor(() => {
       const errorMessages = screen.getAllByText(
@@ -111,9 +105,7 @@ describe('ResetPasswordForm', () => {
       target: { value: 'PasswordABC' },
     })
 
-    fireEvent.click(
-      screen.getByRole('button', { name: /Simpan password baru/i })
-    )
+    fireEvent.click(screen.getByRole('button', { name: /Simpan/i }))
 
     await waitFor(() => {
       const errorMessages = screen.getAllByText(
@@ -134,9 +126,7 @@ describe('ResetPasswordForm', () => {
       target: { value: 'Password456' },
     })
 
-    fireEvent.click(
-      screen.getByRole('button', { name: /Simpan password baru/i })
-    )
+    fireEvent.click(screen.getByRole('button', { name: /Simpan/i }))
 
     await waitFor(() => {
       expect(screen.getByText(/Passwords do not match/i)).toBeInTheDocument()
@@ -159,9 +149,7 @@ describe('ResetPasswordForm', () => {
     })
 
     // Submit form
-    fireEvent.click(
-      screen.getByRole('button', { name: /Simpan password baru/i })
-    )
+    fireEvent.click(screen.getByRole('button', { name: /Simpan/i }))
 
     await waitFor(() => {
       expect(toast.success).toHaveBeenCalledWith(
@@ -184,9 +172,7 @@ describe('ResetPasswordForm', () => {
     fireEvent.change(screen.getByPlaceholderText(/^Konfirmasi Password$/i), {
       target: { value: 'Test12345' },
     })
-    fireEvent.click(
-      screen.getByRole('button', { name: /Simpan password baru/i })
-    )
+    fireEvent.click(screen.getByRole('button', { name: /Simpan/i }))
 
     await waitFor(() => {
       expect(toast.error).toHaveBeenCalledWith(
@@ -194,9 +180,7 @@ describe('ResetPasswordForm', () => {
       )
     })
 
-    expect(
-      screen.getByRole('button', { name: /Simpan password baru/i })
-    ).not.toBeDisabled()
+    expect(screen.getByRole('button', { name: /Simpan/i })).not.toBeDisabled()
   })
 
   it('should show toast when handling thrown error', async () => {
@@ -208,9 +192,7 @@ describe('ResetPasswordForm', () => {
     fireEvent.change(screen.getByPlaceholderText(/^Konfirmasi Password$/i), {
       target: { value: 'Test12345' },
     })
-    fireEvent.click(
-      screen.getByRole('button', { name: /Simpan password baru/i })
-    )
+    fireEvent.click(screen.getByRole('button', { name: /Simpan/i }))
 
     await waitFor(() => {
       expect(toast.error).toHaveBeenCalledWith(
@@ -218,9 +200,7 @@ describe('ResetPasswordForm', () => {
       )
     })
 
-    expect(
-      screen.getByRole('button', { name: /Simpan password baru/i })
-    ).not.toBeDisabled()
+    expect(screen.getByRole('button', { name: /Simpan/i })).not.toBeDisabled()
   })
 
   it('should show loading state while submitting', async () => {
@@ -237,9 +217,7 @@ describe('ResetPasswordForm', () => {
     fireEvent.change(screen.getByPlaceholderText(/^Konfirmasi Password$/i), {
       target: { value: 'Test12345' },
     })
-    fireEvent.click(
-      screen.getByRole('button', { name: /Simpan password baru/i })
-    )
+    fireEvent.click(screen.getByRole('button', { name: /Simpan/i }))
 
     await waitFor(() => {
       expect(screen.getByRole('button', { name: /Loader/i })).toBeDisabled()
