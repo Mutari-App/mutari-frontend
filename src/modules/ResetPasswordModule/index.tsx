@@ -1,7 +1,7 @@
 'use client'
 
 import { ResetPasswordContextProvider } from './contexts/ResetPasswordContext'
-import { ForgotPasswordSection } from './sections/ForgotPasswordSection'
+import { JoinUsSection } from '@/modules/RegisterModule/sections/JoinUsSection'
 import { ResetPasswordFormHeader } from './sections/ResetPasswordFormHeader'
 import { ResetPasswordFormSection } from './sections/ResetPasswordFormSection'
 import { getImage } from '@/utils/getImage'
@@ -18,7 +18,7 @@ export default function ResetPasswordModule() {
       />
 
       <section className="flex flex-row relative items-center justify-center">
-        <ForgotPasswordSection />
+        <JoinUsSection variant="forgotPassword" />
         <div className="bg-white min-w-[50%] min-h-screen flex flex-col items-center justify-center gap-10  p-[10%] md:p-[2%]">
           <ResetPasswordFormHeader />
           <ResetPasswordContextProvider>
