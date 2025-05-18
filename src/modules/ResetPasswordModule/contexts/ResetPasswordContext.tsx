@@ -1,5 +1,5 @@
 'use client'
-import { createContext, useContext, useState } from 'react'
+import { createContext, useContext, useMemo, useState } from 'react'
 import {
   type FormContextInterface,
   type ResetPasswordContextProviderProps,
@@ -26,13 +26,16 @@ export const ResetPasswordContextProvider = ({
     setPage((prevState) => ++prevState)
   }
 
-  const contextValue: FormContextInterface = {
-    page,
-    setPage,
-    goToNextPage,
-    resetPasswordData,
-    setResetPasswordData,
-  }
+  const contextValue: FormContextInterface = useMemo(
+    () => ({
+      page,
+      setPage,
+      goToNextPage,
+      resetPasswordData,
+      setResetPasswordData,
+    }),
+    [page, setPage, goToNextPage, resetPasswordData, setResetPasswordData]
+  )
 
   return (
     <ResetPasswordContext.Provider value={contextValue}>
