@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { resetPasswordFormSchema } from '../schemas/resetPasswordFormSchema'
+import { registerFormSchema } from '@/modules/RegisterModule/schemas/registerFormSchema'
 import { useRouter } from 'next/navigation'
 import { Loader } from 'lucide-react'
 import { customFetch, customFetchBody } from '@/utils/newCustomFetch'
@@ -28,8 +28,8 @@ export const ResetPasswordForm: React.FC = () => {
     setResetPasswordData,
   } = useResetPasswordContext()
 
-  const form = useForm<z.infer<typeof resetPasswordFormSchema>>({
-    resolver: zodResolver(resetPasswordFormSchema),
+  const form = useForm<z.infer<typeof registerFormSchema>>({
+    resolver: zodResolver(registerFormSchema),
     defaultValues: {
       password,
       confirmPassword,
@@ -50,7 +50,7 @@ export const ResetPasswordForm: React.FC = () => {
   }
 
   const submitResetPasswordForm = async (
-    values: z.infer<typeof resetPasswordFormSchema>
+    values: z.infer<typeof registerFormSchema>
   ) => {
     setSubmitLoading(true)
     const {
