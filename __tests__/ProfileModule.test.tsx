@@ -81,6 +81,29 @@ jest.mock('@/components/ui/tabs', () => ({
   }) => <button data-testid={`tab-${value}`}>{children}</button>,
 }))
 
+const mockUser = {
+  id: 'user-123',
+  firstName: 'Test',
+  lastName: 'User',
+  email: 'test@example.com',
+  photoProfile: 'https://example.com/photo.jpg',
+}
+
+const mockAuthContext = {
+  user: mockUser,
+  isAuthenticated: true,
+  setIsAuthenticated: jest.fn(),
+  validate: jest.fn(),
+  preRegistLogin: jest.fn(),
+  login: jest.fn(),
+  logout: jest.fn(),
+  getMe: jest.fn(),
+}
+
+jest.mock('../src/contexts/AuthContext', () => ({
+  useAuthContext: () => mockAuthContext,
+}))
+
 describe('ProfileModule', () => {
   const mockProfile: ProfileProps = {
     id: '1',
