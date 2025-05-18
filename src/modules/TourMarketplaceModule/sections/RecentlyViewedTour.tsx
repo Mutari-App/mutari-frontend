@@ -12,7 +12,11 @@ function RecentlyViewedTour() {
       fetchEndpoint="/tour/views"
       mapData={(data: RecentlyViewedTourResponse) => data.tours}
       renderCard={(tourView) => (
-        <TourCard tour={tourView.tour} key={tourView.id} />
+        <TourCard
+          className="w-1/5 min-w-[250px]"
+          tour={tourView.tour}
+          key={tourView.id}
+        />
       )}
       emptyMessage="Tidak ada tour yang baru dilihat."
     />

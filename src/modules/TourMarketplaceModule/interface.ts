@@ -31,4 +31,5 @@ export interface Tour {
 
 export interface TourCardProps {
   readonly tour: Tour
+  readonly className?: string
 }
