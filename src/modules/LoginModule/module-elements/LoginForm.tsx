@@ -18,6 +18,11 @@ import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { toast } from 'sonner'
 import Link from 'next/link'
+import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth'
+import { auth } from '@/utils/firebase'
+import { Loader2 } from 'lucide-react'
+import { Separator } from '@/components/ui/separator'
+import { Google } from '@/icons/Google'
 
 const loginSchema = z.object({
   email: z.string().email({ message: 'Email tidak valid' }),
@@ -25,7 +30,7 @@ const loginSchema = z.object({
 })
 
 export const LoginForm = () => {
-  const { login } = useAuthContext()
+  const { login, googleLogin } = useAuthContext()
   const router = useRouter()
   const searchParams = useSearchParams()
   const [redirectPath, setRedirectPath] = useState<string>('/')
@@ -52,6 +57,29 @@ export const LoginForm = () => {
       toast.success('Berhasil login!')
     } catch (err: any) {
       toast.error((err as Error).message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const loginGoogle = async () => {
+    try {
+      setLoading(true)
+
+      const result = await signInWithPopup(auth, new GoogleAuthProvider())
+
+      const googleUser = result.user
+      const firebaseToken = await googleUser.getIdToken()
+      await googleLogin({ firebaseToken })
+      router.push(redirectPath)
+      toast.success('Berhasil login!')
+    } catch (err: any) {
+      const errMsg =
+        (err as Error).message === 'User not found'
+          ? 'Akun tidak ditemukan. Silakan daftar atau hubungkan akun terlebih dahulu.'
+          : (err as Error).message
+      toast.error(errMsg)
+      throw err
     } finally {
       setLoading(false)
     }
@@ -112,14 +140,36 @@ export const LoginForm = () => {
               )}
             />
           </div>
-          <div className="flex justify-center">
+          <div className="flex flex-col gap-y-2">
             <Button
               disabled={loading}
               type="submit"
               name="submit-button"
+              data-testid="login-submit-button"
               className="bg-[#0059B3] hover:bg-[#0059B3]/90 text-white w-full"
             >
-              Masuk
+              {loading ? <Loader2 className="animate-spin" /> : 'Masuk'}
+            </Button>
+            <div className="flex items-center justify-center gap-2 text-[#9dbaef] w-full">
+              <Separator className="bg-[#9dbaef] flex-grow w-1/3 h-[0.5px]" />
+              <span className="text-center px-2 text-sm">atau</span>
+              <Separator className="bg-[#9dbaef] flex-grow w-1/3 h-[0.5px]" />
+            </div>
+            <Button
+              disabled={loading}
+              className="text-black w-full"
+              variant={'outline'}
+              onClick={loginGoogle}
+              type="button"
+              id="google-button"
+            >
+              {loading ? (
+                <Loader2 className="animate-spin" />
+              ) : (
+                <>
+                  <Google /> Masuk dengan Google
+                </>
+              )}
             </Button>
           </div>
           <span className="text-sm text-center text-[#024C98] font-medium">

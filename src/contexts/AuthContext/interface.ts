@@ -15,6 +15,12 @@ export interface AuthContextInterface {
     email: string
     password: string
   }) => Promise<CustomFetchBaseResponse>
+  googleLogin: (params: {
+    firebaseToken: string
+  }) => Promise<CustomFetchBaseResponse>
+  googleRegister: (params: {
+    firebaseToken: string
+  }) => Promise<CustomFetchBaseResponse>
   preRegistLogin: (params: {
     email: string
   }) => Promise<CustomFetchBaseResponse>

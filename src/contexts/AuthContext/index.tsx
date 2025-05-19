@@ -118,6 +118,52 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
     []
   )
 
+  const googleLogin = useCallback(async (body: { firebaseToken: string }) => {
+    const response = await customFetch('/auth/google-login', {
+      method: 'POST',
+      credentials: 'include',
+      body: customFetchBody(body),
+    })
+
+    if (response.statusCode === 200) {
+      const userResponse = await customFetch<UserResponseInterface>('/auth/me')
+      if (userResponse.statusCode === 200) {
+        setIsAuthenticated(true)
+        setUser(userResponse.user)
+        return response
+      } else {
+        throw new Error(userResponse.message)
+      }
+    } else {
+      throw new Error(response.message)
+    }
+  }, [])
+
+  const googleRegister = useCallback(
+    async (body: { firebaseToken: string }) => {
+      const response = await customFetch('/auth/google-register', {
+        method: 'POST',
+        credentials: 'include',
+        body: customFetchBody(body),
+      })
+
+      if (response.statusCode === 200) {
+        const userResponse =
+          await customFetch<UserResponseInterface>('/auth/me')
+        if (userResponse.statusCode === 200) {
+          setIsAuthenticated(true)
+          setUser(userResponse.user)
+          return response
+        } else {
+          throw new Error(userResponse.message)
+        }
+      } else {
+        throw new Error(response.message)
+      }
+    },
+    []
+  )
+
   const preRegistLogin = useCallback(async ({ email }: { email: string }) => {
     const response = await customFetch('/pre-register/login', {
       method: 'POST',
@@ -218,6 +264,8 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
       validate,
       preRegistLogin,
       login,
+      googleLogin,
+      googleRegister,
       logout,
       getMe,
     }),
@@ -228,6 +276,8 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
       validate,
       preRegistLogin,
       login,
+      googleLogin,
+      googleRegister,
       logout,
       getMe,
     ]
