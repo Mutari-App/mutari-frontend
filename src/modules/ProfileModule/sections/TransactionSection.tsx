@@ -30,7 +30,7 @@ export const TransactionSection: React.FC<ProfileModuleProps> = () => {
     } finally {
       setLoading(false)
     }
-  }, [profile.id])
+  }, [])
 
   useEffect(() => {
     void getTransactions()
