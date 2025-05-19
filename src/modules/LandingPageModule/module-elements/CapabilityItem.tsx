@@ -1,5 +1,5 @@
 import React from 'react'
-import { CapabilityItemProps } from '../interface'
+import { type CapabilityItemProps } from '../interface'
 
 export const CapabilityItem: React.FC<CapabilityItemProps> = ({
   icon,

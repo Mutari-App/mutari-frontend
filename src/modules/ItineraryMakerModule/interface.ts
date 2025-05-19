@@ -165,4 +165,5 @@ export interface ILocationMarker {
   section: number
   order: number
   title: string
+  isFocused: boolean
 }

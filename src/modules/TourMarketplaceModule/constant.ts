@@ -1,5 +1,4 @@
-export const DurationTypeMap: Record<'HOUR' | 'DAY' | 'WEEK', string> = {
+export const DurationTypeMap: Record<'HOUR' | 'DAY', string> = {
   HOUR: 'jam',
   DAY: 'hari',
-  WEEK: 'minggu',
 }

@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
-import { TransactionCardProps } from '../../interface'
+import { type TransactionCardProps } from '../../interface'
 import { Calendar, Earth, User } from 'lucide-react'
 import { Separator } from '@/components/ui/separator'
 import TransactionDetailModal from './TransactionDetailModal'

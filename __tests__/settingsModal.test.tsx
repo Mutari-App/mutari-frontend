@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import React from 'react'
-import { render, fireEvent, screen, act } from '@testing-library/react'
+import { render, fireEvent, screen } from '@testing-library/react'
 import { SettingsItineraryModal } from '@/modules/ItineraryMakerModule/module-elements/settingsModal'
 import type { CloudinaryUploadWidgetResults } from 'next-cloudinary'
 // Mock the Lucide React icons
@@ -53,7 +54,7 @@ jest.mock('@/components/ui/textarea', () => ({
     <textarea
       data-testid="textarea"
       onChange={onChange}
-      value={value || ''}
+      value={value ?? ''}
       {...props}
     />
   ),
@@ -155,8 +156,7 @@ describe('SettingsItineraryModal', () => {
   it('calls onClose when close button is clicked', () => {
     render(<SettingsItineraryModal {...defaultProps} />)
     // Find and click the close button
-    const closeButton = screen.getByTestId('x-icon')
-      .parentElement! as HTMLElement
+    const closeButton = screen.getByTestId('x-icon').parentElement!
     fireEvent.click(closeButton)
     // Check if onClose was called
     expect(mockOnClose).toHaveBeenCalled()

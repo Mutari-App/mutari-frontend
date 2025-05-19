@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import ItineraryCard from '@/modules/ItinerarySearchResultsModule/module-elements/ItineraryCard'
-import SearchBar from '@/modules/ItinerarySearchResultsModule/module-elements/SearchBar'
+import SearchBar from '@/components/SearchBar'
 import { customFetch, customFetchBody } from '@/utils/newCustomFetch'
 import {
-  BatchCheckItinerarySavedResponse,
+  type BatchCheckItinerarySavedResponse,
   type ItinerarySearchResult,
   type SearchItinerariesResponse,
 } from '@/modules/ItinerarySearchResultsModule/interface'
@@ -55,16 +55,12 @@ const ExploreItinerarySection = () => {
     }
 
     void fetchItineraries()
-  }, [])
+  }, [isAuthenticated])
 
   const handleSearch = (query: string) => {
     if (query.trim()) {
       router.push(`/itinerary/search?q=${encodeURIComponent(query)}`)
     }
-  }
-
-  const handleViewMore = () => {
-    router.push('/itinerary/search')
   }
 
   return (

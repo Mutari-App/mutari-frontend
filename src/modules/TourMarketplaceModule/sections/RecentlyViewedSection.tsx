@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react'
 import ItineraryCardSkeleton from '@/modules/HomePageModule/module-elements/ItineraryCardSkeleton'
 import { customFetch } from '@/utils/newCustomFetch'
+import { useAuthContext } from '@/contexts/AuthContext'
 
 interface RecentlyViewedSectionProps<T> {
   title: string
@@ -21,6 +22,7 @@ function RecentlyViewedSection<T extends { id: string }>({
 }: Readonly<RecentlyViewedSectionProps<T>>) {
   const [items, setItems] = useState<T[]>([])
   const [loading, setLoading] = React.useState(false)
+  const { isAuthenticated } = useAuthContext()
 
   useEffect(() => {
     const fetchData = async () => {
@@ -34,8 +36,14 @@ function RecentlyViewedSection<T extends { id: string }>({
         setLoading(false)
       }
     }
-    void fetchData()
-  }, [fetchEndpoint, mapData])
+    if (isAuthenticated) {
+      void fetchData()
+    }
+  }, [fetchEndpoint, isAuthenticated, mapData])
+
+  if (!isAuthenticated) {
+    return null
+  }
 
   return (
     <section className="flex flex-col justify-start gap-7 w-4/5">
@@ -55,7 +63,7 @@ function RecentlyViewedSection<T extends { id: string }>({
               <React.Fragment key={item.id}>{renderCard(item)}</React.Fragment>
             ))
           ) : (
-            <div className="flex flex-col items-center justify-center w-full h-full gap-5 p-5 text-center bg-white rounded-lg shadow-md">
+            <div className="flex flex-col items-center justify-center w-full h-full gap-5 p-5 text-center bg-white rounded-lg">
               <p className="text-gray-500">{emptyMessage}</p>
             </div>
           )}

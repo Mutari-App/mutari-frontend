@@ -1,13 +1,13 @@
 import React, { useRef, useEffect, useState } from 'react'
-import { Button, buttonVariants } from '@/components/ui/button'
+import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { UserRoundPlus, Edit2, Settings, Share2 } from 'lucide-react'
+import { Edit2, Settings } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { type CloudinaryUploadWidgetResults } from 'next-cloudinary'
 import { SettingsItineraryModal } from '../module-elements/settingsModal'
 import { customFetch, customFetchBody } from '@/utils/newCustomFetch'
-import { CreateItineraryResponse } from '../interface'
-import { DuplicateItineraryResponse } from '@/modules/ItineraryModule/module-elements/types'
+import { type CreateItineraryResponse } from '../interface'
+import { type DuplicateItineraryResponse } from '@/modules/ItineraryModule/module-elements/types'
 import { toast } from 'sonner'
 interface ItineraryHeaderProps {
   itineraryId: string

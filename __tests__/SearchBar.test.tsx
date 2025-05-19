@@ -1,7 +1,7 @@
 import React from 'react'
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import '@testing-library/jest-dom'
-import SearchBar from '@/modules/ItinerarySearchResultsModule/module-elements/SearchBar'
+import SearchBar from '@/components/SearchBar'
 import { customFetch } from '@/utils/newCustomFetch'
 
 // Mock Lucide icons
@@ -71,60 +71,57 @@ jest.mock('@/components/ui/button', () => ({
 }))
 
 // Mock the SearchHistoryDropdown component
-jest.mock(
-  '@/modules/ItinerarySearchResultsModule/module-elements/SearchHistoryDropdown',
-  () => ({
-    __esModule: true,
-    default: ({
-      searchHistory,
-      suggestions,
-      onSelectItem,
-      onClearHistoryItem,
-      onClearAllHistory,
-      className,
-    }: {
-      searchHistory: string[]
-      suggestions: string[]
-      onSelectItem: (query: string) => void
-      onClearHistoryItem: (query: string) => void
-      onClearAllHistory: () => void
-      className?: string
-    }) => (
-      <div data-testid="search-history-dropdown" className={className}>
-        {searchHistory.map((item) => (
-          <div
-            key={`history-${item}`}
-            data-testid="history-item"
-            onClick={() => onSelectItem(item)}
+jest.mock('@/components/SearchHistoryDropdown', () => ({
+  __esModule: true,
+  default: ({
+    searchHistory,
+    suggestions,
+    onSelectItem,
+    onClearHistoryItem,
+    onClearAllHistory,
+    className,
+  }: {
+    searchHistory: string[]
+    suggestions: string[]
+    onSelectItem: (query: string) => void
+    onClearHistoryItem: (query: string) => void
+    onClearAllHistory: () => void
+    className?: string
+  }) => (
+    <div data-testid="search-history-dropdown" className={className}>
+      {searchHistory.map((item) => (
+        <div
+          key={`history-${item}`}
+          data-testid="history-item"
+          onClick={() => onSelectItem(item)}
+        >
+          {item}
+          <button
+            data-testid={`clear-history-${item}`}
+            onClick={(e) => {
+              e.stopPropagation()
+              onClearHistoryItem(item)
+            }}
           >
-            {item}
-            <button
-              data-testid={`clear-history-${item}`}
-              onClick={(e) => {
-                e.stopPropagation()
-                onClearHistoryItem(item)
-              }}
-            >
-              Clear
-            </button>
-          </div>
-        ))}
-        {suggestions.map((item) => (
-          <div
-            key={`suggestion-${item}`}
-            data-testid="suggestion-item"
-            onClick={() => onSelectItem(item)}
-          >
-            {item}
-          </div>
-        ))}
-        <button data-testid="clear-all-history" onClick={onClearAllHistory}>
-          Clear All
-        </button>
-      </div>
-    ),
-  })
-)
+            Clear
+          </button>
+        </div>
+      ))}
+      {suggestions.map((item) => (
+        <div
+          key={`suggestion-${item}`}
+          data-testid="suggestion-item"
+          onClick={() => onSelectItem(item)}
+        >
+          {item}
+        </div>
+      ))}
+      <button data-testid="clear-all-history" onClick={onClearAllHistory}>
+        Clear All
+      </button>
+    </div>
+  ),
+}))
 
 // Mock the customFetch utility
 jest.mock('@/utils/newCustomFetch', () => ({
@@ -173,6 +170,7 @@ describe('SearchBar Component', () => {
         initialValue="Initial Query"
         onSearch={mockOnSearch}
         className="custom-class"
+        searchType="tour"
       />
     )
 

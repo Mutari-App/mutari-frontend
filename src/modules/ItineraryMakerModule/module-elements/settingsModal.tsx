@@ -7,7 +7,6 @@ import {
   CldUploadButton,
 } from 'next-cloudinary'
 import { Textarea } from '@/components/ui/textarea'
-import { toast } from 'sonner'
 
 interface SettingsItineraryModalProps {
   isOpen: boolean

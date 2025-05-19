@@ -4,9 +4,9 @@ import { cookies } from 'next/headers'
 import { customFetch } from '../utils/customFetch'
 import { getCookie } from 'cookies-next/server'
 
-export default async function useUserServer() {
+export default async function getUser() {
   const launchingDate = new Date(
-    process.env.NEXT_PUBLIC_LAUNCHING_DATE || '2025-01-22T00:00:00'
+    process.env.NEXT_PUBLIC_LAUNCHING_DATE ?? '2025-01-22T00:00:00'
   )
   const nowDate = new Date()
   const isLaunching = nowDate > launchingDate

@@ -2,16 +2,25 @@ import { Separator } from '@/components/ui/separator'
 import { Instagram } from '@/icons/Instagram'
 import { Twitter } from '@/icons/Twitter'
 import { Mail } from 'lucide-react'
+import React from 'react'
 
-export const JoinUsSection = () => {
+interface JoinUsSectionProps {
+  variant?: 'loginRegister' | 'forgotPassword'
+}
+
+export const JoinUsSection: React.FC<JoinUsSectionProps> = ({ variant }) => {
   return (
     <section className="hidden lg:flex flex-col text-white min-h-screen items-center justify-end px-[5%] py-[3%] gap-12 w-1/2">
       <div className="text-center space-y-5">
-        <h1 className="text-3xl font-semibold">Bergabung Bersama Kami!</h1>
+        <h1 className="text-3xl font-semibold">
+          {variant === 'forgotPassword'
+            ? 'Kehilangan Password?'
+            : 'Bergabung Bersama Kami!'}
+        </h1>
         <p>
-          Mutari hadir sebagai solusi terbaik untuk membuat pengalaman wisata
-          Anda lebih mudah dan menyenangkan! Bersama Mutari, rencanakan liburan
-          impian Anda ke Indonesia dengan lebih praktis dan tanpa ribet!
+          {variant === 'forgotPassword'
+            ? 'Jangan khawatir! Anda dapat menyetel ulang kata sandi akun Mutari Anda dengan mengikuti form di samping ini.'
+            : 'Mutari hadir sebagai solusi terbaik untuk membuat pengalaman wisata Anda lebih mudah dan menyenangkan! Bersama Mutari, rencanakan liburan impian Anda ke Indonesia dengan lebih praktis dan tanpa ribet!'}
         </p>
       </div>
 

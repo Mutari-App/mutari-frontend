@@ -3,7 +3,7 @@ import { customFetch } from '@/utils/newCustomFetch'
 import { ItineraryHeader } from './module-elements/ItineraryHeader'
 import { ItineraryList } from './module-elements/ItineraryList'
 import { ItinerarySummary } from './module-elements/ItinerarySummary'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Maps from '../ItineraryMakerModule/sections/Maps'
 import { PlanPicker } from './module-elements/PlanPicker'
@@ -29,7 +29,7 @@ export default function DetailItineraryModule() {
     contingencyId: string
   }>()
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       const res = await customFetch<ItineraryDetailResponse>(
         `/itineraries/${id}`,
@@ -46,10 +46,11 @@ export default function DetailItineraryModule() {
       }
 
       setData(res.data)
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err: any) {
       setIsNotFound(true)
     }
-  }
+  }, [id, router])
 
   useEffect(() => {
     void fetchData()
@@ -67,12 +68,13 @@ export default function DetailItineraryModule() {
         }
 
         setContingencies(res.contingencies)
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (err: any) {
         setIsNotFound(true)
       }
     }
     void fetchContingencies()
-  }, [id])
+  }, [fetchData, id])
 
   useEffect(() => {
     if (!contingencyId) {
@@ -98,12 +100,13 @@ export default function DetailItineraryModule() {
         }))
 
         setSelectedContingency({ ...res.contingency, sections: mappedSections })
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (err: any) {
         setIsNotFound(true)
       }
     }
     void fetchContingencyDetail()
-  }, [contingencyId])
+  }, [contingencyId, id])
 
   useEffect(() => {
     const viewItinerary = async () => {
@@ -124,7 +127,7 @@ export default function DetailItineraryModule() {
       router.push('/')
       toast.error('Itinerary ini merupakan itinerary pribadi')
     }
-  }, [data, data?.isPublished, id, isAuthenticated, router])
+  }, [data, data?.isPublished, id, isAuthenticated, router, user?.id])
 
   if (isNotFound) {
     return <NotFound />
@@ -159,7 +162,7 @@ export default function DetailItineraryModule() {
           />
           <PlanPicker
             itineraryId={id}
-            contingencies={contingencies || []}
+            contingencies={contingencies ?? []}
             selectedPlan={selectedContingency ?? data}
           />
         </div>

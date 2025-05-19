@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react'
+import React, { type ReactNode } from 'react'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { ProfileHeader } from '../src/modules/ProfileModule/sections/ProfileHeader'
 import { useAuthContext } from '@/contexts/AuthContext'
@@ -7,10 +7,10 @@ import { customFetch } from '@/utils/newCustomFetch'
 import { toast } from 'sonner'
 import '@testing-library/jest-dom'
 import {
-  ChangeEmailFormProps,
-  EditProfileFormProps,
-  FormProps,
-  SubmitOtpFormProps,
+  type ChangeEmailFormProps,
+  type EditProfileFormProps,
+  type FormProps,
+  type SubmitOtpFormProps,
 } from '@/modules/ProfileModule/interface'
 
 // Mock dependencies

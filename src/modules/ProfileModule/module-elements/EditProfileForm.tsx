@@ -16,10 +16,10 @@ import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { updateProfileFormSchema } from '../schemas/updateProfileSchema'
 import { useAuthContext } from '@/contexts/AuthContext'
-import { z } from 'zod'
+import { type z } from 'zod'
 import { toast } from 'sonner'
 import { customFetch, customFetchBody } from '@/utils/newCustomFetch'
-import { EditProfileFormProps } from '../interface'
+import { type EditProfileFormProps } from '../interface'
 import { useRouter } from 'next/navigation'
 
 export const EditProfileForm: React.FC<EditProfileFormProps> = ({

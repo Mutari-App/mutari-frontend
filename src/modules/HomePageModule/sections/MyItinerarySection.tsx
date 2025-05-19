@@ -1,9 +1,9 @@
 'use client'
 import { Button } from '@/components/ui/button'
 import {
-  ItineraryData,
-  ItineraryResponse,
-  metadataType,
+  type ItineraryData,
+  type ItineraryResponse,
+  type metadataType,
 } from '@/modules/ItineraryModule/module-elements/types'
 import MyItineraryList from '@/modules/ItineraryModule/sections/MyItineraryList'
 import { customFetch } from '@/utils/newCustomFetch'
@@ -27,19 +27,20 @@ export default function MyItinerarySection() {
       if (res.statusCode !== 200) throw new Error(res.message)
       setData(res.itinerary.data)
       setMyItineraryMetadata(res.itinerary.metadata)
-      console.log('data', res.itinerary.data)
     } catch (err: any) {
       if (err instanceof Error) toast.error(`${err.message}`)
     }
   }
   useEffect(() => {
-    fetchMyItinerary().catch((err) => console.log(err))
+    fetchMyItinerary().catch((err: Error) => {
+      toast.error(`${err.message}`)
+    })
   }, [])
 
   return (
     <div className="flex flex-col justify-start lg:justify-between w-4/5 gap-5">
       <div className="flex flex-col lg:flex-row gap-5 justify-between items-center w-full">
-        <h2 className="font-semibold text-2xl md:text-left md:text-[36px] md:text-left  self-start">
+        <h2 className="font-semibold text-2xl md:text-left md:text-[36px] self-start">
           Rencana Perjalanan Saya
         </h2>
         <Link

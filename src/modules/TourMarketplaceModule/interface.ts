@@ -21,9 +21,9 @@ export interface Tour {
   maxCapacity: number
   description?: string
   location: string
-  pricePerTicket: string
+  pricePerTicket: number
   duration: number
-  durationType: 'HOUR' | 'DAY' | 'WEEK'
+  durationType: 'HOUR' | 'DAY'
   itineraryId: string
   createdAt: string
   updatedAt: string
@@ -31,4 +31,5 @@ export interface Tour {
 
 export interface TourCardProps {
   readonly tour: Tour
+  readonly className?: string
 }

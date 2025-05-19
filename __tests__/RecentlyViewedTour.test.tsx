@@ -2,9 +2,16 @@ import React from 'react'
 import { render, screen, waitFor } from '@testing-library/react'
 import RecentlyViewedTour from '@/modules/TourMarketplaceModule/sections/RecentlyViewedTour'
 import { customFetch } from '@/utils/newCustomFetch'
+import { useAuthContext } from '@/contexts/AuthContext'
 
 // Mock customFetch
 jest.mock('@/utils/newCustomFetch')
+jest.mock('@/contexts/AuthContext')
+
+jest.mock('lucide-react', () => ({
+  CalendarIcon: () => <div data-testid="calendar-icon">CalendarIcon</div>,
+  MapPinIcon: () => <div data-testid="map-pin-icon">MapPinIcon</div>,
+}))
 
 // Mock TourCard
 jest.mock('@/modules/TourMarketplaceModule/module-elements/TourCard', () => ({
@@ -34,6 +41,13 @@ const mockTourData = {
 }
 
 describe('RecentlyViewedTour', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    ;(useAuthContext as jest.Mock).mockReturnValue({
+      isAuthenticated: true,
+    })
+  })
+
   it('renders title and fetched tour cards', async () => {
     ;(customFetch as jest.Mock).mockImplementation(() => {
       return Promise.resolve(mockTourData)

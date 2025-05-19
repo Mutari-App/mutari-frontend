@@ -3,13 +3,13 @@ import React, { useState, useEffect } from 'react'
 import ItineraryCard from '@/modules/ItinerarySearchResultsModule/module-elements/ItineraryCard'
 import { customFetch, customFetchBody } from '@/utils/newCustomFetch'
 import {
-  BatchCheckItinerarySavedResponse,
+  type BatchCheckItinerarySavedResponse,
   type ItinerarySearchResult,
   type SearchItinerariesResponse,
 } from '@/modules/ItinerarySearchResultsModule/interface'
 import { Button } from '@/components/ui/button'
 import { v4 } from 'uuid'
-import { DiscoverItinerariesByTagResponse } from '../interface'
+import { type DiscoverItinerariesByTagResponse } from '../interface'
 import { toast } from 'sonner'
 import Link from 'next/link'
 
@@ -98,7 +98,7 @@ const ExploreItinerarySection = () => {
 
   return (
     <section className="flex flex-col justify-start gap-7 w-4/5">
-      <p className="font-semibold text-2xl md:text-left md:text-[36px] md:text-left  self-start">
+      <p className="font-semibold text-2xl md:text-left md:text-[36px] self-start">
         Eksplorasi
       </p>
       {isLoadingPopular ? (

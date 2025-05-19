@@ -16,8 +16,6 @@ import {
   Loader2,
   Lightbulb,
   Wand2,
-  ListChecks,
-  Map,
   MapIcon,
   ListChecksIcon,
 } from 'lucide-react'
@@ -60,7 +58,7 @@ export default function ItineraryMakerModule({
 }: Readonly<ItineraryMakerModuleProps>) {
   const { user } = useAuthContext()
   const launchingDate = new Date(
-    process.env.NEXT_PUBLIC_LAUNCHING_DATE || '2025-01-22T00:00:00'
+    process.env.NEXT_PUBLIC_LAUNCHING_DATE ?? '2025-01-22T00:00:00'
   )
   const nowDate = new Date()
   const isLaunching = nowDate > launchingDate
@@ -117,6 +115,11 @@ export default function ItineraryMakerModule({
   )
   const wasAlreadyRequested = useRef(false)
   const [contingency, setContingency] = useState<ContingencyPlan | null>(null)
+  const [focusedLocation, setFocusedLocation] = useState<{
+    blockId: string
+    sectionNumber: number
+  } | null>(null)
+  const blockRefs = useRef<Record<string, HTMLElement | null>>({})
 
   const initialItineraryData = useRef<CreateItineraryDto>({
     isPublished: false,
@@ -198,7 +201,8 @@ export default function ItineraryMakerModule({
           const mapped = await fetchContingencyDetail()
           setData({ ...res.data, sections: mapped })
         }
-      } catch (err: any) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (err) {
         return <NotFound statusCode={404} />
       }
 
@@ -238,14 +242,15 @@ export default function ItineraryMakerModule({
 
         setContingency({ ...res.contingency, sections: mappedSections })
         return mappedSections
-      } catch (err: any) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (err) {
         notFound()
       }
     }
     if (!wasAlreadyRequested.current) {
       void fetchData()
     }
-  }, [itineraryId, router, user?.id, wasAlreadyRequested])
+  }, [contingencyId, itineraryId, router, user?.id, wasAlreadyRequested])
 
   // Map existing data if fetched
   useEffect(() => {
@@ -399,6 +404,7 @@ export default function ItineraryMakerModule({
         } else {
           toast.error('Gagal mengambil tag')
         }
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
         toast.error('Gagal mengambil tag')
       }
@@ -471,6 +477,42 @@ export default function ItineraryMakerModule({
       window.removeEventListener('beforeunload', handleBeforeUnload)
     }
   }, [hasUnsavedChanges])
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && focusedLocation) {
+        clearLocationFocus()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [focusedLocation])
+
+  useEffect(() => {
+    if (!focusedLocation) return
+
+    const handleClickOutside = (e: MouseEvent) => {
+      // Check if the click was on a block card or marker
+      const target = e.target as HTMLElement
+      const isClickInsideBlock = target.closest('[data-block-id]')
+      const isClickInsidePin = target.closest('[data-location-pin]')
+
+      // If not clicking on a block or pin, clear focus
+      if (!isClickInsideBlock && !isClickInsidePin) {
+        clearLocationFocus()
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [focusedLocation])
 
   const updateTransportMode = async (
     blockId: string,
@@ -970,6 +1012,54 @@ export default function ItineraryMakerModule({
     })
   }
 
+  const registerBlockRef = (blockId: string, element: HTMLElement | null) => {
+    blockRefs.current[blockId] = element
+  }
+
+  const handleLocationFocus = (blockId: string, sectionNumber: number) => {
+    if (
+      !focusedLocation ||
+      focusedLocation.blockId !== blockId ||
+      focusedLocation.sectionNumber !== sectionNumber
+    ) {
+      // Focus on the new location
+      setFocusedLocation({ blockId, sectionNumber })
+
+      // Find the location coordinates to pan the map
+      const section = itineraryData.sections.find(
+        (s) => s.sectionNumber === sectionNumber
+      )
+      const block = section?.blocks?.find((b) => b.id === blockId)
+
+      if (block?.location) {
+        const [lat, lng] = block.location
+          .split(',')
+          .map((coord) => parseFloat(coord.trim()))
+        setPositionToView({ lat, lng })
+
+        // Switch to itinerary view on desktop, map view on mobile
+        if (window.innerWidth >= 768 && isMapView) {
+          setIsMapView(false)
+        }
+
+        // Scroll to the block in the itinerary list
+        setTimeout(() => {
+          const blockElement = blockRefs.current[blockId]
+          if (blockElement) {
+            blockElement.scrollIntoView({
+              behavior: 'smooth',
+              block: 'center',
+            })
+          }
+        }, 50) // Short delay to ensure DOM updates
+      }
+    }
+  }
+
+  const clearLocationFocus = () => {
+    setFocusedLocation(null)
+  }
+
   const addLocationToSection = (
     sectionNumber: number,
     title: string,
@@ -1276,7 +1366,6 @@ export default function ItineraryMakerModule({
     blockId: string
   ): Section[] => {
     // First, find the block and its position
-    let blockToRemove: Block | null = null
     let blockSectionIndex = -1
     let blockIndex = -1
 
@@ -1285,7 +1374,6 @@ export default function ItineraryMakerModule({
 
       const index = section.blocks.findIndex((block) => block.id === blockId)
       if (index !== -1) {
-        blockToRemove = section.blocks[index]
         blockSectionIndex = sIndex
         blockIndex = index
       }
@@ -1512,6 +1600,7 @@ export default function ItineraryMakerModule({
       } else {
         return handleSuccessfulSubmission(response as CreateItineraryResponse)
       }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       if (isCreateAndValidUmami()) {
         window.umami.track('create_itinerary_fail')
@@ -1640,6 +1729,7 @@ export default function ItineraryMakerModule({
         recipientName: user?.firstName,
       }
       await submitItineraryReminder(submissionData)
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       toast.error(`Failed with scheduling itinerary reminder`)
     } finally {
@@ -1744,7 +1834,7 @@ export default function ItineraryMakerModule({
 
     if (
       itineraryData.sections.length === 1 &&
-      (itineraryData.sections[0].blocks?.length ?? 0) <= 1
+      (itineraryData.sections[0].blocks?.length ?? 0) < 1
     ) {
       toast.error('Itinerary harus memiliki setidaknya satu bagian.')
       return
@@ -1797,6 +1887,7 @@ export default function ItineraryMakerModule({
       )
       setFeedbackItems(response.feedback)
       toast.success('Feedback berhasil di-generate')
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       toast.error('Gagal generate feedback. Silahkan coba lagi')
     } finally {
@@ -1819,20 +1910,21 @@ export default function ItineraryMakerModule({
     )
   }
 
-  const syncFeedbackWithItinerary = () => {
-    setFeedbackItems((prev) =>
-      prev.filter((item) => {
-        const section = itineraryData.sections[item.target.sectionIndex - 1]
-        if (!section?.blocks) return false
-
-        return section.blocks.some((block) => block.id === item.target.blockId)
-      })
-    )
-  }
-
   const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? ''
 
   useEffect(() => {
+    const syncFeedbackWithItinerary = () => {
+      setFeedbackItems((prev) =>
+        prev.filter((item) => {
+          const section = itineraryData.sections[item.target.sectionIndex - 1]
+          if (!section?.blocks) return false
+
+          return section.blocks.some(
+            (block) => block.id === item.target.blockId
+          )
+        })
+      )
+    }
     syncFeedbackWithItinerary()
   }, [itineraryData])
 
@@ -1996,6 +2088,9 @@ export default function ItineraryMakerModule({
             timeWarning={timeWarning}
             onTransportModeChange={updateTransportMode}
             setPositionToView={setPositionToView}
+            focusedLocation={focusedLocation}
+            onLocationFocus={handleLocationFocus}
+            registerBlockRef={registerBlockRef}
           />
           <div className="flex justify-center my-8">
             <div className="p-[1.5px] flex -mt-4 w-[240px] items-center bg-gradient-to-r from-[#0073E6] to-[#004080] hover:from-[#0066cc] hover:to-[#003366] rounded-lg group">
@@ -2044,6 +2139,8 @@ export default function ItineraryMakerModule({
             addLocationToSection={addLocationToSection}
             isEditing
             positionToView={positionToView}
+            focusedLocation={focusedLocation}
+            onLocationFocus={handleLocationFocus}
           />
         </div>
         <div className="absolute bottom-5 left-1/2 -translate-x-1/2 shadow-lg z-10 md:hidden">

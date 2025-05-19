@@ -6,13 +6,14 @@ import React, {
   useEffect,
   useRef,
   useState,
+  useCallback,
 } from 'react'
 import { setCookie } from 'cookies-next/client'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { toast } from 'sonner'
 import { useBaseUrlWithPath } from '@/hooks/useBaseUrlWithPath'
 import {
-  UserResponseInterface,
+  type UserResponseInterface,
   type AuthContextInterface,
   type AuthContextProviderProps,
   type User,
@@ -31,7 +32,7 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
   children,
 }) => {
   const launchingDate = new Date(
-    process.env.NEXT_PUBLIC_LAUNCHING_DATE || '2025-01-22T00:00:00'
+    process.env.NEXT_PUBLIC_LAUNCHING_DATE ?? '2025-01-22T00:00:00'
   )
   const nowDate = new Date()
   const isLaunching = nowDate > launchingDate
@@ -57,39 +58,68 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
   const fullUrl = useBaseUrlWithPath()
   const pathname = usePathname()
 
-  const validate = async ({ ticket }: { ticket: string }) => {
-    try {
-      const response = await customFetch<ValidateResponse>(
-        `/pre-register/login/validate/${ticket}`,
-        { method: 'POST' }
-      )
+  const validate = useCallback(
+    async ({ ticket }: { ticket: string }) => {
+      try {
+        const response = await customFetch<ValidateResponse>(
+          `/pre-register/login/validate/${ticket}`,
+          { method: 'POST' }
+        )
 
-      if (response.statusCode !== 200) throw new Error(response.message)
+        if (response.statusCode !== 200) throw new Error(response.message)
 
-      setCookie('AT', response.accessToken)
-      setIsAuthenticated(true)
-      const responseUser = await customFetch<UserResponseInterface>(
-        '/pre-register/referral-code'
-      )
+        setCookie('AT', response.accessToken)
+        setIsAuthenticated(true)
+        const responseUser = await customFetch<UserResponseInterface>(
+          '/pre-register/referral-code'
+        )
 
-      if (responseUser.statusCode !== 200) throw new Error(responseUser.message)
+        if (responseUser.statusCode !== 200)
+          throw new Error(responseUser.message)
 
-      setUser(responseUser.user)
-      router.replace(pathname)
-      router.refresh()
-      return response
-    } catch (e) {
-      setUser(null)
-      setIsAuthenticated(false)
-      router.replace(pathname)
-      router.refresh()
-      if (e instanceof Error) throw new Error(e.message)
-      throw new Error('Unexpected error')
-    }
-  }
+        setUser(responseUser.user)
+        router.replace(pathname)
+        router.refresh()
+        return response
+      } catch (e) {
+        setUser(null)
+        setIsAuthenticated(false)
+        router.replace(pathname)
+        router.refresh()
+        if (e instanceof Error) throw new Error(e.message)
+        throw new Error('Unexpected error')
+      }
+    },
+    [pathname, router]
+  )
 
-  const login = async (body: { email: string; password: string }) => {
-    const response = await customFetch('/auth/login', {
+  const login = useCallback(
+    async (body: { email: string; password: string }) => {
+      const response = await customFetch('/auth/login', {
+        method: 'POST',
+        credentials: 'include',
+        body: customFetchBody(body),
+      })
+
+      if (response.statusCode === 200) {
+        const userResponse =
+          await customFetch<UserResponseInterface>('/auth/me')
+        if (userResponse.statusCode === 200) {
+          setIsAuthenticated(true)
+          setUser(userResponse.user)
+          return response
+        } else {
+          throw new Error(userResponse.message)
+        }
+      } else {
+        throw new Error(response.message)
+      }
+    },
+    []
+  )
+
+  const googleLogin = useCallback(async (body: { firebaseToken: string }) => {
+    const response = await customFetch('/auth/google-login', {
       method: 'POST',
       credentials: 'include',
       body: customFetchBody(body),
@@ -107,9 +137,34 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
     } else {
       throw new Error(response.message)
     }
-  }
+  }, [])
 
-  const preRegistLogin = async ({ email }: { email: string }) => {
+  const googleRegister = useCallback(
+    async (body: { firebaseToken: string }) => {
+      const response = await customFetch('/auth/google-register', {
+        method: 'POST',
+        credentials: 'include',
+        body: customFetchBody(body),
+      })
+
+      if (response.statusCode === 200) {
+        const userResponse =
+          await customFetch<UserResponseInterface>('/auth/me')
+        if (userResponse.statusCode === 200) {
+          setIsAuthenticated(true)
+          setUser(userResponse.user)
+          return response
+        } else {
+          throw new Error(userResponse.message)
+        }
+      } else {
+        throw new Error(response.message)
+      }
+    },
+    []
+  )
+
+  const preRegistLogin = useCallback(async ({ email }: { email: string }) => {
     const response = await customFetch('/pre-register/login', {
       method: 'POST',
       body: customFetchBody({ email }),
@@ -120,9 +175,9 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
     } else {
       throw new Error(response.message)
     }
-  }
+  }, [])
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     const response = await customFetch('/auth/logout', {
       method: 'POST',
       credentials: 'include',
@@ -132,9 +187,9 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
     await deleteCookie('accessToken')
     await deleteCookie('refreshToken')
     return response
-  }
+  }, [])
 
-  const getMe = async () => {
+  const getMe = useCallback(async () => {
     try {
       setLoadingRefreshToken(true)
       const response = await customFetch<UserResponseInterface>('/auth/me')
@@ -147,13 +202,14 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
         setIsAuthenticated(false)
         setUser(null)
       }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
       setIsAuthenticated(false)
       setUser(null)
     } finally {
       setLoadingRefreshToken(false)
     }
-  }
+  }, [router])
 
   useEffect(() => {
     if (isLaunching) {
@@ -173,7 +229,7 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
       setIsAuthenticated(!!accessToken)
       setLoadingRefreshToken(false)
     }
-  }, [])
+  }, [getMe, isLaunching, userResponse])
 
   useEffect(() => {
     if (
@@ -198,7 +254,7 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
         developmentLock.current = true
       }
     }
-  }, [searchParams, fullUrl])
+  }, [searchParams, fullUrl, isLaunching, validate, router])
 
   const contextValue = React.useMemo(
     () => ({
@@ -208,6 +264,8 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
       validate,
       preRegistLogin,
       login,
+      googleLogin,
+      googleRegister,
       logout,
       getMe,
     }),
@@ -218,6 +276,8 @@ export const AuthContextProvider: React.FC<AuthContextProviderProps> = ({
       validate,
       preRegistLogin,
       login,
+      googleLogin,
+      googleRegister,
       logout,
       getMe,
     ]

@@ -2,7 +2,7 @@ import { useForm } from 'react-hook-form'
 import { useRegisterContext } from '../contexts/RegisterContext'
 import { createUserFormSchema } from '../schemas/createUserFormSchema'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
+import { type z } from 'zod'
 import { useEffect, useState } from 'react'
 import {
   Form,
@@ -17,8 +17,13 @@ import { Button } from '@/components/ui/button'
 import { customFetch, customFetchBody } from '@/utils/customFetch'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
-import { Loader } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 import Link from 'next/link'
+import { Separator } from '@/components/ui/separator'
+import { Google } from '@/icons/Google'
+import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth'
+import { auth } from '@/utils/firebase'
+import { useAuthContext } from '@/contexts/AuthContext'
 
 export const CreateUserForm: React.FC = () => {
   const router = useRouter()
@@ -103,6 +108,7 @@ export const CreateUserForm: React.FC = () => {
       } catch (error) {
         toast.error('Terjadi kesalahan. Silakan coba lagi.')
         setSubmitLoading(false)
+        throw error
       }
     }
   }
@@ -114,9 +120,35 @@ export const CreateUserForm: React.FC = () => {
       email,
       birthDate: { day: undefined, month: undefined, year: undefined },
     })
-  }, [firstName, lastName, email, birthDate])
+  }, [firstName, lastName, email, birthDate, form])
 
   const [submitLoading, setSubmitLoading] = useState(false)
+
+  const { googleRegister } = useAuthContext()
+
+  const registerGoogle = async () => {
+    try {
+      setSubmitLoading(true)
+
+      const result = await signInWithPopup(auth, new GoogleAuthProvider())
+
+      const googleUser = result.user
+      const firebaseToken = await googleUser.getIdToken()
+      await googleRegister({ firebaseToken })
+      router.push('/')
+      toast.success('Berhasil daftar!')
+    } catch (err: any) {
+      let errMsg = (err as Error).message
+      if (errMsg === 'User already exists') {
+        router.push('/login')
+        errMsg = 'Email sudah terdaftar. Silakan login.'
+      }
+      toast.error(errMsg)
+      throw err
+    } finally {
+      setSubmitLoading(false)
+    }
+  }
 
   return (
     <Form {...form}>
@@ -251,7 +283,7 @@ export const CreateUserForm: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex justify-center">
+          <div className="flex flex-col gap-y-2">
             <Button
               disabled={submitLoading}
               type="submit"
@@ -259,9 +291,29 @@ export const CreateUserForm: React.FC = () => {
               className="bg-[#0059B3] hover:bg-[#0059B3]/90 text-white w-full"
             >
               {submitLoading ? (
-                <Loader className="animate-spin" />
+                <Loader2 className="animate-spin" />
               ) : (
                 'Daftar Akun'
+              )}
+            </Button>
+            <div className="flex items-center justify-center gap-2 text-[#9dbaef] w-full">
+              <Separator className="bg-[#9dbaef] flex-grow w-1/3 h-[0.5px]" />
+              <span className="text-center px-2 text-sm">atau</span>
+              <Separator className="bg-[#9dbaef] flex-grow w-1/3 h-[0.5px]" />
+            </div>
+            <Button
+              disabled={submitLoading}
+              className="text-black w-full"
+              variant={'outline'}
+              type="button"
+              onClick={registerGoogle}
+            >
+              {submitLoading ? (
+                <Loader2 className="animate-spin" />
+              ) : (
+                <>
+                  <Google /> Daftar dengan Google
+                </>
               )}
             </Button>
           </div>
