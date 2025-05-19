@@ -83,6 +83,18 @@ jest.mock('@/components/ui/button', () => ({
   ),
 }))
 
+// Mock PaymentButton component
+jest.mock(
+  '@/modules/ProfileModule/module-elements/ItineraryCard/PaymentButton',
+  () => ({
+    PaymentButton: ({ transactionId }: { transactionId: string }) => (
+      <div data-testid="payment-button" data-transaction-id={transactionId}>
+        Payment Button
+      </div>
+    ),
+  })
+)
+
 // Mock NumberFormat for currency
 const mockFormatCurrency = jest.fn().mockImplementation(() => 'Rp 500.000')
 const originalIntlNumberFormat = Intl.NumberFormat
@@ -272,6 +284,30 @@ describe('TransactionDetailModal Component', () => {
     expect(paymentStatus).toHaveClass(
       PAYMENT_STATUS_COLOR[PAYMENT_STATUS.UNPAID]
     )
+  })
+
+  test('shows payment button only for UNPAID transactions', () => {
+    // For UNPAID transaction
+    const unpaidTransaction = {
+      ...mockTransaction,
+      paymentStatus: PAYMENT_STATUS.UNPAID,
+    }
+
+    const { rerender } = render(
+      <TransactionDetailModal transaction={unpaidTransaction} />
+    )
+
+    // Payment button should be visible
+    expect(screen.getByTestId('payment-button')).toBeInTheDocument()
+    expect(
+      screen.getByTestId('payment-button').getAttribute('data-transaction-id')
+    ).toBe(unpaidTransaction.id)
+
+    // For PAID transaction
+    rerender(<TransactionDetailModal transaction={mockTransaction} />)
+
+    // Payment button should not be visible
+    expect(screen.queryByTestId('payment-button')).not.toBeInTheDocument()
   })
 
   test('handles transaction with a single guest', () => {
