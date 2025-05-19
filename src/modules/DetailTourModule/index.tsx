@@ -17,20 +17,20 @@ export default function DetailTourModule({
   const [data] = useState<Tour>(initialData)
   const { isAuthenticated } = useAuthContext()
 
-    useEffect(() => {
-      const viewTour = async () => {
-        try {
-          await customFetch(`tour/views/${initialData.id}`, {
-            method: 'POST',
-          })
-        } catch (err: any) {
-          console.error('Error viewing tour:', err)
-        }
+  useEffect(() => {
+    const viewTour = async () => {
+      try {
+        await customFetch(`tour/views/${initialData.id}`, {
+          method: 'POST',
+        })
+      } catch (err: any) {
+        console.error('Error viewing tour:', err)
       }
-      if ( isAuthenticated ) {
-        void viewTour()
-      }
-    }, [])
+    }
+    if (isAuthenticated) {
+      void viewTour()
+    }
+  }, [])
 
   return data ? (
     <div className="max-w-6xl mx-auto p-4 pt-24 py-8">
