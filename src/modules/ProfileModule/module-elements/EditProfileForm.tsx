@@ -21,6 +21,8 @@ import { toast } from 'sonner'
 import { customFetch, customFetchBody } from '@/utils/newCustomFetch'
 import { type EditProfileFormProps } from '../interface'
 import { useRouter } from 'next/navigation'
+import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth'
+import { auth } from '@/utils/firebase'
 
 export const EditProfileForm: React.FC<EditProfileFormProps> = ({
   closeDialog,
@@ -103,6 +105,40 @@ export const EditProfileForm: React.FC<EditProfileFormProps> = ({
       } finally {
         setSubmitLoading(false)
       }
+    }
+  }
+
+  const linkAccount = async () => {
+    try {
+      setSubmitLoading(true)
+
+      const result = await signInWithPopup(auth, new GoogleAuthProvider())
+
+      const googleUser = result.user
+      const firebaseToken = await googleUser.getIdToken()
+
+      const response = await customFetch('/auth/link-account', {
+        method: 'POST',
+        body: customFetchBody({
+          firebaseToken,
+        }),
+      })
+
+      if (response.statusCode === 200) {
+        await getMe()
+        router.refresh()
+        closeDialog()
+        toast.success('Akun berhasil dihubungkan!')
+      }
+    } catch (err: any) {
+      closeDialog()
+      toast.error(
+        err instanceof Error
+          ? err.message
+          : 'Terjadi kesalahan. Silakan coba lagi.'
+      )
+    } finally {
+      setSubmitLoading(false)
     }
   }
   return (
@@ -234,12 +270,16 @@ export const EditProfileForm: React.FC<EditProfileFormProps> = ({
           >
             {submitLoading ? <Loader className="animate-spin" /> : 'Simpan'}
           </Button>
-          <Button
-            className={`bg-white rounded-lg text-black hover:bg-black/10 border-black/10 border font-normal `}
-          >
-            <Google />
-            <span>Link Akun Google</span>
-          </Button>
+          {!user?.firebaseUid && (
+            <Button
+              className={`bg-white rounded-lg text-black hover:bg-black/10 border-black/10 border font-normal `}
+              disabled={submitLoading}
+              onClick={linkAccount}
+            >
+              <Google />
+              <span>Link Akun Google</span>
+            </Button>
+          )}
         </DialogFooter>
       </form>
     </Form>
