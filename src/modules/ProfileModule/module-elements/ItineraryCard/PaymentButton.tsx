@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 import { resumePaymentDoku } from '@/app/actions/resumePaymentDoku'
-import { useRouter } from 'next/navigation'
 import { useAuthContext } from '@/contexts/AuthContext'
 import { DokuScript } from '@/modules/TourBookingFormModule/components/DokuScript'
 

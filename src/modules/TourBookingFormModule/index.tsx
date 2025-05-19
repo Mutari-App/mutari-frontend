@@ -87,32 +87,7 @@ export const TourBookingFormModule: React.FC<TourBookingFormModuleProps> = ({
   //   const midtransClientKey = process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY ?? ''
   const dokuClientId = process.env.NEXT_PUBLIC_DOKU_CLIENT_ID ?? ''
 
-  // Effect to open payment popup when token is received
   useEffect(() => {
-    // // Common payment callbacks
-    // const paymentCallbacks = {
-    //   onSuccess: function (result: { order_id: string }) {
-    //     void confirmPayment(result.order_id)
-    //     setIsLoading(false)
-    //   },
-    //   onPending: function (_result: any) {
-    //     toast.warning('Pembayaran Pending')
-    //     setIsLoading(false)
-    //   },
-    //   onError: function (_result: any) {
-    //     toast.error('Pembayaran Gagal', {
-    //       description:
-    //         'Terjadi kesalahan saat memproses pembayaran. Silakan coba lagi.',
-    //     })
-    //     setIsLoading(false)
-    //   },
-    //   onClose: function () {
-    //     console.log('Customer closed the popup without finishing payment')
-    //     setIsLoading(false)
-    //     router.push(`/profile/${user?.id}?tab=transaction`)
-    //   },
-    // }
-
     if (paymentToken) {
       // window.snap.pay(paymentToken, paymentCallbacks)
       window.loadJokulCheckout(paymentToken)
@@ -237,10 +212,6 @@ export const TourBookingFormModule: React.FC<TourBookingFormModuleProps> = ({
       const result = await createPaymentDoku({
         ...paymentDetails,
       })
-
-      //   const result = await createPayment({
-      //     ...paymentDetails,
-      //   })
 
       // Handle payment result
       if (result.success && result.token) {

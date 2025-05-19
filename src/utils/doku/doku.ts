@@ -191,7 +191,3 @@ export const initDoku = (): DokuService => {
 
   return DokuService.getInstance(config)
 }
-
-export const generateDokuOrderId = (): string => {
-  return `DOKU-ORDER-${Date.now()}-${Math.floor(Math.random() * 1000)}`
-}
