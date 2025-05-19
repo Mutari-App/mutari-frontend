@@ -43,6 +43,7 @@ export interface User {
   createdAt: string
   updatedAt: string
   usedCount: number
+  firebaseUid: string
 }
 
 export interface UserResponseInterface {
