@@ -20,10 +20,10 @@ jest.mock('lucide-react', () => ({
 describe('PreRegisterForm', () => {
   const mockProps = {
     isSuccess: false,
-    setIsSuccess: jest.fn(),
-    showLoginForm: jest.fn(),
+    setIsSuccessAction: jest.fn(),
+    showLoginFormAction: jest.fn(),
     email: '',
-    setEmail: jest.fn(),
+    setEmailAction: jest.fn(),
   }
 
   beforeEach(() => {
@@ -67,14 +67,14 @@ describe('PreRegisterForm', () => {
     render(<PreRegisterForm {...successProps} />)
 
     fireEvent.click(screen.getByRole('button', { name: /Login/i }))
-    expect(mockProps.showLoginForm).toHaveBeenCalledTimes(1)
+    expect(mockProps.showLoginFormAction).toHaveBeenCalledTimes(1)
   })
 
   it('should call showLoginForm when "Login di sini" is clicked', () => {
     render(<PreRegisterForm {...mockProps} />)
 
     fireEvent.click(screen.getByText(/Login di sini/i))
-    expect(mockProps.showLoginForm).toHaveBeenCalledTimes(1)
+    expect(mockProps.showLoginFormAction).toHaveBeenCalledTimes(1)
   })
 
   it('should validate required fields', async () => {
@@ -127,8 +127,10 @@ describe('PreRegisterForm', () => {
       })
 
       // Verify state changes
-      expect(mockProps.setEmail).toHaveBeenCalledWith('john.doe@example.com')
-      expect(mockProps.setIsSuccess).toHaveBeenCalledWith(true)
+      expect(mockProps.setEmailAction).toHaveBeenCalledWith(
+        'john.doe@example.com'
+      )
+      expect(mockProps.setIsSuccessAction).toHaveBeenCalledWith(true)
       expect(toast.success).toHaveBeenCalledWith('Praregistrasi berhasil!', {
         description: 'Silahkan cek email anda!',
       })
@@ -158,7 +160,7 @@ describe('PreRegisterForm', () => {
 
     await waitFor(() => {
       expect(toast.error).toHaveBeenCalledWith(errorMessage)
-      expect(mockProps.setIsSuccess).not.toHaveBeenCalled()
+      expect(mockProps.setIsSuccessAction).not.toHaveBeenCalled()
     })
   })
 
@@ -231,7 +233,7 @@ describe('PreRegisterForm', () => {
 
     // Wait for the submission to complete
     await waitFor(() => {
-      expect(mockProps.setIsSuccess).toHaveBeenCalledWith(true)
+      expect(mockProps.setIsSuccessAction).toHaveBeenCalledWith(true)
     })
   })
 })

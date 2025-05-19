@@ -1,6 +1,6 @@
 'use client'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import MyItineraryList from './sections/MyItineraryList'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
@@ -53,17 +53,20 @@ export default function ItineraryModule() {
     await fetchMySharedItinerary()
   }
 
-  function handleSearchparams(query: string, value: string) {
-    const params = new URLSearchParams(searchParams)
-    if (value) {
-      params.set(query, value)
-    } else {
-      params.delete(query)
-    }
-    router.replace(`${pathname}?${params.toString()}`)
-  }
+  const handleSearchparams = useCallback(
+    (query: string, value: string) => {
+      const params = new URLSearchParams(searchParams)
+      if (value) {
+        params.set(query, value)
+      } else {
+        params.delete(query)
+      }
+      router.replace(`${pathname}?${params.toString()}`)
+    },
+    [pathname, router, searchParams]
+  )
 
-  const fetchMyItinerary = async () => {
+  const fetchMyItinerary = useCallback(async () => {
     try {
       const res = await customFetch<ItineraryResponse>(
         `/itineraries/me?page=${myItineraryPage}`,
@@ -84,9 +87,9 @@ export default function ItineraryModule() {
     } catch (err: any) {
       if (err instanceof Error) toast.error(`${err.message}`)
     }
-  }
+  }, [handleSearchparams, myItineraryPage])
 
-  const fetchMySharedItinerary = async () => {
+  const fetchMySharedItinerary = useCallback(async () => {
     try {
       const res = await customFetch<ItineraryResponse>(
         `/itineraries/me/shared?page=${sharedItineraryPage}`,
@@ -106,9 +109,9 @@ export default function ItineraryModule() {
     } catch (err: any) {
       if (err instanceof Error) toast.error(`${err.message}`)
     }
-  }
+  }, [handleSearchparams, sharedItineraryPage])
 
-  const fetchMyCompletedItinerary = async () => {
+  const fetchMyCompletedItinerary = useCallback(async () => {
     try {
       const res = await customFetch<ItineraryResponse>(
         `/itineraries/me/completed?page=${completedItineraryPage}`,
@@ -130,19 +133,19 @@ export default function ItineraryModule() {
     } catch (err: any) {
       if (err instanceof Error) toast.error(`${err.message}`)
     }
-  }
+  }, [completedItineraryPage, handleSearchparams])
 
   useEffect(() => {
-    fetchMyItinerary().catch((err) => console.log(err))
-  }, [myItineraryPage])
+    fetchMyItinerary().catch((err: Error) => toast.error(err.message))
+  }, [fetchMyItinerary, myItineraryPage])
 
   useEffect(() => {
-    fetchMySharedItinerary().catch((err) => console.log(err))
-  }, [sharedItineraryPage])
+    fetchMySharedItinerary().catch((err: Error) => toast.error(err.message))
+  }, [fetchMySharedItinerary, sharedItineraryPage])
 
   useEffect(() => {
-    fetchMyCompletedItinerary().catch((err) => console.log(err))
-  }, [completedItineraryPage])
+    fetchMyCompletedItinerary().catch((err: Error) => toast.error(err.message))
+  }, [completedItineraryPage, fetchMyCompletedItinerary])
 
   return (
     <div className="flex flex-col items-center gap-7 pt-28">
@@ -156,10 +159,14 @@ export default function ItineraryModule() {
             className="w-full md:w-1/3 mx-auto"
             replace={true}
           >
-            <Button className="bg-gradient-to-r from-[#016CD7] to-[#014285] text-white items-center flex gap-3 w-full">
-              <PlusIcon />
-              Buat Itinerary Baru
-            </Button>
+            <div className="p-[1.5px] flex w-full items-center bg-gradient-to-r from-[#0073E6] to-[#004080] hover:from-[#0066cc] hover:to-[#003366] rounded-lg group">
+              <Button className="h-8 w-full bg-white group-hover:bg-transparent">
+                <span className="bg-gradient-to-r from-[#0073E6] to-[#004080] group-hover:text-white text-transparent bg-clip-text flex items-center">
+                  <PlusIcon className="h-4 w-4 mr-1 text-[#0073E6] group-hover:text-white" />
+                  Buat Itinerary Baru
+                </span>
+              </Button>
+            </div>
           </Link>
           <MyItineraryList
             data={data}

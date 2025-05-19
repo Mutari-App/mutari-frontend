@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { getImage } from '@/utils/getImage'
-import SearchBar from '@/modules/ItinerarySearchResultsModule/module-elements/SearchBar'
+import SearchBar from '@/components/SearchBar'
 import { useRouter } from 'next/navigation'
 
 const HeaderSection = () => {

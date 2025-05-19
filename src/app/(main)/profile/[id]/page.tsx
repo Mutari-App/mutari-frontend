@@ -1,5 +1,5 @@
 import ProfileModule from '@/modules/ProfileModule'
-import { ProfileProps } from '@/modules/ProfileModule/interface'
+import { type ProfileProps } from '@/modules/ProfileModule/interface'
 import { customFetch } from '@/utils/newCustomFetch'
 
 interface GetProfileResponse {

@@ -1,7 +1,7 @@
 import React from 'react'
 import { render, screen, fireEvent } from '@testing-library/react'
 import '@testing-library/jest-dom'
-import NoResults from '@/modules/ItinerarySearchResultsModule/module-elements/NoResults'
+import NoResults from '@/components/NoResults'
 
 // Mock Lucide icons
 jest.mock('lucide-react', () => ({

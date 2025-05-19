@@ -5,7 +5,7 @@ import HeaderSection from './sections/HeaderSection'
 import ItineraryListSection from './sections/ItineraryListSection'
 import { customFetch, customFetchBody } from '@/utils/newCustomFetch'
 import {
-  BatchCheckItinerarySavedResponse,
+  type BatchCheckItinerarySavedResponse,
   type ItineraryFilters,
   type ItinerarySearchResult,
   type SearchItinerariesResponse,

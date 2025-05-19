@@ -20,6 +20,7 @@ import {
 } from '@vis.gl/react-google-maps'
 import CustomPin from '../module-elements/CustomPin'
 import { SECTION_COLORS } from '../constants'
+import { Loader2 } from 'lucide-react'
 
 type MapsProps = {
   readonly itineraryData: Readonly<Section[]>
@@ -31,6 +32,8 @@ type MapsProps = {
     location: string,
     price?: number
   ) => void
+  focusedLocation?: { blockId: string; sectionNumber: number } | null
+  onLocationFocus?: (blockId: string, sectionNumber: number) => void
   _testSelectedPlace?: {
     placeId: string
     latLng: {
@@ -82,6 +85,8 @@ function Maps({
   addLocationToSection,
   isEditing,
   positionToView,
+  focusedLocation,
+  onLocationFocus,
   _testSelectedPlace,
   _testSelectedPlaceDetails,
 }: MapsProps) {
@@ -99,7 +104,7 @@ function Maps({
       firstLoc
         ? { lat: parseFloat(firstLoc[0]), lng: parseFloat(firstLoc[1]) }
         : { lat: -6.3604, lng: 106.82719 },
-    []
+    [firstLoc]
   )
   const defaultSelectedPlace = { placeId: '', latLng: { lat: 0, lng: 0 } }
 
@@ -108,6 +113,7 @@ function Maps({
   )
   const [selectedPlaceDetails, setSelectedPlaceDetails] =
     useState<PlaceResult | null>(_testSelectedPlaceDetails ?? null)
+  const [isLoading, setIsLoading] = useState(false)
 
   const { locations, routes } = useMemo(() => {
     const locations: ILocationMarker[] = []
@@ -130,6 +136,7 @@ function Maps({
               section: section.sectionNumber,
               order,
               title: block.title,
+              isFocused: focusedLocation?.blockId === block.id,
             })
           }
 
@@ -149,10 +156,11 @@ function Maps({
     })
 
     return { locations, routes }
-  }, [itineraryData])
+  }, [itineraryData, focusedLocation])
 
   const fetchPlaceDetails = async (placeId: string) => {
     try {
+      setIsLoading(true)
       const res = await customFetch<GetPlaceDetailsResponse>(
         `/map/details?placeId=${placeId}`,
         {
@@ -164,6 +172,8 @@ function Maps({
       }
     } catch (error) {
       console.error('Error fetching place details:', error)
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -173,6 +183,8 @@ function Maps({
       return
     }
     if (e.detail.placeId) {
+      // Clear previous details when selecting a new place
+      setSelectedPlaceDetails(null)
       setSelectedPlace({
         placeId: e.detail.placeId,
         latLng: {
@@ -217,6 +229,28 @@ function Maps({
     }
   }, [positionToView, map])
 
+  function findBlockIdFromLocation(lat: number, lng: number) {
+    for (const section of itineraryData) {
+      if (section.blocks) {
+        for (const block of section.blocks) {
+          if (block.location) {
+            const [blockLat, blockLng] = block.location
+              .split(',')
+              .map((coord) => parseFloat(coord.trim()))
+            // Use approximate equality for floating point comparison
+            if (
+              Math.abs(blockLat - lat) < 0.0001 &&
+              Math.abs(blockLng - lng) < 0.0001
+            ) {
+              return block.id
+            }
+          }
+        }
+      }
+    }
+    return null
+  }
+
   return (
     <div className="w-full h-full">
       <Map
@@ -236,11 +270,21 @@ function Maps({
             key={`${loc.lat}-${loc.lng}`}
             position={loc}
             data-testid="map-marker"
+            onClick={() => {
+              if (onLocationFocus) {
+                // Find the block ID from the location
+                const blockId = findBlockIdFromLocation(loc.lat, loc.lng)
+                if (blockId) {
+                  onLocationFocus(blockId, loc.section)
+                }
+              }
+            }}
           >
             <CustomPin
               number={loc.order}
               color={SECTION_COLORS[loc.section % 10].class}
               title={loc.title}
+              highlighted={loc?.isFocused}
             />
           </AdvancedMarker>
         ))}
@@ -263,54 +307,71 @@ function Maps({
           />
         )}
 
-        {selectedPlace.placeId && selectedPlaceDetails && (
+        {/* Show modal immediately when a place is selected, even during loading */}
+        {selectedPlace.placeId && (
           <div className="absolute bottom-8 left-1/2 -translate-x-1/2 w-11/12 flex flex-col gap-5 bg-white max-h-[50dvh] overflow-auto rounded-2xl shadow-md p-6">
-            <div className="flex justify-between ">
-              <div className="flex gap-2 flex-col">
-                <h3 className="font-semibold text-lg">
-                  {selectedPlaceDetails.name}
-                </h3>
-                <p className="text-gray-600">{selectedPlaceDetails.vicinity}</p>
-                <div className="flex gap-1 items-center text-sm">
-                  ⭐
-                  <p className="text-gray-600">
-                    <span className="text-yellow-500 font-semibold">
-                      {selectedPlaceDetails.rating}{' '}
-                    </span>
-                    ({selectedPlaceDetails.user_ratings_total})
-                  </p>
-                </div>
+            {isLoading ? (
+              <div className="flex flex-col items-center justify-center py-8">
+                <Loader2 className="h-8 w-8 text-blue-500 animate-spin mb-2" />
+                <p className="text-gray-600">Mengambil detail lokasi...</p>
               </div>
+            ) : selectedPlaceDetails ? (
+              <>
+                <div className="flex flex-col-reverse md:flex-row gap-4 md:justify-between ">
+                  <div className="flex gap-2 flex-col">
+                    <h3 className="font-semibold text-lg">
+                      {selectedPlaceDetails.name}
+                    </h3>
+                    <p className="text-gray-600">
+                      {selectedPlaceDetails.vicinity}
+                    </p>
+                    <div className="flex gap-1 items-center text-sm">
+                      ⭐
+                      <p className="text-gray-600">
+                        <span className="text-yellow-500 font-semibold">
+                          {selectedPlaceDetails.rating}{' '}
+                        </span>
+                        ({selectedPlaceDetails.user_ratings_total})
+                      </p>
+                    </div>
+                  </div>
 
-              <Button
-                size={'sm'}
-                variant={'gradient'}
-                onClick={handleAddToItinerary}
-              >
-                Tambahkan ke itinerary
-              </Button>
-            </div>
-
-            <div className="flex gap-2 flex-col text-sm text-gray-600">
-              {selectedPlaceDetails.international_phone_number && (
-                <div className="flex gap-2 items-center">
-                  <Phone size={16} />
-                  <p>{selectedPlaceDetails.international_phone_number}</p>
-                </div>
-              )}
-              {selectedPlaceDetails.website && (
-                <div className="flex gap-2 items-center">
-                  <Globe size={16} />
-                  <Link
-                    href={selectedPlaceDetails.website}
-                    target="_blank"
-                    className="text-sky-600 hover:text-blue-400 underline"
+                  <Button
+                    size={'sm'}
+                    variant={'gradient'}
+                    onClick={handleAddToItinerary}
                   >
-                    {selectedPlaceDetails.website}
-                  </Link>
+                    Tambahkan ke itinerary
+                  </Button>
                 </div>
-              )}
-            </div>
+
+                <div className="flex gap-2 flex-col text-sm text-gray-600">
+                  {selectedPlaceDetails.international_phone_number && (
+                    <div className="flex gap-2 items-center">
+                      <Phone size={16} />
+                      <p>{selectedPlaceDetails.international_phone_number}</p>
+                    </div>
+                  )}
+                  {selectedPlaceDetails.website && (
+                    <div className="flex gap-2 items-center">
+                      <Globe size={16} />
+                      <Link
+                        href={selectedPlaceDetails.website}
+                        target="_blank"
+                        className="text-sky-600 hover:text-blue-400 underline"
+                      >
+                        {selectedPlaceDetails.website}
+                      </Link>
+                    </div>
+                  )}
+                </div>
+              </>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-8">
+                <Loader2 className="h-8 w-8 text-blue-500 animate-spin mb-2" />
+                <p className="text-gray-600">Mengambil detail lokasi...</p>
+              </div>
+            )}
           </div>
         )}
       </Map>

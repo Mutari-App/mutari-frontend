@@ -43,7 +43,7 @@ describe('TourHeader', () => {
       <TourHeader
         title={mockTourNoImage.title}
         location={mockTourNoImage.location}
-        coverImage={mockTourNoImage.coverImage || ''}
+        coverImage={mockTourNoImage.coverImage ?? ''}
       />
     )
     const backgroundDiv = container.querySelector('div.relative')

@@ -17,6 +17,7 @@ export default async function TourDetailPage({
     }
 
     return <DetailTourModule initialData={res.data} />
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (err) {
     return notFound()
   }

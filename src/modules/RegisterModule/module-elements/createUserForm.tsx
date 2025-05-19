@@ -2,7 +2,7 @@ import { useForm } from 'react-hook-form'
 import { useRegisterContext } from '../contexts/RegisterContext'
 import { createUserFormSchema } from '../schemas/createUserFormSchema'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
+import { type z } from 'zod'
 import { useEffect, useState } from 'react'
 import {
   Form,
@@ -100,6 +100,7 @@ export const CreateUserForm: React.FC = () => {
           toast.error('Terjadi kesalahan. Silakan coba lagi.')
           setSubmitLoading(false)
         }
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
         toast.error('Terjadi kesalahan. Silakan coba lagi.')
         setSubmitLoading(false)
@@ -114,7 +115,7 @@ export const CreateUserForm: React.FC = () => {
       email,
       birthDate: { day: undefined, month: undefined, year: undefined },
     })
-  }, [firstName, lastName, email, birthDate])
+  }, [firstName, lastName, email, birthDate, form])
 
   const [submitLoading, setSubmitLoading] = useState(false)
 

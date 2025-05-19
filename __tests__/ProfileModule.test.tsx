@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import '@testing-library/jest-dom'
 import ProfileModule from '../src/modules/ProfileModule' // Adjust this path as needed
-import { ProfileProps } from '../src/modules/ProfileModule/interface' // Import the interface
+import { type ProfileProps } from '../src/modules/ProfileModule/interface' // Import the interface
 import React from 'react'
 
 // Mock the imported components
@@ -38,6 +38,17 @@ jest.mock(
   })
 )
 
+jest.mock('../src/modules/ProfileModule/sections/TransactionSection', () => ({
+  TransactionSection: ({ profile }: { profile: ProfileProps }) => (
+    <div
+      data-testid="transaction-section"
+      data-profile={JSON.stringify(profile)}
+    >
+      Transaction History Section
+    </div>
+  ),
+}))
+
 // Mock the UI components
 jest.mock('@/components/ui/tabs', () => ({
   Tabs: ({
@@ -68,6 +79,29 @@ jest.mock('@/components/ui/tabs', () => ({
     children: React.ReactNode
     value: string
   }) => <button data-testid={`tab-${value}`}>{children}</button>,
+}))
+
+const mockUser = {
+  id: 'user-123',
+  firstName: 'Test',
+  lastName: 'User',
+  email: 'test@example.com',
+  photoProfile: 'https://example.com/photo.jpg',
+}
+
+const mockAuthContext = {
+  user: mockUser,
+  isAuthenticated: true,
+  setIsAuthenticated: jest.fn(),
+  validate: jest.fn(),
+  preRegistLogin: jest.fn(),
+  login: jest.fn(),
+  logout: jest.fn(),
+  getMe: jest.fn(),
+}
+
+jest.mock('../src/contexts/AuthContext', () => ({
+  useAuthContext: () => mockAuthContext,
 }))
 
 describe('ProfileModule', () => {
@@ -102,7 +136,7 @@ describe('ProfileModule', () => {
   it('passes profile data to ProfileHeader correctly', () => {
     render(<ProfileModule profile={mockProfile} />)
     const header = screen.getByTestId('profile-header')
-    expect(JSON.parse(header.dataset.props || '{}')).toEqual(mockProfile)
+    expect(JSON.parse(header.dataset.props ?? '{}')).toEqual(mockProfile)
   })
 
   it('renders tabs with correct default value', () => {
@@ -127,12 +161,12 @@ describe('ProfileModule', () => {
     render(<ProfileModule profile={mockProfile} />)
 
     const itinerariesSection = screen.getByTestId('itineraries-section')
-    expect(JSON.parse(itinerariesSection.dataset.profile || '{}')).toEqual(
+    expect(JSON.parse(itinerariesSection.dataset.profile ?? '{}')).toEqual(
       mockProfile
     )
 
     const likedSection = screen.getByTestId('liked-itineraries-section')
-    expect(JSON.parse(likedSection.dataset.profile || '{}')).toEqual(
+    expect(JSON.parse(likedSection.dataset.profile ?? '{}')).toEqual(
       mockProfile
     )
   })
