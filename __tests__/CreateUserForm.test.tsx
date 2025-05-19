@@ -62,6 +62,15 @@ jest.mock('sonner', () => ({
   },
 }))
 
+jest.mock('firebase/app', () => ({
+  initializeApp: jest.fn(),
+}))
+
+jest.mock('firebase/auth', () => ({
+  getAuth: jest.fn(),
+  signInWithEmailAndPassword: jest.fn(),
+}))
+
 describe('CreateUserForm', () => {
   beforeEach(() => {
     jest.clearAllMocks()

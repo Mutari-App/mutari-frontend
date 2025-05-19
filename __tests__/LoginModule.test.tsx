@@ -43,6 +43,15 @@ jest.mock('@/utils/getImage', () => ({
     ),
 }))
 
+jest.mock('firebase/app', () => ({
+  initializeApp: jest.fn(),
+}))
+
+jest.mock('firebase/auth', () => ({
+  getAuth: jest.fn(),
+  signInWithEmailAndPassword: jest.fn(),
+}))
+
 describe('LoginModule', () => {
   beforeEach(() => {
     jest.clearAllMocks()
