@@ -115,6 +115,11 @@ export default function ItineraryMakerModule({
   )
   const wasAlreadyRequested = useRef(false)
   const [contingency, setContingency] = useState<ContingencyPlan | null>(null)
+  const [focusedLocation, setFocusedLocation] = useState<{
+    blockId: string
+    sectionNumber: number
+  } | null>(null)
+  const blockRefs = useRef<Record<string, HTMLElement | null>>({})
 
   const initialItineraryData = useRef<CreateItineraryDto>({
     isPublished: false,
@@ -472,6 +477,42 @@ export default function ItineraryMakerModule({
       window.removeEventListener('beforeunload', handleBeforeUnload)
     }
   }, [hasUnsavedChanges])
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && focusedLocation) {
+        clearLocationFocus()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [focusedLocation])
+
+  useEffect(() => {
+    if (!focusedLocation) return
+
+    const handleClickOutside = (e: MouseEvent) => {
+      // Check if the click was on a block card or marker
+      const target = e.target as HTMLElement
+      const isClickInsideBlock = target.closest('[data-block-id]')
+      const isClickInsidePin = target.closest('[data-location-pin]')
+
+      // If not clicking on a block or pin, clear focus
+      if (!isClickInsideBlock && !isClickInsidePin) {
+        clearLocationFocus()
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [focusedLocation])
 
   const updateTransportMode = async (
     blockId: string,
@@ -969,6 +1010,54 @@ export default function ItineraryMakerModule({
         sections: updatedSections,
       }
     })
+  }
+
+  const registerBlockRef = (blockId: string, element: HTMLElement | null) => {
+    blockRefs.current[blockId] = element
+  }
+
+  const handleLocationFocus = (blockId: string, sectionNumber: number) => {
+    if (
+      !focusedLocation ||
+      focusedLocation.blockId !== blockId ||
+      focusedLocation.sectionNumber !== sectionNumber
+    ) {
+      // Focus on the new location
+      setFocusedLocation({ blockId, sectionNumber })
+
+      // Find the location coordinates to pan the map
+      const section = itineraryData.sections.find(
+        (s) => s.sectionNumber === sectionNumber
+      )
+      const block = section?.blocks?.find((b) => b.id === blockId)
+
+      if (block?.location) {
+        const [lat, lng] = block.location
+          .split(',')
+          .map((coord) => parseFloat(coord.trim()))
+        setPositionToView({ lat, lng })
+
+        // Switch to itinerary view on desktop, map view on mobile
+        if (window.innerWidth >= 768 && isMapView) {
+          setIsMapView(false)
+        }
+
+        // Scroll to the block in the itinerary list
+        setTimeout(() => {
+          const blockElement = blockRefs.current[blockId]
+          if (blockElement) {
+            blockElement.scrollIntoView({
+              behavior: 'smooth',
+              block: 'center',
+            })
+          }
+        }, 50) // Short delay to ensure DOM updates
+      }
+    }
+  }
+
+  const clearLocationFocus = () => {
+    setFocusedLocation(null)
   }
 
   const addLocationToSection = (
@@ -1999,6 +2088,9 @@ export default function ItineraryMakerModule({
             timeWarning={timeWarning}
             onTransportModeChange={updateTransportMode}
             setPositionToView={setPositionToView}
+            focusedLocation={focusedLocation}
+            onLocationFocus={handleLocationFocus}
+            registerBlockRef={registerBlockRef}
           />
           <div className="flex justify-center my-8">
             <div className="p-[1.5px] flex -mt-4 w-[240px] items-center bg-gradient-to-r from-[#0073E6] to-[#004080] hover:from-[#0066cc] hover:to-[#003366] rounded-lg group">
@@ -2047,6 +2139,8 @@ export default function ItineraryMakerModule({
             addLocationToSection={addLocationToSection}
             isEditing
             positionToView={positionToView}
+            focusedLocation={focusedLocation}
+            onLocationFocus={handleLocationFocus}
           />
         </div>
         <div className="absolute bottom-5 left-1/2 -translate-x-1/2 shadow-lg z-10 md:hidden">
