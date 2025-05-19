@@ -3,9 +3,11 @@ import { TourHeader } from './module-elements/TourHeader'
 import { TourDescription } from './module-elements/TourDescription'
 import { TourInclude } from './module-elements/TourInclude'
 import { TourOrderCard } from './module-elements/TourOrderCard'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Loader2 } from 'lucide-react'
 import { TourList } from './module-elements/TourList'
+import { customFetch } from '@/utils/newCustomFetch'
+import { useAuthContext } from '@/contexts/AuthContext'
 
 export default function DetailTourModule({
   initialData,
@@ -13,6 +15,22 @@ export default function DetailTourModule({
   initialData: Tour
 }) {
   const [data] = useState<Tour>(initialData)
+  const { isAuthenticated } = useAuthContext()
+
+    useEffect(() => {
+      const viewTour = async () => {
+        try {
+          await customFetch(`tour/views/${initialData.id}`, {
+            method: 'POST',
+          })
+        } catch (err: any) {
+          console.error('Error viewing tour:', err)
+        }
+      }
+      if ( isAuthenticated ) {
+        void viewTour()
+      }
+    }, [])
 
   return data ? (
     <div className="max-w-6xl mx-auto p-4 pt-24 py-8">
