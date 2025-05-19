@@ -11,8 +11,7 @@ import {
 import { useForm, useFieldArray, FormProvider } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
-import { MidtransScript } from './components/MidtransScript'
-import { createPayment } from '@/app/actions/payment'
+import { DokuScript } from './components/DokuScript'
 import { useRouter } from 'next/navigation'
 import {
   Form,
@@ -41,6 +40,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { customFetch, customFetchBody } from '@/utils/newCustomFetch'
+import { createPaymentDoku } from '@/app/actions/paymentDoku'
 
 // Define guest schema
 const guestSchema = z.object({
@@ -80,60 +80,44 @@ export const TourBookingFormModule: React.FC<TourBookingFormModuleProps> = ({
 
   // State for loading and payment process
   const [isLoading, setIsLoading] = useState(false)
-  const [snapToken, setSnapToken] = useState<string | null>(null)
-  const [orderId, setOrderId] = useState<string | null>(null)
+  const [paymentToken, setPaymentToken] = useState<string | null>(null)
+  //   const [orderId, setOrderId] = useState<string | null>(null)
   const [showConfirmation, setShowConfirmation] = useState(false)
-  const midtransClientKey = process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY ?? ''
 
-  // Effect to open Midtrans popup when token is received
+  //   const midtransClientKey = process.env.NEXT_PUBLIC_MIDTRANS_CLIENT_KEY ?? ''
+  const dokuClientId = process.env.NEXT_PUBLIC_DOKU_CLIENT_ID ?? ''
+
+  // Effect to open payment popup when token is received
   useEffect(() => {
-    const confirmPayment = async (orderId: string) => {
-      try {
-        const result = await customFetch(`/tour/${orderId}/pay`, {
-          method: 'PATCH',
-        })
+    // // Common payment callbacks
+    // const paymentCallbacks = {
+    //   onSuccess: function (result: { order_id: string }) {
+    //     void confirmPayment(result.order_id)
+    //     setIsLoading(false)
+    //   },
+    //   onPending: function (_result: any) {
+    //     toast.warning('Pembayaran Pending')
+    //     setIsLoading(false)
+    //   },
+    //   onError: function (_result: any) {
+    //     toast.error('Pembayaran Gagal', {
+    //       description:
+    //         'Terjadi kesalahan saat memproses pembayaran. Silakan coba lagi.',
+    //     })
+    //     setIsLoading(false)
+    //   },
+    //   onClose: function () {
+    //     console.log('Customer closed the popup without finishing payment')
+    //     setIsLoading(false)
+    //     router.push(`/profile/${user?.id}?tab=transaction`)
+    //   },
+    // }
 
-        if (result.statusCode !== 200) throw new Error(result.message)
-
-        toast.success('Pembayaran Success')
-        router.push(`/profile/${user?.id}?tab=transaction`)
-      } catch (error: any) {
-        if (error instanceof Error) {
-          toast.error(error.message)
-        } else {
-          toast.error(
-            'Terjadi kesalahan saat memproses pembayaran. Silakan coba lagi.'
-          )
-        }
-      } finally {
-        setIsLoading(false)
-      }
+    if (paymentToken) {
+      // window.snap.pay(paymentToken, paymentCallbacks)
+      window.loadJokulCheckout(paymentToken)
     }
-    if (snapToken && typeof window !== 'undefined' && window.snap) {
-      window.snap.pay(snapToken, {
-        onSuccess: function (result: { order_id: string }) {
-          void confirmPayment(result.order_id)
-          setIsLoading(false)
-        },
-        onPending: function (_result: any) {
-          toast.warning('Pembayaran Pending')
-          setIsLoading(false)
-        },
-        onError: function (_result: any) {
-          toast.error('Pembayaran Gagal', {
-            description:
-              'Terjadi kesalahan saat memproses pembayaran. Silakan coba lagi.',
-          })
-          setIsLoading(false)
-        },
-        onClose: function () {
-          console.log('Customer closed the popup without finishing payment')
-          setIsLoading(false)
-          router.push(`/profile/${user?.id}?tab=transaction`)
-        },
-      })
-    }
-  }, [snapToken, orderId, router, user?.id])
+  }, [paymentToken, user?.id])
 
   // Initialize form
   const form = useForm<FormValues>({
@@ -236,8 +220,8 @@ export const TourBookingFormModule: React.FC<TourBookingFormModuleProps> = ({
       // Validate transaction
       const validatedTransaction = handleTransactionError(transaction)
 
-      // Create payment
-      const result = await createPayment({
+      // Payment details for both providers
+      const paymentDetails = {
         userId: user.id,
         transactionId: validatedTransaction.id,
         customerFirstName: data.customer.firstName,
@@ -248,12 +232,20 @@ export const TourBookingFormModule: React.FC<TourBookingFormModuleProps> = ({
         tourName: tourDetail.title,
         pricePerPerson: tourDetail.pricePerTicket,
         numberOfGuests: guests,
+      }
+
+      const result = await createPaymentDoku({
+        ...paymentDetails,
       })
+
+      //   const result = await createPayment({
+      //     ...paymentDetails,
+      //   })
 
       // Handle payment result
       if (result.success && result.token) {
-        setSnapToken(result.token)
-        setOrderId(result.transactionId || null)
+        setPaymentToken(result.token)
+        // setOrderId(result.transactionId || null)
       } else {
         throw new Error(result.error ?? 'Failed to create payment')
       }
@@ -265,14 +257,15 @@ export const TourBookingFormModule: React.FC<TourBookingFormModuleProps> = ({
           'Terjadi kesalahan saat memproses pembayaran. Silakan coba lagi.'
         )
       }
+    } finally {
       setIsLoading(false)
     }
   }
 
   return (
     <div className="container mx-auto p-4 pt-24  sm:pt-32 pb-20 font-raleway">
-      {/* Load Midtrans Script */}
-      <MidtransScript clientKey={midtransClientKey} />
+      {/* <MidtransScript clientKey={midtransClientKey} /> */}
+      <DokuScript clientId={dokuClientId} />
 
       <h1 className="text-2xl font-bold  font-poppins mb-6">
         Formulir Pemesanan
@@ -556,27 +549,6 @@ export const TourBookingFormModule: React.FC<TourBookingFormModuleProps> = ({
               Konfirmasi untuk melanjutkan ke proses pembayaran.
             </DialogDescription>
           </DialogHeader>
-
-          <div className="space-y-2 py-4">
-            <div className="flex justify-between">
-              <span>Tour:</span>
-              <span className="font-medium">{tourDetail.title}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Tanggal:</span>
-              <span className="font-medium">{formattedDate}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Jumlah Peserta:</span>
-              <span className="font-medium">{guests} orang</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Total Pembayaran:</span>
-              <span className="font-medium">
-                Rp{totalPrice.toLocaleString('id-ID')}
-              </span>
-            </div>
-          </div>
 
           <DialogFooter>
             <Button

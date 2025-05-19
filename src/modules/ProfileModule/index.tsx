@@ -12,6 +12,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 export default function ProfileModule({
   profile,
   tabValue,
+  transactionId,
 }: Readonly<ProfileModuleProps>) {
   const { user } = useAuthContext()
   const router = useRouter()
@@ -55,7 +56,7 @@ export default function ProfileModule({
           <LikedItinerariesSection profile={profile} />
         </TabsContent>
         <TabsContent value="transaction">
-          <TransactionSection profile={profile} />
+          <TransactionSection profile={profile} transactionId={transactionId} />
         </TabsContent>
       </Tabs>
     </div>

@@ -6,8 +6,13 @@ export interface TourBookingFormModuleProps {
   tourDate: Date
 }
 
-export interface MidtransScriptProps {
-  clientKey: string
+// export interface MidtransScriptProps {
+//   clientKey: string
+//   onLoad?: () => void
+// }
+
+export interface DokuScriptProps {
+  clientId: string
   onLoad?: () => void
 }
 

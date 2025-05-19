@@ -14,13 +14,14 @@ export default async function ProfilePage({
   searchParams: Promise<Record<string, string | string[] | undefined>>
 }>) {
   const { id } = await params
-  const { tab } = await searchParams
+  const { tab, transactionId } = await searchParams
   try {
     const response = await customFetch<GetProfileResponse>(`/profile/${id}`)
     return (
       <ProfileModule
         profile={response.profile}
         tabValue={tab as string | undefined}
+        transactionId={transactionId as string | undefined}
       />
     )
   } catch (err) {

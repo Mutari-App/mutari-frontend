@@ -1,25 +1,12 @@
 import React from 'react'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
-import '@testing-library/jest-dom'
 import { PaymentButton } from '@/modules/ProfileModule/module-elements/ItineraryCard/PaymentButton'
-import { resumePayment } from '@/app/actions/resumePayment'
+import { resumePaymentDoku } from '@/app/actions/resumePaymentDoku'
 import { toast } from 'sonner'
-import { useRouter } from 'next/navigation'
 import { useAuthContext } from '@/contexts/AuthContext'
+import { useRouter } from 'next/navigation'
 
-// Mock dependencies
-jest.mock('next/navigation', () => ({
-  useRouter: jest.fn(),
-}))
-
-jest.mock('@/contexts/AuthContext', () => ({
-  useAuthContext: jest.fn(),
-}))
-
-jest.mock('@/app/actions/resumePayment', () => ({
-  resumePayment: jest.fn(),
-}))
-
+jest.mock('@/app/actions/resumePaymentDoku')
 jest.mock('sonner', () => ({
   toast: {
     error: jest.fn(),
@@ -28,17 +15,28 @@ jest.mock('sonner', () => ({
   },
 }))
 
-jest.mock('@/modules/TourBookingFormModule/components/MidtransScript', () => ({
-  MidtransScript: () => <div data-testid="midtrans-script" />,
+jest.mock('@/contexts/AuthContext', () => ({
+  useAuthContext: jest.fn(),
 }))
 
-describe('PaymentButton Component', () => {
+jest.mock('next/navigation', () => ({
+  useRouter: jest.fn(),
+}))
+
+// Mock DokuScript component
+jest.mock('@/modules/TourBookingFormModule/components/DokuScript', () => ({
+  __esModule: true,
+  DokuScript: () => <div data-testid="doku-script"></div>,
+}))
+
+describe('PaymentButton', () => {
+  // Mock payment data
   const mockProps = {
-    transactionId: 'txn-123',
-    totalPrice: 500000,
+    transactionId: 'test-transaction-id',
+    totalPrice: 100000,
     quantity: 2,
-    tourId: 'tour-456',
-    tourName: 'Bali Tour',
+    tourId: 'test-tour-id',
+    tourName: 'Test Tour',
     guests: [
       {
         firstName: 'John',
@@ -46,54 +44,63 @@ describe('PaymentButton Component', () => {
         email: 'john@example.com',
         phoneNumber: '081234567890',
       },
-      {
-        firstName: 'Jane',
-        lastName: 'Doe',
-        email: 'jane@example.com',
-        phoneNumber: '087654321098',
-      },
     ],
   }
 
-  const mockUser = {
-    id: 'user-789',
-    firstName: 'John',
-    lastName: 'Doe',
-  }
+  // Mock user context
+  const mockUser = { id: 'user-123' }
+  const mockUseAuthContext = useAuthContext as jest.Mock
+  const mockUseRouter = useRouter as jest.Mock
 
-  const mockRouter = {
-    refresh: jest.fn(),
-  }
+  // Mock window methods
+  const mockLoadJokulCheckout = jest.fn()
 
   beforeEach(() => {
     jest.clearAllMocks()
-    ;(useRouter as jest.Mock).mockReturnValue(mockRouter)
-    ;(useAuthContext as jest.Mock).mockReturnValue({ user: mockUser })
+
+    // Setup auth context mock
+    mockUseAuthContext.mockReturnValue({ user: mockUser })
+    mockUseRouter.mockReturnValue({ push: jest.fn(), refresh: jest.fn() })
+
+    // Setup window mocks
+    global.window.loadJokulCheckout = mockLoadJokulCheckout
+
+    // Mock document.querySelector
+    document.querySelector = jest.fn().mockImplementation((selector) => {
+      return {
+        setAttribute: jest.fn(),
+        removeAttribute: jest.fn(),
+      }
+    })
   })
 
-  test('renders the payment button correctly', () => {
+  it('renders the payment button correctly', () => {
     render(<PaymentButton {...mockProps} />)
 
     expect(screen.getByText('Bayar Sekarang')).toBeInTheDocument()
-    expect(screen.getByTestId('midtrans-script')).toBeInTheDocument()
+    expect(screen.getByTestId('doku-script')).toBeInTheDocument()
   })
 
-  test('shows error toast when user is not logged in', async () => {
-    ;(useAuthContext as jest.Mock).mockReturnValue({ user: null })
+  it('shows loading state when clicked', async () => {
+    // Mock the resumePaymentDoku to delay returning
+    ;(resumePaymentDoku as jest.Mock).mockImplementation(
+      () =>
+        new Promise((resolve) =>
+          setTimeout(() => resolve({ success: true, token: 'token-123' }), 100)
+        )
+    )
 
     render(<PaymentButton {...mockProps} />)
 
     fireEvent.click(screen.getByText('Bayar Sekarang'))
 
-    expect(toast.error).toHaveBeenCalledWith('Anda harus login terlebih dahulu')
-    expect(resumePayment).not.toHaveBeenCalled()
+    expect(screen.getByText('Memproses...')).toBeInTheDocument()
   })
 
-  test('calls resumePayment with correct parameters when clicked', async () => {
-    ;(resumePayment as jest.Mock).mockResolvedValue({
+  it('calls resumePaymentDoku with correct parameters when clicked', async () => {
+    ;(resumePaymentDoku as jest.Mock).mockResolvedValue({
       success: true,
-      token: 'snap-token-123',
-      orderId: 'order-123',
+      token: 'test-token',
     })
 
     render(<PaymentButton {...mockProps} />)
@@ -101,7 +108,7 @@ describe('PaymentButton Component', () => {
     fireEvent.click(screen.getByText('Bayar Sekarang'))
 
     await waitFor(() => {
-      expect(resumePayment).toHaveBeenCalledWith({
+      expect(resumePaymentDoku).toHaveBeenCalledWith({
         userId: mockUser.id,
         transactionId: mockProps.transactionId,
         totalPrice: mockProps.totalPrice,
@@ -116,11 +123,20 @@ describe('PaymentButton Component', () => {
     })
   })
 
-  test('shows error toast when resumePayment fails', async () => {
-    const errorMessage = 'Failed to process payment'
-    ;(resumePayment as jest.Mock).mockResolvedValue({
-      success: false,
-      error: errorMessage,
+  it('shows error toast when user is not logged in', () => {
+    mockUseAuthContext.mockReturnValue({ user: null })
+
+    render(<PaymentButton {...mockProps} />)
+
+    fireEvent.click(screen.getByText('Bayar Sekarang'))
+
+    expect(toast.error).toHaveBeenCalledWith('Anda harus login terlebih dahulu')
+  })
+
+  it('calls loadJokulCheckout when payment token is received', async () => {
+    ;(resumePaymentDoku as jest.Mock).mockResolvedValue({
+      success: true,
+      token: 'test-token',
     })
 
     render(<PaymentButton {...mockProps} />)
@@ -128,17 +144,28 @@ describe('PaymentButton Component', () => {
     fireEvent.click(screen.getByText('Bayar Sekarang'))
 
     await waitFor(() => {
-      expect(toast.error).toHaveBeenCalledWith(errorMessage)
+      expect(mockLoadJokulCheckout).toHaveBeenCalledWith('test-token')
     })
   })
 
-  test('shows loading state while processing payment', async () => {
-    // Create a promise that never resolves to keep loading state
-    ;(resumePayment as jest.Mock).mockImplementation(
-      () =>
-        new Promise((resolve) => {
-          // Intentionally not resolved to test loading state
-        })
+  it('shows error toast when resumePaymentDoku fails', async () => {
+    ;(resumePaymentDoku as jest.Mock).mockResolvedValue({
+      success: false,
+      error: 'Payment failed',
+    })
+
+    render(<PaymentButton {...mockProps} />)
+
+    fireEvent.click(screen.getByText('Bayar Sekarang'))
+
+    await waitFor(() => {
+      expect(toast.error).toHaveBeenCalledWith('Payment failed')
+    })
+  })
+
+  it('shows generic error toast when resumePaymentDoku throws an error', async () => {
+    ;(resumePaymentDoku as jest.Mock).mockRejectedValue(
+      new Error('Network error')
     )
 
     render(<PaymentButton {...mockProps} />)
@@ -146,7 +173,76 @@ describe('PaymentButton Component', () => {
     fireEvent.click(screen.getByText('Bayar Sekarang'))
 
     await waitFor(() => {
-      expect(screen.getByText('Memproses...')).toBeInTheDocument()
+      expect(toast.error).toHaveBeenCalledWith('Network error')
+    })
+  })
+
+  it('shows generic error toast when resumePaymentDoku throws a non-Error exception', async () => {
+    ;(resumePaymentDoku as jest.Mock).mockRejectedValue('Something went wrong')
+
+    render(<PaymentButton {...mockProps} />)
+
+    fireEvent.click(screen.getByText('Bayar Sekarang'))
+
+    await waitFor(() => {
+      expect(toast.error).toHaveBeenCalledWith(
+        'Terjadi kesalahan saat memproses pembayaran. Silakan coba lagi.'
+      )
+    })
+  })
+
+  it('hides dialog overlay when payment token is received', async () => {
+    const mockSetAttribute = jest.fn()
+    const mockedQuerySelector = jest.fn().mockImplementation(() => ({
+      setAttribute: mockSetAttribute,
+    }))
+    document.querySelector = mockedQuerySelector
+    ;(resumePaymentDoku as jest.Mock).mockResolvedValue({
+      success: true,
+      token: 'test-token',
+    })
+
+    render(<PaymentButton {...mockProps} />)
+
+    fireEvent.click(screen.getByText('Bayar Sekarang'))
+
+    await waitFor(() => {
+      expect(mockedQuerySelector).toHaveBeenCalled()
+      expect(mockSetAttribute).toHaveBeenCalledWith(
+        'style',
+        'visibility: hidden; opacity: 0;'
+      )
+    })
+  })
+
+  it('disables the button when loading', () => {
+    ;(resumePaymentDoku as jest.Mock).mockImplementation(
+      () =>
+        new Promise((resolve) =>
+          setTimeout(() => resolve({ success: true }), 1000)
+        )
+    )
+
+    render(<PaymentButton {...mockProps} />)
+
+    const button = screen.getByRole('button')
+    fireEvent.click(button)
+
+    expect(button).toBeDisabled()
+  })
+
+  it('re-enables the button after payment fails', async () => {
+    ;(resumePaymentDoku as jest.Mock).mockRejectedValue(
+      new Error('Payment failed')
+    )
+
+    render(<PaymentButton {...mockProps} />)
+
+    const button = screen.getByRole('button')
+    fireEvent.click(button)
+
+    await waitFor(() => {
+      expect(button).not.toBeDisabled()
     })
   })
 })

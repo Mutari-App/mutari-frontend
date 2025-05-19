@@ -13,6 +13,7 @@ export interface ProfileProps {
 export interface ProfileModuleProps {
   profile: ProfileProps
   tabValue?: string
+  transactionId?: string
 }
 
 export interface ItineraryProps {
