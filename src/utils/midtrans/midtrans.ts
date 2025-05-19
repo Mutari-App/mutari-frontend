@@ -63,7 +63,3 @@ export const initMidtrans = (): MidtransService => {
 
   return MidtransService.getInstance(config)
 }
-
-export const generateOrderId = (): string => {
-  return `ORDER-${Date.now()}-${Math.floor(Math.random() * 1000)}`
-}
