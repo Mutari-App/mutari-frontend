@@ -8,8 +8,12 @@ import {
 import { customFetch } from '@/utils/newCustomFetch'
 import { toast } from 'sonner'
 import TransactionCard from '../module-elements/ItineraryCard/TransactionCard'
+import { useRouter } from 'next/navigation'
 
-export const TransactionSection: React.FC<ProfileModuleProps> = () => {
+export const TransactionSection: React.FC<ProfileModuleProps> = ({
+  transactionId,
+}) => {
+  const router = useRouter()
   const [transactions, setTransactions] = useState<TransactionProps[]>([])
   const [loading, setLoading] = useState<boolean>(true)
 
@@ -31,6 +35,38 @@ export const TransactionSection: React.FC<ProfileModuleProps> = () => {
       setLoading(false)
     }
   }, [])
+
+  useEffect(() => {
+    if (transactionId) {
+      const confirmPayment = async () => {
+        try {
+          setLoading(true)
+          const result = await customFetch(`/tour/${transactionId}/pay`, {
+            method: 'PATCH',
+          })
+
+          if (result.statusCode !== 200) throw new Error(result.message)
+
+          toast.success('Pembayaran Berhasil')
+        } catch (error: any) {
+          if (error instanceof Error) {
+            toast.error(error.message)
+          } else {
+            toast.error(
+              'Terjadi kesalahan saat memproses pembayaran. Silakan coba lagi.'
+            )
+          }
+        } finally {
+          const url = new URL(window.location.href)
+          url.searchParams.delete('transactionId')
+          router.push(url.toString())
+          setLoading(false)
+        }
+      }
+
+      void confirmPayment()
+    }
+  }, [transactionId, router, getTransactions])
 
   useEffect(() => {
     void getTransactions()

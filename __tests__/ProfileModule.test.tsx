@@ -81,6 +81,23 @@ jest.mock('@/components/ui/tabs', () => ({
   }) => <button data-testid={`tab-${value}`}>{children}</button>,
 }))
 
+// Mock next/navigation
+const mockPush = jest.fn()
+const mockRouter = {
+  push: mockPush,
+}
+
+const mockParams = new URLSearchParams()
+mockParams.set = jest.fn((...args) =>
+  URLSearchParams.prototype.set.apply(mockParams, args)
+)
+mockParams.toString = jest.fn(() => '')
+
+jest.mock('next/navigation', () => ({
+  useRouter: () => mockRouter,
+  useSearchParams: () => mockParams,
+}))
+
 const mockUser = {
   id: 'user-123',
   firstName: 'Test',
@@ -118,12 +135,14 @@ describe('ProfileModule', () => {
   }
 
   it('renders without crashing', () => {
-    render(<ProfileModule profile={mockProfile} />)
+    render(<ProfileModule profile={mockProfile} tabValue="itineraries" />)
     expect(screen.getByTestId('profile-header')).toBeInTheDocument()
   })
 
   it('renders with correct container classes', () => {
-    const { container } = render(<ProfileModule profile={mockProfile} />)
+    const { container } = render(
+      <ProfileModule profile={mockProfile} tabValue="itineraries" />
+    )
     const mainDiv = container.firstChild as HTMLElement
     expect(mainDiv).toHaveClass(
       'min-h-screen',
@@ -134,13 +153,13 @@ describe('ProfileModule', () => {
   })
 
   it('passes profile data to ProfileHeader correctly', () => {
-    render(<ProfileModule profile={mockProfile} />)
+    render(<ProfileModule profile={mockProfile} tabValue="itineraries" />)
     const header = screen.getByTestId('profile-header')
     expect(JSON.parse(header.dataset.props ?? '{}')).toEqual(mockProfile)
   })
 
   it('renders tabs with correct default value', () => {
-    render(<ProfileModule profile={mockProfile} />)
+    render(<ProfileModule profile={mockProfile} tabValue="itineraries" />)
     expect(screen.getByTestId('tabs')).toHaveAttribute(
       'data-default-value',
       'itineraries'
@@ -148,7 +167,7 @@ describe('ProfileModule', () => {
   })
 
   it('renders both tab triggers with correct labels', () => {
-    render(<ProfileModule profile={mockProfile} />)
+    render(<ProfileModule profile={mockProfile} tabValue="itineraries" />)
     expect(screen.getByTestId('tab-itineraries')).toHaveTextContent(
       'Itineraries'
     )
@@ -158,7 +177,7 @@ describe('ProfileModule', () => {
   })
 
   it('passes profile data to tab content sections correctly', () => {
-    render(<ProfileModule profile={mockProfile} />)
+    render(<ProfileModule profile={mockProfile} tabValue="itineraries" />)
 
     const itinerariesSection = screen.getByTestId('itineraries-section')
     expect(JSON.parse(itinerariesSection.dataset.profile ?? '{}')).toEqual(
