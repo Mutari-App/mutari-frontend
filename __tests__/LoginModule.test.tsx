@@ -56,7 +56,7 @@ describe('LoginModule', () => {
     expect(screen.getAllByText('Masuk').length).toBeGreaterThan(0)
     expect(screen.getByLabelText(/Email/i)).toBeInTheDocument()
     expect(screen.getByLabelText(/Password/i)).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /Masuk/i })).toBeInTheDocument()
+    expect(screen.getByTestId('login-submit-button')).toBeInTheDocument()
   })
 
   it('validates email format', async () => {
@@ -93,7 +93,7 @@ describe('LoginModule', () => {
     render(<LoginModule />)
 
     const passwordInput = screen.getByLabelText(/Password/i)
-    const submitButton = screen.getByRole('button', { name: /Masuk/i })
+    const submitButton = screen.getByTestId('login-submit-button')
 
     // Type short password
     await userEvent.type(passwordInput, 'short')
@@ -124,7 +124,7 @@ describe('LoginModule', () => {
 
     const emailInput = screen.getByLabelText(/Email/i)
     const passwordInput = screen.getByLabelText(/Password/i)
-    const submitButton = screen.getByRole('button', { name: /Masuk/i })
+    const submitButton = screen.getByTestId('login-submit-button')
 
     // Fill form with valid data
     await userEvent.type(emailInput, 'test@example.com')
@@ -152,7 +152,7 @@ describe('LoginModule', () => {
 
     const emailInput = screen.getByLabelText(/Email/i)
     const passwordInput = screen.getByLabelText(/Password/i)
-    const submitButton = screen.getByRole('button', { name: /Masuk/i })
+    const submitButton = screen.getByTestId('login-submit-button')
 
     await userEvent.type(emailInput, 'test@example.com')
     await userEvent.type(passwordInput, 'wrongPassword')
@@ -171,7 +171,7 @@ describe('LoginModule', () => {
 
     const emailInput = screen.getByLabelText(/Email/i)
     const passwordInput = screen.getByLabelText(/Password/i)
-    const submitButton = screen.getByRole('button', { name: /Masuk/i })
+    const submitButton = screen.getByTestId('login-submit-button')
 
     await userEvent.type(emailInput, 'test@example.com')
     await userEvent.type(passwordInput, 'validPassword')
@@ -190,7 +190,7 @@ describe('LoginModule', () => {
 
     const emailInput = screen.getByLabelText(/Email/i)
     const passwordInput = screen.getByLabelText(/Password/i)
-    const submitButton = screen.getByRole('button', { name: /Masuk/i })
+    const submitButton = screen.getByTestId('login-submit-button')
 
     await userEvent.type(emailInput, 'test@example.com')
     await userEvent.type(passwordInput, 'validPassword')
@@ -215,7 +215,7 @@ describe('LoginModule', () => {
 
     const emailInput = screen.getByLabelText(/Email/i)
     const passwordInput = screen.getByLabelText(/Password/i)
-    const submitButton = screen.getByRole('button', { name: /Masuk/i })
+    const submitButton = screen.getByTestId('login-submit-button')
 
     await userEvent.type(emailInput, 'test@example.com')
     await userEvent.type(passwordInput, 'validPassword')
