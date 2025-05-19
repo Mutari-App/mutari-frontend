@@ -226,6 +226,8 @@ describe('ItineraryBlock Component', () => {
   const mockRemoveBlock = jest.fn()
   const mockSetPositionToView = jest.fn()
   const mockRemoveFeedbackForField = jest.fn()
+  const mockOnLocationFocus = jest.fn()
+  const mockRegisterBlockRef = jest.fn()
 
   const blockId = 'test-block-123'
   const blockIndex = 0
@@ -271,6 +273,9 @@ describe('ItineraryBlock Component', () => {
         feedbackItems={[]}
         showRoute={false}
         setPositionToView={mockSetPositionToView}
+        isFocused={false}
+        onLocationFocus={mockOnLocationFocus}
+        registerBlockRef={mockRegisterBlockRef}
       />
     )
 
@@ -304,6 +309,9 @@ describe('ItineraryBlock Component', () => {
         removeFeedbackForField={mockRemoveFeedbackForField}
         feedbackItems={[]}
         showRoute={false}
+        isFocused={false}
+        onLocationFocus={mockOnLocationFocus}
+        registerBlockRef={mockRegisterBlockRef}
       />
     )
 
@@ -346,6 +354,9 @@ describe('ItineraryBlock Component', () => {
         showRoute={true}
         routeInfo={routeInfo}
         setPositionToView={mockSetPositionToView}
+        isFocused={false}
+        onLocationFocus={mockOnLocationFocus}
+        registerBlockRef={mockRegisterBlockRef}
       />
     )
 
@@ -384,6 +395,9 @@ describe('ItineraryBlock Component', () => {
         showRoute={false}
         routeInfo={routeInfo}
         setPositionToView={mockSetPositionToView}
+        isFocused={false}
+        onLocationFocus={mockOnLocationFocus}
+        registerBlockRef={mockRegisterBlockRef}
       />
     )
 
@@ -420,6 +434,9 @@ describe('ItineraryBlock Component', () => {
         routeInfo={routeInfo}
         onTransportModeChange={mockOnTransportModeChange}
         setPositionToView={mockSetPositionToView}
+        isFocused={false}
+        onLocationFocus={mockOnLocationFocus}
+        registerBlockRef={mockRegisterBlockRef}
       />
     )
 
@@ -473,6 +490,9 @@ describe('ItineraryBlock Component', () => {
         routeInfo={routeInfo}
         onTransportModeChange={mockOnTransportModeChange}
         setPositionToView={mockSetPositionToView}
+        isFocused={false}
+        onLocationFocus={mockOnLocationFocus}
+        registerBlockRef={mockRegisterBlockRef}
       />
     )
 
@@ -519,6 +539,9 @@ describe('ItineraryBlock Component', () => {
         routeInfo={routeInfo}
         onTransportModeChange={mockOnTransportModeChange}
         setPositionToView={mockSetPositionToView}
+        isFocused={false}
+        onLocationFocus={mockOnLocationFocus}
+        registerBlockRef={mockRegisterBlockRef}
       />
     )
 
@@ -563,6 +586,9 @@ describe('ItineraryBlock Component', () => {
         routeInfo={routeInfo}
         setPositionToView={mockSetPositionToView}
         // Intentionally not providing onTransportModeChange
+        isFocused={false}
+        onLocationFocus={mockOnLocationFocus}
+        registerBlockRef={mockRegisterBlockRef}
       />
     )
 
@@ -591,6 +617,9 @@ describe('ItineraryBlock Component', () => {
         removeFeedbackForField={mockRemoveFeedbackForField}
         feedbackItems={[]}
         showRoute={false}
+        isFocused={false}
+        onLocationFocus={mockOnLocationFocus}
+        registerBlockRef={mockRegisterBlockRef}
       />
     )
 
@@ -623,6 +652,9 @@ describe('ItineraryBlock Component', () => {
         removeFeedbackForField={mockRemoveFeedbackForField}
         feedbackItems={[]}
         showRoute={false}
+        isFocused={false}
+        onLocationFocus={mockOnLocationFocus}
+        registerBlockRef={mockRegisterBlockRef}
       />
     )
 
@@ -653,6 +685,9 @@ describe('ItineraryBlock Component', () => {
         removeFeedbackForField={mockRemoveFeedbackForField}
         feedbackItems={[]}
         showRoute={false}
+        isFocused={false}
+        onLocationFocus={mockOnLocationFocus}
+        registerBlockRef={mockRegisterBlockRef}
       />
     )
 
@@ -684,6 +719,9 @@ describe('ItineraryBlock Component', () => {
         removeFeedbackForField={mockRemoveFeedbackForField}
         feedbackItems={[]}
         showRoute={false}
+        isFocused={false}
+        onLocationFocus={mockOnLocationFocus}
+        registerBlockRef={mockRegisterBlockRef}
       />
     )
 
@@ -709,6 +747,9 @@ describe('ItineraryBlock Component', () => {
         removeFeedbackForField={mockRemoveFeedbackForField}
         feedbackItems={[]}
         showRoute={false}
+        isFocused={false}
+        onLocationFocus={mockOnLocationFocus}
+        registerBlockRef={mockRegisterBlockRef}
       />
     )
 
@@ -733,6 +774,9 @@ describe('ItineraryBlock Component', () => {
         removeFeedbackForField={mockRemoveFeedbackForField}
         feedbackItems={[]}
         showRoute={false}
+        isFocused={false}
+        onLocationFocus={mockOnLocationFocus}
+        registerBlockRef={mockRegisterBlockRef}
       />
     )
 
@@ -758,6 +802,9 @@ describe('ItineraryBlock Component', () => {
         feedbackItems={[]}
         showRoute={false}
         setPositionToView={mockSetPositionToView}
+        isFocused={false}
+        onLocationFocus={mockOnLocationFocus}
+        registerBlockRef={mockRegisterBlockRef}
       />
     )
 
@@ -790,6 +837,9 @@ describe('ItineraryBlock Component', () => {
         feedbackItems={[]}
         showRoute={false}
         setPositionToView={mockSetPositionToView}
+        isFocused={false}
+        onLocationFocus={mockOnLocationFocus}
+        registerBlockRef={mockRegisterBlockRef}
       />
     )
 

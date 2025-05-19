@@ -64,6 +64,9 @@ interface ItinerarySectionsProps {
   setPositionToView: React.Dispatch<
     React.SetStateAction<google.maps.LatLngLiteral | null>
   >
+  focusedLocation: { blockId: string; sectionNumber: number } | null
+  onLocationFocus: (blockId: string, sectionNumber: number) => void
+  registerBlockRef: (blockId: string, element: HTMLElement | null) => void
 }
 
 export const ItinerarySections: React.FC<ItinerarySectionsProps> = ({
@@ -83,6 +86,9 @@ export const ItinerarySections: React.FC<ItinerarySectionsProps> = ({
   handleDragEnd,
   onTransportModeChange,
   setPositionToView,
+  focusedLocation,
+  onLocationFocus,
+  registerBlockRef,
 }) => {
   // Helper function to check if a block should show route information
   const shouldShowRoute = (section: Section, blockIndex: number): boolean => {
@@ -188,6 +194,13 @@ export const ItinerarySections: React.FC<ItinerarySectionsProps> = ({
                     routeInfo={block.routeToNext}
                     onTransportModeChange={onTransportModeChange}
                     setPositionToView={setPositionToView}
+                    isFocused={
+                      focusedLocation !== null &&
+                      focusedLocation.blockId === block.id &&
+                      focusedLocation.sectionNumber === section.sectionNumber
+                    }
+                    onLocationFocus={onLocationFocus}
+                    registerBlockRef={registerBlockRef}
                   />
                 ))}
                 {provided.placeholder}
