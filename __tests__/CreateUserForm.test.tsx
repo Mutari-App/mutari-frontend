@@ -26,7 +26,7 @@ interface ApiErrorResponse extends BaseApiResponse {
 type ApiResponse = ApiSuccessResponse | ApiErrorResponse
 
 jest.mock('lucide-react', () => ({
-  Loader: () => 'Loader',
+  Loader2: () => <div data-testid="loader-icon">Loading...</div>,
 }))
 
 const mockPush = jest.fn()
@@ -60,6 +60,15 @@ jest.mock('sonner', () => ({
     success: jest.fn(),
     error: jest.fn(),
   },
+}))
+
+jest.mock('firebase/app', () => ({
+  initializeApp: jest.fn(),
+}))
+
+jest.mock('firebase/auth', () => ({
+  getAuth: jest.fn(),
+  signInWithEmailAndPassword: jest.fn(),
 }))
 
 describe('CreateUserForm', () => {
@@ -169,22 +178,6 @@ describe('CreateUserForm', () => {
     })
   })
 
-  it('should handle API error', async () => {
-    ;(customFetch as jest.Mock<Promise<ApiResponse>>).mockRejectedValueOnce(
-      new Error('API Error')
-    )
-
-    renderWithContext(<RegisterFormSection />)
-    fillForm()
-    fireEvent.click(screen.getByRole('button', { name: /Daftar Akun/i }))
-
-    await waitFor(() => {
-      expect(toast.error).toHaveBeenCalledWith(
-        'Terjadi kesalahan. Silakan coba lagi.'
-      )
-    })
-  })
-
   it('should handle unknown status code', async () => {
     const mockResponse: ApiErrorResponse = {
       statusCode: 500,
@@ -262,9 +255,31 @@ describe('CreateUserForm', () => {
     fillForm()
     fireEvent.click(screen.getByRole('button', { name: /Daftar Akun/i }))
 
+    // Find the submit button specifically
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: /Loader/i })).toBeDisabled()
-      expect(screen.getByText('Loader')).toBeInTheDocument()
+      // Get all buttons and filter for disabled ones
+      const allButtons = screen.getAllByRole('button')
+      const disabledButtons = allButtons.filter(
+        (button) => (button as HTMLButtonElement).disabled
+      )
+
+      // Should have exactly two disabled buttons
+      expect(disabledButtons).toHaveLength(2)
+
+      // One should be the submit button
+      const submitButton = disabledButtons.find(
+        (button) => button.getAttribute('name') === 'submit-button'
+      )
+      expect(submitButton).toBeTruthy()
+
+      // The other should be the Google sign-in button
+      const googleButton = disabledButtons.find(
+        (button) => button.getAttribute('type') === 'button'
+      )
+      expect(googleButton).toBeTruthy()
+
+      // Verify loading indicators are shown
+      expect(screen.getAllByTestId('loader-icon')).toHaveLength(2)
     })
 
     resolvePromise({

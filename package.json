@@ -48,6 +48,7 @@
     "cookies-next": "^5.1.0",
     "date-fns": "^4.1.0",
     "googleapis": "^148.0.0",
+    "firebase": "^11.7.3",
     "lodash.debounce": "^4.0.8",
     "lucide-react": "^0.474.0",
     "midtrans-client": "^1.4.2",
