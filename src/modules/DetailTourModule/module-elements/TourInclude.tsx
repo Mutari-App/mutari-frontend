@@ -1,8 +1,18 @@
 'use client'
 
-import { Home, Bus, Ticket, Backpack,
-  Utensils, Users, HandPlatter, Camera,
-  BriefcaseMedical, Speech, SquareParking } from 'lucide-react'
+import {
+  Home,
+  Bus,
+  Ticket,
+  Backpack,
+  Utensils,
+  Users,
+  HandPlatter,
+  Camera,
+  BriefcaseMedical,
+  Speech,
+  SquareParking,
+} from 'lucide-react'
 import { type JSX } from 'react'
 
 const iconMap: Record<string, JSX.Element> = {
@@ -16,7 +26,7 @@ const iconMap: Record<string, JSX.Element> = {
   medical: <BriefcaseMedical className="text-blue-500" />,
   tourguide: <Speech className="text-blue-500" />,
   parkingticket: <SquareParking className="text-blue-500" />,
-  bag: <Backpack className="text-blue-500" />
+  bag: <Backpack className="text-blue-500" />,
 }
 
 export const TourInclude = ({ includes }: { includes: Include[] }) => {
