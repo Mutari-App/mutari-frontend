@@ -26,6 +26,9 @@ export default {
         roboto: ['var(--font-roboto)'],
         hammersmithOne: ['var(--font-hammersmith-one)'],
       },
+      backgroundImage: {
+        'blue-gradient': 'linear-gradient(to right, #0073E6, #004080)',
+      },
     },
   },
   // eslint-disable-next-line @typescript-eslint/no-require-imports

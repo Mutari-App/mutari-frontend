@@ -32,6 +32,8 @@ type MapsProps = {
     location: string,
     price?: number
   ) => void
+  focusedLocation?: { blockId: string; sectionNumber: number } | null
+  onLocationFocus?: (blockId: string, sectionNumber: number) => void
   _testSelectedPlace?: {
     placeId: string
     latLng: {
@@ -83,6 +85,8 @@ function Maps({
   addLocationToSection,
   isEditing,
   positionToView,
+  focusedLocation,
+  onLocationFocus,
   _testSelectedPlace,
   _testSelectedPlaceDetails,
 }: MapsProps) {
@@ -132,6 +136,7 @@ function Maps({
               section: section.sectionNumber,
               order,
               title: block.title,
+              isFocused: focusedLocation?.blockId === block.id,
             })
           }
 
@@ -151,7 +156,7 @@ function Maps({
     })
 
     return { locations, routes }
-  }, [itineraryData])
+  }, [itineraryData, focusedLocation])
 
   const fetchPlaceDetails = async (placeId: string) => {
     try {
@@ -224,6 +229,28 @@ function Maps({
     }
   }, [positionToView, map])
 
+  function findBlockIdFromLocation(lat: number, lng: number) {
+    for (const section of itineraryData) {
+      if (section.blocks) {
+        for (const block of section.blocks) {
+          if (block.location) {
+            const [blockLat, blockLng] = block.location
+              .split(',')
+              .map((coord) => parseFloat(coord.trim()))
+            // Use approximate equality for floating point comparison
+            if (
+              Math.abs(blockLat - lat) < 0.0001 &&
+              Math.abs(blockLng - lng) < 0.0001
+            ) {
+              return block.id
+            }
+          }
+        }
+      }
+    }
+    return null
+  }
+
   return (
     <div className="w-full h-full">
       <Map
@@ -243,11 +270,21 @@ function Maps({
             key={`${loc.lat}-${loc.lng}`}
             position={loc}
             data-testid="map-marker"
+            onClick={() => {
+              if (onLocationFocus) {
+                // Find the block ID from the location
+                const blockId = findBlockIdFromLocation(loc.lat, loc.lng)
+                if (blockId) {
+                  onLocationFocus(blockId, loc.section)
+                }
+              }
+            }}
           >
             <CustomPin
               number={loc.order}
               color={SECTION_COLORS[loc.section % 10].class}
               title={loc.title}
+              highlighted={loc?.isFocused}
             />
           </AdvancedMarker>
         ))}
