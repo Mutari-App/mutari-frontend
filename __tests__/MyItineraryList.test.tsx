@@ -184,8 +184,8 @@ jest.mock('next/navigation', () => ({
 jest.mock('next/image', () => ({
   __esModule: true,
   default: ({ alt, ...props }: ImageProps) => {
-    // eslint-disable-next-line @next/next/no-img-element
     return (
+      // eslint-disable-next-line @next/next/no-img-element
       <img
         {...props}
         alt={alt || ''}
@@ -233,16 +233,6 @@ describe('MyItineraryList Component Pagination Tests', () => {
       mockSearchParams.delete(key)
     })
   })
-
-  // Helper function for tests
-  function handleSearchParamsChange(paramName: string, value: string) {
-    if (value) {
-      mockSearchParams.set(paramName, value)
-    } else {
-      mockSearchParams.delete(paramName)
-    }
-    mockReplace(`/mock-path?${mockSearchParams.toString()}`)
-  }
 
   describe('handleSearchparams function', () => {
     it('should update search parameters correctly when value is provided', async () => {

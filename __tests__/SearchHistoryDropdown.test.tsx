@@ -1,7 +1,7 @@
 import React from 'react'
 import { render, screen, fireEvent } from '@testing-library/react'
 import '@testing-library/jest-dom'
-import SearchHistoryDropdown from '@/modules/ItinerarySearchResultsModule/module-elements/SearchHistoryDropdown'
+import SearchHistoryDropdown from '@/components/SearchHistoryDropdown'
 
 // Mock Lucide icons
 jest.mock('lucide-react', () => ({

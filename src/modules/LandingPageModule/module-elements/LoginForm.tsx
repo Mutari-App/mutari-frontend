@@ -25,10 +25,10 @@ const loginSchema = z.object({
 
 export const LoginForm: React.FC<LoginFormProps> = ({
   isSuccess,
-  setIsSuccess,
-  showRegisterForm,
+  setIsSuccessAction,
+  showRegisterFormAction,
   email,
-  setEmail,
+  setEmailAction,
 }) => {
   const [loading, setLoading] = useState<boolean>(false)
 
@@ -49,8 +49,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({
 
       if (response.statusCode !== 200) throw new Error(response.message)
 
-      setEmail(values.email)
-      setIsSuccess(true)
+      setEmailAction(values.email)
+      setIsSuccessAction(true)
       toast.success('Login berhasil!', {
         description: 'Silahkan cek email anda!',
       })
@@ -62,7 +62,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   }
 
   return isSuccess ? (
-    <div className="relative  rounded-2xl p-8 text-center text-white shadow-xl text-center  ">
+    <div className="relative  rounded-2xl p-8 text-center text-white shadow-xl">
       <CheckCircle className="mx-auto h-16 w-16 text-green-400 mb-6" />
       <h2 className="text-2xl font-bold mb-6">Login Berhasil!</h2>
       <div className="space-y-4 mb-8">
@@ -107,7 +107,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
         <div className="col-span-2 flex justify-center text-xs gap-1">
           <span className="">Belum punya akun?</span>
           <button
-            onClick={showRegisterForm}
+            onClick={showRegisterFormAction}
             className="underline font-semibold"
           >
             Register di sini

@@ -7,6 +7,7 @@ interface LikesButtonProps {
   count: number
   liked: boolean
   itineraryId: string
+  enabled: boolean
   className?: string
 }
 
@@ -24,21 +25,31 @@ const LikesButton: React.FC<LikesButtonProps> = ({
   count,
   liked,
   itineraryId,
+  enabled,
   className = '',
 }) => {
+  const [isEnabled, setIsEnabled] = useState(enabled)
   const [isLiked, setIsLiked] = useState(liked)
   const [likeCount, setLikeCount] = useState(count)
 
   const toggleLike = async () => {
     try {
+      const newLikeCount = isLiked === true ? likeCount - 1 : likeCount + 1
+      setIsEnabled(false)
+      setIsLiked(!isLiked)
+      setLikeCount(newLikeCount)
       const response = await customFetch(`/itineraries/${itineraryId}/save`, {
         method: isLiked === true ? 'DELETE' : 'POST',
         credentials: 'include',
       })
 
-      if (!response.success) throw Error(response.message)
-      setIsLiked(!isLiked)
-      setLikeCount(isLiked === true ? likeCount - 1 : likeCount + 1)
+      if (!response.success) {
+        // revert when not success
+        setIsLiked((prevLiked) => !prevLiked)
+        setLikeCount((prevCount) => prevCount)
+        throw Error(response.message)
+      }
+      setIsEnabled(true)
       toast.message(isLiked === true ? 'Itinerary unsaved' : 'Itinerary saved!')
     } catch (error) {
       toast.error(
@@ -52,8 +63,10 @@ const LikesButton: React.FC<LikesButtonProps> = ({
       className={`flex items-center gap-1 ${className} ${isLiked ? 'text-red-500' : 'text-gray-500'}`}
     >
       <Heart
-        onClick={toggleLike}
-        className={`h-4 w-4 cursor-pointer ${isLiked ? 'text-red-500 fill-red-500' : 'text-gray-500'}`}
+        onClick={isEnabled ? toggleLike : undefined}
+        className={`h-4 w-4 cursor-pointer ${isLiked ? 'text-red-500 fill-red-500' : 'text-gray-500'} ${
+          !isEnabled ? 'opacity-50 cursor-not-allowed' : ''
+        }`}
       />
       <span>{formatLikes(likeCount)}</span>
     </div>

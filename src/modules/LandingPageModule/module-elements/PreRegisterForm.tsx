@@ -42,10 +42,10 @@ const preRegisterSchema = z.object({
 
 export const PreRegisterForm: React.FC<PreRegisterFormProps> = ({
   isSuccess,
-  setIsSuccess,
-  showLoginForm,
+  setIsSuccessAction,
+  showLoginFormAction,
   email,
-  setEmail,
+  setEmailAction,
 }) => {
   const [submitLoading, setSubmitLoading] = useState<boolean>(false)
   //   const [countries, setCountries] = useState<CountryProps[]>([])
@@ -89,8 +89,8 @@ export const PreRegisterForm: React.FC<PreRegisterFormProps> = ({
       })
 
       if (response.statusCode !== 200) throw new Error(response.message)
-      setEmail(values.email)
-      setIsSuccess(true)
+      setEmailAction(values.email)
+      setIsSuccessAction(true)
       toast.success('Praregistrasi berhasil!', {
         description: 'Silahkan cek email anda!',
       })
@@ -114,7 +114,11 @@ export const PreRegisterForm: React.FC<PreRegisterFormProps> = ({
           Bagikan kode referral dan dapatkan <strong>hadiah menarik</strong>!
         </p>
       </div>
-      <Button onClick={showLoginForm} variant={'secondary'} className="w-full">
+      <Button
+        onClick={showLoginFormAction}
+        variant={'secondary'}
+        className="w-full"
+      >
         Login
       </Button>
     </div>
@@ -399,7 +403,10 @@ export const PreRegisterForm: React.FC<PreRegisterFormProps> = ({
         {/* Login Link */}
         <div className="col-span-2 flex justify-center text-xs gap-1">
           <span className="">Sudah punya akun?</span>
-          <button onClick={showLoginForm} className="underline font-semibold">
+          <button
+            onClick={showLoginFormAction}
+            className="underline font-semibold"
+          >
             Login di sini
           </button>
         </div>

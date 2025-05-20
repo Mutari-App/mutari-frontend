@@ -10,8 +10,8 @@ import './globals.css'
 import { Suspense } from 'react'
 import { Toaster } from '@/components/ui/sonner'
 import { AuthContextProvider } from '@/contexts/AuthContext'
-import useUserServer from '@/hooks/useUserServer'
 import Script from 'next/script'
+import getUser from '@/utils/getUser'
 
 const poppins = Poppins({
   subsets: ['latin'],
@@ -60,7 +60,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  const userResponse = await useUserServer()
+  const userResponse = await getUser()
   return (
     <html lang="id" className="scroll-smooth">
       <head>

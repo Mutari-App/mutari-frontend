@@ -5,12 +5,13 @@ import HeaderSection from './sections/HeaderSection'
 import ItineraryListSection from './sections/ItineraryListSection'
 import { customFetch, customFetchBody } from '@/utils/newCustomFetch'
 import {
-  BatchCheckItinerarySavedResponse,
+  type BatchCheckItinerarySavedResponse,
   type ItineraryFilters,
   type ItinerarySearchResult,
   type SearchItinerariesResponse,
 } from './interface'
 import { toast } from 'sonner'
+import { useAuthContext } from '@/contexts/AuthContext'
 
 const ItinerarySearchResultsModule = () => {
   const searchParams = useSearchParams()
@@ -34,6 +35,7 @@ const ItinerarySearchResultsModule = () => {
     sortBy: (searchParams.get('sortBy') as ItineraryFilters['sortBy']) ?? '',
     order: (searchParams.get('order') as ItineraryFilters['order']) ?? '',
   })
+  const { isAuthenticated } = useAuthContext()
 
   const fetchItineraries = useCallback(async () => {
     try {
@@ -59,15 +61,22 @@ const ItinerarySearchResultsModule = () => {
       )
 
       const itineraryIds = response.data.map((itinerary) => itinerary.id)
-      const responseLikes = await customFetch<BatchCheckItinerarySavedResponse>(
-        `/itineraries/checkSave`,
-        {
-          method: 'POST',
-          body: customFetchBody(itineraryIds),
-          credentials: 'include',
-        }
-      )
-      setItinerariesLiked(responseLikes.result)
+      if (!isAuthenticated) {
+        setItinerariesLiked(
+          itineraryIds.reduce((acc, id) => ({ ...acc, [id]: false }), {})
+        )
+      } else {
+        const responseLikes =
+          await customFetch<BatchCheckItinerarySavedResponse>(
+            `/itineraries/checkSave`,
+            {
+              method: 'POST',
+              body: customFetchBody(itineraryIds),
+              credentials: 'include',
+            }
+          )
+        setItinerariesLiked(responseLikes.result)
+      }
 
       setItineraries(response.data)
       setTotalPages(response.metadata.totalPages)

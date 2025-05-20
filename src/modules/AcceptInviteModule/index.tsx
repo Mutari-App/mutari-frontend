@@ -1,7 +1,10 @@
 'use client'
 
-import React, { useEffect } from 'react'
-import { AcceptInvitationInteface, AcceptInviteModuleProps } from './interface'
+import React, { useEffect, useCallback } from 'react'
+import {
+  type AcceptInvitationInteface,
+  type AcceptInviteModuleProps,
+} from './interface'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { Loader2 } from 'lucide-react'
@@ -12,7 +15,7 @@ export const AcceptInviteModule: React.FC<AcceptInviteModuleProps> = ({
   itineraryId,
 }) => {
   const launchingDate = new Date(
-    process.env.NEXT_PUBLIC_LAUNCHING_DATE || '2025-01-22T00:00:00'
+    process.env.NEXT_PUBLIC_LAUNCHING_DATE ?? '2025-01-22T00:00:00'
   )
   const nowDate = new Date()
   const isLaunching = nowDate > launchingDate
@@ -20,7 +23,7 @@ export const AcceptInviteModule: React.FC<AcceptInviteModuleProps> = ({
   const { isAuthenticated } = useAuthContext()
   const router = useRouter()
 
-  const getInvitation = async () => {
+  const getInvitation = useCallback(async () => {
     if (!isAuthenticated) {
       toast.error('Silahkan login terlebih dahulu!')
       if (isLaunching) {
@@ -41,6 +44,7 @@ export const AcceptInviteModule: React.FC<AcceptInviteModuleProps> = ({
           throw new Error(acceptResponse.message)
         }
         router.push(`/itinerary/${itineraryId}`)
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (err) {
         toast.error('Undangan tidak valid!', {
           description: 'Coba gunakan akun lain atau minta undangan baru',
@@ -48,7 +52,7 @@ export const AcceptInviteModule: React.FC<AcceptInviteModuleProps> = ({
         router.push('/')
       }
     }
-  }
+  }, [isAuthenticated, isLaunching, itineraryId, router])
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -56,7 +60,7 @@ export const AcceptInviteModule: React.FC<AcceptInviteModuleProps> = ({
     }, 0)
 
     return () => clearTimeout(timeout)
-  }, [toast])
+  }, [getInvitation])
 
   return (
     <div className="flex items-center justify-center h-screen">

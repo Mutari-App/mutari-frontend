@@ -5,7 +5,6 @@ import { MoreHorizontal, X } from 'lucide-react'
 import Image from 'next/image'
 import type React from 'react'
 import { useRef, useState, type KeyboardEvent } from 'react'
-import useOutsideClick from '@/hooks/useOutsideClick'
 import { customFetch } from '@/utils/newCustomFetch'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
@@ -25,9 +24,9 @@ import {
 } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
-import { ItineraryData } from './types'
+import { type ItineraryData } from './types'
 import { useAuthContext } from '@/contexts/AuthContext'
-import { DuplicateItineraryResponse } from '@/modules/ItineraryModule/module-elements/types'
+import { type DuplicateItineraryResponse } from '@/modules/ItineraryModule/module-elements/types'
 
 function ItineraryCard({
   shared = false,
@@ -41,14 +40,12 @@ function ItineraryCard({
   readonly refresh: () => void
 }) {
   const { user } = useAuthContext()
-  const [openOptions, setOpenOptions] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [showInviteDialog, setShowInviteDialog] = useState(false)
   const [emailInput, setEmailInput] = useState('')
   const [emails, setEmails] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
-  const optionRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const daysTotal =
     Math.floor(
@@ -56,14 +53,8 @@ function ItineraryCard({
         (1000 * 60 * 60 * 24)
     ) + 1
 
-  useOutsideClick({
-    ref: optionRef,
-    handler: () => setOpenOptions(false),
-  })
-
   const openDeleteConfirmation = (e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation()
-    setOpenOptions(false)
     setShowDeleteDialog(true)
   }
 

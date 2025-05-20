@@ -42,6 +42,12 @@ jest.mock('next/link', () => ({
   ),
 }))
 
+jest.mock('@/contexts/AuthContext', () => ({
+  useAuthContext: () => ({
+    user: { id: 'user1' },
+  }),
+}))
+
 // Mock UI components
 jest.mock('@/components/ui/card', () => ({
   Card: ({
@@ -116,6 +122,13 @@ jest.mock(
     ),
   })
 )
+
+jest.mock('@/contexts/AuthContext', () => ({
+  useAuthContext: () => ({
+    isAuthenticated: true,
+    user: { id: 'user1' },
+  }),
+}))
 
 // Mock date-fns
 jest.mock('date-fns', () => ({

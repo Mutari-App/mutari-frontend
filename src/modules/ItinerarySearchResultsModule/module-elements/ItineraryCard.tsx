@@ -8,6 +8,7 @@ import { format } from 'date-fns'
 import { id as localeId } from 'date-fns/locale'
 import { Badge } from '@/components/ui/badge'
 import LikesButton from './LikesButton'
+import { useAuthContext } from '@/contexts/AuthContext'
 
 interface ItineraryCardProps {
   itinerary: ItinerarySearchResult
@@ -24,10 +25,11 @@ const ItineraryCard: React.FC<ItineraryCardProps> = ({
 }) => {
   const { id, firstName, lastName, photoProfile } = itinerary.user
   const fullName = `${firstName} ${lastName ?? ''}`
-  const initials = `${firstName.charAt(0)}${lastName?.charAt(0) || ''}`
+  const initials = `${firstName.charAt(0)}${lastName?.charAt(0) ?? ''}`
 
   const visibleTags = itinerary.tags.slice(0, maxVisibleTags)
   const hiddenTagsCount = Math.max(0, itinerary.tags.length - maxVisibleTags)
+  const { isAuthenticated, user } = useAuthContext()
 
   return (
     <Card
@@ -58,12 +60,15 @@ const ItineraryCard: React.FC<ItineraryCardProps> = ({
               className="absolute top-2 right-2 bg-black bg-opacity-25 rounded-full px-1.5 py-[3px] sm:hidden"
               data-testid="mobile-likes-wrapper"
             >
-              <LikesButton
-                itineraryId={itinerary.id}
-                liked={isLiked}
-                count={itinerary.likes}
-                className="text-xs text-white"
-              />
+              {isAuthenticated ? (
+                <LikesButton
+                  itineraryId={itinerary.id}
+                  liked={isLiked}
+                  count={itinerary.likes}
+                  enabled={isAuthenticated && itinerary.user.id !== user?.id}
+                  className="text-xs text-white"
+                />
+              ) : null}
             </div>
           </div>
           <CardContent className="px-2 py-1.5 sm:px-3 sm:py-2 space-y-1 flex-grow">
@@ -125,12 +130,15 @@ const ItineraryCard: React.FC<ItineraryCardProps> = ({
           </Link>
           {/* Desktop-only (≥ 640px) Likes button */}
           <div className="hidden sm:block" data-testid="desktop-likes-wrapper">
-            <LikesButton
-              itineraryId={itinerary.id}
-              liked={isLiked}
-              count={itinerary.likes}
-              className="text-[10px] pl-1 sm:text-sm"
-            />
+            {isAuthenticated ? (
+              <LikesButton
+                itineraryId={itinerary.id}
+                liked={isLiked}
+                count={itinerary.likes}
+                enabled={isAuthenticated && itinerary.user.id !== user?.id}
+                className="text-[10px] pl-1 sm:text-sm"
+              />
+            ) : null}
           </div>
         </CardFooter>
       </div>

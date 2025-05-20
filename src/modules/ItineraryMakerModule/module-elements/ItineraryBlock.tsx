@@ -80,6 +80,9 @@ interface ItineraryBlockProps {
   setPositionToView: React.Dispatch<
     React.SetStateAction<google.maps.LatLngLiteral | null>
   >
+  isFocused: boolean
+  onLocationFocus: (blockId: string, sectionNumber: number) => void
+  registerBlockRef: (blockId: string, element: HTMLElement | null) => void
 }
 
 export const ItineraryBlock: React.FC<ItineraryBlockProps> = ({
@@ -97,6 +100,9 @@ export const ItineraryBlock: React.FC<ItineraryBlockProps> = ({
   routeInfo,
   onTransportModeChange,
   setPositionToView,
+  isFocused,
+  onLocationFocus,
+  registerBlockRef,
 }) => {
   return (
     <>
@@ -106,13 +112,24 @@ export const ItineraryBlock: React.FC<ItineraryBlockProps> = ({
       >
         {(provided: DraggableProvided, snapshot: DraggableStateSnapshot) => (
           <Card
-            ref={provided.innerRef}
+            ref={(el) => {
+              provided.innerRef(el)
+              registerBlockRef(block.id, el)
+            }}
             {...provided.draggableProps}
-            className={`${!showRoute || !routeInfo ? 'mb-2 lg:mb-4' : ''} ${snapshot.isDragging ? 'shadow-lg' : ''} ${
-              timeWarning && timeWarning.blockId === block.id
-                ? 'border-red-500'
-                : ''
-            }`}
+            className={`
+              ${!showRoute || !routeInfo ? 'mb-2 lg:mb-4' : ''} 
+              ${snapshot.isDragging ? 'shadow-lg' : ''}
+              ${timeWarning && timeWarning.blockId === block.id ? 'border-red-500' : ''}
+              ${isFocused ? 'ring-2 ring-[#004080]' : ''}
+              ${block.blockType === 'LOCATION' ? 'cursor-pointer' : ''}
+            `}
+            onClick={
+              block.blockType === 'LOCATION'
+                ? () => onLocationFocus(block.id, sectionNumber)
+                : undefined
+            }
+            data-block-id={block.id} // Add this data attribute
           >
             <CardContent className="p-1 pb-2 lg:pb-4 sm:p-2 lg:p-4">
               <div className="flex justify-between items-start">

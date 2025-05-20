@@ -15,18 +15,35 @@ export interface AuthContextInterface {
     email: string
     password: string
   }) => Promise<CustomFetchBaseResponse>
+  googleLogin: (params: {
+    firebaseToken: string
+  }) => Promise<CustomFetchBaseResponse>
+  googleRegister: (params: {
+    firebaseToken: string
+  }) => Promise<CustomFetchBaseResponse>
   preRegistLogin: (params: {
     email: string
   }) => Promise<CustomFetchBaseResponse>
   logout: () => Promise<CustomFetchBaseResponse>
+  getMe: () => Promise<void>
 }
 
 export interface User {
   id: string
   email: string
   firstName: string
-  referralCode: string
+  lastName: string
+  phoneNumber: string | null
+  photoProfile: string | null
+  referralCode: string | null
+  isEmailConfirmed: boolean
+  referredById: string | null
+  loyaltyPoints: number
+  birthDate: string
+  createdAt: string
+  updatedAt: string
   usedCount: number
+  firebaseUid: string
 }
 
 export interface UserResponseInterface {
