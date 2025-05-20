@@ -87,7 +87,7 @@ export class DokuService {
           auto_redirect: true,
         },
         payment: {
-          payment_due_date: 1, // Payment due in minutes
+          payment_due_date: 60, // Payment due in minutes
         },
         customer: {
           name: `${paymentRequest.customer_details.first_name} ${paymentRequest.customer_details.last_name}`,
@@ -115,8 +115,8 @@ export class DokuService {
           'Request-Id': requestId,
           'Request-Timestamp': requestTimestamp,
           Signature: `HMACSHA256=${signature}`,
-          Digest: this.generateDigest(stringifiedBody),
         },
+        body: stringifiedBody,
       })
 
       if (!response.ok) {
