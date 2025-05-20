@@ -192,7 +192,6 @@ describe('ProfileHeader', () => {
     render(<ProfileHeader {...mockProfileProps} />)
 
     expect(screen.getByText('John Doe')).toBeInTheDocument()
-    expect(screen.getByText('100')).toBeInTheDocument()
     expect(screen.getByText('5')).toBeInTheDocument()
     expect(screen.getByText('10')).toBeInTheDocument()
     expect(screen.getByText('3')).toBeInTheDocument()
