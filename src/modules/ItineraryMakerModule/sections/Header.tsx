@@ -9,6 +9,7 @@ import { customFetch, customFetchBody } from '@/utils/newCustomFetch'
 import { type CreateItineraryResponse } from '../interface'
 import { type DuplicateItineraryResponse } from '@/modules/ItineraryModule/module-elements/types'
 import { toast } from 'sonner'
+
 interface ItineraryHeaderProps {
   itineraryId: string
   title: string
@@ -21,12 +22,15 @@ interface ItineraryHeaderProps {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => void
   onCoverImageChange: (result: CloudinaryUploadWidgetResults) => void
+  onPublishStatusChange: (isPublished: boolean) => void
   isSubmitting: boolean
   isGenerating: boolean
   onGenerateFeedback: () => void
   isPublished: boolean
   isContingency: boolean
+  isEdit: boolean
 }
+
 export const ItineraryHeader: React.FC<ItineraryHeaderProps> = ({
   itineraryId,
   title,
@@ -35,8 +39,10 @@ export const ItineraryHeader: React.FC<ItineraryHeaderProps> = ({
   onTitleChange,
   onDescChange,
   onCoverImageChange,
+  onPublishStatusChange,
   isPublished,
   isContingency,
+  isEdit,
 }) => {
   const titleInputRef = useRef<HTMLInputElement>(null)
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false)
@@ -79,23 +85,26 @@ export const ItineraryHeader: React.FC<ItineraryHeaderProps> = ({
     onDescChange({
       target: { value: data.description ?? '' },
     } as React.ChangeEvent<HTMLInputElement>)
-    if (data.coverImage) {
+    if (data.coverImage && data.coverImage !== localCoverImage) {
       onCoverImageChange({
         info: { secure_url: data.coverImage },
       } as CloudinaryUploadWidgetResults)
     }
+    onPublishStatusChange(data.isPublished)
 
-    try {
-      await customFetch<CreateItineraryResponse>(
-        `/itineraries/${itineraryId}/publish`,
-        {
-          method: 'PATCH',
-          body: customFetchBody({ isPublished: data.isPublished }),
-          credentials: 'include',
-        }
-      )
-    } catch (error) {
-      console.error('Failed to publish itinerary:', error)
+    if (isEdit) {
+      try {
+        await customFetch<CreateItineraryResponse>(
+          `/itineraries/${itineraryId}/publish`,
+          {
+            method: 'PATCH',
+            body: customFetchBody({ isPublished: data.isPublished }),
+            credentials: 'include',
+          }
+        )
+      } catch (error) {
+        console.error('Failed to publish itinerary:', error)
+      }
     }
   }
 
@@ -206,6 +215,7 @@ export const ItineraryHeader: React.FC<ItineraryHeaderProps> = ({
         description={localDesc}
         coverImage={localCoverImage}
         onDuplicate={handleDuplicate}
+        isEdit={isEdit}
       />
     </div>
   )
