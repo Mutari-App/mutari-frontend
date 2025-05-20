@@ -186,7 +186,7 @@ export const initDoku = (): DokuService => {
   const config: DokuConfig = {
     clientId: process.env.NEXT_PUBLIC_DOKU_CLIENT_ID ?? '',
     secretKey: process.env.DOKU_SECRET_KEY ?? '',
-    isProduction: process.env.NODE_ENV === 'production',
+    isProduction: process.env.DOKU_ENV === 'production',
   }
 
   return DokuService.getInstance(config)
