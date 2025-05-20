@@ -43,7 +43,7 @@ export const DokuScript: React.FC<DokuScriptProps> = ({ clientId, onLoad }) => {
       if (window.Jokul) {
         window.Jokul.init({
           clientId: clientId,
-          isProduction: process.env.NODE_ENV === 'production',
+          isProduction: process.env.DOKU_ENV === 'production',
         })
         onLoad?.()
       }
@@ -56,7 +56,7 @@ export const DokuScript: React.FC<DokuScriptProps> = ({ clientId, onLoad }) => {
 
     // Use correct URL based on environment
     const scriptUrl =
-      process.env.NODE_ENV === 'production'
+      process.env.DOKU_ENV === 'production'
         ? 'https://jokul.doku.com/jokul-checkout-js/v1/jokul-checkout-1.0.0.js'
         : 'https://sandbox.doku.com/jokul-checkout-js/v1/jokul-checkout-1.0.0.js'
 
@@ -70,7 +70,7 @@ export const DokuScript: React.FC<DokuScriptProps> = ({ clientId, onLoad }) => {
       if (window.Jokul) {
         window.Jokul.init({
           clientId: clientId,
-          isProduction: process.env.NODE_ENV === 'production',
+          isProduction: process.env.DOKU_ENV === 'production',
         })
         onLoad?.()
       }
