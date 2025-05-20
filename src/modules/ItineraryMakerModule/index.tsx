@@ -1932,7 +1932,7 @@ export default function ItineraryMakerModule({
     <APIProvider apiKey={apiKey}>
       <div className="flex max-h-screen">
         <div
-          className={`container max-w-4xl mx-auto p-4 pt-24 min-h-screen max-h-screen overflow-auto ${isMapView && 'hidden'} md:block`}
+          className={`container max-w-4xl mx-auto p-4 pt-24 max-md:pb-12 min-h-screen max-h-screen overflow-auto ${isMapView && 'hidden'} md:block`}
         >
           <button
             onClick={handleSubmit}
@@ -2041,7 +2041,11 @@ export default function ItineraryMakerModule({
               {/* Hover gradient layer */}
               <span className="absolute inset-0 bg-gradient-to-r from-[#80004B] to-[#0073E6] opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out" />
 
-              <span className="relative flex items-center gap-1.5">
+              <span className="relative flex items-center gap-1.5 min-[390px]:hidden">
+                <Wand2 size={16} />
+                {isGenerating ? 'Memproses...' : 'Saran AI'}
+              </span>
+              <span className="relative items-center gap-1.5 hidden min-[390px]:flex">
                 <Wand2 size={16} />
                 {isGenerating ? 'Memproses...' : 'Buat Saran AI'}
               </span>
@@ -2143,7 +2147,7 @@ export default function ItineraryMakerModule({
             onLocationFocus={handleLocationFocus}
           />
         </div>
-        <div className="absolute bottom-5 left-1/2 -translate-x-1/2 shadow-lg z-10 md:hidden">
+        <div className="fixed bottom-7 left-1/2 -translate-x-1/2 shadow-lg z-10 md:hidden">
           <Button
             variant={'gradient'}
             onClick={() => setIsMapView((prev) => !prev)}
