@@ -123,6 +123,13 @@ jest.mock(
   })
 )
 
+jest.mock('@/contexts/AuthContext', () => ({
+  useAuthContext: () => ({
+    isAuthenticated: true,
+    user: { id: 'user1' },
+  }),
+}))
+
 // Mock date-fns
 jest.mock('date-fns', () => ({
   format: jest.fn().mockReturnValue('01 Jan 2023'),
