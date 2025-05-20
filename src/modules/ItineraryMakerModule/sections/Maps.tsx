@@ -298,15 +298,6 @@ function Maps({
           />
         ))}
 
-        {selectedPlace.latLng.lat && selectedPlace.latLng.lng && (
-          <AdvancedMarker
-            position={selectedPlace.latLng}
-            onClick={() => {
-              setSelectedPlace(selectedPlace)
-            }}
-          />
-        )}
-
         {/* Show modal immediately when a place is selected, even during loading */}
         {selectedPlace.placeId && (
           <div className="absolute bottom-8 left-1/2 -translate-x-1/2 w-11/12 flex flex-col gap-5 bg-white max-h-[50dvh] overflow-auto rounded-2xl shadow-md p-6">
