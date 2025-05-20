@@ -56,6 +56,7 @@ jest.mock('@/components/ui/dropdown-menu', () => ({
       {children}
     </div>
   ),
+  DropdownMenuSeparator: () => <div data-testid="dropdown-separator" />,
 }))
 
 jest.mock('@/components/ui/dialog', () => ({
@@ -142,13 +143,23 @@ jest.mock('@/components/ui/button', () => ({
     children,
     onClick,
     type,
+    variant,
+    disabled,
   }: {
     children: React.ReactNode
     onClick?: () => void
     className?: string
     type?: 'button' | 'submit' | 'reset'
+    variant?: string
+    disabled?: boolean
   }) => (
-    <button data-testid="button" onClick={onClick} type={type}>
+    <button
+      data-testid="button"
+      data-variant={variant}
+      onClick={onClick}
+      type={type}
+      disabled={disabled}
+    >
       {children}
     </button>
   ),
@@ -201,6 +212,11 @@ jest.mock('@/utils/newCustomFetch')
 jest.mock('lucide-react', () => ({
   MoreHorizontal: () => <div>MoreHorizontal</div>,
   X: () => <div data-testid="x-icon">X</div>,
+  Globe: () => <div data-testid="globe-icon">Globe</div>,
+  Check: () => <div data-testid="check-icon">Check</div>,
+  Users: () => <div data-testid="users-icon">Users</div>,
+  Copy: () => <div data-testid="copy-icon">Copy</div>,
+  Trash2: () => <div data-testid="trash-icon">Trash2</div>,
 }))
 
 // Mock hook
@@ -245,8 +261,8 @@ describe('ItineraryCard Component', () => {
     // Click the option button to open dropdown
     fireEvent.click(screen.getByTestId('option-btn'))
 
-    // Find and click the "Mark as Completed" option directly
-    const markAsCompleteOption = screen.getByText('Mark as Completed')
+    // Find and click the "Tandai selesai" option directly
+    const markAsCompleteOption = screen.getByText('Tandai selesai')
     fireEvent.click(markAsCompleteOption)
 
     await waitFor(() => {
@@ -273,7 +289,7 @@ describe('ItineraryCard Component', () => {
     fireEvent.click(screen.getByTestId('option-btn'))
 
     // Click the mark as completed option
-    fireEvent.click(screen.getByText('Mark as Completed'))
+    fireEvent.click(screen.getByText('Tandai selesai'))
 
     await waitFor(() => {
       expect(toast.error).toHaveBeenCalledWith('Failed to mark as complete')
@@ -288,7 +304,7 @@ describe('ItineraryCard Component', () => {
     fireEvent.click(screen.getByTestId('option-btn'))
 
     // Click delete option
-    fireEvent.click(screen.getByText('Delete'))
+    fireEvent.click(screen.getByText('Hapus'))
 
     // Check if dialog appears with confirmation message
     expect(screen.getByText('Apakah anda yakin?')).toBeInTheDocument()
@@ -308,10 +324,10 @@ describe('ItineraryCard Component', () => {
 
     // Open delete dialog
     fireEvent.click(screen.getByTestId('option-btn'))
-    fireEvent.click(screen.getByText('Delete'))
+    fireEvent.click(screen.getByText('Hapus'))
 
     // Confirm deletion
-    fireEvent.click(screen.getByText('Hapus'))
+    fireEvent.click(screen.getByText('Hapus', { selector: 'button' }))
 
     await waitFor(() => {
       expect(customFetch).toHaveBeenCalledWith('/itineraries/1/', {
@@ -334,10 +350,10 @@ describe('ItineraryCard Component', () => {
 
     // Open delete dialog
     fireEvent.click(screen.getByTestId('option-btn'))
-    fireEvent.click(screen.getByText('Delete'))
+    fireEvent.click(screen.getByText('Hapus'))
 
     // Confirm deletion
-    fireEvent.click(screen.getByText('Hapus'))
+    fireEvent.click(screen.getByText('Hapus', { selector: 'button' }))
 
     await waitFor(() => {
       expect(toast.error).toHaveBeenCalledWith('Failed to delete itinerary')
@@ -351,7 +367,7 @@ describe('ItineraryCard Component', () => {
 
     // Open delete dialog
     fireEvent.click(screen.getByTestId('option-btn'))
-    fireEvent.click(screen.getByText('Delete'))
+    fireEvent.click(screen.getByText('Hapus'))
 
     // Cancel deletion
     fireEvent.click(screen.getByText('Batal'))
@@ -366,10 +382,102 @@ describe('ItineraryCard Component', () => {
     fireEvent.click(screen.getByTestId('option-btn'))
 
     // Click invite option
-    fireEvent.click(screen.getByText('Invite'))
+    fireEvent.click(screen.getByText('Undang'))
 
     // Check if invite dialog appears
     expect(screen.getByText('Masukkan email')).toBeInTheDocument()
+  })
+
+  it('opens publish dialog and publishes itinerary', async () => {
+    const mockRefresh = jest.fn()
+    ;(customFetch as jest.Mock).mockResolvedValueOnce({
+      statusCode: 200,
+      message: 'Itinerary published',
+    })
+
+    render(<ItineraryCard item={mockItem} refresh={mockRefresh} />)
+
+    // Click the option button to open dropdown
+    fireEvent.click(screen.getByTestId('option-btn'))
+
+    // Click the publish option
+    fireEvent.click(screen.getByText('Publikasikan'))
+
+    // Check that the publish dialog is open
+    expect(screen.getByText('Publikasikan Itinerary')).toBeInTheDocument()
+
+    // Click the publish button
+    fireEvent.click(screen.getByText('Publikasikan', { selector: 'button' }))
+
+    await waitFor(() => {
+      expect(customFetch).toHaveBeenCalledWith('/itineraries/1/publish', {
+        method: 'PATCH',
+        body: JSON.stringify({ isPublished: true }),
+        credentials: 'include',
+      })
+      expect(toast.success).toHaveBeenCalledWith(
+        'Itinerary published successfully!'
+      )
+      expect(mockRefresh).toHaveBeenCalled()
+    })
+  })
+
+  it('unpublishes a published itinerary', async () => {
+    const publishedItem = { ...mockItem, isPublished: true }
+    const mockRefresh = jest.fn()
+    ;(customFetch as jest.Mock).mockResolvedValueOnce({
+      statusCode: 200,
+      message: 'Itinerary unpublished',
+    })
+
+    render(<ItineraryCard item={publishedItem} refresh={mockRefresh} />)
+
+    // Click the option button to open dropdown
+    fireEvent.click(screen.getByTestId('option-btn'))
+
+    // Click the unpublish option
+    fireEvent.click(screen.getByText('Batalkan publikasi'))
+
+    // Check that the unpublish dialog is open
+    expect(screen.getByText('Batalkan Publikasi Itinerary')).toBeInTheDocument()
+
+    // Click the unpublish button
+    fireEvent.click(screen.getByText('Batalkan Publikasi'))
+
+    await waitFor(() => {
+      expect(customFetch).toHaveBeenCalledWith('/itineraries/1/publish', {
+        method: 'PATCH',
+        body: JSON.stringify({ isPublished: false }),
+        credentials: 'include',
+      })
+      expect(toast.success).toHaveBeenCalledWith('Itinerary unpublished.')
+      expect(mockRefresh).toHaveBeenCalled()
+    })
+  })
+
+  it('duplicates an itinerary when duplicate option is clicked', async () => {
+    ;(customFetch as jest.Mock).mockResolvedValueOnce({
+      statusCode: 201,
+      duplicatedItinerary: { id: '2' },
+    })
+
+    render(<ItineraryCard item={mockItem} refresh={jest.fn()} />)
+
+    // Click the option button to open dropdown
+    fireEvent.click(screen.getByTestId('option-btn'))
+
+    // Click the duplicate option
+    fireEvent.click(screen.getByText('Duplikasi & Edit'))
+
+    await waitFor(() => {
+      expect(customFetch).toHaveBeenCalledWith('/itineraries/1/duplicate', {
+        method: 'POST',
+      })
+      expect(toast.success).toHaveBeenCalledWith(
+        'Itinerary duplicated successfully!'
+      )
+      expect(mockPush).toHaveBeenCalledWith('/itinerary/2/edit')
+    })
   })
 
   it('handles email input and adds valid emails', () => {
@@ -377,7 +485,7 @@ describe('ItineraryCard Component', () => {
 
     // Open invite dialog
     fireEvent.click(screen.getByTestId('option-btn'))
-    fireEvent.click(screen.getByText('Invite'))
+    fireEvent.click(screen.getByText('Undang'))
 
     // Type valid email and press Enter
     const input = screen.getByPlaceholderText('Email (pisahkan dengan spasi)')
@@ -393,7 +501,7 @@ describe('ItineraryCard Component', () => {
 
     // Open invite dialog
     fireEvent.click(screen.getByTestId('option-btn'))
-    fireEvent.click(screen.getByText('Invite'))
+    fireEvent.click(screen.getByText('Undang'))
 
     // Type invalid email and press Enter
     const input = screen.getByPlaceholderText('Email (pisahkan dengan spasi)')
@@ -409,7 +517,7 @@ describe('ItineraryCard Component', () => {
 
     // Open invite dialog
     fireEvent.click(screen.getByTestId('option-btn'))
-    fireEvent.click(screen.getByText('Invite'))
+    fireEvent.click(screen.getByText('Undang'))
 
     // Type valid email followed by space
     const input = screen.getByPlaceholderText('Email (pisahkan dengan spasi)')
@@ -424,7 +532,7 @@ describe('ItineraryCard Component', () => {
 
     // Open invite dialog
     fireEvent.click(screen.getByTestId('option-btn'))
-    fireEvent.click(screen.getByText('Invite'))
+    fireEvent.click(screen.getByText('Undang'))
 
     // Add an email
     const input = screen.getByPlaceholderText('Email (pisahkan dengan spasi)')
@@ -444,7 +552,7 @@ describe('ItineraryCard Component', () => {
 
     // Open invite dialog
     fireEvent.click(screen.getByTestId('option-btn'))
-    fireEvent.click(screen.getByText('Invite'))
+    fireEvent.click(screen.getByText('Undang'))
 
     // Add an email
     const input = screen.getByPlaceholderText('Email (pisahkan dengan spasi)')
@@ -469,7 +577,7 @@ describe('ItineraryCard Component', () => {
 
     // Open invite dialog
     fireEvent.click(screen.getByTestId('option-btn'))
-    fireEvent.click(screen.getByText('Invite'))
+    fireEvent.click(screen.getByText('Undang'))
 
     // Add an email
     const input = screen.getByPlaceholderText('Email (pisahkan dengan spasi)')
@@ -500,7 +608,7 @@ describe('ItineraryCard Component', () => {
 
     // Open invite dialog
     fireEvent.click(screen.getByTestId('option-btn'))
-    fireEvent.click(screen.getByText('Invite'))
+    fireEvent.click(screen.getByText('Undang'))
 
     // Type email without pressing Enter
     const input = screen.getByPlaceholderText('Email (pisahkan dengan spasi)')
@@ -522,7 +630,7 @@ describe('ItineraryCard Component', () => {
 
     // Open invite dialog
     fireEvent.click(screen.getByTestId('option-btn'))
-    fireEvent.click(screen.getByText('Invite'))
+    fireEvent.click(screen.getByText('Undang'))
 
     // Submit the form without adding any emails
     fireEvent.click(screen.getByText('Kirim'))
@@ -540,7 +648,7 @@ describe('ItineraryCard Component', () => {
 
     // Open invite dialog
     fireEvent.click(screen.getByTestId('option-btn'))
-    fireEvent.click(screen.getByText('Invite'))
+    fireEvent.click(screen.getByText('Undang'))
 
     // Add an email and submit
     const input = screen.getByPlaceholderText('Email (pisahkan dengan spasi)')
@@ -564,7 +672,7 @@ describe('ItineraryCard Component', () => {
 
     // Open invite dialog to access user list
     fireEvent.click(screen.getByTestId('option-btn'))
-    fireEvent.click(screen.getByText('Invite'))
+    fireEvent.click(screen.getByText('Undang'))
 
     // Find all divs that contain the user's name
     const userContainers = Array.from(document.querySelectorAll('div')).filter(
@@ -603,7 +711,7 @@ describe('ItineraryCard Component', () => {
 
     // Open invite dialog to access user list
     fireEvent.click(screen.getByTestId('option-btn'))
-    fireEvent.click(screen.getByText('Invite'))
+    fireEvent.click(screen.getByText('Undang'))
 
     // Find all divs that contain the user's name
     const userContainers = Array.from(document.querySelectorAll('div')).filter(
@@ -636,8 +744,16 @@ describe('ItineraryCard Component', () => {
     // Open dropdown
     fireEvent.click(screen.getByTestId('option-btn'))
 
-    // Check that "Mark as Completed" is not present
-    expect(screen.queryByText('Mark as Completed')).not.toBeInTheDocument()
+    // Check that "Tandai selesai" is not present
+    expect(screen.queryByText('Tandai selesai')).not.toBeInTheDocument()
+  })
+
+  it('shows a public label when itinerary is published', () => {
+    const publishedItem = { ...mockItem, isPublished: true }
+    render(<ItineraryCard item={publishedItem} refresh={jest.fn()} />)
+
+    // Check that the public label is shown
+    expect(screen.getByText('Publik')).toBeInTheDocument()
   })
 
   it('stops event propagation when clicking dialog content', () => {
@@ -645,7 +761,7 @@ describe('ItineraryCard Component', () => {
 
     // Open invite dialog
     fireEvent.click(screen.getByTestId('option-btn'))
-    fireEvent.click(screen.getByText('Invite'))
+    fireEvent.click(screen.getByText('Undang'))
 
     // Click on dialog content
     fireEvent.click(screen.getByTestId('dialog-content'))
@@ -660,7 +776,7 @@ describe('ItineraryCard Component', () => {
 
     // Open invite dialog
     fireEvent.click(screen.getByTestId('option-btn'))
-    fireEvent.click(screen.getByText('Invite'))
+    fireEvent.click(screen.getByText('Undang'))
 
     expect(
       screen.getByText('Belum ada akun yang terdaftar')
@@ -673,7 +789,7 @@ describe('ItineraryCard Component', () => {
 
     // Open invite dialog
     fireEvent.click(screen.getByTestId('option-btn'))
-    fireEvent.click(screen.getByText('Invite'))
+    fireEvent.click(screen.getByText('Undang'))
 
     expect(
       screen.getByText('Tidak ada undangan yang tertunda')
