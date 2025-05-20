@@ -133,10 +133,12 @@ export const ProfileHeader: React.FC<ProfileProps> = ({
           {firstName} {lastName}
         </span>
         {/* <span>@{username}</span> */}
+        {/* 
         <div className="flex gap-1">
           <MutariPoint />
           <span className="font-semibold">{loyaltyPoints}</span>
         </div>
+        */}
         <div className="flex gap-7">
           <div className="flex flex-col items-center">
             <span className="font-semibold text-xl">

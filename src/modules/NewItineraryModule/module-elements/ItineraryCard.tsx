@@ -1,7 +1,15 @@
 'use client'
 
 import { getImage } from '@/utils/getImage'
-import { MoreHorizontal, X } from 'lucide-react'
+import {
+  MoreHorizontal,
+  X,
+  Globe,
+  Check,
+  Copy,
+  Trash2,
+  Users,
+} from 'lucide-react'
 import Image from 'next/image'
 import type React from 'react'
 import { useRef, useState, type KeyboardEvent } from 'react'
@@ -13,6 +21,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
 import {
@@ -42,6 +51,7 @@ function ItineraryCard({
   const { user } = useAuthContext()
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [showInviteDialog, setShowInviteDialog] = useState(false)
+  const [showPublishDialog, setShowPublishDialog] = useState(false)
   const [emailInput, setEmailInput] = useState('')
   const [emails, setEmails] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(false)
@@ -61,6 +71,11 @@ function ItineraryCard({
   const openInviteDialog = (e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation()
     setShowInviteDialog(true)
+  }
+
+  const openPublishDialog = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.stopPropagation()
+    setShowPublishDialog(true)
   }
 
   const isValidEmail = (email: string) => {
@@ -151,10 +166,33 @@ function ItineraryCard({
       )
 
       if (response.statusCode !== 200) throw new Error(response.message)
-      toast.success('Itinerary marked as complete!')
+      toast.success('Itinerary ditandai selesai!')
       refresh()
     } catch (err) {
       if (err instanceof Error) toast.error(`${err.message}`)
+    }
+  }
+
+  const publishItinerary = async (isPublished: boolean) => {
+    try {
+      setIsLoading(true)
+      const res = await customFetch(`/itineraries/${item.id}/publish`, {
+        method: 'PATCH',
+        body: JSON.stringify({ isPublished }),
+      })
+      if (!res.success) throw new Error(res.message)
+      toast.success(
+        isPublished
+          ? 'Itinerary berhasil dipublikasikan!'
+          : 'Pembatalan publikasi itinerary berhasil.'
+      )
+      setShowPublishDialog(false)
+      refresh()
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (error) {
+      toast.error('Gagal mengubah status publikasi itinerary.')
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -165,7 +203,7 @@ function ItineraryCard({
       })
 
       if (response.statusCode !== 200) throw new Error(response.message)
-      toast.success('Itinerary deleted successfully!')
+      toast.success('Itinerary berhasil dihapus!')
       setShowDeleteDialog(false)
       refresh()
     } catch (err) {
@@ -204,7 +242,7 @@ function ItineraryCard({
 
       if (response.statusCode !== 201) throw new Error(response.message)
       else router.push(`/itinerary/${response.duplicatedItinerary.id}/edit`)
-      toast.success('Itinerary duplicated successfully!')
+      toast.success('Itinerary berhasil diduplikasi!')
     } catch (err) {
       if (err instanceof Error) toast.error(`${err.message}`)
     }
@@ -213,9 +251,9 @@ function ItineraryCard({
   return (
     <div
       onClick={() => router.push(`/itinerary/${item.id}`)}
-      className="group flex items-center gap-5 shadow-lg w-full rounded-xl overflow-hidden hover:cursor-pointer relative"
+      className="group flex items-center gap-5 shadow-lg w-full rounded-xl overflow-hidden hover:cursor-pointer relative transition-all duration-300 hover:shadow-xl"
     >
-      <div className="w-1/4 h-full overflow-hidden">
+      <div className="w-1/4 h-36 overflow-hidden">
         <Image
           src={
             item.coverImage !== '' && item.coverImage != null
@@ -228,10 +266,18 @@ function ItineraryCard({
           className="w-full h-full object-cover pointer-events-none group-hover:scale-125 duration-300"
         />
       </div>
-      <div className="w-3/4 h-full flex flex-col gap-2 py-4">
-        <p className="font-raleway font-medium text-sm md:text-xl w-4/5">
-          {item.title}
-        </p>
+      <div className="w-3/4 h-full flex flex-col gap-2 py-4 pr-12">
+        <div className="flex items-center gap-2">
+          <p className="font-raleway font-medium text-sm md:text-xl">
+            {item.title}
+          </p>
+          {item.isPublished && (
+            <div className="flex items-center gap-1 bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs">
+              <Globe size={12} />
+              <span>Publik</span>
+            </div>
+          )}
+        </div>
         <div className="font-raleway text-[#94A3B8] flex flex-col gap-1">
           <p className="text-xs md:text-sm">
             {daysTotal} Hari • {item.locationCount} Destinasi
@@ -254,29 +300,61 @@ function ItineraryCard({
           <DropdownMenuTrigger asChild>
             <button
               data-testid="option-btn"
-              className="absolute top-2 right-2 p-2 rounded-full hover:bg-black/10"
+              className="absolute top-2 right-2 p-2 rounded-full hover:bg-black/10 transition-colors"
               onClick={(e) => e.stopPropagation()}
             >
-              <MoreHorizontal />
+              <MoreHorizontal className="text-gray-600" />
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
-            <DropdownMenuItem onClick={openInviteDialog}>
-              Invite
+          <DropdownMenuContent
+            align="end"
+            onClick={(e) => e.stopPropagation()}
+            className="min-w-44"
+          >
+            <DropdownMenuItem
+              onClick={openInviteDialog}
+              className="flex items-center gap-2 cursor-pointer"
+            >
+              <Users size={16} />
+              <span>Undang</span>
             </DropdownMenuItem>
+
+            <DropdownMenuItem
+              onClick={openPublishDialog}
+              className="flex items-center gap-2 cursor-pointer"
+            >
+              <Globe size={16} />
+              <span>
+                {item.isPublished ? 'Batalkan publikasi' : 'Publikasikan'}
+              </span>
+            </DropdownMenuItem>
+
             {!item.isCompleted && (
-              <DropdownMenuItem onClick={markAsComplete}>
-                Mark as Completed
+              <DropdownMenuItem
+                onClick={markAsComplete}
+                className="flex items-center gap-2 cursor-pointer"
+              >
+                <Check size={16} />
+                <span>Tandai selesai</span>
               </DropdownMenuItem>
             )}
-            <DropdownMenuItem onClick={duplicateItinerary}>
-              Duplicate & Edit
+
+            <DropdownMenuItem
+              onClick={duplicateItinerary}
+              className="flex items-center gap-2 cursor-pointer"
+            >
+              <Copy size={16} />
+              <span>Duplikasi & Edit</span>
             </DropdownMenuItem>
+
+            <DropdownMenuSeparator />
+
             <DropdownMenuItem
               onClick={openDeleteConfirmation}
-              className="text-red-500 focus:text-red-500"
+              className="text-red-500 focus:text-red-500 flex items-center gap-2 cursor-pointer"
             >
-              Delete
+              <Trash2 size={16} />
+              <span>Hapus</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -331,10 +409,7 @@ function ItineraryCard({
               />
             </div>
             <div className="flex justify-end">
-              <Button
-                className="px-4 py-2 bg-gradient-to-r from-[#016CD7] to-[#014285] text-white items-center rounded"
-                type="submit"
-              >
+              <Button variant="gradient" type="submit">
                 Kirim
               </Button>
             </div>
@@ -344,10 +419,10 @@ function ItineraryCard({
           <Tabs defaultValue="accepted" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="accepted">
-                Akun Terdaftar ({item.invitedUsers?.length})
+                Akun Terdaftar ({item.invitedUsers?.length || 0})
               </TabsTrigger>
               <TabsTrigger value="pending">
-                Pending ({item.pendingInvites?.length})
+                Pending ({item.pendingInvites?.length || 0})
               </TabsTrigger>
             </TabsList>
 
@@ -362,7 +437,7 @@ function ItineraryCard({
                       className="flex items-center justify-between p-2 bg-gray-50 rounded-md"
                     >
                       <div className="flex items-center gap-2">
-                        <div className="relative rounded-full overflow-hidden aspect-square w-10  ">
+                        <div className="relative rounded-full overflow-hidden aspect-square w-10">
                           <Image
                             src={
                               user.photoProfile ||
@@ -383,8 +458,11 @@ function ItineraryCard({
                           </span>
                         </div>
                       </div>
-                      <button onClick={() => removeUser(user.id)}>
-                        <X />
+                      <button
+                        onClick={() => removeUser(user.id)}
+                        className="hover:bg-gray-200 p-1 rounded-full transition-colors"
+                      >
+                        <X size={18} />
                       </button>
                     </div>
                   ))}
@@ -407,7 +485,7 @@ function ItineraryCard({
                       className="flex items-center justify-between p-2 bg-gray-50 rounded-md"
                     >
                       <div className="flex items-center gap-2">
-                        <div className="rounded-full aspect-square w-10 bg-gray-400 text-white text-2xl text-center leading-10">
+                        <div className="rounded-full aspect-square w-10 bg-gray-400 text-white text-2xl flex items-center justify-center">
                           {user.email[0].toUpperCase()}
                         </div>
                         <span>{user.email}</span>
@@ -425,6 +503,47 @@ function ItineraryCard({
         </DialogContent>
       </Dialog>
 
+      {/* Publish Dialog */}
+      <Dialog open={showPublishDialog} onOpenChange={setShowPublishDialog}>
+        <DialogContent
+          className="font-roboto p-8 rounded-lg max-w-md"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <DialogTitle className="text-xl font-semibold text-center">
+            {item.isPublished
+              ? 'Batalkan Publikasi Itinerary'
+              : 'Publikasikan Itinerary'}
+          </DialogTitle>
+          <DialogDescription className="text-md text-center">
+            {item.isPublished
+              ? 'Membatalkan publikasi akan membuat itinerary ini pribadi dan hanya dapat diakses oleh Anda dan pengguna yang diundang.'
+              : 'Publikasi akan membuat itinerary ini terlihat oleh publik. Siapa saja dapat melihat detail itinerary Anda.'}
+          </DialogDescription>
+          <DialogFooter className="flex w-full sm:justify-center justify-center gap-y-2 mt-4">
+            <Button
+              className="px-8 py-2 border-2 border-[#016CD7] bg-white rounded-md text-[#014285]"
+              variant="outline"
+              onClick={() => setShowPublishDialog(false)}
+              disabled={isLoading}
+            >
+              Batal
+            </Button>
+            <Button
+              className="px-8 py-2"
+              variant="gradient"
+              onClick={() => publishItinerary(!item.isPublished)}
+              disabled={isLoading}
+            >
+              {isLoading
+                ? 'Memproses...'
+                : item.isPublished
+                  ? 'Batalkan Publikasi'
+                  : 'Publikasikan'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Delete Confirmation Dialog */}
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <DialogContent
@@ -439,13 +558,15 @@ function ItineraryCard({
           </DialogDescription>
           <DialogFooter className="flex w-full sm:justify-center justify-center gap-y-2">
             <Button
-              className="px-8 py-2 border-2 border-[#016CD7] bg-white rounded text-[#014285]"
+              className="px-8 py-2 border-2 border-[#016CD7] bg-white rounded-md text-[#014285]"
+              variant="outline"
               onClick={() => setShowDeleteDialog(false)}
             >
               Batal
             </Button>
             <Button
-              className="px-8 py-2 bg-gradient-to-r from-[#016CD7] to-[#014285] text-white items-center rounded"
+              className="px-8 py-2 "
+              variant="gradient"
               onClick={removeItinerary}
             >
               Hapus
