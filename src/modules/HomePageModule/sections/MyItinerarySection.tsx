@@ -38,7 +38,7 @@ export default function MyItinerarySection() {
   }, [])
 
   return (
-    <div className="flex flex-col justify-start lg:justify-between w-4/5 gap-5">
+    <div className="flex flex-col justify-start lg:justify-between container mx-auto px-4 gap-5">
       <div className="flex flex-col lg:flex-row gap-5 justify-between items-center w-full">
         <h2 className="font-semibold text-2xl md:text-left md:text-[36px] self-start">
           Rencana Perjalanan Saya
