@@ -97,7 +97,7 @@ const ExploreItinerarySection = () => {
   }, [itineraries, itinerariesByTag])
 
   return (
-    <section className="flex flex-col justify-start gap-7 w-4/5">
+    <section className="flex flex-col justify-start gap-4 container mx-auto px-4">
       <p className="font-semibold text-2xl md:text-left md:text-[36px] self-start">
         Eksplorasi
       </p>
@@ -112,7 +112,7 @@ const ExploreItinerarySection = () => {
         </div>
       ) : (
         <div>
-          <p className="sm:text-xl md:text-2xl font-semibold">
+          <p className="sm:text-xl md:text-2xl font-semibold mb-2">
             Banyak di-like orang
           </p>
           <div className="p-2 sm:p-4 border border-[#0073E6] rounded-xl shadow-gray-300 shadow-lg grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-6">
@@ -142,7 +142,7 @@ const ExploreItinerarySection = () => {
         itinerariesByTag &&
         itinerariesByTag.length > 0 && (
           <div>
-            <p className="sm:text-xl md:text-2xl font-semibold">
+            <p className="sm:text-xl md:text-2xl font-semibold mb-2">
               Perjalanan lain yang mungkin Anda suka
             </p>
             <div className="p-2 sm:p-4 border border-[#0073E6] rounded-xl shadow-gray-300 shadow-lg grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-6">

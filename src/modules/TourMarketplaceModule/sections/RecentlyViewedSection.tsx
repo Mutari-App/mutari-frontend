@@ -46,8 +46,10 @@ function RecentlyViewedSection<T extends { id: string }>({
   }
 
   return (
-    <section className="flex flex-col justify-start gap-7 w-4/5">
-      <h2 className="font-semibold text-2xl md:text-left md:text-[36px] sel">
+    <section className="flex flex-col justify-start gap-7 container mx-auto px-4">
+      <h2
+        className={`font-semibold text-2xl md:text-left md:text-[36px] sel ${fetchEndpoint === '/tour/views' ? 'text-base sm:text-xl' : ''}`}
+      >
         {title}
       </h2>
       {loading ? (
