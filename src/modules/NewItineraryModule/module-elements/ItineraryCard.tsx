@@ -166,7 +166,7 @@ function ItineraryCard({
       )
 
       if (response.statusCode !== 200) throw new Error(response.message)
-      toast.success('Itinerary marked as complete!')
+      toast.success('Itinerary ditandai selesai!')
       refresh()
     } catch (err) {
       if (err instanceof Error) toast.error(`${err.message}`)
@@ -176,22 +176,21 @@ function ItineraryCard({
   const publishItinerary = async (isPublished: boolean) => {
     try {
       setIsLoading(true)
-      await customFetch(`/itineraries/${item.id}/publish`, {
+      const res = await customFetch(`/itineraries/${item.id}/publish`, {
         method: 'PATCH',
         body: JSON.stringify({ isPublished }),
-        credentials: 'include',
       })
-
+      if (!res.success) throw new Error(res.message)
       toast.success(
         isPublished
-          ? 'Itinerary published successfully!'
-          : 'Itinerary unpublished.'
+          ? 'Itinerary berhasil dipublikasikan!'
+          : 'Pembatalan publikasi itinerary berhasil.'
       )
       setShowPublishDialog(false)
       refresh()
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
-      console.error('Failed to publish itinerary:', error)
-      toast.error('Failed to update publish status.')
+      toast.error('Gagal mengubah status publikasi itinerary.')
     } finally {
       setIsLoading(false)
     }
@@ -204,7 +203,7 @@ function ItineraryCard({
       })
 
       if (response.statusCode !== 200) throw new Error(response.message)
-      toast.success('Itinerary deleted successfully!')
+      toast.success('Itinerary berhasil dihapus!')
       setShowDeleteDialog(false)
       refresh()
     } catch (err) {
@@ -243,7 +242,7 @@ function ItineraryCard({
 
       if (response.statusCode !== 201) throw new Error(response.message)
       else router.push(`/itinerary/${response.duplicatedItinerary.id}/edit`)
-      toast.success('Itinerary duplicated successfully!')
+      toast.success('Itinerary berhasil diduplikasi!')
     } catch (err) {
       if (err instanceof Error) toast.error(`${err.message}`)
     }
