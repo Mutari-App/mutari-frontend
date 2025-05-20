@@ -270,9 +270,7 @@ describe('ItineraryCard Component', () => {
         '/itineraries/1/mark-as-complete/',
         { method: 'PATCH' }
       )
-      expect(toast.success).toHaveBeenCalledWith(
-        'Itinerary marked as complete!'
-      )
+      expect(toast.success).toHaveBeenCalledWith('Itinerary ditandai selesai!')
       expect(mockRefresh).toHaveBeenCalled()
     })
   })
@@ -333,9 +331,7 @@ describe('ItineraryCard Component', () => {
       expect(customFetch).toHaveBeenCalledWith('/itineraries/1/', {
         method: 'DELETE',
       })
-      expect(toast.success).toHaveBeenCalledWith(
-        'Itinerary deleted successfully!'
-      )
+      expect(toast.success).toHaveBeenCalledWith('Itinerary berhasil dihapus!')
       expect(mockRefresh).toHaveBeenCalled()
     })
   })
@@ -391,7 +387,7 @@ describe('ItineraryCard Component', () => {
   it('opens publish dialog and publishes itinerary', async () => {
     const mockRefresh = jest.fn()
     ;(customFetch as jest.Mock).mockResolvedValueOnce({
-      statusCode: 200,
+      success: true,
       message: 'Itinerary published',
     })
 
@@ -413,10 +409,9 @@ describe('ItineraryCard Component', () => {
       expect(customFetch).toHaveBeenCalledWith('/itineraries/1/publish', {
         method: 'PATCH',
         body: JSON.stringify({ isPublished: true }),
-        credentials: 'include',
       })
       expect(toast.success).toHaveBeenCalledWith(
-        'Itinerary published successfully!'
+        'Itinerary berhasil dipublikasikan!'
       )
       expect(mockRefresh).toHaveBeenCalled()
     })
@@ -426,7 +421,7 @@ describe('ItineraryCard Component', () => {
     const publishedItem = { ...mockItem, isPublished: true }
     const mockRefresh = jest.fn()
     ;(customFetch as jest.Mock).mockResolvedValueOnce({
-      statusCode: 200,
+      success: true,
       message: 'Itinerary unpublished',
     })
 
@@ -448,9 +443,10 @@ describe('ItineraryCard Component', () => {
       expect(customFetch).toHaveBeenCalledWith('/itineraries/1/publish', {
         method: 'PATCH',
         body: JSON.stringify({ isPublished: false }),
-        credentials: 'include',
       })
-      expect(toast.success).toHaveBeenCalledWith('Itinerary unpublished.')
+      expect(toast.success).toHaveBeenCalledWith(
+        'Pembatalan publikasi itinerary berhasil.'
+      )
       expect(mockRefresh).toHaveBeenCalled()
     })
   })
@@ -474,7 +470,7 @@ describe('ItineraryCard Component', () => {
         method: 'POST',
       })
       expect(toast.success).toHaveBeenCalledWith(
-        'Itinerary duplicated successfully!'
+        'Itinerary berhasil diduplikasi!'
       )
       expect(mockPush).toHaveBeenCalledWith('/itinerary/2/edit')
     })
