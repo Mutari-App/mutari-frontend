@@ -988,6 +988,13 @@ export default function ItineraryMakerModule({
     }))
   }
 
+  const handlePublishStatusChange = (isPublished: boolean) => {
+    setItineraryData((prev) => ({
+      ...prev,
+      isPublished,
+    }))
+  }
+
   const addBlock = (sectionNumber: number, blockType: string) => {
     setItineraryData((prev) => {
       const updatedSections = prev.sections.map((section) => {
@@ -1954,10 +1961,12 @@ export default function ItineraryMakerModule({
             onTitleChange={handleTitleChange}
             onDescChange={handleDescChange}
             onCoverImageChange={handleImageUpload}
+            onPublishStatusChange={handlePublishStatusChange}
             isSubmitting={isSubmitting}
             onGenerateFeedback={handleGenerateFeedback}
             isGenerating={isGenerating}
             isContingency={!!contingencyId}
+            isEdit={isEdit}
           />
           <div className="flex flex-wrap items-center gap-2 mb-4">
             {isContingency ? (

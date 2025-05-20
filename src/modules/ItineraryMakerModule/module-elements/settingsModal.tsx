@@ -1,12 +1,15 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { X, Clipboard, Trash } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { buttonVariants } from '@/components/ui/button'
+import { Button, buttonVariants } from '@/components/ui/button'
 import {
   type CloudinaryUploadWidgetResults,
   CldUploadButton,
 } from 'next-cloudinary'
 import { Textarea } from '@/components/ui/textarea'
+import { toast } from 'sonner'
+import { customFetch } from '@/utils/newCustomFetch'
+import { useRouter } from 'next/navigation'
 
 interface SettingsItineraryModalProps {
   isOpen: boolean
@@ -27,6 +30,7 @@ interface SettingsItineraryModalProps {
   title: string
   description?: string
   isPublished: boolean
+  isEdit: boolean
 }
 
 export const SettingsItineraryModal: React.FC<SettingsItineraryModalProps> = ({
@@ -41,6 +45,7 @@ export const SettingsItineraryModal: React.FC<SettingsItineraryModalProps> = ({
   title,
   description,
   isPublished,
+  isEdit,
 }) => {
   const [isClient, setIsClient] = React.useState(false)
   const [visibility, setVisibility] = React.useState<'public' | 'private'>(
@@ -49,6 +54,8 @@ export const SettingsItineraryModal: React.FC<SettingsItineraryModalProps> = ({
   const [localTitle, setLocalTitle] = React.useState(title)
   const [localDesc, setLocalDesc] = React.useState(description)
   const [localCoverImage, setLocalCoverImage] = React.useState(coverImage)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const router = useRouter()
 
   useEffect(() => {
     setIsClient(true)
@@ -82,151 +89,205 @@ export const SettingsItineraryModal: React.FC<SettingsItineraryModalProps> = ({
     onClose()
   }
 
+  const handleDelete = async () => {
+    try {
+      const response = await customFetch(`/itineraries/${itineraryId}`, {
+        method: 'DELETE',
+      })
+      if (response.success) {
+        toast.success('Itinerary deleted successfully')
+        router.push('/itinerary')
+      } else {
+        toast.error('Failed to delete itinerary')
+      }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (error) {
+      toast.error('Failed to delete itinerary')
+    }
+    onClose()
+  }
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="bg-white w-[600px] max-h-[70vh] overflow-y-auto rounded-2xl shadow-xl relative">
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 text-gray-400 hover:text-black z-20"
-        >
-          <X size={20} />
-        </button>
+    <>
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+        <div className="bg-white w-[600px] max-h-[70vh] overflow-y-auto rounded-2xl shadow-xl relative">
+          <button
+            onClick={onClose}
+            className="absolute top-4 right-4 text-gray-400 hover:text-black z-20"
+          >
+            <X size={20} />
+          </button>
 
-        <div className="p-6 text-center">
-          <h2 className="text-2xl font-bold">Itinerary Settings</h2>
-        </div>
+          <div className="p-6 text-center">
+            <h2 className="text-2xl font-bold">Itinerary Settings</h2>
+          </div>
 
-        <div
-          className="relative w-full h-56 lg:h-56 rounded-md mb-4 flex items-center justify-center overflow-hidden"
-          style={{
-            backgroundImage: coverImage
-              ? `url(${coverImage})`
-              : 'linear-gradient(360deg, #004080, #0073E6, #60A5FA)',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-          }}
-        >
-          <CldUploadButton
-            uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
-            onSuccess={onCoverImageChange}
-            className={cn(
-              buttonVariants({ variant: 'ghost', size: 'sm' }),
-              isContingency &&
-                'opacity-50 cursor-not-allowed pointer-events-none',
-              'absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-30 text-white bg-[#1C1C1C99] p-2 rounded-full'
-            )}
-            options={{
-              clientAllowedFormats: ['image'],
-              maxFiles: 1,
-              maxFileSize: 1024 * 256, // 256 KB
+          <div
+            className="relative w-full h-56 lg:h-56 rounded-md mb-4 flex items-center justify-center overflow-hidden"
+            style={{
+              backgroundImage: coverImage
+                ? `url(${coverImage})`
+                : 'linear-gradient(360deg, #004080, #0073E6, #60A5FA)',
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
             }}
           >
-            Ganti foto cover
-          </CldUploadButton>
-        </div>
-
-        <div className="p-6 space-y-4">
-          <div>
-            <label
-              htmlFor="title"
-              className="block text-sm font-semibold text-gray-700"
-            >
-              Judul
-            </label>
-            <Textarea
-              id="title"
-              className="w-full mt-2 p-3 text-md bg-transparent border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-              value={localTitle}
-              onChange={(e) => {
-                setLocalTitle(e.target.value)
+            <CldUploadButton
+              uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
+              onSuccess={onCoverImageChange}
+              className={cn(
+                buttonVariants({ variant: 'ghost', size: 'sm' }),
+                isContingency &&
+                  'opacity-50 cursor-not-allowed pointer-events-none',
+                'absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-30 text-white bg-[#1C1C1C99] p-2 rounded-full'
+              )}
+              options={{
+                clientAllowedFormats: ['image'],
+                maxFiles: 1,
+                maxFileSize: 1024 * 256, // 256 KB
               }}
-              placeholder="Masukkan Judul Perjalanan"
-            />
+            >
+              Ganti foto cover
+            </CldUploadButton>
           </div>
 
-          <div>
-            <label
-              htmlFor="description"
-              className="block text-sm font-semibold text-gray-700"
-            >
-              Deskripsi
-            </label>
-            <Textarea
-              id="description"
-              className="w-full mt-2 p-3 text-md bg-transparent border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={localDesc}
-              onChange={(e) => {
-                setLocalDesc(e.target.value)
-              }}
-              placeholder="Masukkan Deskripsi Perjalanan"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-semibold text-gray-800 mb-2">
-              Siapa yang bisa lihat
-            </label>
-            <div className="space-y-2 text-sm">
-              <label className="flex items-start gap-2 cursor-pointer">
-                <input
-                  type="radio"
-                  name="visibility"
-                  value="public"
-                  checked={visibility === 'public'}
-                  onChange={() => setVisibility('public')}
-                />
-                <span>
-                  <span className="font-medium">Public</span>
-                  <br />
-                  <span className="text-gray-500">
-                    Itinerary akan masuk ke discovery catalogue mutari dan dapat
-                    dilihat seluruh pengguna Mutari
-                  </span>
-                </span>
+          <div className="p-6 space-y-4">
+            <div>
+              <label
+                htmlFor="title"
+                className="block text-sm font-semibold text-gray-700"
+              >
+                Judul
               </label>
-              <label className="flex items-start gap-2 cursor-pointer">
-                <input
-                  type="radio"
-                  name="visibility"
-                  value="private"
-                  checked={visibility === 'private'}
-                  onChange={() => setVisibility('private')}
-                />
-                <span>
-                  <span className="font-medium">Private</span>
-                  <br />
-                  <span className="text-gray-500">
-                    Itinerary hanya dapat dilihat olehmu dan orang-orang yang
-                    kamu invite atau memiliki link sharing
-                  </span>
-                </span>
-              </label>
+              <Textarea
+                id="title"
+                className="w-full mt-2 p-3 text-md bg-transparent border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                value={localTitle}
+                onChange={(e) => {
+                  setLocalTitle(e.target.value)
+                }}
+                placeholder="Masukkan Judul Perjalanan"
+              />
             </div>
-          </div>
 
-          <hr />
+            <div>
+              <label
+                htmlFor="description"
+                className="block text-sm font-semibold text-gray-700"
+              >
+                Deskripsi
+              </label>
+              <Textarea
+                id="description"
+                className="w-full mt-2 p-3 text-md bg-transparent border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={localDesc}
+                onChange={(e) => {
+                  setLocalDesc(e.target.value)
+                }}
+                placeholder="Masukkan Deskripsi Perjalanan"
+              />
+            </div>
 
-          <div className="text-sm">
-            <button
-              className="flex items-center gap-2 text-gray-700 font-medium mb-4"
-              onClick={handleDuplicate}
+            <div>
+              <label className="block text-sm font-semibold text-gray-800 mb-2">
+                Siapa yang bisa lihat
+              </label>
+              <div className="space-y-2 text-sm">
+                <label className="flex items-start gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="visibility"
+                    value="public"
+                    checked={visibility === 'public'}
+                    onChange={() => setVisibility('public')}
+                  />
+                  <span>
+                    <span className="font-medium">Public</span>
+                    <br />
+                    <span className="text-gray-500">
+                      Itinerary akan masuk ke discovery catalogue mutari dan
+                      dapat dilihat seluruh pengguna Mutari
+                    </span>
+                  </span>
+                </label>
+                <label className="flex items-start gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="visibility"
+                    value="private"
+                    checked={visibility === 'private'}
+                    onChange={() => setVisibility('private')}
+                  />
+                  <span>
+                    <span className="font-medium">Private</span>
+                    <br />
+                    <span className="text-gray-500">
+                      Itinerary hanya dapat dilihat olehmu dan orang-orang yang
+                      kamu invite atau memiliki link sharing
+                    </span>
+                  </span>
+                </label>
+              </div>
+            </div>
+
+            <hr />
+
+            {/* Only show duplicate and delete buttons in edit mode */}
+            {isEdit && (
+              <div className="text-sm">
+                <button
+                  className="flex items-center gap-2 text-gray-700 font-medium mb-4"
+                  onClick={handleDuplicate}
+                >
+                  <Clipboard size={18} /> Duplikat itinerary
+                </button>
+                <button
+                  className="flex items-center gap-2 text-red-600 font-medium"
+                  onClick={() => setShowDeleteConfirm(true)}
+                >
+                  <Trash size={18} /> Hapus itinerary
+                </button>
+              </div>
+            )}
+
+            <Button
+              onClick={handleSave}
+              variant="gradient"
+              className="w-full"
+              disabled={isContingency}
             >
-              <Clipboard size={18} /> Duplikat itinerary
-            </button>
-            <button className="flex items-center gap-2 text-red-600 font-medium">
-              <Trash size={18} /> Hapus itinerary
-            </button>
+              Simpan
+            </Button>
           </div>
-
-          <button
-            onClick={handleSave}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg py-2 text-sm mt-4"
-            disabled={isContingency}
-          >
-            Simpan
-          </button>
         </div>
       </div>
-    </div>
+
+      {/* Delete confirmation modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50">
+          <div className="bg-white w-[400px] rounded-2xl shadow-xl p-6">
+            <h3 className="text-xl font-bold mb-4">Hapus Itinerary</h3>
+            <p className="mb-6">
+              Apakah anda yakin ingin menghapus itinerary ini? Tindakan ini
+              tidak dapat dibatalkan.
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="px-4 py-2 border border-gray-300 rounded-lg"
+              >
+                Batal
+              </button>
+              <button
+                onClick={handleDelete}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg"
+              >
+                Hapus
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   )
 }
