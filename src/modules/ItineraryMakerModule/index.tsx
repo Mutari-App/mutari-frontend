@@ -115,6 +115,11 @@ export default function ItineraryMakerModule({
   )
   const wasAlreadyRequested = useRef(false)
   const [contingency, setContingency] = useState<ContingencyPlan | null>(null)
+  const [focusedLocation, setFocusedLocation] = useState<{
+    blockId: string
+    sectionNumber: number
+  } | null>(null)
+  const blockRefs = useRef<Record<string, HTMLElement | null>>({})
 
   const initialItineraryData = useRef<CreateItineraryDto>({
     isPublished: false,
@@ -472,6 +477,42 @@ export default function ItineraryMakerModule({
       window.removeEventListener('beforeunload', handleBeforeUnload)
     }
   }, [hasUnsavedChanges])
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && focusedLocation) {
+        clearLocationFocus()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [focusedLocation])
+
+  useEffect(() => {
+    if (!focusedLocation) return
+
+    const handleClickOutside = (e: MouseEvent) => {
+      // Check if the click was on a block card or marker
+      const target = e.target as HTMLElement
+      const isClickInsideBlock = target.closest('[data-block-id]')
+      const isClickInsidePin = target.closest('[data-location-pin]')
+
+      // If not clicking on a block or pin, clear focus
+      if (!isClickInsideBlock && !isClickInsidePin) {
+        clearLocationFocus()
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [focusedLocation])
 
   const updateTransportMode = async (
     blockId: string,
@@ -947,6 +988,13 @@ export default function ItineraryMakerModule({
     }))
   }
 
+  const handlePublishStatusChange = (isPublished: boolean) => {
+    setItineraryData((prev) => ({
+      ...prev,
+      isPublished,
+    }))
+  }
+
   const addBlock = (sectionNumber: number, blockType: string) => {
     setItineraryData((prev) => {
       const updatedSections = prev.sections.map((section) => {
@@ -969,6 +1017,54 @@ export default function ItineraryMakerModule({
         sections: updatedSections,
       }
     })
+  }
+
+  const registerBlockRef = (blockId: string, element: HTMLElement | null) => {
+    blockRefs.current[blockId] = element
+  }
+
+  const handleLocationFocus = (blockId: string, sectionNumber: number) => {
+    if (
+      !focusedLocation ||
+      focusedLocation.blockId !== blockId ||
+      focusedLocation.sectionNumber !== sectionNumber
+    ) {
+      // Focus on the new location
+      setFocusedLocation({ blockId, sectionNumber })
+
+      // Find the location coordinates to pan the map
+      const section = itineraryData.sections.find(
+        (s) => s.sectionNumber === sectionNumber
+      )
+      const block = section?.blocks?.find((b) => b.id === blockId)
+
+      if (block?.location) {
+        const [lat, lng] = block.location
+          .split(',')
+          .map((coord) => parseFloat(coord.trim()))
+        setPositionToView({ lat, lng })
+
+        // Switch to itinerary view on desktop, map view on mobile
+        if (window.innerWidth >= 768 && isMapView) {
+          setIsMapView(false)
+        }
+
+        // Scroll to the block in the itinerary list
+        setTimeout(() => {
+          const blockElement = blockRefs.current[blockId]
+          if (blockElement) {
+            blockElement.scrollIntoView({
+              behavior: 'smooth',
+              block: 'center',
+            })
+          }
+        }, 50) // Short delay to ensure DOM updates
+      }
+    }
+  }
+
+  const clearLocationFocus = () => {
+    setFocusedLocation(null)
   }
 
   const addLocationToSection = (
@@ -1745,7 +1841,7 @@ export default function ItineraryMakerModule({
 
     if (
       itineraryData.sections.length === 1 &&
-      (itineraryData.sections[0].blocks?.length ?? 0) <= 1
+      (itineraryData.sections[0].blocks?.length ?? 0) < 1
     ) {
       toast.error('Itinerary harus memiliki setidaknya satu bagian.')
       return
@@ -1843,7 +1939,7 @@ export default function ItineraryMakerModule({
     <APIProvider apiKey={apiKey}>
       <div className="flex max-h-screen">
         <div
-          className={`container max-w-4xl mx-auto p-4 pt-24 min-h-screen max-h-screen overflow-auto ${isMapView && 'hidden'} md:block`}
+          className={`container max-w-4xl mx-auto p-4 pt-24 max-md:pb-12 min-h-screen max-h-screen overflow-auto ${isMapView && 'hidden'} md:block`}
         >
           <button
             onClick={handleSubmit}
@@ -1865,10 +1961,12 @@ export default function ItineraryMakerModule({
             onTitleChange={handleTitleChange}
             onDescChange={handleDescChange}
             onCoverImageChange={handleImageUpload}
+            onPublishStatusChange={handlePublishStatusChange}
             isSubmitting={isSubmitting}
             onGenerateFeedback={handleGenerateFeedback}
             isGenerating={isGenerating}
             isContingency={!!contingencyId}
+            isEdit={isEdit}
           />
           <div className="flex flex-wrap items-center gap-2 mb-4">
             {isContingency ? (
@@ -1952,7 +2050,11 @@ export default function ItineraryMakerModule({
               {/* Hover gradient layer */}
               <span className="absolute inset-0 bg-gradient-to-r from-[#80004B] to-[#0073E6] opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out" />
 
-              <span className="relative flex items-center gap-1.5">
+              <span className="relative flex items-center gap-1.5 min-[390px]:hidden">
+                <Wand2 size={16} />
+                {isGenerating ? 'Memproses...' : 'Saran AI'}
+              </span>
+              <span className="relative items-center gap-1.5 hidden min-[390px]:flex">
                 <Wand2 size={16} />
                 {isGenerating ? 'Memproses...' : 'Buat Saran AI'}
               </span>
@@ -1999,6 +2101,9 @@ export default function ItineraryMakerModule({
             timeWarning={timeWarning}
             onTransportModeChange={updateTransportMode}
             setPositionToView={setPositionToView}
+            focusedLocation={focusedLocation}
+            onLocationFocus={handleLocationFocus}
+            registerBlockRef={registerBlockRef}
           />
           <div className="flex justify-center my-8">
             <div className="p-[1.5px] flex -mt-4 w-[240px] items-center bg-gradient-to-r from-[#0073E6] to-[#004080] hover:from-[#0066cc] hover:to-[#003366] rounded-lg group">
@@ -2047,9 +2152,11 @@ export default function ItineraryMakerModule({
             addLocationToSection={addLocationToSection}
             isEditing
             positionToView={positionToView}
+            focusedLocation={focusedLocation}
+            onLocationFocus={handleLocationFocus}
           />
         </div>
-        <div className="absolute bottom-5 left-1/2 -translate-x-1/2 shadow-lg z-10 md:hidden">
+        <div className="fixed bottom-7 left-1/2 -translate-x-1/2 shadow-lg z-10 md:hidden">
           <Button
             variant={'gradient'}
             onClick={() => setIsMapView((prev) => !prev)}

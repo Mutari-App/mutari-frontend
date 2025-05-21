@@ -60,13 +60,15 @@ const ItineraryCard: React.FC<ItineraryCardProps> = ({
               className="absolute top-2 right-2 bg-black bg-opacity-25 rounded-full px-1.5 py-[3px] sm:hidden"
               data-testid="mobile-likes-wrapper"
             >
-              <LikesButton
-                itineraryId={itinerary.id}
-                liked={isLiked}
-                count={itinerary.likes}
-                enabled={isAuthenticated && itinerary.user.id !== user?.id}
-                className="text-xs text-white"
-              />
+              {isAuthenticated ? (
+                <LikesButton
+                  itineraryId={itinerary.id}
+                  liked={isLiked}
+                  count={itinerary.likes}
+                  enabled={isAuthenticated && itinerary.user.id !== user?.id}
+                  className="text-xs text-white"
+                />
+              ) : null}
             </div>
           </div>
           <CardContent className="px-2 py-1.5 sm:px-3 sm:py-2 space-y-1 flex-grow">
@@ -128,13 +130,15 @@ const ItineraryCard: React.FC<ItineraryCardProps> = ({
           </Link>
           {/* Desktop-only (≥ 640px) Likes button */}
           <div className="hidden sm:block" data-testid="desktop-likes-wrapper">
-            <LikesButton
-              itineraryId={itinerary.id}
-              liked={isLiked}
-              count={itinerary.likes}
-              enabled={isAuthenticated && itinerary.user.id !== user?.id}
-              className="text-[10px] pl-1 sm:text-sm"
-            />
+            {isAuthenticated ? (
+              <LikesButton
+                itineraryId={itinerary.id}
+                liked={isLiked}
+                count={itinerary.likes}
+                enabled={isAuthenticated && itinerary.user.id !== user?.id}
+                className="text-[10px] pl-1 sm:text-sm"
+              />
+            ) : null}
           </div>
         </CardFooter>
       </div>

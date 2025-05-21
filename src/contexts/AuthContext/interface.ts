@@ -15,6 +15,12 @@ export interface AuthContextInterface {
     email: string
     password: string
   }) => Promise<CustomFetchBaseResponse>
+  googleLogin: (params: {
+    firebaseToken: string
+  }) => Promise<CustomFetchBaseResponse>
+  googleRegister: (params: {
+    firebaseToken: string
+  }) => Promise<CustomFetchBaseResponse>
   preRegistLogin: (params: {
     email: string
   }) => Promise<CustomFetchBaseResponse>
@@ -37,6 +43,7 @@ export interface User {
   createdAt: string
   updatedAt: string
   usedCount: number
+  firebaseUid: string
 }
 
 export interface UserResponseInterface {

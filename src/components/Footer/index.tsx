@@ -36,27 +36,25 @@ export const Footer: React.FC = () => {
   }
 
   return (
-    <section className="flex justify-center items-center relative bg-[#0059B3] py-8 md:py-12 text-white">
+    <section className="flex flex-col justify-center items-center relative bg-[#0059B3] pt-8 text-white">
       <div className="relative max-w-screen-xl mx-auto flex gap-4 justify-center">
         <Image
           src={getImage('logo-white-shadow.png')}
           alt="Mutari Logo"
           width={1000}
           height={1000}
-          className="object-contain w-28 md:w-40"
+          className="object-contain w-24 md:w-32"
         />
-        <div className="flex flex-col gap-2 justify-center">
-          <p className="text-lg md:text-2xl font-semibold drop-shadow-lg">
-            Kontak kami
-          </p>
+        <div className="flex flex-col gap-1 justify-center">
+          <p className="md:text-xl font-semibold drop-shadow-lg">Kontak kami</p>
           <a
             href="https://instagram.com/mutari.id"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center space-x-2 hover:underline transition-colors"
           >
-            <Instagram className="w-4 h-4 md:w-6 md:h-6 drop-shadow-lg" />
-            <span className="text-sm md:text-xl drop-shadow-lg">
+            <Instagram className="w-4 h-4 drop-shadow-lg" />
+            <span className="text-sm md:text-base drop-shadow-lg">
               @mutari.id
             </span>
           </a>
@@ -66,8 +64,8 @@ export const Footer: React.FC = () => {
             rel="noopener noreferrer"
             className="flex items-center space-x-2 hover:underline transition-colors"
           >
-            <Twitter className="w-4 h-4 md:w-6 md:h-6 drop-shadow-lg" />
-            <span className="text-sm md:text-xl drop-shadow-lg">
+            <Twitter className="w-4 h-4 drop-shadow-lg" />
+            <span className="text-sm md:text-base drop-shadow-lg">
               @mutariindonesia
             </span>
           </a>
@@ -75,14 +73,14 @@ export const Footer: React.FC = () => {
             href="mailto:support@mutari.id"
             className="flex items-center space-x-2 hover:underline transition-colors"
           >
-            <Mail className="w-4 h-4 md:w-6 md:h-6 drop-shadow-lg" />
-            <span className="text-sm md:text-xl drop-shadow-lg">
+            <Mail className="w-4 h-4 drop-shadow-lg" />
+            <span className="text-sm md:text-base drop-shadow-lg">
               support@mutari.id
             </span>
           </a>
         </div>
       </div>
-      <p className="absolute bottom-3 md:bottom-5 text-xs">
+      <p className="text-xs py-4">
         © 2025 Mutari. Semua hak dilindungi undang-undang
       </p>
     </section>

@@ -41,7 +41,7 @@ const mockTour: TourCardProps['tour'] = {
   location: 'Bandung',
   duration: 3,
   durationType: 'DAY',
-  pricePerTicket: '150000',
+  pricePerTicket: 150000,
   coverImage: 'https://example.com/image.jpg',
   maxCapacity: 0,
   itineraryId: 'tour-1',
