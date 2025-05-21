@@ -259,7 +259,7 @@ function ItineraryCard({
           src={
             item.coverImage !== '' && item.coverImage != null
               ? item.coverImage
-              : getImage('logo-no-background.png')
+              : getImage('itinerary_placeholder.png')
           }
           alt={item.title}
           width={720}

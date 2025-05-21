@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { toast } from 'sonner'
 import { customFetch } from '@/utils/newCustomFetch'
 import { useRouter } from 'next/navigation'
+import { getImage } from '@/utils/getImage'
 
 interface SettingsItineraryModalProps {
   isOpen: boolean
@@ -129,7 +130,7 @@ export const SettingsItineraryModal: React.FC<SettingsItineraryModalProps> = ({
               style={{
                 backgroundImage: coverImage
                   ? `url(${coverImage})`
-                  : 'linear-gradient(360deg, #004080, #0073E6, #60A5FA)',
+                  : `url(${getImage('itinerary_placeholder.png')})`,
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
               }}

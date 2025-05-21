@@ -5,6 +5,7 @@ import React from 'react'
 import { type TourCardProps } from '../interface'
 import { DurationTypeMap } from '../constant'
 import { CalendarIcon, MapPinIcon } from 'lucide-react'
+import { getImage } from '@/utils/getImage'
 
 function TourCard({ tour, className }: Readonly<TourCardProps>) {
   return (
@@ -14,20 +15,16 @@ function TourCard({ tour, className }: Readonly<TourCardProps>) {
       <div className="flex flex-col h-full">
         <Link href={`/tour/${tour.id}`} className="flex flex-col h-full">
           <div className="relative h-24 sm:h-40 w-full">
-            {tour.coverImage ? (
-              <Image
-                src={tour.coverImage}
-                alt={tour.title}
-                fill
-                className="object-cover"
-              />
-            ) : (
-              <div className="flex h-full w-full items-center justify-center bg-blue-50">
-                <span className="text-slate-400 max-sm:text-sm">
-                  Tidak Ada Gambar
-                </span>
-              </div>
-            )}
+            <Image
+              src={
+                tour.coverImage !== '' && tour.coverImage
+                  ? tour.coverImage
+                  : getImage('itinerary_placeholder.png')
+              }
+              alt={tour.title}
+              fill
+              className="object-cover"
+            />
           </div>
           <CardContent className="px-2 py-1.5 sm:px-3 sm:py-2 space-y-1 flex-grow">
             <div className="flex flex-col gap-2">
