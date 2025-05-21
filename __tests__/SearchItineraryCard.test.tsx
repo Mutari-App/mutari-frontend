@@ -202,18 +202,6 @@ describe('ItineraryCard Component', () => {
     expect(likesButtons[1]).toHaveAttribute('data-count', '1200')
   })
 
-  test('renders default image placeholder when no cover image is provided', () => {
-    const itineraryNoImage = {
-      ...mockItinerary,
-      coverImage: null,
-    }
-
-    render(<ItineraryCard itinerary={itineraryNoImage} isLiked={false} />)
-
-    // Check if the placeholder text is rendered
-    expect(screen.getByText('Tidak Ada Gambar')).toBeInTheDocument()
-  })
-
   test('renders initials in avatar when no profile photo is provided', () => {
     const itineraryNoUserPhoto = {
       ...mockItinerary,

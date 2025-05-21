@@ -97,8 +97,8 @@ const ExploreItinerarySection = () => {
   }, [itineraries, itinerariesByTag])
 
   return (
-    <section className="flex flex-col justify-start gap-4 container mx-auto px-4">
-      <p className="font-semibold text-2xl md:text-left md:text-[36px] self-start">
+    <section className="flex flex-col justify-start container mx-auto px-4">
+      <p className="font-semibold md:text-2xl lg:text-3xl self-start">
         Eksplorasi
       </p>
       {isLoadingPopular ? (
@@ -112,7 +112,7 @@ const ExploreItinerarySection = () => {
         </div>
       ) : (
         <div>
-          <p className="sm:text-xl md:text-2xl font-semibold mb-2">
+          <p className="text-sm md:text-2xl my-3 font-medium">
             Banyak di-like orang
           </p>
           <div className="p-2 sm:p-4 border border-[#0073E6] rounded-xl shadow-gray-300 shadow-lg grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-6">
@@ -142,7 +142,7 @@ const ExploreItinerarySection = () => {
         itinerariesByTag &&
         itinerariesByTag.length > 0 && (
           <div>
-            <p className="sm:text-xl md:text-2xl font-semibold mb-2">
+            <p className="text-sm md:text-2xl mt-6 mb-3 font-medium">
               Perjalanan lain yang mungkin Anda suka
             </p>
             <div className="p-2 sm:p-4 border border-[#0073E6] rounded-xl shadow-gray-300 shadow-lg grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-6">
@@ -162,7 +162,7 @@ const ExploreItinerarySection = () => {
       {itineraries && itineraries.length > 0 && (
         <Link
           href={'/itinerary/search'}
-          className="w-full md:w-3/4 lg:w-1/2 mx-auto flex justify-center"
+          className="w-full md:w-3/4 lg:w-1/2 mx-auto mt-4 md:mt-6 flex justify-center"
         >
           <div className="p-[1.5px] flex w-full items-center bg-gradient-to-r from-[#0073E6] to-[#004080] hover:from-[#0066cc] hover:to-[#003366] rounded-lg group">
             <Button className="h-8 w-full bg-white group-hover:bg-transparent">

@@ -9,6 +9,7 @@ import { customFetch, customFetchBody } from '@/utils/newCustomFetch'
 import { type CreateItineraryResponse } from '../interface'
 import { type DuplicateItineraryResponse } from '@/modules/ItineraryModule/module-elements/types'
 import { toast } from 'sonner'
+import { getImage } from '@/utils/getImage'
 
 interface ItineraryHeaderProps {
   itineraryId: string
@@ -130,7 +131,7 @@ export const ItineraryHeader: React.FC<ItineraryHeaderProps> = ({
       style={{
         backgroundImage: localCoverImage
           ? `url(${localCoverImage})`
-          : 'linear-gradient(360deg, #004080, #0073E6, #60A5FA)',
+          : `url(${getImage('itinerary_placeholder.png')})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
       }}

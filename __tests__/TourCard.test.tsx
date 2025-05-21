@@ -62,13 +62,6 @@ describe('TourCard', () => {
     expect(image).toHaveAttribute('src', mockTour.coverImage)
   })
 
-  it('shows placeholder when no cover image', () => {
-    const noImageTour = { ...mockTour, coverImage: '' }
-    render(<TourCard tour={noImageTour} />)
-
-    expect(screen.getByText('Tidak Ada Gambar')).toBeInTheDocument()
-  })
-
   it('has link to tour detail page', () => {
     render(<TourCard tour={mockTour} />)
     const link = screen.getByRole('link')

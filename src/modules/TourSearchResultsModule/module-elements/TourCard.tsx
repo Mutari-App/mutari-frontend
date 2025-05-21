@@ -5,6 +5,7 @@ import React from 'react'
 import { DurationTypeMap } from '@/modules/TourMarketplaceModule/constant'
 import { CalendarIcon, MapPinIcon } from 'lucide-react'
 import { type TourSearchResult } from '../interface'
+import { getImage } from '@/utils/getImage'
 
 interface TourCardProps {
   tour: TourSearchResult
@@ -18,18 +19,16 @@ const TourCard: React.FC<TourCardProps> = ({ tour }) => {
       <div className="flex flex-col h-full">
         <Link href={`/tour/${tour.id}`} className="flex flex-col h-full">
           <div className="relative h-24 sm:h-40 w-full">
-            {tour.coverImage ? (
-              <Image
-                src={tour.coverImage}
-                alt={tour.title}
-                fill
-                className="object-cover"
-              />
-            ) : (
-              <div className="flex h-full w-full items-center justify-center bg-blue-50 text-sm">
-                <span className="text-slate-400">Tidak Ada Gambar</span>
-              </div>
-            )}
+            <Image
+              src={
+                tour.coverImage !== '' && tour.coverImage
+                  ? tour.coverImage
+                  : getImage('itinerary_placeholder.png')
+              }
+              alt={tour.title}
+              fill
+              className="object-cover"
+            />
             {tour.availableTickets > 0 ? (
               <div className="absolute top-2 right-2 bg-green-300 text-gray-700 text-[10px] min-[500px]:text-xs px-2 py-0.5 min-[500px]:py-1 rounded-full">
                 {tour.availableTickets} tiket tersedia

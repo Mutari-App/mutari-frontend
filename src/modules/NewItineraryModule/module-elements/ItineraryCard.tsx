@@ -259,7 +259,7 @@ function ItineraryCard({
           src={
             item.coverImage !== '' && item.coverImage != null
               ? item.coverImage
-              : getImage('logo-no-background.png')
+              : getImage('itinerary_placeholder.png')
           }
           alt={item.title}
           width={720}
@@ -285,7 +285,7 @@ function ItineraryCard({
           </p>
         </div>
         <div className="flex gap-2">
-          {shared && <Badge variant={'outline'}>Dibagikan</Badge>}
+          {shared && <Badge variant={'outline'}>Dibagikan Ke saya</Badge>}
           {finished && (
             <Badge
               variant={'outline'}

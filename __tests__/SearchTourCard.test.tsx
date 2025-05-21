@@ -137,18 +137,6 @@ describe('TourCard Component', () => {
     )
   })
 
-  test('renders default image placeholder when no cover image is provided', () => {
-    const tourNoImage = {
-      ...mockTour,
-      coverImage: null,
-    }
-
-    render(<TourCard tour={tourNoImage} />)
-
-    // Check if the placeholder text is rendered
-    expect(screen.getByText('Tidak Ada Gambar')).toBeInTheDocument()
-  })
-
   test('renders sold out badge when no tickets available', () => {
     const soldOutTour = {
       ...mockTour,

@@ -9,6 +9,7 @@ import { id as localeId } from 'date-fns/locale'
 import { Badge } from '@/components/ui/badge'
 import LikesButton from './LikesButton'
 import { useAuthContext } from '@/contexts/AuthContext'
+import { getImage } from '@/utils/getImage'
 
 interface ItineraryCardProps {
   itinerary: ItinerarySearchResult
@@ -41,20 +42,16 @@ const ItineraryCard: React.FC<ItineraryCardProps> = ({
           className="flex flex-col h-full"
         >
           <div className="relative h-24 sm:h-40 w-full">
-            {itinerary.coverImage ? (
-              <Image
-                src={itinerary.coverImage}
-                alt={itinerary.title}
-                fill
-                className="object-cover"
-              />
-            ) : (
-              <div className="flex h-full w-full items-center justify-center bg-blue-50">
-                <span className="text-slate-400 max-sm:text-sm">
-                  Tidak Ada Gambar
-                </span>
-              </div>
-            )}
+            <Image
+              src={
+                itinerary.coverImage !== '' && itinerary.coverImage
+                  ? itinerary.coverImage
+                  : getImage('itinerary_placeholder.png')
+              }
+              alt={itinerary.title}
+              fill
+              className="object-cover"
+            />
             {/* Mobile-only (< 640px) Likes button at top right with semi-transparent background */}
             <div
               className="absolute top-2 right-2 bg-black bg-opacity-25 rounded-full px-1.5 py-[3px] sm:hidden"
