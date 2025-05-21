@@ -70,7 +70,7 @@ export const RouteInfo: React.FC<RouteInfoProps> = ({
   }
 
   return (
-    <div className="flex flex-col font-raleway text-[#004080] text-sm">
+    <div className="flex flex-col font-raleway text-[#004080] text-sm border-l-2 border-[#004080] py-3 pl-2">
       <div className="flex items-center gap-2">
         <TransportIcon />
         <div className="flex font-semibold">

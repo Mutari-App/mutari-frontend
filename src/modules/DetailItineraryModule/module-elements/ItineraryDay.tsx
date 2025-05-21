@@ -27,16 +27,16 @@ export const ItineraryDay = ({ section }: { section: Section }) => {
           <div key={block.id}>
             <div
               className={cn(
-                'p-3 w-full',
+                'p-3 w-full border-2 border-gray-400 rounded-md my-4',
                 block.blockType === 'NOTE' ? 'bg-[#E5F1FF]' : 'bg-white'
               )}
             >
               {block.blockType === 'LOCATION' && (
-                <>
+                <div className="flex flex-col gap-2">
                   <h3 className="md:text-2xl font-bold font-raleway">
                     {block.title}
                   </h3>
-                  <div className="flex items-center gap-4 md:text-lg text-[#024C98] font-roboto font-medium">
+                  {((block.startTime && block.endTime) || block.price > 0) &&<div className="flex items-center gap-4 md:text-sm text-[#024C98] font-roboto font-medium">
                     {block.startTime && block.endTime && (
                       <div className="flex items-center gap-1">
                         <Clock size={16} /> {formatTime(block.startTime)} -{' '}
@@ -48,9 +48,9 @@ export const ItineraryDay = ({ section }: { section: Section }) => {
                         <Tag size={16} /> Rp{block.price.toLocaleString()}
                       </div>
                     )}
-                  </div>
-                  <p className="md:text-lg font-roboto">{block.description}</p>
-                </>
+                  </div>}
+                  {block.description && <p className="md:text-lg font-roboto">{block.description}</p>}
+                </div>
               )}
               {block.blockType === 'NOTE' && (
                 <p className="md:text-lg font-roboto">{block.description}</p>

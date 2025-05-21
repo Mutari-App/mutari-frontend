@@ -154,6 +154,7 @@ export const ItineraryHeader: React.FC<ItineraryHeaderProps> = ({
               placeholder="Masukkan Judul Perjalanan"
               disabled={isContingency}
               style={{ cursor: isContingency ? 'not-allowed' : 'text' }}
+              maxLength={50}
             />
             {!isContingency && (
               <Edit2
