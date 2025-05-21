@@ -17,6 +17,7 @@ import { type DuplicateItineraryResponse } from '@/modules/ItineraryModule/modul
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import Head from 'next/head'
 import { useRouter } from 'next/navigation'
+import { getImage } from '@/utils/getImage'
 
 export const ItineraryHeader = ({
   data,
@@ -259,7 +260,7 @@ export const ItineraryHeader = ({
       style={{
         backgroundImage: data.coverImage
           ? `url(${data.coverImage})`
-          : 'linear-gradient(360deg, #004080, #0073E6, #60A5FA)',
+          : `url(${getImage('itinerary_placeholder.png')})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
       }}
