@@ -27,7 +27,7 @@ import {
   SheetTrigger,
   SheetTitle,
 } from '@/components/ui/sheet'
-import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
+import { Avatar, AvatarFallback } from '../ui/avatar'
 
 export const Navbar: React.FC = () => {
   const launchingDate = new Date(
@@ -188,15 +188,17 @@ export const Navbar: React.FC = () => {
           (isAuthenticated && !!user ? (
             <DropdownMenu>
               <DropdownMenuTrigger className="focus:outline-none ">
-                {user.photoProfile ? (<div className="rounded-full overflow-hidden hover:opacity-80 transition-opacity">
-                  <Image
-                    src={user.photoProfile}
-                    alt="Profile"
-                    width={40}
-                    height={40}
-                    className="h-8 w-8 sm:h-10 sm:w-10 object-cover"
-                  />
-                </div>) : (
+                {user.photoProfile ? (
+                  <div className="rounded-full overflow-hidden hover:opacity-80 transition-opacity">
+                    <Image
+                      src={user.photoProfile}
+                      alt="Profile"
+                      width={40}
+                      height={40}
+                      className="h-8 w-8 sm:h-10 sm:w-10 object-cover"
+                    />
+                  </div>
+                ) : (
                   <Avatar className="h-10 w-10">
                     <AvatarFallback className="text-[10px] sm:text-sm bg-blue-50">
                       {initials}

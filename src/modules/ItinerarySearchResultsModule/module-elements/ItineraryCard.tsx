@@ -116,7 +116,11 @@ const ItineraryCard: React.FC<ItineraryCardProps> = ({
             className="flex items-center gap-1 sm:gap-2 relative"
           >
             <Avatar className="h-6 w-6">
-              <AvatarImage src={photoProfile ?? undefined} alt={fullName} className="object-cover" />
+              <AvatarImage
+                src={photoProfile ?? undefined}
+                alt={fullName}
+                className="object-cover"
+              />
               <AvatarFallback className="text-[10px] sm:text-xs bg-blue-50">
                 {initials}
               </AvatarFallback>
