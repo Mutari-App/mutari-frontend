@@ -113,7 +113,7 @@ export const ItinerarySections: React.FC<ItinerarySectionsProps> = ({
       {sections.map((section) => (
         <div key={section.sectionNumber} className="mb-8">
           <div className="flex items-center justify-between mb-2 gap-4">
-            <div className="relative flex-grow group border">
+            <div className="relative flex-grow group">
               <Input
                 className="lg:text-2xl font-semibold border-none p-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
                 value={section.title}
