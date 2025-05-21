@@ -83,6 +83,7 @@ interface Tour {
   updatedAt: string
   itinerary: Itinerary
   includes: Include[]
+  availableTickets: number
 }
 
 interface Include {

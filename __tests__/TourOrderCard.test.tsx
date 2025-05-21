@@ -76,26 +76,50 @@ describe('TourOrderCard', () => {
   })
 
   it('renders with correct price', () => {
-    render(<TourOrderCard tourId="123" pricePerTicket={1500000} />)
+    render(
+      <TourOrderCard
+        availableTickets={1}
+        tourId="123"
+        pricePerTicket={1500000}
+      />
+    )
     expect(screen.getByText('Pesan Sekarang')).toBeInTheDocument()
   })
 
   it('opens dialog when booking button is clicked', async () => {
-    render(<TourOrderCard tourId="123" pricePerTicket={1500000} />)
+    render(
+      <TourOrderCard
+        availableTickets={1}
+        tourId="123"
+        pricePerTicket={1500000}
+      />
+    )
     await userEvent.click(screen.getByText('Pesan Sekarang'))
     expect(screen.getByText('Pilih tanggal')).toBeInTheDocument()
     expect(screen.getByText('Guest')).toBeInTheDocument()
   })
 
   it('closes dialog when cancel button is clicked', async () => {
-    render(<TourOrderCard tourId="123" pricePerTicket={1500000} />)
+    render(
+      <TourOrderCard
+        availableTickets={1}
+        tourId="123"
+        pricePerTicket={1500000}
+      />
+    )
     await userEvent.click(screen.getByText('Pesan Sekarang'))
     await userEvent.click(screen.getByText('Batal'))
     expect(screen.queryByText('Pilih tanggal')).not.toBeInTheDocument()
   })
 
   it('updates guest count and calculates total price correctly', async () => {
-    render(<TourOrderCard tourId="123" pricePerTicket={1500000} />)
+    render(
+      <TourOrderCard
+        availableTickets={1}
+        tourId="123"
+        pricePerTicket={1500000}
+      />
+    )
     await userEvent.click(screen.getByText('Pesan Sekarang'))
 
     const guestInput = screen.getByPlaceholderText('Pilih jumlah partisipan')
@@ -110,7 +134,13 @@ describe('TourOrderCard', () => {
   })
 
   it('allows entering voucher code', async () => {
-    render(<TourOrderCard tourId="123" pricePerTicket={1500000} />)
+    render(
+      <TourOrderCard
+        availableTickets={1}
+        tourId="123"
+        pricePerTicket={1500000}
+      />
+    )
     await userEvent.click(screen.getByText('Pesan Sekarang'))
 
     const voucherInput = screen.getByPlaceholderText(
@@ -122,7 +152,13 @@ describe('TourOrderCard', () => {
   })
 
   it('updates trip details when date is selected', async () => {
-    render(<TourOrderCard tourId="123" pricePerTicket={1500000} />)
+    render(
+      <TourOrderCard
+        availableTickets={1}
+        tourId="123"
+        pricePerTicket={1500000}
+      />
+    )
     await userEvent.click(screen.getByText('Pesan Sekarang'))
 
     // Initially, departure date should show '-'
@@ -135,7 +171,13 @@ describe('TourOrderCard', () => {
   })
 
   it('shows error when booking without selecting a date', async () => {
-    render(<TourOrderCard tourId="123" pricePerTicket={1500000} />)
+    render(
+      <TourOrderCard
+        availableTickets={1}
+        tourId="123"
+        pricePerTicket={1500000}
+      />
+    )
     await userEvent.click(screen.getByText('Pesan Sekarang'))
 
     const bookNowButton = screen.getAllByText('Pesan Sekarang')[1]
@@ -148,7 +190,13 @@ describe('TourOrderCard', () => {
   })
 
   it('shows error when booking with invalid guest count', async () => {
-    render(<TourOrderCard tourId="123" pricePerTicket={1500000} />)
+    render(
+      <TourOrderCard
+        availableTickets={1}
+        tourId="123"
+        pricePerTicket={1500000}
+      />
+    )
     await userEvent.click(screen.getByText('Pesan Sekarang'))
     await userEvent.click(screen.getByTestId('mock-calendar'))
 
@@ -164,7 +212,13 @@ describe('TourOrderCard', () => {
   })
 
   it('navigates to booking form when all inputs are valid', async () => {
-    render(<TourOrderCard tourId="123" pricePerTicket={1500000} />)
+    render(
+      <TourOrderCard
+        availableTickets={1}
+        tourId="123"
+        pricePerTicket={1500000}
+      />
+    )
     await userEvent.click(screen.getByText('Pesan Sekarang'))
     await userEvent.click(screen.getByTestId('mock-calendar'))
 
@@ -178,7 +232,13 @@ describe('TourOrderCard', () => {
   })
 
   it('closes dialog after successful booking', async () => {
-    render(<TourOrderCard tourId="123" pricePerTicket={1500000} />)
+    render(
+      <TourOrderCard
+        availableTickets={1}
+        tourId="123"
+        pricePerTicket={1500000}
+      />
+    )
     await userEvent.click(screen.getByText('Pesan Sekarang'))
     await userEvent.click(screen.getByTestId('mock-calendar'))
     await userEvent.click(screen.getAllByText('Pesan Sekarang')[1])

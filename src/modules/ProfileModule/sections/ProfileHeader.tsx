@@ -106,7 +106,7 @@ export const ProfileHeader: React.FC<ProfileProps> = ({
               src={photoProfile || '/placeholder.svg'}
               alt={`${firstName} ${lastName}'s profile picture`}
               fill
-              className="object-fill"
+              className="object-cover"
             />
           )}
         </div>

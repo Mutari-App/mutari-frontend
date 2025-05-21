@@ -64,6 +64,7 @@ const ItineraryCard: React.FC<ItineraryCardProps> = ({
                   count={itinerary.likes}
                   enabled={isAuthenticated && itinerary.user.id !== user?.id}
                   className="text-xs text-white"
+                  outlineColor="text-white"
                 />
               ) : null}
             </div>
@@ -116,7 +117,11 @@ const ItineraryCard: React.FC<ItineraryCardProps> = ({
             className="flex items-center gap-1 sm:gap-2 relative"
           >
             <Avatar className="h-6 w-6">
-              <AvatarImage src={photoProfile ?? undefined} alt={fullName} />
+              <AvatarImage
+                src={photoProfile ?? undefined}
+                alt={fullName}
+                className="object-cover"
+              />
               <AvatarFallback className="text-[10px] sm:text-xs bg-blue-50">
                 {initials}
               </AvatarFallback>
