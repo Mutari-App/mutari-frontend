@@ -500,9 +500,10 @@ export default function ItineraryMakerModule({
       const target = e.target as HTMLElement
       const isClickInsideBlock = target.closest('[data-block-id]')
       const isClickInsidePin = target.closest('[data-location-pin]')
+      const isClickAddButton = target.closest('[data-add-location-btn]')
 
       // If not clicking on a block or pin, clear focus
-      if (!isClickInsideBlock && !isClickInsidePin) {
+      if (!isClickInsideBlock && !isClickInsidePin && !isClickAddButton) {
         clearLocationFocus()
       }
     }
@@ -1073,8 +1074,8 @@ export default function ItineraryMakerModule({
     location: string,
     price?: number
   ) => {
+    const blockId = v4()
     setItineraryData((prev) => {
-      const blockId = v4()
       const updatedSections = prev.sections.map((section) => {
         if (section.sectionNumber === sectionNumber) {
           const newBlock = {
@@ -1102,6 +1103,7 @@ export default function ItineraryMakerModule({
       setTimeout(() => void updateRoutes(blockId), 0)
       return result
     })
+    handleLocationFocus(blockId, sectionNumber)
   }
 
   const addSection = (position?: 'after' | 'before', relativeTo?: number) => {

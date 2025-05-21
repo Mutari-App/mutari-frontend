@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { Card, CardContent, CardFooter } from '@/components/ui/card'
 import { type ItineraryProps } from '../../interface'
 import LikesButton from '@/modules/ItinerarySearchResultsModule/module-elements/LikesButton'
+import { getImage } from '@/utils/getImage'
 
 interface ItineraryCardProps {
   itinerary: ItineraryProps
@@ -16,18 +17,16 @@ export const LikedItineraryCard: React.FC<ItineraryCardProps> = ({
     <Link href={`/itinerary/${itinerary.id}`}>
       <Card className="h-full flex flex-col overflow-hidden transition-all hover:shadow-md font-raleway">
         <div className="relative h-24 sm:h-40 w-full">
-          {itinerary.coverImage ? (
-            <Image
-              src={itinerary.coverImage}
-              alt={itinerary.title}
-              fill
-              className="object-cover"
-            />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center bg-blue-50">
-              <span className="text-slate-400">Tidak Ada Gambar</span>
-            </div>
-          )}
+          <Image
+            src={
+              itinerary.coverImage !== '' && itinerary.coverImage
+                ? itinerary.coverImage
+                : getImage('itinerary_placeholder.png')
+            }
+            alt={itinerary.title}
+            fill
+            className="object-cover"
+          />
         </div>
         <CardContent className="px-2 py-1.5 sm:px-3 sm:py-2 space-y-1 flex-grow">
           <div>
@@ -71,18 +70,16 @@ export const ItineraryCard: React.FC<ItineraryCardProps> = ({ itinerary }) => {
     <Link href={`/itinerary/${itinerary.id}`}>
       <Card className="h-full flex flex-col overflow-hidden transition-all hover:shadow-md font-raleway">
         <div className="relative h-24 sm:h-40 w-full">
-          {itinerary.coverImage ? (
-            <Image
-              src={itinerary.coverImage}
-              alt={itinerary.title}
-              fill
-              className="object-cover"
-            />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center bg-blue-50">
-              <span className="text-slate-400">Tidak Ada Gambar</span>
-            </div>
-          )}
+          <Image
+            src={
+              itinerary.coverImage !== '' && itinerary.coverImage
+                ? itinerary.coverImage
+                : getImage('itinerary_placeholder.png')
+            }
+            alt={itinerary.title}
+            fill
+            className="object-cover"
+          />
         </div>
         <CardContent className="px-2 py-1.5 sm:px-3 sm:py-2 space-y-1 flex-grow">
           <div>

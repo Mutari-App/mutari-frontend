@@ -21,6 +21,7 @@ import {
 import CustomPin from '../module-elements/CustomPin'
 import { SECTION_COLORS } from '../constants'
 import { Loader2 } from 'lucide-react'
+import { title } from 'process'
 
 type MapsProps = {
   readonly itineraryData: Readonly<Section[]>
@@ -205,9 +206,21 @@ function Maps({
     if (selectedPlaceDetails) {
       const { name } = selectedPlaceDetails
       const location = `${selectedPlace.latLng.lat}, ${selectedPlace.latLng.lng}`
-      const sectionNumber = itineraryData.length
+      let sectionNumber = 1
+      for (const section of itineraryData) {
+        if (section.blocks && section.blocks.length > 0) {
+          sectionNumber = section.sectionNumber
+        } else {
+          break
+        }
+      }
       const title = name || 'New Place'
       const price = selectedPlaceDetails.priceRange?.startPrice
+
+      if (focusedLocation) {
+        // If a location is focused, add the new location to the same section
+        sectionNumber = focusedLocation.sectionNumber
+      }
 
       if (addLocationToSection) {
         addLocationToSection(sectionNumber, title, location, price)
@@ -331,6 +344,7 @@ function Maps({
                     size={'sm'}
                     variant={'gradient'}
                     onClick={handleAddToItinerary}
+                    data-add-location-btn
                   >
                     Tambahkan ke itinerary
                   </Button>
