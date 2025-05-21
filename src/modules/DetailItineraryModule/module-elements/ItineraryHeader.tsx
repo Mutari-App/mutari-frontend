@@ -363,7 +363,7 @@ export const ItineraryHeader = ({
             />
           </Head>
         )}
-        <DialogContent className="font-roboto cursor-default p-6 pb-10 max-w-md">
+        <DialogContent className="font-roboto cursor-default p-6 pb-10 max-w-md rounded-md">
           <DialogHeader>
             <DialogTitle className="text-2xl text-center w-full font-semibold">
               Bagikan Itinerary
@@ -382,11 +382,11 @@ export const ItineraryHeader = ({
                 melihat, tetapi tidak bisa edit maupun duplikat
               </div>
               <div className="flex items-center gap-2 bg-gray-100 rounded-md p-2">
-                <span className="text-sm text-gray-800 truncate w-[300px]">
+                <span className="text-sm text-gray-800 truncate max-w-[200px] min-[400px]:max-w-[250px] min-[450px]:max-w-[300px]">
                   {shareLink}
                 </span>
                 <Button
-                  className="px-4 py-2 bg-gradient-to-r from-[#016CD7] to-[#014285] text-white items-center rounded"
+                  className="flex ml-auto px-4 py-2 bg-gradient-to-r from-[#016CD7] to-[#014285] text-white items-center rounded"
                   onClick={() => {
                     void navigator.clipboard
                       .writeText(shareLink)
