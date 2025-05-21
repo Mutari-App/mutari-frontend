@@ -483,7 +483,32 @@ export const TourBookingFormModule: React.FC<TourBookingFormModuleProps> = ({
               </div>
               <h3 className="font-medium">Open Trip Baduy 2D1N</h3>
               <p className="text-sm text-gray-600">
-                Rp{tourDetail.pricePerTicket.toLocaleString('id-ID')}/pax
+                {(() => {
+                  const originalPrice =
+                    tourDetail.pricePerTicket * (100 / (100 - 20))
+
+                  return (
+                    <div className="flex flex-col w-full ">
+                      <div className="flex flex-col  relative w-fit">
+                        <div className="flex items-center gap-1.5 ">
+                          <span className="text-gray-500 line-through text-xs">
+                            Rp{Number(originalPrice).toLocaleString('ID-id')}
+                          </span>
+                          <span className="bg-red-100 text-red-600 text-xs px-1.5 py-[1px] rounded-md font-medium whitespace-nowrap">
+                            20% OFF
+                          </span>
+                        </div>
+                        <span className="text-[#024C98] font-semibold">
+                          Rp
+                          {Number(tourDetail.pricePerTicket).toLocaleString(
+                            'ID-id'
+                          )}
+                          /pax
+                        </span>
+                      </div>
+                    </div>
+                  )
+                })()}{' '}
               </p>
             </div>
 

@@ -12,9 +12,11 @@ import { toast } from 'sonner'
 export const TourOrderCard = ({
   tourId,
   pricePerTicket,
+  availableTickets,
 }: {
   tourId: string
   pricePerTicket: number
+  availableTickets: number
 }) => {
   const router = useRouter()
   const [open, setOpen] = useState(false)
@@ -53,15 +55,34 @@ export const TourOrderCard = ({
 
   return (
     <div className="sticky top-4 w-full lg:w-72 bg-white p-4 rounded-xl shadow-md self-start">
-      <p className="text-xl font-semibold text-gray-800 text-raleway">
-        Rp{pricePerTicket.toLocaleString('id-ID')}
-        <span className="text-sm"> / pax</span>
-      </p>
+      {(() => {
+        const originalPrice = pricePerTicket * (100 / (100 - 20))
+
+        return (
+          <div className="flex flex-col w-full ">
+            <div className="flex flex-col  relative w-fit">
+              <div className="flex items-center gap-1.5 ">
+                <span className="text-gray-500 line-through text-xs">
+                  Rp{Number(originalPrice).toLocaleString('ID-id')}
+                </span>
+                <span className="bg-red-100 text-red-600 text-xs px-1.5 py-[1px] rounded-md font-medium whitespace-nowrap">
+                  20% OFF
+                </span>
+              </div>
+              <span className="text-[#024C98] font-semibold">
+                Rp{Number(pricePerTicket).toLocaleString('ID-id')}
+                /pax
+              </span>
+            </div>
+          </div>
+        )
+      })()}
       <Button
         className="mt-4 w-full bg-gradient-to-r from-[#016CD7] to-[#014285] text-white py-2 rounded-lg"
+        disabled={availableTickets < 1}
         onClick={() => setOpen(true)}
       >
-        Pesan Sekarang
+        {availableTickets > 0 ? `Pesan Sekarang` : 'Tiket tidak tersedia'}
       </Button>
 
       <Dialog open={open} onOpenChange={setOpen}>

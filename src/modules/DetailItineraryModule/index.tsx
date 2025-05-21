@@ -177,7 +177,7 @@ export default function DetailItineraryModule() {
             }
           />
         </div>
-        <div className="absolute bottom-5 left-1/2 -translate-x-1/2 shadow-lg z-10 md:hidden">
+        <div className="fixed bottom-5 left-1/2 -translate-x-1/2 shadow-lg z-10 md:hidden">
           <Button
             variant={'gradient'}
             onClick={() => setIsMapView((prev) => !prev)}
