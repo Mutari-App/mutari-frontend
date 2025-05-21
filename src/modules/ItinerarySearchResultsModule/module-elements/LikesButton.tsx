@@ -9,6 +9,7 @@ interface LikesButtonProps {
   itineraryId: string
   enabled: boolean
   className?: string
+  outlineColor?: string
 }
 
 // Format number to use 'k' for thousands
@@ -27,6 +28,7 @@ const LikesButton: React.FC<LikesButtonProps> = ({
   itineraryId,
   enabled,
   className = '',
+  outlineColor = '',
 }) => {
   const [isEnabled, setIsEnabled] = useState(enabled)
   const [isLiked, setIsLiked] = useState(liked)
@@ -64,7 +66,7 @@ const LikesButton: React.FC<LikesButtonProps> = ({
     >
       <Heart
         onClick={isEnabled ? toggleLike : undefined}
-        className={`h-4 w-4 cursor-pointer ${isLiked ? 'text-red-500 fill-red-500' : 'text-gray-500'} ${
+        className={`h-4 w-4 cursor-pointer ${outlineColor} ${isLiked ? 'text-red-500 fill-red-500' : 'text-gray-500'} ${
           !isEnabled ? 'opacity-50 cursor-not-allowed' : ''
         }`}
       />

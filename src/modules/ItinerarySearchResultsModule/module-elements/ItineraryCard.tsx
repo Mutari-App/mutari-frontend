@@ -64,6 +64,7 @@ const ItineraryCard: React.FC<ItineraryCardProps> = ({
                   count={itinerary.likes}
                   enabled={isAuthenticated && itinerary.user.id !== user?.id}
                   className="text-xs text-white"
+                  outlineColor="text-white"
                 />
               ) : null}
             </div>
