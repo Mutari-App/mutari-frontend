@@ -110,11 +110,11 @@ export default function NewItineraryModule() {
   }, [page, filters, fetchAllMyItinerary])
 
   return (
-    <div className="flex flex-col items-center gap-7 pt-28">
+    <div className="flex flex-col items-center gap-7 pt-24 md:pt-28">
       <div className="flex flex-col items-center gap-7 px-5 w-full lg:w-4/5">
-        <div className="flex flex-col justify-start gap-7 w-full">
+        <div className="flex flex-col justify-start gap-4 w-full">
           <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
-            <h2 className="font-semibold text-2xl text-center md:text-left md:text-[36px]">
+            <h2 className="font-semibold text-xl sm:text-2xl text-center md:text-left md:text-[36px]">
               Rencana Perjalanan Saya
             </h2>
             <Popover open={isFilterOpen} onOpenChange={setIsFilterOpen}>
@@ -144,7 +144,7 @@ export default function NewItineraryModule() {
                         className="data-[state=checked]:bg-[#016CD7] data-[state=checked]:border-[#016CD7]"
                       />
                       <Label htmlFor="shared" className="cursor-pointer">
-                        Dibagikan
+                        Dibagikan ke Saya
                       </Label>
                     </div>
                     <div className="flex items-center space-x-2">
@@ -207,10 +207,10 @@ export default function NewItineraryModule() {
           />
         </div>
       </div>
-      <div className="text-center text-sm">
+      <div className="text-center text-sm sm:text-base pt-4 md:pt-8 md:text-lg lg:text-xl">
         <p>
-          <span className="font-bold text-[#016CD7]">LELAH</span> membuat
-          rencana perjalanan dari nol?
+          <span className="font-bold text-blue-500">LELAH</span> membuat rencana
+          perjalanan dari nol?
         </p>
         <p>Coba jelajahi itinerary yang dibuat oleh pengguna!</p>
       </div>
