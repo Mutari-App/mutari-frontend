@@ -27,6 +27,7 @@ import {
   SheetTrigger,
   SheetTitle,
 } from '@/components/ui/sheet'
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
 
 export const Navbar: React.FC = () => {
   const launchingDate = new Date(
@@ -39,6 +40,7 @@ export const Navbar: React.FC = () => {
   const router = useRouter()
   const [isOpen, setIsOpen] = useState(false)
   const [isScrolledToScreen, setIsScrolledToScreen] = useState(false)
+  const initials = `${user?.firstName.charAt(0).toUpperCase()}${user?.lastName?.charAt(0).toUpperCase() ?? ''}`
 
   useEffect(() => {
     const handleScroll = () => {
@@ -186,15 +188,21 @@ export const Navbar: React.FC = () => {
           (isAuthenticated && !!user ? (
             <DropdownMenu>
               <DropdownMenuTrigger className="focus:outline-none ">
-                <div className="rounded-full overflow-hidden hover:opacity-80 transition-opacity">
+                {user.photoProfile ? (<div className="rounded-full overflow-hidden hover:opacity-80 transition-opacity">
                   <Image
-                    src="/images/profile-placeholder.png"
+                    src={user.photoProfile}
                     alt="Profile"
                     width={40}
                     height={40}
                     className="h-8 w-8 sm:h-10 sm:w-10 object-cover"
                   />
-                </div>
+                </div>) : (
+                  <Avatar className="h-10 w-10">
+                    <AvatarFallback className="text-[10px] sm:text-sm bg-blue-50">
+                      {initials}
+                    </AvatarFallback>
+                  </Avatar>
+                )}
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 align="end"
