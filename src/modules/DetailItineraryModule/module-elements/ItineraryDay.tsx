@@ -28,7 +28,7 @@ export const ItineraryDay = ({ section }: { section: Section }) => {
           <div key={block.id}>
             <Card
               className={cn(
-                'p-3 w-full border border-gray-400 rounded-md my-4',
+                'p-3 w-full rounded-md my-4',
                 block.blockType === 'NOTE' ? 'bg-[#E5F1FF]' : 'bg-white'
               )}
             >
