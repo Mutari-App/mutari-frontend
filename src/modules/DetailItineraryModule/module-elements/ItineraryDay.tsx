@@ -36,20 +36,26 @@ export const ItineraryDay = ({ section }: { section: Section }) => {
                   <h3 className="md:text-2xl font-bold font-raleway">
                     {block.title}
                   </h3>
-                  {((block.startTime && block.endTime) || block.price > 0) &&<div className="flex items-center gap-4 md:text-sm text-[#024C98] font-roboto font-medium">
-                    {block.startTime && block.endTime && (
-                      <div className="flex items-center gap-1">
-                        <Clock size={16} /> {formatTime(block.startTime)} -{' '}
-                        {formatTime(block.endTime)}
-                      </div>
-                    )}
-                    {block.price > 0 && (
-                      <div className="flex items-center gap-1">
-                        <Tag size={16} /> Rp{block.price.toLocaleString()}
-                      </div>
-                    )}
-                  </div>}
-                  {block.description && <p className="md:text-lg font-roboto">{block.description}</p>}
+                  {((block.startTime && block.endTime) || block.price > 0) && (
+                    <div className="flex items-center gap-4 text-xs md:text-sm text-[#024C98] font-roboto font-medium">
+                      {block.startTime && block.endTime && (
+                        <div className="flex items-center gap-1">
+                          <Clock size={16} /> {formatTime(block.startTime)} -{' '}
+                          {formatTime(block.endTime)}
+                        </div>
+                      )}
+                      {block.price > 0 && (
+                        <div className="flex items-center gap-1">
+                          <Tag size={16} /> Rp{block.price.toLocaleString()}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  {block.description && (
+                    <p className="md:text-lg font-roboto">
+                      {block.description}
+                    </p>
+                  )}
                 </div>
               )}
               {block.blockType === 'NOTE' && (
