@@ -26,10 +26,12 @@ export const ItineraryDay = ({ section }: { section: Section }) => {
             : null
         return (
           <div key={block.id}>
-            <Card className={cn(
+            <Card
+              className={cn(
                 'p-3 w-full border border-gray-400 rounded-md my-4',
                 block.blockType === 'NOTE' ? 'bg-[#E5F1FF]' : 'bg-white'
-              )}>
+              )}
+            >
               {block.blockType === 'LOCATION' && (
                 <div className="flex flex-col gap-2">
                   <h3 className="md:text-2xl font-bold font-raleway">
