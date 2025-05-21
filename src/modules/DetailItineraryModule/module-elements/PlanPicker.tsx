@@ -16,7 +16,7 @@ export const PlanPicker = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false)
   return (
-    <div className="fixed py-7 pl-2 pr-0 space-x-0 left-0 bottom-3 bg-gradient-to-r from-[#004080] to-[#0073E6] text-white rounded-r-full min-w-16 h-10 flex items-center justify-center">
+    <div className="fixed py-7 pl-2 pr-0 space-x-0 left-0 bottom-3 bg-gradient-to-r from-[#004080] to-[#0073E6] text-white rounded-r-full min-w-16 h-10 flex items-center justify-center z-30">
       {isOpen && (
         <div className="flex flex-row items-center justify-center gap-3 px-1">
           <Link href={`/itinerary/${itineraryId}`}>
