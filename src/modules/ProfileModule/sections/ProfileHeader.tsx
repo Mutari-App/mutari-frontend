@@ -121,7 +121,7 @@ export const ProfileHeader: React.FC<ProfileProps> = ({
             options={{
               clientAllowedFormats: ['image'],
               maxFiles: 1,
-              maxFileSize: 1024 * 256, // 256 KB
+              maxFileSize: 1024 * 512, // 512 KB
             }}
           >
             Pilih Foto
