@@ -2,6 +2,7 @@ import { cn } from '@/lib/utils'
 import { Clock, Tag } from 'lucide-react'
 import { RouteInfo } from './RouteInfo'
 import { SECTION_COLORS } from '@/modules/ItineraryMakerModule/constants'
+import { Card } from '@/components/ui/card'
 
 export const ItineraryDay = ({ section }: { section: Section }) => {
   return (
@@ -25,12 +26,10 @@ export const ItineraryDay = ({ section }: { section: Section }) => {
             : null
         return (
           <div key={block.id}>
-            <div
-              className={cn(
+            <Card className={cn(
                 'p-3 w-full border border-gray-400 rounded-md my-4',
                 block.blockType === 'NOTE' ? 'bg-[#E5F1FF]' : 'bg-white'
-              )}
-            >
+              )}>
               {block.blockType === 'LOCATION' && (
                 <div className="flex flex-col gap-2">
                   <h3 className="md:text-2xl font-bold font-raleway">
@@ -64,7 +63,7 @@ export const ItineraryDay = ({ section }: { section: Section }) => {
               {isLastBlock && (
                 <div className="absolute -left-1 bottom-8 w-4 border-t-2 border-[#94A3B8]"></div>
               )}
-            </div>
+            </Card>
             {!isLastBlock && block.routeToNext && (
               <div className="ml-6 my-2">
                 <RouteInfo
