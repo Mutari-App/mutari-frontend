@@ -36,6 +36,7 @@ import { Badge } from '@/components/ui/badge'
 import { type ItineraryData } from './types'
 import { useAuthContext } from '@/contexts/AuthContext'
 import { type DuplicateItineraryResponse } from '@/modules/ItineraryModule/module-elements/types'
+import { Card } from '@/components/ui/card'
 
 function ItineraryCard({
   shared = false,
@@ -249,11 +250,11 @@ function ItineraryCard({
   }
 
   return (
-    <div
+    <Card
       onClick={() => router.push(`/itinerary/${item.id}`)}
-      className="group flex items-center gap-5 shadow-lg w-full rounded-xl overflow-hidden hover:cursor-pointer relative transition-all duration-300 hover:shadow-xl"
+      className="group flex items-center gap-5 w-full rounded-xl overflow-hidden hover:cursor-pointer relative transition-all duration-300 hover:shadow-md"
     >
-      <div className="w-1/4 h-36 overflow-hidden">
+      <div className="w-1/4 h-24 md:h-36 overflow-hidden">
         <Image
           src={
             item.coverImage !== '' && item.coverImage != null
@@ -263,7 +264,7 @@ function ItineraryCard({
           alt={item.title}
           width={720}
           height={720}
-          className="w-full h-full object-cover pointer-events-none group-hover:scale-125 duration-300"
+          className="w-full h-full max-h-72 object-cover pointer-events-none group-hover:scale-125 duration-300"
         />
       </div>
       <div className="w-3/4 h-full flex flex-col gap-2 py-4 pr-12">
@@ -574,7 +575,7 @@ function ItineraryCard({
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </Card>
   )
 }
 
