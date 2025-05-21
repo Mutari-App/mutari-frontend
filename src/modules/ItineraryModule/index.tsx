@@ -148,10 +148,10 @@ export default function ItineraryModule() {
   }, [completedItineraryPage, fetchMyCompletedItinerary])
 
   return (
-    <div className="flex flex-col items-center gap-7 pt-28">
+    <div className="flex flex-col items-center gap-7 pt-24 md:pt-28">
       <div className="flex flex-col items-center gap-7 px-5 w-full lg:w-4/5">
-        <div className="flex flex-col justify-start gap-7 w-full">
-          <h2 className="font-semibold text-2xl text-center md:text-left md:text-[36px] self-start">
+        <div className="flex flex-col justify-start gap-4 md:gap-7 w-full">
+          <h2 className="font-semibold text-center md:text-left md:text-[28px] lg:text-[36px] self-start">
             Rencana Perjalanan Saya
           </h2>
           <Link
@@ -175,20 +175,21 @@ export default function ItineraryModule() {
             searchQueryParams="myItineraryPage"
           />
         </div>
-        <div className="flex flex-col justify-start gap-7 w-full">
-          <h2 className="font-semibold text-2xl text-center md:text-left md:text-[36px] self-start">
-            Dibagikan
+        <div className="flex flex-col justify-start gap-4 md:gap-7 w-full">
+          <h2 className="font-semibold text-center md:text-left md:text-2xl lg:text-3xl self-start">
+            Dibagikan ke Saya
           </h2>
           <MyItineraryList
             data={sharedData}
             metadata={sharedItineraryMetadata}
             refresh={refreshAll}
             searchQueryParams="sharedItineraryPage"
+            emptyPlaceholder="Belum ada yang dibagikan ke saya."
           />
         </div>
 
-        <div className="flex flex-col justify-start gap-7 w-full">
-          <h2 className="font-semibold text-2xl md:text-left md:text-[36px] sel">
+        <div className="flex flex-col justify-start gap-4 md:gap-7 w-full">
+          <h2 className="font-semibold md:text-left md:text-2xl lg:text-3xl sel">
             Perjalanan Selesai
           </h2>
           <MyItineraryList
@@ -196,10 +197,11 @@ export default function ItineraryModule() {
             metadata={completedItineraryMetadata}
             refresh={refreshAll}
             searchQueryParams="completedItineraryPage"
+            emptyPlaceholder="Belum ada perjalanan selesai."
           />
         </div>
       </div>
-      <div className="text-center text-sm">
+      <div className="text-center text-sm sm:text-base pt-4 md:pt-8 md:text-lg lg:text-xl">
         <p>
           <span className="font-bold text-blue-500">LELAH</span> membuat rencana
           perjalanan dari nol?

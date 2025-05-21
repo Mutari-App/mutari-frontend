@@ -41,14 +41,14 @@ function RecentlyViewedSection<T extends { id: string }>({
     }
   }, [fetchEndpoint, isAuthenticated, mapData])
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated || items.length <= 0) {
     return null
   }
 
   return (
-    <section className="flex flex-col justify-start gap-7 container mx-auto px-4">
+    <section className="flex flex-col justify-start gap-4 container mx-auto px-4">
       <h2
-        className={`font-semibold text-2xl md:text-left md:text-[36px] sel ${fetchEndpoint === '/tour/views' ? 'text-base sm:text-xl md:text-[24px]' : ''}`}
+        className={`font-semibold md:text-2xl lg:text-3xl ${fetchEndpoint === '/tour/views' ? 'text-base sm:text-xl md:text-[24px] lg:text-[24px]' : ''}`}
       >
         {title}
       </h2>

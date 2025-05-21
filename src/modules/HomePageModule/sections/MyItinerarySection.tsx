@@ -40,7 +40,7 @@ export default function MyItinerarySection() {
   return (
     <div className="flex flex-col justify-start lg:justify-between container mx-auto px-4 gap-5">
       <div className="flex flex-col lg:flex-row gap-5 justify-between items-center w-full">
-        <h2 className="font-semibold text-2xl md:text-left md:text-[36px] self-start">
+        <h2 className="font-semibold md:text-2xl lg:text-3xl self-start">
           Rencana Perjalanan Saya
         </h2>
         <Link

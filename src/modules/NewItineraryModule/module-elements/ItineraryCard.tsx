@@ -285,7 +285,7 @@ function ItineraryCard({
           </p>
         </div>
         <div className="flex gap-2">
-          {shared && <Badge variant={'outline'}>Dibagikan</Badge>}
+          {shared && <Badge variant={'outline'}>Dibagikan Ke saya</Badge>}
           {finished && (
             <Badge
               variant={'outline'}

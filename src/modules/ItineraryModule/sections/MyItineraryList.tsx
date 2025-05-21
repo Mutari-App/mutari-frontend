@@ -19,12 +19,14 @@ function MyItineraryList({
   refresh,
   searchQueryParams,
   includePagination = true,
+  emptyPlaceholder = 'Belum ada rencana perjalanan.',
 }: {
   readonly data: readonly Readonly<ItineraryData>[]
   readonly metadata: metadataType
   readonly refresh: () => void
   readonly searchQueryParams: string
   readonly includePagination?: boolean
+  readonly emptyPlaceholder?: string
 }) {
   const searchParams = useSearchParams()
   const pathname = usePathname()
@@ -47,11 +49,11 @@ function MyItineraryList({
           ))}
         </div>
       ) : (
-        <div className="w-full flex items-center justify-center py-8">
-          Belum ada rencana perjalanan.
+        <div className="w-full text-sm text-gray-800 md:text-base flex items-center justify-center py-4 md:py-8">
+          {emptyPlaceholder}
         </div>
       )}
-      {includePagination && (
+      {includePagination && metadata.totalPages > 0 && (
         <Pagination>
           <PaginationContent>
             <PaginationItem>

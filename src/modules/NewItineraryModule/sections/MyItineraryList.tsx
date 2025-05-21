@@ -18,10 +18,12 @@ function MyItineraryList({
   data,
   metadata,
   refresh,
+  emptyPlaceholder = 'Belum ada rencana perjalanan.',
 }: {
   readonly data: readonly Readonly<ItineraryData>[]
   readonly metadata: metadataType
   readonly refresh: () => void
+  readonly emptyPlaceholder?: string
 }) {
   const { user } = useAuthContext()
 
@@ -55,7 +57,7 @@ function MyItineraryList({
         </div>
       ) : (
         <div className="w-full flex items-center justify-center py-8">
-          Belum ada rencana perjalanan.
+          {emptyPlaceholder}
         </div>
       )}
       <Pagination>

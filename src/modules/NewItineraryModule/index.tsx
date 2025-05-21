@@ -144,7 +144,7 @@ export default function NewItineraryModule() {
                         className="data-[state=checked]:bg-[#016CD7] data-[state=checked]:border-[#016CD7]"
                       />
                       <Label htmlFor="shared" className="cursor-pointer">
-                        Dibagikan
+                        Dibagikan ke Saya
                       </Label>
                     </div>
                     <div className="flex items-center space-x-2">
