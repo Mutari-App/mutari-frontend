@@ -21,6 +21,7 @@ import {
 import CustomPin from '../module-elements/CustomPin'
 import { SECTION_COLORS } from '../constants'
 import { Loader2 } from 'lucide-react'
+import { title } from 'process'
 
 type MapsProps = {
   readonly itineraryData: Readonly<Section[]>
@@ -343,6 +344,7 @@ function Maps({
                     size={'sm'}
                     variant={'gradient'}
                     onClick={handleAddToItinerary}
+                    data-add-location-btn
                   >
                     Tambahkan ke itinerary
                   </Button>
