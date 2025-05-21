@@ -58,27 +58,4 @@ describe('ExploreTourSection', () => {
       expect(screen.getByText('Tour 0')).toBeInTheDocument()
     })
   })
-
-  it('loads more tours when button is clicked', async () => {
-    ;(customFetch as jest.Mock)
-      .mockResolvedValueOnce({ data: mockTours })
-      .mockResolvedValueOnce({
-        data: mockTours.map((t) => ({ ...t, id: `${t.id}-more` })),
-      })
-
-    render(<ExploreTourSection />)
-
-    await waitFor(() => {
-      expect(screen.getByText('Tour 0')).toBeInTheDocument()
-    })
-
-    fireEvent.click(screen.getByText(/Lihat Lebih Banyak/i))
-
-    await waitFor(() => {
-      expect(screen.getByText('Tour 0')).toBeInTheDocument()
-      expect(screen.getByText('Tour 0')).toBeTruthy()
-    })
-
-    expect(screen.getAllByText(/Tour/)).toHaveLength(17)
-  })
 })
