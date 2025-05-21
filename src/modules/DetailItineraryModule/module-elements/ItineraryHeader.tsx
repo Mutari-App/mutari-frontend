@@ -16,6 +16,7 @@ import { toast } from 'sonner'
 import { type DuplicateItineraryResponse } from '@/modules/ItineraryModule/module-elements/types'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import Head from 'next/head'
+import { useRouter } from 'next/navigation'
 
 export const ItineraryHeader = ({
   data,
@@ -34,6 +35,7 @@ export const ItineraryHeader = ({
   const [emailInput, setEmailInput] = useState('')
   const [emails, setEmails] = useState<string[]>([])
   const inputRef = useRef<HTMLInputElement>(null)
+  const router = useRouter()
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -159,6 +161,9 @@ export const ItineraryHeader = ({
       )
 
       if (response.statusCode !== 201) throw new Error(response.message)
+      if (response.duplicatedItinerary) {
+        router.push(`/itinerary/${response.duplicatedItinerary.id}/edit`)
+      }
       toast.success('Itinerary duplicated successfully!')
     } catch (err) {
       if (err instanceof Error) toast.error(`${err.message}`)

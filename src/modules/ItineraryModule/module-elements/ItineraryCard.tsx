@@ -34,6 +34,7 @@ import {
 } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useAuthContext } from '@/contexts/AuthContext'
+import { Card } from '@/components/ui/card'
 
 function ItineraryCard({
   item,
@@ -249,11 +250,11 @@ function ItineraryCard({
   }
 
   return (
-    <div
+    <Card
       onClick={() => router.push(`/itinerary/${item.id}`)}
-      className="group flex items-center gap-5 shadow-lg w-full rounded-xl overflow-hidden hover:cursor-pointer relative transition-all duration-300 hover:shadow-xl"
+      className="group flex items-center gap-5 w-full rounded-xl overflow-hidden hover:cursor-pointer relative transition-all duration-300 hover:shadow-md"
     >
-      <div className="w-1/4 h-36 overflow-hidden">
+      <div className="w-1/4 h-24 md:h-36 overflow-hidden">
         <Image
           src={
             item.coverImage !== '' && item.coverImage != null
@@ -565,7 +566,7 @@ function ItineraryCard({
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </Card>
   )
 }
 
