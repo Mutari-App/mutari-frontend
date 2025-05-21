@@ -22,6 +22,7 @@ interface SettingsItineraryModalProps {
   onTitleChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void
   onDescChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void
   onCoverImageChange: (result: CloudinaryUploadWidgetResults) => void
+  onDelete: (data: { itineraryId: string }) => void
   isContingency: boolean
   itineraryId: string
   title: string
@@ -36,6 +37,7 @@ export const SettingsItineraryModal: React.FC<SettingsItineraryModalProps> = ({
   onSave,
   onDuplicate,
   onCoverImageChange,
+  onDelete,
   isContingency,
   itineraryId,
   title,
@@ -49,6 +51,7 @@ export const SettingsItineraryModal: React.FC<SettingsItineraryModalProps> = ({
   const [localTitle, setLocalTitle] = React.useState(title)
   const [localDesc, setLocalDesc] = React.useState(description)
   const [localCoverImage, setLocalCoverImage] = React.useState(coverImage)
+  const [showDeleteConfirm, setShowDeleteConfirm] = React.useState(false)
 
   useEffect(() => {
     setIsClient(true)
@@ -79,6 +82,12 @@ export const SettingsItineraryModal: React.FC<SettingsItineraryModalProps> = ({
     onDuplicate({
       itineraryId: itineraryId,
     })
+    onClose()
+  }
+
+  const handleDelete = () => {
+    onDelete({ itineraryId })
+    setShowDeleteConfirm(false)
     onClose()
   }
 
@@ -206,17 +215,22 @@ export const SettingsItineraryModal: React.FC<SettingsItineraryModalProps> = ({
 
           <hr />
 
-          <div className="text-sm">
-            <button
-              className="flex items-center gap-2 text-gray-700 font-medium mb-4"
-              onClick={handleDuplicate}
-            >
-              <Clipboard size={18} /> Duplikat itinerary
-            </button>
-            <button className="flex items-center gap-2 text-red-600 font-medium">
-              <Trash size={18} /> Hapus itinerary
-            </button>
-          </div>
+          {itineraryId && (
+            <div className="text-sm">
+              <button
+                className="flex items-center gap-2 text-gray-700 font-medium mb-4"
+                onClick={handleDuplicate}
+              >
+                <Clipboard size={18} /> Duplikat itinerary
+              </button>
+              <button
+                className="flex items-center gap-2 text-red-600 font-medium"
+                onClick={() => setShowDeleteConfirm(true)}
+              >
+                <Trash size={18} /> Hapus itinerary
+              </button>
+            </div>
+          )}
 
           <button
             onClick={handleSave}
@@ -227,6 +241,33 @@ export const SettingsItineraryModal: React.FC<SettingsItineraryModalProps> = ({
           </button>
         </div>
       </div>
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+          <div className="bg-white rounded-xl shadow-lg p-6 w-[400px]">
+            <h3 className="text-lg font-semibold mb-4">
+              Konfirmasi Penghapusan
+            </h3>
+            <p className="text-sm text-gray-700 mb-6">
+              Apakah kamu yakin ingin menghapus itinerary ini? Tindakan ini
+              tidak dapat dibatalkan.
+            </p>
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="px-4 py-2 rounded-lg bg-gray-200 text-gray-800 text-sm"
+              >
+                Batal
+              </button>
+              <button
+                onClick={handleDelete}
+                className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm"
+              >
+                Hapus
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

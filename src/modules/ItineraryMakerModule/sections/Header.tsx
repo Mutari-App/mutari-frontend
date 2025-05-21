@@ -1,3 +1,5 @@
+'use client'
+
 import React, { useRef, useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -9,6 +11,7 @@ import { customFetch, customFetchBody } from '@/utils/newCustomFetch'
 import { type CreateItineraryResponse } from '../interface'
 import { type DuplicateItineraryResponse } from '@/modules/ItineraryModule/module-elements/types'
 import { toast } from 'sonner'
+import { useRouter } from 'next/navigation'
 interface ItineraryHeaderProps {
   itineraryId: string
   title: string
@@ -44,6 +47,7 @@ export const ItineraryHeader: React.FC<ItineraryHeaderProps> = ({
   const [localDesc, setLocalDesc] = useState(description ?? '')
   const [localCoverImage, setLocalCoverImage] = useState(coverImage)
   const [localIsPublished, setLocalIsPublished] = useState(isPublished)
+  const router = useRouter()
 
   // Update local state when props change
   useEffect(() => {
@@ -112,6 +116,20 @@ export const ItineraryHeader: React.FC<ItineraryHeaderProps> = ({
       return response.duplicatedItinerary.id
     } catch (error) {
       console.error('Failed to duplicate itinerary:', error)
+    }
+  }
+
+  const removeItinerary = async ({ itineraryId }: { itineraryId: string }) => {
+    try {
+      const response = await customFetch(`/itineraries/${itineraryId}/`, {
+        method: 'DELETE',
+      })
+
+      if (response.statusCode !== 200) throw new Error(response.message)
+      toast.success('Itinerary deleted successfully!')
+      router.push('/itinerary')
+    } catch (err) {
+      if (err instanceof Error) toast.error(`${err.message}`)
     }
   }
 
@@ -200,6 +218,7 @@ export const ItineraryHeader: React.FC<ItineraryHeaderProps> = ({
         onTitleChange={onTitleChange}
         onDescChange={onDescChange}
         onCoverImageChange={onCoverImageChange}
+        onDelete={removeItinerary}
         isContingency={isContingency}
         itineraryId={itineraryId}
         title={localTitle}
