@@ -16,7 +16,6 @@ export default function DetailTourModule({
 }) {
   const [data] = useState<Tour>(initialData)
   const { isAuthenticated } = useAuthContext()
-
   useEffect(() => {
     const viewTour = async () => {
       try {
@@ -52,6 +51,7 @@ export default function DetailTourModule({
           <TourOrderCard
             tourId={initialData.id}
             pricePerTicket={data.pricePerTicket}
+            availableTickets={Number(data.availableTickets)}
           />
         </div>
         <TourList section={data.itinerary.sections} />

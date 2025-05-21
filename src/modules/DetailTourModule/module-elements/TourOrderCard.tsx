@@ -12,9 +12,11 @@ import { toast } from 'sonner'
 export const TourOrderCard = ({
   tourId,
   pricePerTicket,
+  availableTickets,
 }: {
   tourId: string
   pricePerTicket: number
+  availableTickets: number
 }) => {
   const router = useRouter()
   const [open, setOpen] = useState(false)
@@ -77,9 +79,10 @@ export const TourOrderCard = ({
       })()}
       <Button
         className="mt-4 w-full bg-gradient-to-r from-[#016CD7] to-[#014285] text-white py-2 rounded-lg"
+        disabled={availableTickets < 1}
         onClick={() => setOpen(true)}
       >
-        Pesan Sekarang
+        {availableTickets > 0 ? `Pesan Sekarang` : 'Tiket tidak tersedia'}
       </Button>
 
       <Dialog open={open} onOpenChange={setOpen}>

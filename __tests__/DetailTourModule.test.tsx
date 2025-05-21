@@ -60,6 +60,7 @@ jest.mock('lucide-react', () => ({
 const mockTour: Tour = {
   id: 'tour-1',
   title: 'Explore Bali',
+  availableTickets: 1,
   coverImage: 'https://example.com/bali.jpg',
   maxCapacity: 20,
   description: 'A 3-day tour to explore the beautiful island of Bali.',
