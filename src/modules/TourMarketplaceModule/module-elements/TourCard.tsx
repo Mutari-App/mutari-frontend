@@ -46,7 +46,28 @@ function TourCard({ tour, className }: Readonly<TourCardProps>) {
         </Link>
 
         <CardFooter className="px-2 py-1.5 mt-auto sm:px-3 sm:py-2 font-raleway text-[#024C98] font-semibold text-sm sm:text-base">
-          Rp{Number(tour.pricePerTicket).toLocaleString('ID-id')}/pax
+          {(() => {
+            const originalPrice = tour.pricePerTicket * (100 / (100 - 20))
+
+            return (
+              <div className="flex flex-col w-full ">
+                <div className="flex flex-col  relative w-fit">
+                  <div className="flex items-center gap-1.5 ">
+                    <span className="text-gray-500 line-through text-xs">
+                      Rp{Number(originalPrice).toLocaleString('ID-id')}
+                    </span>
+                    <span className="bg-red-100 text-red-600 text-xs px-1.5 py-[1px] rounded-md font-medium whitespace-nowrap">
+                      20% OFF
+                    </span>
+                  </div>
+                  <span className="text-[#024C98] font-semibold">
+                    Rp{Number(tour.pricePerTicket).toLocaleString('ID-id')}
+                    /pax
+                  </span>
+                </div>
+              </div>
+            )
+          })()}
         </CardFooter>
       </div>
     </Card>
