@@ -147,7 +147,7 @@ export const SettingsItineraryModal: React.FC<SettingsItineraryModalProps> = ({
                 options={{
                   clientAllowedFormats: ['image'],
                   maxFiles: 1,
-                  maxFileSize: 1024 * 256, // 256 KB
+                  maxFileSize: 1024 * 1024, // 1 MB
                 }}
               >
                 Ganti foto cover
